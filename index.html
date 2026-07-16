@@ -13,6 +13,31 @@
 </header>
 
 <main>
+  <section class="hero">
+    <div class="hero-year" id="year-readout">----</div>
+    <div class="hero-diff">
+      <span class="hero-diff-label">ズレ(実績 − 見通し)</span>
+      <span class="hero-diff-value" id="v-diff">—</span>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-chip">
+        <span class="stat-chip-dot stat-chip-dot-forecast"></span>
+        <span class="stat-chip-label">見通し</span>
+        <span class="stat-chip-value" id="v-forecast">—</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-chip-dot stat-chip-dot-actual"></span>
+        <span class="stat-chip-label">実績</span>
+        <span class="stat-chip-value" id="v-actual">—</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input type="range" id="year-select" min="0" max="0" value="0" step="1">
+    </div>
+  </section>
+
   <section class="chart-section">
     <h2 class="chart-title">実質GDP成長率</h2>
     <p class="chart-desc">政府の当初見通し(実質)と、確定した実績を並べたもの。</p>
@@ -21,27 +46,7 @@
       <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-label="実質GDP成長率の実績と政府見通しの推移"></svg>
     </div>
 
-    <div class="controls">
-      <label for="year-select">年度を選ぶ</label>
-      <input type="range" id="year-select" min="0" max="0" value="0" step="1">
-      <div class="year-readout" id="year-readout">----</div>
-    </div>
-
-    <div class="readout" id="readout">
-      <div class="readout-row">
-        <span class="readout-label">見通し(発表時点)</span>
-        <span class="readout-value" id="v-forecast">—</span>
-      </div>
-      <div class="readout-row">
-        <span class="readout-label">実績(確報)</span>
-        <span class="readout-value" id="v-actual">—</span>
-      </div>
-      <div class="readout-row">
-        <span class="readout-label">ズレ(実績 − 見通し)</span>
-        <span class="readout-value" id="v-diff">—</span>
-      </div>
-      <div class="readout-source" id="v-source"></div>
-    </div>
+    <div class="readout-source" id="v-source"></div>
   </section>
 
   <section class="about-link">

@@ -1,3 +1,6 @@
 .DS_Store
 CLAUDE.local.md
 *.swp
+.wrangler/
+*.dc.html
+support.js
