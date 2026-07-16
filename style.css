@@ -15,7 +15,7 @@
   --red: #d4482e;
   --actual: var(--navy);
   --forecast: var(--amber);
-  --forecast-dashed: #b3b9c0;
+  --forecast-dashed: var(--amber);
   --hover-bg: #f6f8fb;
 }
 
@@ -268,6 +268,7 @@ a.card:hover {
   stroke: var(--forecast-dashed);
   stroke-width: 1.5;
   stroke-dasharray: 4 3;
+  stroke-opacity: 0.65;
 }
 
 .spark-actual {
@@ -483,6 +484,16 @@ a.card:hover {
 .end-label-forecast {
   fill: var(--amber);
   transition: transform 0.4s ease, opacity 0.3s ease;
+}
+
+.line-forecast {
+  fill: none;
+  stroke: var(--forecast-dashed);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-opacity: 0.65;
 }
 
 .line-actual {

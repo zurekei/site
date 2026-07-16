@@ -135,6 +135,11 @@ async function main() {
     svg.appendChild(label);
   }
 
+  if (forecastYears.length > 0) {
+    const forecastLinePath = forecastYears.map((r) => `${xScale(r.year)},${yScale(r.forecastVal)}`).join(" L ");
+    svg.appendChild(svgEl("path", { class: "line-forecast", d: `M ${forecastLinePath}` }));
+  }
+
   let actualLabel = null;
   if (actualPoints.length > 0) {
     const linePath = actualPoints.map((r) => `${xScale(r.year)},${yScale(r.actualVal)}`).join(" L ");
@@ -188,15 +193,29 @@ async function main() {
     forecastPoint.setAttribute("cy", fy);
     forecastPoint.setAttribute("opacity", 1);
 
-    const nearActualLabel = actualPoints.length > 0 && Math.abs(yearX - xScale(actualPoints[actualPoints.length - 1].year)) < 40;
+    let forecastLabelY = fy + 4;
     forecastLabel.setAttribute("x", yearX + 8);
-    forecastLabel.setAttribute("y", nearActualLabel ? fy + 16 : fy + 4);
     forecastLabel.setAttribute("opacity", 1);
 
     if (actualLabel) {
       const lastActual = actualPoints[actualPoints.length - 1];
-      actualLabel.setAttribute("y", nearActualLabel ? yScale(lastActual.actualVal) - 8 : yScale(lastActual.actualVal) + 4);
+      const ay = yScale(lastActual.actualVal);
+      let actualLabelY = ay + 4;
+      const nearActualLabel = Math.abs(yearX - xScale(lastActual.year)) < 40;
+      const MIN_GAP = 14;
+      if (nearActualLabel && Math.abs(forecastLabelY - actualLabelY) < MIN_GAP) {
+        const mid = (forecastLabelY + actualLabelY) / 2;
+        if (forecastLabelY <= actualLabelY) {
+          forecastLabelY = mid - MIN_GAP / 2;
+          actualLabelY = mid + MIN_GAP / 2;
+        } else {
+          forecastLabelY = mid + MIN_GAP / 2;
+          actualLabelY = mid - MIN_GAP / 2;
+        }
+      }
+      actualLabel.setAttribute("y", actualLabelY);
     }
+    forecastLabel.setAttribute("y", forecastLabelY);
 
     vForecast.textContent = fmtVal(r.forecastVal, metric.unit, metric.signed);
 
