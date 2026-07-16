@@ -4,60 +4,68 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ズレ計 — 政府経済見通しと実績のズレ</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="site-header">
-  <h1>ズレ計</h1>
-  <p class="tagline">政府の「見通し」と、その後の「実績」を並べて記録する。</p>
-</header>
-
-<main>
-  <section class="hero">
-    <div class="hero-year" id="year-readout">----</div>
-    <div class="hero-diff">
-      <span class="hero-diff-label">ズレ(実績 − 見通し)</span>
-      <span class="hero-diff-value" id="v-diff">—</span>
-    </div>
-
-    <div class="stat-row">
-      <div class="stat-chip">
-        <span class="stat-chip-dot stat-chip-dot-forecast"></span>
-        <span class="stat-chip-label">見通し</span>
-        <span class="stat-chip-value" id="v-forecast">—</span>
-      </div>
-      <div class="stat-chip">
-        <span class="stat-chip-dot stat-chip-dot-actual"></span>
-        <span class="stat-chip-label">実績</span>
-        <span class="stat-chip-value" id="v-actual">—</span>
+<div class="page">
+  <header class="site-header">
+    <div class="brand">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag" id="t-tag">FORECAST × ACTUAL</div>
       </div>
     </div>
-
-    <div class="controls">
-      <input type="range" id="year-select" min="0" max="0" value="0" step="1">
+    <div class="header-right">
+      <div class="lang-toggle">
+        <button id="lang-ja" class="lang-btn mono">JA</button>
+        <button id="lang-en" class="lang-btn mono">EN</button>
+      </div>
+      <nav class="site-nav">
+        <span class="nav-current" id="t-nav"></span>
+        <a class="nav-link" id="t-nav-data" href="https://github.com/zurekei/site/tree/main/data" target="_blank" rel="noopener"></a>
+        <a class="nav-link" id="t-nav-about" href="about.html"></a>
+      </nav>
     </div>
-  </section>
+  </header>
 
-  <section class="chart-section">
-    <h2 class="chart-title">実質GDP成長率</h2>
-    <p class="chart-desc">政府の当初見通し(実質)と、確定した実績を並べたもの。</p>
+  <p class="lead" id="t-lead"></p>
 
-    <div class="chart-wrap">
-      <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-label="実質GDP成長率の実績と政府見通しの推移"></svg>
-    </div>
+  <div class="callout">
+    <div class="callout-title" id="t-callout-title"></div>
+    <p class="callout-body" id="t-callout-body"></p>
+  </div>
 
-    <div class="readout-source" id="v-source"></div>
-  </section>
+  <div class="indicators-heading">
+    <div class="indicators-label" id="t-indicators-label"></div>
+    <div class="indicators-latest" id="t-indicators-latest"></div>
+  </div>
 
-  <section class="about-link">
-    <a href="about.md">このサイトについて</a>
-  </section>
-</main>
+  <div class="card-grid" id="card-grid"></div>
 
-<footer class="site-footer">
-  <p>出典: 内閣府「経済見通しと経済財政運営の基本的態度」、国民経済計算(SNA)。詳細は <a href="README.md">data/README.md</a> を参照。</p>
-</footer>
+  <div class="legend-row">
+    <span class="legend-item"><span class="legend-swatch legend-swatch-forecast"></span><span id="t-legend-forecast"></span></span>
+    <span class="legend-item"><span class="legend-swatch legend-swatch-actual"></span><span id="t-legend-actual"></span></span>
+  </div>
 
-<script src="app.js"></script>
+  <footer class="site-footer-row">
+    <a class="footer-src" id="t-footer-src" href="https://www5.cao.go.jp/keizai1/mitoshi/mitoshikako.html" target="_blank" rel="noopener"></a>
+    <a class="footer-about" id="t-footer-about" href="about.html"></a>
+  </footer>
+</div>
+<script src="csv.js"></script>
+<script src="home.js"></script>
 </body>
 </html>

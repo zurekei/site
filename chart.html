@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title id="page-title">ズレ計</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+  <header class="site-header">
+    <div class="brand">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </div>
+  </header>
+
+  <a class="chart-back" href="index.html">← 指標一覧</a>
+
+  <main>
+    <section class="hero">
+      <div class="hero-year" id="year-readout">----</div>
+      <div class="hero-diff">
+        <span class="hero-diff-label">ズレ(実績 − 見通し)</span>
+        <span class="hero-diff-value" id="v-diff">—</span>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-chip">
+          <span class="stat-chip-dot stat-chip-dot-forecast"></span>
+          <span class="stat-chip-label">見通し</span>
+          <span class="stat-chip-value" id="v-forecast">—</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-chip-dot stat-chip-dot-actual"></span>
+          <span class="stat-chip-label">実績</span>
+          <span class="stat-chip-value" id="v-actual">—</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <input type="range" id="year-select" min="0" max="0" value="0" step="1">
+      </div>
+    </section>
+
+    <section class="chart-section">
+      <h2 class="chart-title" id="chart-title">—</h2>
+      <p class="chart-desc" id="chart-desc"></p>
+
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title"></svg>
+      </div>
+
+      <div class="readout-source" id="v-source"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer-row">
+    <span>src: 内閣府 / 国民経済計算(SNA)</span>
+    <a class="footer-about" href="about.html">このサイトについて</a>
+  </footer>
+</div>
+<script src="csv.js"></script>
+<script src="chart.js"></script>
+</body>
+</html>
