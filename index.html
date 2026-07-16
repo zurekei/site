@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ズレ計 — 政府経済見通しと実績のズレ</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <h1>ズレ計</h1>
+  <p class="tagline">政府の「見通し」と、その後の「実績」を並べて記録する。</p>
+</header>
+
+<main>
+  <section class="chart-section">
+    <h2 class="chart-title">実質GDP成長率</h2>
+    <p class="chart-desc">政府の当初見通し(実質)と、確定した実績を並べたもの。</p>
+
+    <div class="chart-wrap">
+      <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-label="実質GDP成長率の実績と政府見通しの推移"></svg>
+    </div>
+
+    <div class="controls">
+      <label for="year-select">年度を選ぶ</label>
+      <input type="range" id="year-select" min="0" max="0" value="0" step="1">
+      <div class="year-readout" id="year-readout">----</div>
+    </div>
+
+    <div class="readout" id="readout">
+      <div class="readout-row">
+        <span class="readout-label">見通し(発表時点)</span>
+        <span class="readout-value" id="v-forecast">—</span>
+      </div>
+      <div class="readout-row">
+        <span class="readout-label">実績(確報)</span>
+        <span class="readout-value" id="v-actual">—</span>
+      </div>
+      <div class="readout-row">
+        <span class="readout-label">ズレ(実績 − 見通し)</span>
+        <span class="readout-value" id="v-diff">—</span>
+      </div>
+      <div class="readout-source" id="v-source"></div>
+    </div>
+  </section>
+
+  <section class="about-link">
+    <a href="about.md">このサイトについて</a>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>出典: 内閣府「経済見通しと経済財政運営の基本的態度」、国民経済計算(SNA)。詳細は <a href="README.md">data/README.md</a> を参照。</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
