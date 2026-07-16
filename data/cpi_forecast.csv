@@ -1,0 +1,6 @@
+fiscal_year,forecast_cpi,actual_cpi,forecast_source_url,actual_source_url,notes
+1998,0.7,,https://www5.cao.go.jp/keizai1/mitoshi/1998/19980119mitoshi.html,,[見通し]本文中の「４．物価」表、消費者物価指数・騰落率の欄に「0.7」と直接記載。実績値は未収集(総務省CPI長期時系列データからの収集が別途必要)。
+2001,-0.2,,https://www5.cao.go.jp/keizai1/mitoshi/2001/0131b-mitoshi.html,,[見通し原文]消費者物価は、緩やかな消費の増加の中で下落幅を縮小する（対前年度比０．２％程度の下落）。実績値は未収集。
+2002,-0.6,,https://www5.cao.go.jp/keizai1/mitoshi/2002/0125mitoshi.html,,[見通し原文]消費者物価：対前年度比０．６％程度の下落。実績値は未収集。
+2024,2.5,,https://www5.cao.go.jp/keizai1/mitoshi/2023/r060126mitoshi.pdf,,[見通し原文]令和６年度の...消費者物価（総合）は2.5％程度の上昇率になると見込まれる(gdp_forecast.csvの同年notesと同一文書より)。実績値は未収集。
+2025,2.0,,https://www5.cao.go.jp/keizai1/mitoshi/2024/r070124mitoshi.pdf,,[見通し原文]令和７年度の...消費者物価（総合）は2.0％程度の上昇率になると見込まれる(gdp_forecast.csvの同年notesと同一文書より)。実績値は未収集。
