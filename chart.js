@@ -59,6 +59,16 @@ const METRICS = {
     unit: "兆円",
     signed: false,
   },
+  cpi: {
+    title: "消費者物価指数(総合)",
+    desc: "政府の当初見通しと、総務省統計局が公表する確定した実績を並べたもの。",
+    csv: "data/cpi_forecast.csv",
+    forecastCol: "forecast_cpi",
+    actualCol: "actual_cpi",
+    forecastSourceCol: "forecast_source_url",
+    actualSourceCol: "actual_source_url",
+    unit: "%",
+  },
 };
 
 function svgEl(tag, attrs) {

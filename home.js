@@ -60,7 +60,7 @@ const INDICATOR_META = [
     descJa: "家計が購入する財・サービスの価格変動。", descEn: "Change in prices of goods and services households buy.",
     unit: "%", kind: "series",
     csv: "data/cpi_forecast.csv", forecastCol: "forecast_cpi", actualCol: "actual_cpi",
-    chartHref: null,
+    chartHref: "chart.html?m=cpi",
   },
   {
     key: "gdp-nominal",
