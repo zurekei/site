@@ -81,6 +81,22 @@ function extractSourceUrl(raw, label) {
   return m ? m[1] : raw;
 }
 
+// notes fields pack several tagged segments together (e.g. "[実績]リーマン
+// ショック年度。 / [見通し原文]こうした結果、...", also seen: [見通し], [出典],
+// [参考]) — [見通し原文] is a verbatim copy of the forecast document's wording,
+// which just restates the number already shown as v-forecast, and the other
+// non-[実績] tags are transcription/sourcing asides for auditors. Only [実績]
+// segments are surfaced to a reader alongside the chart; unrecognized/typo'd
+// tags are silently dropped rather than shown raw.
+function extractEventNote(raw) {
+  if (!raw) return "";
+  return raw
+    .split(" / ")
+    .filter((seg) => seg.startsWith("[実績]"))
+    .map((seg) => seg.slice("[実績]".length).trim())
+    .join(" ");
+}
+
 async function main() {
   const params = new URLSearchParams(location.search);
   const metricKey = params.get("m") || "gdp-real";
@@ -98,6 +114,7 @@ async function main() {
       actualVal: toNum(r[metric.actualCol]),
       forecastSourceUrl: r[metric.forecastSourceCol],
       actualSourceUrl: extractSourceUrl(r[metric.actualSourceCol], metric.actualSourceLabel),
+      notes: r.notes || "",
     }))
     .sort((a, b) => a.year - b.year);
 
@@ -258,6 +275,7 @@ async function main() {
   const vForecast = document.getElementById("v-forecast");
   const vActual = document.getElementById("v-actual");
   const vDiff = document.getElementById("v-diff");
+  const vNotes = document.getElementById("v-notes");
   const vSource = document.getElementById("v-source");
 
   // the slider only steps through years that HAVE a forecast (forecastYears),
@@ -290,6 +308,7 @@ async function main() {
   function render(idx) {
     const r = forecastYears[idx];
     yearReadout.textContent = `${r.year}年度`;
+    if (vNotes) vNotes.textContent = extractEventNote(r.notes);
 
     const yearX = xScale(r.year);
     const fx = yearX;

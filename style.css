@@ -577,6 +577,15 @@ a.card:hover {
   transition: x1 0.4s ease, y1 0.4s ease, x2 0.4s ease, y2 0.4s ease, opacity 0.3s ease;
 }
 
+.readout-notes {
+  margin-top: 0.6rem;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.readout-notes:empty { display: none; }
+
 .readout-source {
   margin-top: 1rem;
   padding-top: 0.75rem;
