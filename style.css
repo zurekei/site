@@ -353,49 +353,10 @@ a.card:hover {
 }
 .chart-back:hover { opacity: 0.7; }
 
-.hero {
-  margin-top: 1.25rem;
-  padding: 2rem 1.5rem 1.75rem;
-  background: var(--hover-bg);
-  border: 1px solid var(--line);
-  text-align: center;
-}
-
-.hero-year {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.85rem;
-  color: var(--muted);
-  letter-spacing: 0.08em;
-}
-
-.hero-diff {
-  margin-top: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.hero-diff-label {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 0.7rem;
-  color: var(--muted);
-  letter-spacing: 0.04em;
-}
-
-.hero-diff-value {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: clamp(2.75rem, 12vw, 4rem);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--navy);
-}
-
 .stat-row {
-  margin-top: 1.5rem;
   display: flex;
-  justify-content: center;
-  gap: 2rem;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.75rem;
   font-family: "IBM Plex Mono", monospace;
 }
 
@@ -419,7 +380,18 @@ a.card:hover {
 .stat-chip-label { color: var(--muted); font-size: 0.75rem; }
 .stat-chip-value { font-weight: 600; }
 
-.controls { margin-top: 1.75rem; }
+.stat-chip-diff .stat-chip-label,
+.stat-chip-diff .stat-chip-value {
+  color: var(--amber);
+}
+.stat-chip-diff .stat-chip-value { font-weight: 700; }
+
+/* slider inset matches chart.js PAD (left 44px / right 64px of a 960 viewBox)
+   so the track sits directly under the plotted x-axis */
+.controls {
+  margin-top: 0.85rem;
+  padding: 0 6.667% 0 4.583%;
+}
 
 #year-select {
   width: 100%;
@@ -458,22 +430,40 @@ a.card:hover {
   background: var(--line);
 }
 
-.chart-section { margin-top: 2rem; }
+.chart-section { margin-top: 1.5rem; }
 
-.chart-title { margin: 0; font-size: 0.95rem; font-weight: 600; }
+.chart-title { margin: 0; font-size: 1.3rem; font-weight: 600; }
 
 .chart-desc {
-  margin: 0.25rem 0 0.75rem;
-  font-size: 0.78rem;
+  margin: 0.3rem 0 0;
+  font-size: 0.8rem;
   color: var(--muted);
 }
 
 .chart-wrap {
+  margin-top: 1rem;
   border: 1px solid var(--line);
   background: var(--bg);
 }
 
 #chart { display: block; width: 100%; height: auto; }
+
+.readout {
+  margin-top: 1.1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem 1.5rem;
+}
+
+.readout-year {
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
 
 .axis-line { stroke: var(--line); stroke-width: 1; }
 .axis-label { fill: var(--muted-2); font-size: 11px; font-family: "IBM Plex Mono", monospace; }

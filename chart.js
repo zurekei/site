@@ -179,7 +179,14 @@ async function main() {
 
   slider.min = 0;
   slider.max = forecastYears.length - 1;
-  slider.value = forecastYears.length - 1;
+  let defaultIdx = forecastYears.length - 1;
+  for (let i = forecastYears.length - 1; i >= 0; i--) {
+    if (forecastYears[i].actualVal !== null) {
+      defaultIdx = i;
+      break;
+    }
+  }
+  slider.value = defaultIdx;
 
   function render(idx) {
     const r = forecastYears[idx];
@@ -249,7 +256,7 @@ async function main() {
   }
 
   slider.addEventListener("input", () => render(Number(slider.value)));
-  render(forecastYears.length - 1);
+  render(defaultIdx);
 }
 
 main();

@@ -33,37 +33,36 @@
   <a class="chart-back" href="index.html">← 指標一覧</a>
 
   <main>
-    <section class="hero">
-      <div class="hero-year" id="year-readout">----</div>
-      <div class="hero-diff">
-        <span class="hero-diff-label">ズレ(実績 − 見通し)</span>
-        <span class="hero-diff-value" id="v-diff">—</span>
-      </div>
+    <section class="chart-section">
+      <h1 class="chart-title" id="chart-title">—</h1>
+      <p class="chart-desc" id="chart-desc"></p>
 
-      <div class="stat-row">
-        <div class="stat-chip">
-          <span class="stat-chip-dot stat-chip-dot-forecast"></span>
-          <span class="stat-chip-label">見通し</span>
-          <span class="stat-chip-value" id="v-forecast">—</span>
-        </div>
-        <div class="stat-chip">
-          <span class="stat-chip-dot stat-chip-dot-actual"></span>
-          <span class="stat-chip-label">実績</span>
-          <span class="stat-chip-value" id="v-actual">—</span>
-        </div>
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title"></svg>
       </div>
 
       <div class="controls">
         <input type="range" id="year-select" min="0" max="0" value="0" step="1">
       </div>
-    </section>
 
-    <section class="chart-section">
-      <h2 class="chart-title" id="chart-title">—</h2>
-      <p class="chart-desc" id="chart-desc"></p>
-
-      <div class="chart-wrap">
-        <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title"></svg>
+      <div class="readout">
+        <div class="readout-year mono" id="year-readout">----</div>
+        <div class="stat-row">
+          <div class="stat-chip">
+            <span class="stat-chip-dot stat-chip-dot-forecast"></span>
+            <span class="stat-chip-label">見通し</span>
+            <span class="stat-chip-value" id="v-forecast">—</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-chip-dot stat-chip-dot-actual"></span>
+            <span class="stat-chip-label">実績</span>
+            <span class="stat-chip-value" id="v-actual">—</span>
+          </div>
+          <div class="stat-chip stat-chip-diff">
+            <span class="stat-chip-label">ズレ</span>
+            <span class="stat-chip-value" id="v-diff">—</span>
+          </div>
+        </div>
       </div>
 
       <div class="readout-source" id="v-source"></div>
