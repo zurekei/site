@@ -12,6 +12,7 @@ const METRICS = {
     actualCol: "actual_real",
     forecastSourceCol: "forecast_source_url",
     actualSourceCol: "actual_source_url",
+    actualSourceLabel: "実質",
     unit: "%",
   },
   "gdp-nominal": {
@@ -22,6 +23,7 @@ const METRICS = {
     actualCol: "actual_nominal",
     forecastSourceCol: "forecast_source_url",
     actualSourceCol: "actual_source_url",
+    actualSourceLabel: "名目",
     unit: "%",
   },
   "unemployment": {
@@ -70,6 +72,15 @@ function fmtVal(v, unit, signed) {
   return `${v > 0 ? "+" : ""}${v.toFixed(1)}${unit}`;
 }
 
+// some CSV columns pack multiple labeled URLs into one field (e.g. GDP's
+// actual_source_url holds both "実質:URL 名目:URL" since the two metrics
+// share a source column) — pull out the URL for this metric's label
+function extractSourceUrl(raw, label) {
+  if (!raw || !label) return raw;
+  const m = raw.match(new RegExp(`${label}:(\\S+)`));
+  return m ? m[1] : raw;
+}
+
 async function main() {
   const params = new URLSearchParams(location.search);
   const metricKey = params.get("m") || "gdp-real";
@@ -86,7 +97,7 @@ async function main() {
       forecastVal: toNum(r[metric.forecastCol]),
       actualVal: toNum(r[metric.actualCol]),
       forecastSourceUrl: r[metric.forecastSourceCol],
-      actualSourceUrl: r[metric.actualSourceCol],
+      actualSourceUrl: extractSourceUrl(r[metric.actualSourceCol], metric.actualSourceLabel),
     }))
     .sort((a, b) => a.year - b.year);
 
@@ -292,8 +303,10 @@ async function main() {
     }
 
     const links = [];
-    if (r.forecastSourceUrl) links.push(`見通し出典: <a href="${r.forecastSourceUrl}" target="_blank" rel="noopener">${r.forecastSourceUrl}</a>`);
-    if (r.actualSourceUrl) links.push(`実績出典: <a href="${r.actualSourceUrl}" target="_blank" rel="noopener">${r.actualSourceUrl}</a>`);
+    const forecastUrl = safeUrl(r.forecastSourceUrl);
+    const actualUrl = safeUrl(r.actualSourceUrl);
+    if (forecastUrl) links.push(`見通し出典: <a href="${escapeHTML(forecastUrl)}" target="_blank" rel="noopener">${escapeHTML(forecastUrl)}</a>`);
+    if (actualUrl) links.push(`実績出典: <a href="${escapeHTML(actualUrl)}" target="_blank" rel="noopener">${escapeHTML(actualUrl)}</a>`);
     vSource.innerHTML = links.join("<br>");
   }
 

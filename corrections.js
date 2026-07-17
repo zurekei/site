@@ -1,17 +1,3 @@
-function escapeHTML(s) {
-  return String(s).replace(/[&<>"']/g, (c) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;",
-  }[c]));
-}
-
-function safeUrl(url) {
-  return /^https?:\/\//.test(url) ? url : null;
-}
-
 function renderEntry(r) {
   const url = safeUrl(r.url);
   const link = url

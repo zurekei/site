@@ -51,6 +51,7 @@
   - columns: fiscal_year, forecast_real, forecast_nominal, actual_real, actual_nominal, forecast_source_url, forecast_published_date, actual_source_url, notes
 - 実績値は改定されるため、取得日と確報/速報の別をnotesに記録
 - 更新は年1回の手動運用を前提とする(自動化しない。壊れない仕組み優先)
+- `csv.js`のパーサはクォート付きフィールド非対応の単純split(",")。自由記述欄(notes, reason等)に読点以外のカンマを含めない。カンマが必要な場面は「、」で代用する
 
 ## 技術構成
 

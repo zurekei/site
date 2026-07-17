@@ -13,6 +13,20 @@ function toNum(s) {
   return s === "" || s === undefined ? null : Number(s);
 }
 
+function escapeHTML(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[c]));
+}
+
+function safeUrl(url) {
+  return /^https?:\/\//.test(url) ? url : null;
+}
+
 async function loadCSV(path) {
   const res = await fetch(path);
   const text = await res.text();
