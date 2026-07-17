@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>OGP画像生成用 — ズレ計</title>
+<!-- assets/og.png の生成元ページ。1200x630の枠を実データ(gdp_forecast.csv)から描画し、
+     スクリーンショットしてOGP画像にする。サイト本体からはリンクしない。 -->
+<link rel="stylesheet" href="style.css">
+<style>
+  html, body { background: #888; }
+  /* ?shot: ヘッドレスChromeでの書き出し用に余白と背景を消し、フレームを原点に置く */
+  body.shot { background: var(--bg); }
+  body.shot .og-frame { margin: 0; }
+  .og-frame {
+    width: 1200px;
+    height: 630px;
+    background: var(--bg);
+    margin: 40px auto;
+    padding: 44px 56px 40px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+  .og-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .og-brand { display: flex; align-items: center; gap: 18px; }
+  .og-brand-logo { width: 64px; height: 64px; }
+  .og-brand-name {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 40px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .og-brand-slash { font-size: 22px; color: var(--amber); margin-left: 12px; }
+  .og-brand-tag {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 15px;
+    letter-spacing: 0.24em;
+    color: var(--muted-2);
+    margin-top: 4px;
+  }
+  .og-title {
+    font-size: 26px;
+    font-weight: 600;
+    text-align: right;
+    line-height: 1.5;
+  }
+  .og-title small {
+    display: block;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--muted);
+  }
+  .og-chart { flex: 1; margin-top: 18px; }
+  .og-chart svg { width: 100%; height: 100%; display: block; }
+  .og-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 16px;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+  .og-legend { display: flex; gap: 28px; }
+  .og-legend-item { display: flex; align-items: center; gap: 9px; }
+  .og-legend-swatch { width: 26px; height: 0; display: inline-block; }
+  .og-legend-swatch-forecast { border-top: 2.5px dashed var(--forecast-dashed); }
+  .og-legend-swatch-actual { height: 3px; background: var(--navy); }
+  .og-domain { color: var(--muted-2); }
+</style>
+</head>
+<body>
+<div class="og-frame" id="og-frame">
+  <div class="og-header">
+    <div class="og-brand">
+      <svg class="og-brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="og-brand-name">ズレ計<span class="og-brand-slash">zurekei ~/</span></div>
+        <div class="og-brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </div>
+    <div class="og-title">
+      政府経済見通し × 実績
+      <small>予測値・実績値・出典を毎年並べて記録する</small>
+    </div>
+  </div>
+  <div class="og-chart">
+    <svg id="og-svg" viewBox="0 0 1088 400" preserveAspectRatio="none"></svg>
+  </div>
+  <div class="og-footer">
+    <div class="og-legend">
+      <span class="og-legend-item"><span class="og-legend-swatch og-legend-swatch-forecast"></span>見通し</span>
+      <span class="og-legend-item"><span class="og-legend-swatch og-legend-swatch-actual"></span>実績</span>
+      <span>実質GDP成長率 1980–2025年度</span>
+    </div>
+    <div class="og-domain">zurekei.org</div>
+  </div>
+</div>
+<script src="csv.js"></script>
+<script>
+if (location.search.includes("shot")) document.body.classList.add("shot");
+const SVG_NS = "http://www.w3.org/2000/svg";
+const W = 1088, H = 400;
+const PAD = { top: 16, right: 20, bottom: 30, left: 52 };
+
+function el(tag, attrs) {
+  const e = document.createElementNS(SVG_NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+
+async function main() {
+  const rows = (await loadCSV("data/gdp_forecast.csv"))
+    .map((r) => ({
+      year: Number(r.fiscal_year),
+      f: toNum(r.forecast_real),
+      a: toNum(r.actual_real),
+    }))
+    .sort((x, y) => x.year - y.year);
+
+  const years = rows.map((r) => r.year);
+  const xMin = Math.min(...years), xMax = Math.max(...years);
+  const vals = rows.flatMap((r) => [r.f, r.a]).filter((v) => v !== null);
+  const yPad = (Math.max(...vals) - Math.min(...vals)) * 0.1;
+  const yMin = Math.min(...vals, 0) - yPad, yMax = Math.max(...vals, 0) + yPad;
+
+  const x = (yr) => PAD.left + ((yr - xMin) / (xMax - xMin)) * (W - PAD.left - PAD.right);
+  const y = (v) => PAD.top + (H - PAD.top - PAD.bottom) * (1 - (v - yMin) / (yMax - yMin));
+
+  const svg = document.getElementById("og-svg");
+
+  svg.appendChild(el("line", { class: "zero-line", x1: PAD.left, x2: W - PAD.right, y1: y(0), y2: y(0) }));
+  for (let yr = 1980; yr <= xMax; yr += 5) {
+    svg.appendChild(el("line", { class: "axis-line", x1: x(yr), x2: x(yr), y1: PAD.top, y2: H - PAD.bottom }));
+    const t = el("text", { class: "axis-label", x: x(yr), y: H - PAD.bottom + 22, "text-anchor": "middle", "font-size": 15 });
+    t.textContent = yr;
+    svg.appendChild(t);
+  }
+  for (let v = -4; v <= 6; v += 2) {
+    if (v !== 0) svg.appendChild(el("line", { class: "grid-line-y", x1: PAD.left, x2: W - PAD.right, y1: y(v), y2: y(v) }));
+    const t = el("text", { class: "axis-label", x: PAD.left - 10, y: y(v) + 5, "text-anchor": "end", "font-size": 15 });
+    t.textContent = v + "%";
+    svg.appendChild(t);
+  }
+
+  function path(key) {
+    const pts = rows.filter((r) => r[key] !== null);
+    const segs = [];
+    let cur = [];
+    pts.forEach((r) => {
+      if (cur.length && r.year - cur[cur.length - 1].year > 1) { segs.push(cur); cur = []; }
+      cur.push(r);
+    });
+    if (cur.length) segs.push(cur);
+    return segs.map((s) => "M " + s.map((r) => `${x(r.year)},${y(r[key])}`).join(" L ")).join(" ");
+  }
+
+  const fp = el("path", { class: "line-forecast", d: path("f") });
+  fp.setAttribute("stroke-width", 2.25);
+  svg.appendChild(fp);
+  const ap = el("path", { class: "line-actual", d: path("a") });
+  ap.setAttribute("stroke-width", 3);
+  svg.appendChild(ap);
+}
+main();
+</script>
+</body>
+</html>
