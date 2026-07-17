@@ -212,6 +212,36 @@ async function main() {
     svg.appendChild(actualLabel);
   }
 
+  // years whose forecast/actual gap sits notably above the series' own
+  // typical spread (mean + 1 stddev of |diff|) — a threshold computed from
+  // the data itself, not a fixed magic number, so it stays meaningful across
+  // metrics with very different units (%, 兆円). Listed as plain numbers
+  // below the chart rather than on it, so charts with many outliers don't
+  // get visually noisy.
+  const deviations = actualPoints
+    .filter((r) => r.forecastVal !== null)
+    .map((r) => ({ ...r, diff: r.actualVal - r.forecastVal }));
+  const gapYearsEl = document.getElementById("gap-years");
+  if (gapYearsEl && deviations.length >= 3) {
+    const absDiffs = deviations.map((d) => Math.abs(d.diff));
+    const mean = absDiffs.reduce((a, b) => a + b, 0) / absDiffs.length;
+    const variance = absDiffs.reduce((a, b) => a + (b - mean) ** 2, 0) / absDiffs.length;
+    const threshold = mean + Math.sqrt(variance);
+    const largeGaps = deviations
+      .filter((d) => Math.abs(d.diff) > threshold)
+      .sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+    if (largeGaps.length > 0) {
+      gapYearsEl.innerHTML =
+        `<span class="gap-years-label">ズレが平均+1標準偏差を超えた年度</span>` +
+        largeGaps
+          .map(
+            (d) =>
+              `<span class="gap-years-item">${d.year}年度 ${d.diff > 0 ? "+" : ""}${d.diff.toFixed(1)}${metric.unit}</span>`
+          )
+          .join("");
+    }
+  }
+
   const forecastLabel = svgEl("text", { class: "end-label end-label-forecast", opacity: 0 });
   forecastLabel.textContent = "見通し";
   svg.appendChild(forecastLabel);
@@ -246,8 +276,7 @@ async function main() {
     yearReadout.textContent = `${r.year}年度`;
 
     const yearX = xScale(r.year);
-    const offset = r.actualVal !== null ? 4 : 0;
-    const fx = yearX - offset;
+    const fx = yearX;
     const fy = yScale(r.forecastVal);
     forecastPoint.setAttribute("cx", fx);
     forecastPoint.setAttribute("cy", fy);
@@ -280,7 +309,7 @@ async function main() {
     vForecast.textContent = fmtVal(r.forecastVal, metric.unit, metric.signed);
 
     if (r.actualVal !== null) {
-      const ax = yearX + offset;
+      const ax = yearX;
       const ay = yScale(r.actualVal);
       actualPoint.setAttribute("cx", ax);
       actualPoint.setAttribute("cy", ay);

@@ -525,6 +525,29 @@ a.card:hover {
 
 .gap-label { fill: var(--muted-2); font-size: 10px; font-family: "IBM Plex Mono", monospace; }
 
+.gap-years {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line-soft);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1rem;
+  font-size: 0.72rem;
+}
+
+.gap-years:empty { display: none; }
+
+.gap-years-label {
+  color: var(--muted-2);
+  letter-spacing: 0.02em;
+}
+
+.gap-years-item {
+  color: var(--amber);
+  font-weight: 600;
+}
+
 .line-forecast-vintage {
   fill: none;
   stroke: var(--amber);

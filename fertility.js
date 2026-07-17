@@ -116,6 +116,52 @@ async function main() {
     .filter((seg) => seg.length === 1)
     .forEach((seg) => svg.appendChild(svgEl("circle", { class: "line-actual-dot", cx: xScale(seg[0].year), cy: yScale(seg[0].tfr), r: 1.75 })));
 
+  // for each vintage, the single target year where its assumption diverged
+  // most from the actual value — a vintage that's been drifting from actual
+  // for decades would otherwise flood this list with dozens of near-duplicate
+  // consecutive years, so it's collapsed to one worst-point per vintage
+  // first. Then: which of those worst-points sit notably above the typical
+  // spread (mean + 1 stddev of |diff|) — a threshold computed from the data
+  // itself, not a fixed magic number. Listed as plain numbers below the
+  // chart rather than on it, so a fan of many vintages doesn't get visually
+  // noisy.
+  const actualByYear = new Map(actualRows.map((r) => [r.year, r.tfr]));
+  const fertilityDeviations = forecastRows
+    .map((r) => {
+      const actualTfr = actualByYear.get(r.targetYear);
+      return actualTfr === undefined ? null : { ...r, actualTfr, diff: actualTfr - r.mid };
+    })
+    .filter(Boolean);
+  const worstByVintage = Array.from(
+    fertilityDeviations
+      .reduce((map, d) => {
+        const cur = map.get(d.vintageYear);
+        if (!cur || Math.abs(d.diff) > Math.abs(cur.diff)) map.set(d.vintageYear, d);
+        return map;
+      }, new Map())
+      .values()
+  );
+  const gapYearsEl = document.getElementById("gap-years");
+  if (gapYearsEl && worstByVintage.length >= 3) {
+    const absDiffs = worstByVintage.map((d) => Math.abs(d.diff));
+    const mean = absDiffs.reduce((a, b) => a + b, 0) / absDiffs.length;
+    const variance = absDiffs.reduce((a, b) => a + (b - mean) ** 2, 0) / absDiffs.length;
+    const threshold = mean + Math.sqrt(variance);
+    const largeGaps = worstByVintage
+      .filter((d) => Math.abs(d.diff) > threshold)
+      .sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+    if (largeGaps.length > 0) {
+      gapYearsEl.innerHTML =
+        `<span class="gap-years-label">推計ごとの最大ズレが平均+1標準偏差を超えたもの</span>` +
+        largeGaps
+          .map(
+            (d) =>
+              `<span class="gap-years-item">${d.vintageYear}年推計→${d.targetYear}年 ${d.diff > 0 ? "+" : ""}${d.diff.toFixed(2)}</span>`
+          )
+          .join("");
+    }
+  }
+
   // end-of-line labels often land within a few px of each other since several
   // vintages converge to a similar long-run assumption — push overlapping
   // labels apart vertically so they stay legible
