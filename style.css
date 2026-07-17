@@ -234,18 +234,23 @@ a.card:hover {
 }
 
 .card-stats {
-  display: flex;
-  gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   margin: 12px 0 14px;
   padding-top: 12px;
   border-top: 1px solid var(--line-soft);
   font-family: "IBM Plex Mono", monospace;
 }
 
+.card-stats > div:first-child { text-align: left; }
+.card-stats > div:nth-child(2) { text-align: center; }
+.card-stats > div:last-child { text-align: right; }
+
 .stat-label {
   font-size: 10px;
   color: var(--muted-2);
   letter-spacing: 0.1em;
+  text-align: left;
 }
 
 .stat-label-gap { color: var(--amber); }
