@@ -260,6 +260,22 @@ async function main() {
   const vDiff = document.getElementById("v-diff");
   const vSource = document.getElementById("v-source");
 
+  // the slider only steps through years that HAVE a forecast (forecastYears),
+  // which can start well after xMin (e.g. GDP has actuals back to 1980 but no
+  // forecast archive before 1998) — so the slider's own value range covers a
+  // narrower span than the chart's x-axis. Inset the track by exactly the
+  // pixel fraction the chart itself would place those start/end years at, so
+  // the thumb always sits directly under the year it represents. This assumes
+  // forecastYears has no internal gaps (every year in [first, last] has a
+  // forecast) — true for all metrics today, but a future metric with missing
+  // interior years would need per-step (not just endpoint) alignment.
+  const controlsEl = document.querySelector(".controls");
+  if (controlsEl && forecastYears.length > 1) {
+    const fracLeft = xScale(forecastYears[0].year) / CHART_W;
+    const fracRight = 1 - xScale(forecastYears[forecastYears.length - 1].year) / CHART_W;
+    controlsEl.style.padding = `0 ${(fracRight * 100).toFixed(3)}% 0 ${(fracLeft * 100).toFixed(3)}%`;
+  }
+
   slider.min = 0;
   slider.max = forecastYears.length - 1;
   let defaultIdx = forecastYears.length - 1;

@@ -413,11 +413,11 @@ a.card:hover {
 }
 .stat-chip-diff .stat-chip-value { font-weight: 700; }
 
-/* slider inset matches chart.js PAD (left 44px / right 64px of a 960 viewBox)
-   so the track sits directly under the plotted x-axis */
+/* left/right padding is computed and set by chart.js at runtime — the slider's
+   value range (years with a forecast) can start later than the chart's x-axis
+   domain (years with any data), so the inset isn't a fixed constant */
 .controls {
   margin-top: 0.85rem;
-  padding: 0 6.667% 0 4.583%;
 }
 
 #year-select {
