@@ -18,6 +18,7 @@ const T = {
     sourceLabel: "出典",
     src: "src: 内閣府 / 国民経済計算(SNA)",
     aboutLink: "このサイトについて",
+    correctionsLink: "訂正履歴",
   },
   en: {
     tag: "FORECAST × ACTUAL",
@@ -38,6 +39,7 @@ const T = {
     sourceLabel: "Source",
     src: "src: Cabinet Office of Japan / SNA",
     aboutLink: "About this site",
+    correctionsLink: "Corrections",
   },
 };
 
@@ -103,7 +105,7 @@ function buildSparkline(rows, forecastCol, actualCol) {
   const fVals = rows.map((r) => r[forecastCol]).filter((v) => v !== null);
   const aVals = rows.map((r) => r[actualCol]).filter((v) => v !== null);
   const all = fVals.concat(aVals);
-  if (all.length < 2) return { fc: "", ac: "" };
+  if (all.length < 2) return { fc: [], fcDots: [], ac: [], acDots: [] };
 
   const min = Math.min(...all);
   const max = Math.max(...all);
@@ -113,18 +115,37 @@ function buildSparkline(rows, forecastCol, actualCol) {
   const PADY = 8;
   const scaleY = (v) => H - PADY - ((v - min) / span) * (H - PADY * 2);
 
+  // splits into multiple segments on non-contiguous years, so gaps in the
+  // underlying data (e.g. CPI's collected years) aren't drawn as a fabricated trend.
+  // a segment of length 1 draws no visible line, so its point is returned separately
+  // as a dot to render explicitly (otherwise an isolated data point vanishes silently)
   function pathFor(col) {
     const withVals = rows.filter((r) => r[col] !== null);
-    if (withVals.length === 0) return "";
-    return withVals
-      .map((r, idx) => {
-        const x = withVals.length === 1 ? W / 2 : (idx / (withVals.length - 1)) * (W - 16) + 8;
-        return `${x.toFixed(1)},${scaleY(r[col]).toFixed(1)}`;
-      })
-      .join(" ");
+    if (withVals.length === 0) return { lines: [], dots: [] };
+    const points = withVals.map((r, idx) => ({
+      year: r.year,
+      x: withVals.length === 1 ? W / 2 : (idx / (withVals.length - 1)) * (W - 16) + 8,
+      y: scaleY(r[col]),
+    }));
+    const segments = [];
+    let current = [];
+    points.forEach((p, idx) => {
+      if (current.length > 0 && p.year - points[idx - 1].year > 1) {
+        segments.push(current);
+        current = [];
+      }
+      current.push(p);
+    });
+    if (current.length > 0) segments.push(current);
+    return {
+      lines: segments.filter((seg) => seg.length > 1).map((seg) => seg.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")),
+      dots: segments.filter((seg) => seg.length === 1).map((seg) => seg[0]),
+    };
   }
 
-  return { fc: pathFor(forecastCol), ac: pathFor(actualCol) };
+  const fc = pathFor(forecastCol);
+  const ac = pathFor(actualCol);
+  return { fc: fc.lines, fcDots: fc.dots, ac: ac.lines, acDots: ac.dots };
 }
 
 async function loadSeries(meta) {
@@ -182,8 +203,10 @@ function renderCard(meta, lang, data) {
       <div><div class="stat-label stat-label-gap">${t.gap}</div><div class="stat-value stat-value-gap">${gapStr}</div></div>
     </div>
     <svg class="card-spark" viewBox="0 0 300 80">
-      <polyline class="spark-forecast" points="${spark.fc}"></polyline>
-      <polyline class="spark-actual" points="${spark.ac}"></polyline>
+      ${spark.fc.map((pts) => `<polyline class="spark-forecast" points="${pts}"></polyline>`).join("")}
+      ${spark.ac.map((pts) => `<polyline class="spark-actual" points="${pts}"></polyline>`).join("")}
+      ${spark.fcDots.map((p) => `<circle class="spark-forecast-dot" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2"></circle>`).join("")}
+      ${spark.acDots.map((p) => `<circle class="spark-actual-dot" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2"></circle>`).join("")}
     </svg>`;
 
   if (meta.chartHref) {
@@ -221,6 +244,7 @@ async function main() {
     document.getElementById("t-legend-forecast").textContent = t.plan;
     document.getElementById("t-legend-actual").textContent = t.actual;
     document.getElementById("t-footer-src").textContent = t.src;
+    document.getElementById("t-footer-corrections").textContent = t.correctionsLink;
     document.getElementById("t-footer-about").textContent = t.aboutLink;
     document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
     document.getElementById("lang-en").classList.toggle("active", lang === "en");

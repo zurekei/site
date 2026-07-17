@@ -135,15 +135,57 @@ async function main() {
     svg.appendChild(label);
   }
 
+  function buildSegments(points) {
+    const segments = [];
+    let current = [];
+    points.forEach((r) => {
+      if (current.length > 0 && r.year - current[current.length - 1].year > 1) {
+        segments.push(current);
+        current = [];
+      }
+      current.push(r);
+    });
+    if (current.length > 0) segments.push(current);
+    return segments;
+  }
+
+  function pathFromSegments(segments, valKey) {
+    return segments
+      .map((seg) => `M ${seg.map((r) => `${xScale(r.year)},${yScale(r[valKey])}`).join(" L ")}`)
+      .join(" ");
+  }
+
+  // years never covered by a published forecast (gaps > 1yr between forecastYears
+  // entries) get a neutral factual label instead of a fabricated straight-line trend
+  function drawGapLabels(segments) {
+    for (let i = 1; i < segments.length; i++) {
+      const prevYear = segments[i - 1][segments[i - 1].length - 1].year;
+      const nextYear = segments[i][0].year;
+      const label = svgEl("text", {
+        class: "gap-label",
+        x: (xScale(prevYear) + xScale(nextYear)) / 2,
+        y: CHART_H - PAD.bottom - 10,
+        "text-anchor": "middle",
+      });
+      label.textContent = "データ未収集";
+      svg.appendChild(label);
+    }
+  }
+
   if (forecastYears.length > 0) {
-    const forecastLinePath = forecastYears.map((r) => `${xScale(r.year)},${yScale(r.forecastVal)}`).join(" L ");
-    svg.appendChild(svgEl("path", { class: "line-forecast", d: `M ${forecastLinePath}` }));
+    const forecastSegments = buildSegments(forecastYears);
+    svg.appendChild(svgEl("path", { class: "line-forecast", d: pathFromSegments(forecastSegments, "forecastVal") }));
+    forecastSegments
+      .filter((seg) => seg.length === 1)
+      .forEach((seg) => {
+        svg.appendChild(svgEl("circle", { class: "line-forecast-dot", cx: xScale(seg[0].year), cy: yScale(seg[0].forecastVal), r: 1.75 }));
+      });
+    drawGapLabels(forecastSegments);
   }
 
   let actualLabel = null;
   if (actualPoints.length > 0) {
-    const linePath = actualPoints.map((r) => `${xScale(r.year)},${yScale(r.actualVal)}`).join(" L ");
-    svg.appendChild(svgEl("path", { class: "line-actual", d: `M ${linePath}` }));
+    svg.appendChild(svgEl("path", { class: "line-actual", d: pathFromSegments(buildSegments(actualPoints), "actualVal") }));
 
     actualPoints.forEach((r) => {
       svg.appendChild(svgEl("circle", { class: "line-actual-dot", cx: xScale(r.year), cy: yScale(r.actualVal), r: 1.75 }));
