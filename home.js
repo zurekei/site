@@ -7,7 +7,7 @@ const T = {
     lead: "政府は各年度のはじめに経済の「見通し」を示し、約一年後に「実績」が確定する。ズレ計は、その二つを並べて時系列で記録するだけの場所。",
     calloutTitle: "ズレの読み方",
     calloutBody: "ズレは「実績 − 見通し」の差であり、良し悪しの評価ではない。景気変動・災害・資源価格・政策変更など、見通しの前提が外れると生じる。プラスは実績が見通しを上回ったこと、マイナスは下回ったことを意味する。",
-    indicatorsLabel: "指標一覧 · 6",
+    indicatorsLabel: "指標一覧 · 7",
     indicatorsLatest: "最新年度 / 見通し vs 実績",
     plan: "見通し",
     actual: "実績",
@@ -15,6 +15,7 @@ const T = {
     pending: "データ収集中",
     noActual: "未確定",
     noLinkNote: "実績データ収集後に詳細チャートを公開予定",
+    fertilityNote: "歴代7推計(1992〜2023) vs 実績",
     sourceLabel: "出典",
     src: "src: 内閣府 / 国民経済計算(SNA)",
     aboutLink: "このサイトについて",
@@ -28,7 +29,7 @@ const T = {
     lead: "At the start of each fiscal year the government issues an economic forecast; about a year later the actual figures are confirmed. Zurekei simply records the two, side by side, over time.",
     calloutTitle: "Reading the gap",
     calloutBody: 'The gap is simply "actual − forecast" — not a verdict. It appears when the assumptions behind a forecast miss: swings in the economy, disasters, commodity prices, policy changes. A plus means the actual came in above the forecast; a minus, below.',
-    indicatorsLabel: "INDICATORS · 6",
+    indicatorsLabel: "INDICATORS · 7",
     indicatorsLatest: "Latest FY / Forecast vs Actual",
     plan: "Forecast",
     actual: "Actual",
@@ -36,6 +37,7 @@ const T = {
     pending: "Collecting data",
     noActual: "pending",
     noLinkNote: "Detail chart will be published once actual data is collected",
+    fertilityNote: "7 vintages (1992–2023) vs actual",
     sourceLabel: "Source",
     src: "src: Cabinet Office of Japan / SNA",
     aboutLink: "About this site",
@@ -91,6 +93,13 @@ const INDICATOR_META = [
     unit: "兆円", kind: "series", signed: false,
     csv: "data/tax_revenue_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
     chartHref: "chart.html?m=tax-revenue",
+  },
+  {
+    key: "fertility",
+    nameJa: "合計特殊出生率", nameEn: "Total fertility rate",
+    descJa: "社人研の歴代人口推計が置いた出生率の仮定と、実績の比較。", descEn: "Fertility assumptions across generations of official population projections, vs. actual.",
+    kind: "fertility",
+    chartHref: "fertility.html",
   },
 ];
 
@@ -179,6 +188,15 @@ function renderCard(meta, lang, data) {
         <div class="card-desc">${desc}</div>
         <div class="card-pending-badge">${t.pending}</div>
       </div>`;
+  }
+
+  if (meta.kind === "fertility") {
+    return `
+      <a class="card" href="${meta.chartHref}">
+        <div class="card-top"><span class="card-name mono">${name}</span></div>
+        <div class="card-desc">${desc}</div>
+        <div class="card-note card-note-fertility">${t.fertilityNote}</div>
+      </a>`;
   }
 
   const { latest, spark } = data;

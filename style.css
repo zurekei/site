@@ -301,6 +301,13 @@ a.card:hover {
   color: var(--muted);
 }
 
+.card-note-fertility {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-soft);
+  font-family: "IBM Plex Mono", monospace;
+}
+
 .card-pending-badge {
   display: inline-block;
   margin-top: 16px;
@@ -329,6 +336,18 @@ a.card:hover {
 .legend-swatch { width: 18px; height: 0; display: inline-block; }
 .legend-swatch-forecast { border-top: 1.5px dashed var(--forecast-dashed); }
 .legend-swatch-actual { height: 2px; background: var(--navy); }
+.legend-swatch-vintage { border-top: 1.5px solid var(--amber); }
+
+.fertility-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin-top: 22px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
 
 .site-footer-row {
   display: flex;
@@ -500,6 +519,15 @@ a.card:hover {
 .line-forecast-dot { fill: var(--amber); opacity: 0.65; }
 
 .gap-label { fill: var(--muted-2); font-size: 10px; font-family: "IBM Plex Mono", monospace; }
+
+.line-forecast-vintage {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.vintage-label { fill: var(--amber); font-size: 9px; font-family: "IBM Plex Mono", monospace; }
 
 .line-forecast-point {
   fill: var(--amber);
