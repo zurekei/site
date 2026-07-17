@@ -17,6 +17,8 @@ const T = {
     noLinkNote: "実績データ収集後に詳細チャートを公開予定",
     fertilityNote: "歴代7推計(1992〜2023) vs 実績",
     sourceLabel: "出典",
+    heroCopy: "見通しと実績のズレを、\n記録し続ける。",
+    heroCaption: "実質GDP成長率 — 当初見通しと実績 1980–2025年度",
     src: "src: 内閣府 / 国民経済計算(SNA)",
     aboutLink: "このサイトについて",
     correctionsLink: "訂正履歴",
@@ -39,6 +41,8 @@ const T = {
     noLinkNote: "Detail chart will be published once actual data is collected",
     fertilityNote: "7 vintages (1992–2023) vs actual",
     sourceLabel: "Source",
+    heroCopy: "A running record of the gap\nbetween forecast and actual.",
+    heroCaption: "Real GDP growth — initial forecast vs actual, FY1980–2025",
     src: "src: Cabinet Office of Japan / SNA",
     aboutLink: "About this site",
     correctionsLink: "Corrections",
@@ -261,6 +265,13 @@ async function main() {
     document.getElementById("t-indicators-latest").textContent = t.indicatorsLatest;
     document.getElementById("t-legend-forecast").textContent = t.plan;
     document.getElementById("t-legend-actual").textContent = t.actual;
+    document.getElementById("hero-caption").textContent = t.heroCaption;
+    document.getElementById("hero-copy").textContent = t.heroCopy;
+    // hero.js が描画完了する前に applyI18n が走るため、ラベルは存在チェック付きで反映
+    const heroActual = document.getElementById("hero-label-actual");
+    if (heroActual) heroActual.textContent = t.actual;
+    const heroForecast = document.getElementById("hero-label-forecast");
+    if (heroForecast) heroForecast.textContent = t.plan;
     document.getElementById("t-footer-src").textContent = t.src;
     document.getElementById("t-footer-corrections").textContent = t.correctionsLink;
     document.getElementById("t-footer-about").textContent = t.aboutLink;

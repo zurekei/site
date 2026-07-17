@@ -117,6 +117,70 @@ a { color: inherit; }
 .nav-link { color: var(--muted); text-decoration: none; }
 .nav-link:hover { opacity: 0.7; }
 
+/* ---- hero (開幕演出) ----
+   通常のデータチャート(白地)と役割が違うことを示すため、ここだけ紺の
+   計器パネル調。色は見通し/実績の区別のみで、善悪の示唆には使わない */
+
+.hero {
+  position: relative;
+  margin-top: 20px;
+  background: var(--navy);
+  padding: 16px 18px 10px;
+}
+
+#hero-chart { display: block; width: 100%; height: auto; }
+
+.hero-caption {
+  margin-top: 2px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.45);
+  text-align: right;
+  letter-spacing: 0.04em;
+}
+
+.hero-copy {
+  position: absolute;
+  left: 6%;
+  bottom: 13%;
+  max-width: 72%;
+  color: #f4f5f8;
+  font-size: clamp(1.4rem, 4.4vw, 3rem);
+  font-weight: 700;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  white-space: pre-line;
+  /* 折れ線と重なる位置でも読めるように、背景色でにじませて分離する */
+  text-shadow: 0 0 18px rgba(27, 42, 74, 0.95), 0 0 6px rgba(27, 42, 74, 0.95);
+}
+
+.hero .zero-line { stroke: rgba(255, 255, 255, 0.35); }
+.hero .axis-line { stroke: rgba(255, 255, 255, 0.1); }
+.hero .grid-line-y { stroke: rgba(255, 255, 255, 0.07); }
+.hero .axis-label { fill: rgba(255, 255, 255, 0.5); }
+.hero .line-actual { stroke: #e6e9f0; }
+.hero .end-label-actual { fill: #e6e9f0; }
+
+/* 見通しも実線で描く(色は通常チャートと同じ琥珀/白の区別のみ) */
+.hero .line-forecast { stroke-opacity: 0.9; stroke-dasharray: none; }
+
+.hero-spark {
+  fill: none;
+  stroke: #e6e9f0;
+  stroke-width: 1.5;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.hero-spark.on {
+  animation: hero-spark-pulse 1.8s ease-out infinite;
+}
+
+@keyframes hero-spark-pulse {
+  0% { transform: scale(1); opacity: 0.9; }
+  75% { transform: scale(4.5); opacity: 0; }
+  100% { transform: scale(4.5); opacity: 0; }
+}
+
 /* ---- lead / callout ---- */
 
 .lead {
