@@ -3,10 +3,42 @@ const CHART_W = 960;
 const CHART_H = 480;
 const PAD = { top: 20, right: 64, bottom: 32, left: 58 };
 
+// UI strings for this page. Indicator names (title/titleEn) are kept in sync
+// with home.js's INDICATOR_META nameEn by hand — no shared import, so check
+// both when renaming an indicator.
+const T = {
+  ja: {
+    back: "← 指標一覧",
+    forecast: "見通し",
+    actual: "実績",
+    gap: "ズレ",
+    actualPending: "実績未確定(年度未終了)",
+    dataNotCollected: "データ未収集",
+    forecastSourcePrefix: "見通し出典: ",
+    actualSourcePrefix: "実績出典: ",
+    footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
+    footerAbout: "このサイトについて",
+  },
+  en: {
+    back: "← Indicators",
+    forecast: "Forecast",
+    actual: "Actual",
+    gap: "Gap",
+    actualPending: "Actual not yet finalized (fiscal year in progress)",
+    dataNotCollected: "Data not yet collected",
+    forecastSourcePrefix: "Forecast source: ",
+    actualSourcePrefix: "Actual source: ",
+    footerSrc: "src: Cabinet Office of Japan / SNA",
+    footerAbout: "About this site",
+  },
+};
+
 const METRICS = {
   "gdp-real": {
     title: "実質GDP成長率",
+    titleEn: "Real GDP growth",
     desc: "政府の当初見通し(実質)と、確定した実績を並べたもの。",
+    descEn: "The government's initial forecast (real) laid alongside the confirmed actual.",
     csv: "data/gdp_forecast.csv",
     forecastCol: "forecast_real",
     actualCol: "actual_real",
@@ -17,7 +49,9 @@ const METRICS = {
   },
   "gdp-nominal": {
     title: "名目GDP成長率",
+    titleEn: "Nominal GDP growth",
     desc: "政府の当初見通し(名目)と、確定した実績を並べたもの。",
+    descEn: "The government's initial forecast (nominal) laid alongside the confirmed actual.",
     csv: "data/gdp_forecast.csv",
     forecastCol: "forecast_nominal",
     actualCol: "actual_nominal",
@@ -28,7 +62,9 @@ const METRICS = {
   },
   "unemployment": {
     title: "完全失業率",
+    titleEn: "Unemployment rate",
     desc: "政府の当初見通しと、確定した実績を並べたもの。",
+    descEn: "The government's initial forecast laid alongside the confirmed actual.",
     csv: "data/unemployment_forecast.csv",
     forecastCol: "forecast_rate",
     actualCol: "actual_rate",
@@ -39,7 +75,9 @@ const METRICS = {
   },
   "current-account": {
     title: "経常収支",
+    titleEn: "Current account",
     desc: "政府の当初見通しと、確定した実績を並べたもの。",
+    descEn: "The government's initial forecast laid alongside the confirmed actual.",
     csv: "data/current_account_forecast.csv",
     forecastCol: "forecast_tn",
     actualCol: "actual_tn",
@@ -50,7 +88,9 @@ const METRICS = {
   },
   "tax-revenue": {
     title: "一般会計税収",
+    titleEn: "Tax revenue",
     desc: "財務省の当初予算における税収見積もりと、確定した決算額を並べたもの。",
+    descEn: "The Ministry of Finance's initial budget estimate for tax revenue, laid alongside the confirmed settlement figure.",
     csv: "data/tax_revenue_forecast.csv",
     forecastCol: "forecast_tn",
     actualCol: "actual_tn",
@@ -61,7 +101,9 @@ const METRICS = {
   },
   "bond-issuance": {
     title: "国債発行額(一般会計)",
+    titleEn: "Government bond issuance",
     desc: "財務省の当初予算における公債発行予定額と、決算における実績発行額を並べたもの。復興債・年金特例公債など別枠区分の公債は含まない(原資料の区分に従う)。",
+    descEn: "The Ministry of Finance's initial budget plan for bond issuance, laid alongside the actual issuance recorded in the settlement. Bonds tracked in separate categories, such as reconstruction bonds or pension special-issue bonds, are not included, following the classification used in the primary source.",
     csv: "data/bond_issuance_forecast.csv",
     forecastCol: "forecast_tn",
     actualCol: "actual_tn",
@@ -69,11 +111,26 @@ const METRICS = {
     actualSourceCol: "actual_source_url",
     unit: "兆円",
     signed: false,
-    gapLabel: "当初予算に計画なし",
+    gapLabel: { ja: "当初予算に計画なし", en: "No issuance planned in the initial budget" },
+  },
+  "jgb-total": {
+    title: "国債発行総額",
+    titleEn: "Total JGB issuance",
+    desc: "財務省の当初の国債発行計画(総額)と、実績の発行総額を並べたもの。建設国債・特例国債・復興債等・財投債・借換債を含む(収入金ベース、原資料の区分に従う)。",
+    descEn: "The Ministry of Finance's initial JGB issuance plan (total), laid alongside actual total issuance. Includes construction bonds, deficit-financing bonds, reconstruction and other special bonds, FILP bonds, and refunding bonds (revenue basis, following the classification used in the primary source).",
+    csv: "data/jgb_total_issuance_forecast.csv",
+    forecastCol: "forecast_tn",
+    actualCol: "actual_tn",
+    forecastSourceCol: "forecast_source_url",
+    actualSourceCol: "actual_source_url",
+    unit: "兆円",
+    signed: false,
   },
   cpi: {
     title: "消費者物価指数(総合)",
+    titleEn: "Consumer prices (CPI)",
     desc: "政府の当初見通しと、総務省統計局が公表する確定した実績を並べたもの。",
+    descEn: "The government's initial forecast laid alongside the confirmed actual published by the Ministry of Internal Affairs and Communications' Statistics Bureau.",
     csv: "data/cpi_forecast.csv",
     forecastCol: "forecast_cpi",
     actualCol: "actual_cpi",
@@ -82,6 +139,14 @@ const METRICS = {
     unit: "%",
   },
 };
+
+function fmtFY(year, lang) {
+  return lang === "ja" ? `${year}年度` : `FY${year}`;
+}
+
+function gapLabelText(metric, lang) {
+  return metric.gapLabel ? metric.gapLabel[lang] : T[lang].dataNotCollected;
+}
 
 function svgEl(tag, attrs) {
   const el = document.createElementNS(SVG_NS, tag);
@@ -124,9 +189,12 @@ async function main() {
   const metricKey = params.get("m") || "gdp-real";
   const metric = Object.hasOwn(METRICS, metricKey) ? METRICS[metricKey] : METRICS["gdp-real"];
 
+  // the static <title>/meta description in chart.html stay JA regardless of
+  // the in-page language toggle (per site convention: static head tags are
+  // JA-authoritative); only this dynamic per-metric document.title follows.
   document.getElementById("page-title").textContent = `${metric.title} — ズレ計`;
-  document.getElementById("chart-title").textContent = metric.title;
-  document.getElementById("chart-desc").textContent = metric.desc;
+
+  let lang = "ja";
 
   const rawRows = await loadCSV(metric.csv);
   const rows = rawRows
@@ -207,7 +275,9 @@ async function main() {
   }
 
   // years never covered by a published forecast (gaps > 1yr between forecastYears
-  // entries) get a neutral factual label instead of a fabricated straight-line trend
+  // entries) get a neutral factual label instead of a fabricated straight-line trend.
+  // labels are collected into gapLabelEls so applyI18n() can retranslate them later.
+  const gapLabelEls = [];
   function drawGapLabels(segments) {
     for (let i = 1; i < segments.length; i++) {
       const prevYear = segments[i - 1][segments[i - 1].length - 1].year;
@@ -218,8 +288,9 @@ async function main() {
         y: CHART_H - PAD.bottom - 10,
         "text-anchor": "middle",
       });
-      label.textContent = metric.gapLabel || "データ未収集";
+      label.textContent = gapLabelText(metric, lang);
       svg.appendChild(label);
+      gapLabelEls.push(label);
     }
   }
 
@@ -248,12 +319,12 @@ async function main() {
       x: xScale(lastActual.year) + 8,
       y: yScale(lastActual.actualVal) + 4,
     });
-    actualLabel.textContent = "実績";
+    actualLabel.textContent = T[lang].actual;
     svg.appendChild(actualLabel);
   }
 
   const forecastLabel = svgEl("text", { class: "end-label end-label-forecast", opacity: 0 });
-  forecastLabel.textContent = "見通し";
+  forecastLabel.textContent = T[lang].forecast;
   svg.appendChild(forecastLabel);
 
   const linkLine = svgEl("line", { class: "link-line", opacity: 0 });
@@ -300,7 +371,7 @@ async function main() {
 
   function render(idx) {
     const r = forecastYears[idx];
-    yearReadout.textContent = `${r.year}年度`;
+    yearReadout.textContent = fmtFY(r.year, lang);
     if (vNotes) vNotes.textContent = extractEventNote(r.notes);
 
     const yearX = xScale(r.year);
@@ -355,20 +426,43 @@ async function main() {
     } else {
       actualPoint.setAttribute("opacity", 0);
       linkLine.setAttribute("opacity", 0);
-      vActual.textContent = "実績未確定(年度未終了)";
+      vActual.textContent = T[lang].actualPending;
       vDiff.textContent = "—";
     }
 
     const links = [];
     const forecastUrl = safeUrl(r.forecastSourceUrl);
     const actualUrl = safeUrl(r.actualSourceUrl);
-    if (forecastUrl) links.push(`見通し出典: <a href="${escapeHTML(forecastUrl)}" target="_blank" rel="noopener">${escapeHTML(forecastUrl)}</a>`);
-    if (actualUrl) links.push(`実績出典: <a href="${escapeHTML(actualUrl)}" target="_blank" rel="noopener">${escapeHTML(actualUrl)}</a>`);
+    if (forecastUrl) links.push(`${T[lang].forecastSourcePrefix}<a href="${escapeHTML(forecastUrl)}" target="_blank" rel="noopener">${escapeHTML(forecastUrl)}</a>`);
+    if (actualUrl) links.push(`${T[lang].actualSourcePrefix}<a href="${escapeHTML(actualUrl)}" target="_blank" rel="noopener">${escapeHTML(actualUrl)}</a>`);
     vSource.innerHTML = links.join("<br>");
   }
 
   slider.addEventListener("input", () => render(Number(slider.value)));
-  render(defaultIdx);
+
+  function applyI18n() {
+    const t = T[lang];
+    document.getElementById("chart-title").textContent = lang === "ja" ? metric.title : metric.titleEn;
+    document.getElementById("chart-desc").textContent = lang === "ja" ? metric.desc : metric.descEn;
+    document.getElementById("t-back").textContent = t.back;
+    document.getElementById("t-stat-forecast").textContent = t.forecast;
+    document.getElementById("t-stat-actual").textContent = t.actual;
+    document.getElementById("t-stat-gap").textContent = t.gap;
+    document.getElementById("t-footer-src").textContent = t.footerSrc;
+    document.getElementById("t-footer-about").textContent = t.footerAbout;
+    if (actualLabel) actualLabel.textContent = t.actual;
+    forecastLabel.textContent = t.forecast;
+    gapLabelEls.forEach((el) => { el.textContent = gapLabelText(metric, lang); });
+    document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
+    document.getElementById("lang-en").classList.toggle("active", lang === "en");
+    document.documentElement.lang = lang;
+    render(Number(slider.value));
+  }
+
+  document.getElementById("lang-ja").addEventListener("click", () => { lang = "ja"; applyI18n(); });
+  document.getElementById("lang-en").addEventListener("click", () => { lang = "en"; applyI18n(); });
+
+  applyI18n();
 }
 
 main();

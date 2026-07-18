@@ -3,6 +3,37 @@ const CHART_W = 960;
 const CHART_H = 480;
 const PAD = { top: 20, right: 64, bottom: 32, left: 44 };
 
+// UI strings for this page. The indicator name ("Total fertility rate")
+// is kept in sync with home.js's INDICATOR_META nameEn by hand.
+const T = {
+  ja: {
+    back: "← 指標一覧",
+    title: "合計特殊出生率 — 歴代推計 vs 実績",
+    desc: "国立社会保障・人口問題研究所「日本の将来推計人口」が版ごとに置いた合計特殊出生率の仮定(中位)を重ねたもの。線の色が薄いほど古い推計、濃いほど新しい推計。",
+    chartAriaLabel: "合計特殊出生率の歴代推計と実績",
+    legendActual: "実績",
+    vintageSuffix: "年推計",
+    sourceActualPrefix: "実績: ",
+    footerSrc: "src: 国立社会保障・人口問題研究所「日本の将来推計人口」",
+    footerAbout: "このサイトについて",
+  },
+  en: {
+    back: "← Indicators",
+    title: "Total fertility rate — successive projections vs actual",
+    desc: "Fertility assumptions (medium variant) from successive editions of NIPSSR's population projections, overlaid. Lighter lines are older projections; darker lines are more recent.",
+    chartAriaLabel: "Successive fertility-rate projections and the actual rate",
+    legendActual: "Actual",
+    vintageSuffix: " projection",
+    sourceActualPrefix: "Actual: ",
+    footerSrc: "src: NIPSSR / Population Projections for Japan",
+    footerAbout: "About this site",
+  },
+};
+
+function vintageLabel(vintageYear, lang) {
+  return lang === "ja" ? `${vintageYear}${T.ja.vintageSuffix}` : `${vintageYear}${T.en.vintageSuffix}`;
+}
+
 function svgEl(tag, attrs) {
   const el = document.createElementNS(SVG_NS, tag);
   for (const k in attrs) el.setAttribute(k, attrs[k]);
@@ -33,6 +64,8 @@ function pathFromSegments(segments, xScale, yScale, yearKey, valKey) {
 }
 
 async function main() {
+  let lang = "ja";
+
   const [forecastRaw, actualRaw] = await Promise.all([
     loadCSV("data/fertility_forecast.csv"),
     loadCSV("data/fertility_actual.csv"),
@@ -181,35 +214,59 @@ async function main() {
     });
   }
 
-  const legend = document.getElementById("fertility-legend");
-  legend.innerHTML =
-    `<span class="legend-item"><span class="legend-swatch legend-swatch-actual"></span>実績</span>` +
-    byVintage
-      .map(
-        ({ vintageYear }) =>
-          `<span class="legend-item"><span class="legend-swatch legend-swatch-vintage" style="opacity:${opacityFor(vintageYear).toFixed(2)}"></span>${vintageYear}年推計</span>`
-      )
-      .join("");
+  function buildLegendHtml() {
+    return (
+      `<span class="legend-item"><span class="legend-swatch legend-swatch-actual"></span>${T[lang].legendActual}</span>` +
+      byVintage
+        .map(
+          ({ vintageYear }) =>
+            `<span class="legend-item"><span class="legend-swatch legend-swatch-vintage" style="opacity:${opacityFor(vintageYear).toFixed(2)}"></span>${vintageLabel(vintageYear, lang)}</span>`
+        )
+        .join("")
+    );
+  }
 
-  const sourceLines = [];
-  const seenUrls = new Set();
-  byVintage.forEach(({ vintageYear, rows }) => {
-    const url = safeUrl(rows[0].sourceUrl);
-    if (url && !seenUrls.has(url)) {
-      seenUrls.add(url);
-      const note = rows[0].notes ? `(${escapeHTML(rows[0].notes)})` : "";
-      sourceLines.push(`${vintageYear}年推計: <a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(url)}</a>${note}`);
-    }
-  });
-  const actualUrls = [...new Set(actualRows.map((r) => r.sourceUrl).filter(Boolean))];
-  actualUrls.forEach((u) => {
-    const url = safeUrl(u);
-    if (url && !seenUrls.has(url)) {
-      seenUrls.add(url);
-      sourceLines.push(`実績: <a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(url)}</a>`);
-    }
-  });
-  document.getElementById("fertility-source").innerHTML = sourceLines.join("<br>");
+  function buildSourceHtml() {
+    const sourceLines = [];
+    const seenUrls = new Set();
+    byVintage.forEach(({ vintageYear, rows }) => {
+      const url = safeUrl(rows[0].sourceUrl);
+      if (url && !seenUrls.has(url)) {
+        seenUrls.add(url);
+        const note = rows[0].notes ? `(${escapeHTML(rows[0].notes)})` : "";
+        sourceLines.push(`${vintageLabel(vintageYear, lang)}: <a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(url)}</a>${note}`);
+      }
+    });
+    const actualUrls = [...new Set(actualRows.map((r) => r.sourceUrl).filter(Boolean))];
+    actualUrls.forEach((u) => {
+      const url = safeUrl(u);
+      if (url && !seenUrls.has(url)) {
+        seenUrls.add(url);
+        sourceLines.push(`${T[lang].sourceActualPrefix}<a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(url)}</a>`);
+      }
+    });
+    return sourceLines.join("<br>");
+  }
+
+  function applyI18n() {
+    const t = T[lang];
+    document.getElementById("t-back").textContent = t.back;
+    document.getElementById("fert-title").textContent = t.title;
+    document.getElementById("fert-desc").textContent = t.desc;
+    document.getElementById("fertility-chart").setAttribute("aria-label", t.chartAriaLabel);
+    document.getElementById("t-footer-src").textContent = t.footerSrc;
+    document.getElementById("t-footer-about").textContent = t.footerAbout;
+    document.getElementById("fertility-legend").innerHTML = buildLegendHtml();
+    document.getElementById("fertility-source").innerHTML = buildSourceHtml();
+    document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
+    document.getElementById("lang-en").classList.toggle("active", lang === "en");
+    document.documentElement.lang = lang;
+  }
+
+  document.getElementById("lang-ja").addEventListener("click", () => { lang = "ja"; applyI18n(); });
+  document.getElementById("lang-en").addEventListener("click", () => { lang = "en"; applyI18n(); });
+
+  applyI18n();
 }
 
 main();

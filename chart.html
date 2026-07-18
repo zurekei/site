@@ -38,9 +38,15 @@
         <div class="brand-tag">FORECAST × ACTUAL</div>
       </div>
     </div>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <button id="lang-ja" class="lang-btn mono">JA</button>
+        <button id="lang-en" class="lang-btn mono">EN</button>
+      </div>
+    </div>
   </header>
 
-  <a class="chart-back" href="index.html">← 指標一覧</a>
+  <a class="chart-back" id="t-back" href="index.html">← 指標一覧</a>
 
   <main>
     <section class="chart-section">
@@ -60,16 +66,16 @@
         <div class="stat-row">
           <div class="stat-chip">
             <span class="stat-chip-dot stat-chip-dot-forecast"></span>
-            <span class="stat-chip-label">見通し</span>
+            <span class="stat-chip-label" id="t-stat-forecast">見通し</span>
             <span class="stat-chip-value" id="v-forecast">—</span>
           </div>
           <div class="stat-chip">
             <span class="stat-chip-dot stat-chip-dot-actual"></span>
-            <span class="stat-chip-label">実績</span>
+            <span class="stat-chip-label" id="t-stat-actual">実績</span>
             <span class="stat-chip-value" id="v-actual">—</span>
           </div>
           <div class="stat-chip stat-chip-diff">
-            <span class="stat-chip-label">ズレ</span>
+            <span class="stat-chip-label" id="t-stat-gap">ズレ</span>
             <span class="stat-chip-value" id="v-diff">—</span>
           </div>
         </div>
@@ -82,8 +88,8 @@
   </main>
 
   <footer class="site-footer-row">
-    <span>src: 内閣府 / 国民経済計算(SNA)</span>
-    <a class="footer-about" href="about.html">このサイトについて</a>
+    <span id="t-footer-src">src: 内閣府 / 国民経済計算(SNA)</span>
+    <a class="footer-about" id="t-footer-about" href="about.html">このサイトについて</a>
   </footer>
 </div>
 <script src="csv.js"></script>
