@@ -59,20 +59,20 @@ const INDICATOR_META = [
     chartHref: "chart.html?m=gdp-real",
   },
   {
-    key: "cpi",
-    nameJa: "消費者物価 (CPI)", nameEn: "Consumer prices (CPI)",
-    descJa: "家計が購入する財・サービスの価格変動。", descEn: "Change in prices of the goods and services households buy.",
-    unit: "%", kind: "series",
-    csv: "data/cpi_forecast.csv", forecastCol: "forecast_cpi", actualCol: "actual_cpi",
-    chartHref: "chart.html?m=cpi",
-  },
-  {
     key: "gdp-nominal",
     nameJa: "名目GDP成長率", nameEn: "Nominal GDP growth",
     descJa: "物価変動を含む、金額ベースの成長率。", descEn: "Growth in monetary terms, including price changes.",
     unit: "%", kind: "series",
     csv: "data/gdp_forecast.csv", forecastCol: "forecast_nominal", actualCol: "actual_nominal",
     chartHref: "chart.html?m=gdp-nominal",
+  },
+  {
+    key: "cpi",
+    nameJa: "消費者物価 (CPI)", nameEn: "Consumer prices (CPI)",
+    descJa: "家計が購入する財・サービスの価格変動。", descEn: "Change in prices of the goods and services households buy.",
+    unit: "%", kind: "series",
+    csv: "data/cpi_forecast.csv", forecastCol: "forecast_cpi", actualCol: "actual_cpi",
+    chartHref: "chart.html?m=cpi",
   },
   {
     key: "unemployment",
