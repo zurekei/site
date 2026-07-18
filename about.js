@@ -89,8 +89,8 @@ const METHODS_ROWS = [
     en: ["Government bond issuance", "Ministry of Finance, “Trends in General Account Bond Issuance,” initial budget figure", "Ministry of Finance, settlement (actual) figure, same source"],
   },
   {
-    ja: ["合計特殊出生率", "国立社会保障・人口問題研究所(社人研)「日本の将来推計人口」歴代推計の中位仮定", "厚生労働省「人口動態統計」実績値"],
-    en: ["Total fertility rate", "National Institute of Population and Social Security Research (IPSS), “Population Projections for Japan,” medium-fertility assumption across successive vintages", "Ministry of Health, Labour and Welfare, Vital Statistics of Japan, actual figures"],
+    ja: ["合計特殊出生率", "国立社会保障・人口問題研究所(社人研)「日本の将来推計人口」歴代推計の中位仮定", "厚生労働省「人口動態統計」(社人研「人口統計資料集」収録値を含む)"],
+    en: ["Total fertility rate", "National Institute of Population and Social Security Research (IPSS), “Population Projections for Japan,” medium-fertility assumption across successive vintages", "Ministry of Health, Labour and Welfare, Vital Statistics of Japan (partly as compiled in the IPSS Population Statistics of Japan)"],
   },
 ];
 
