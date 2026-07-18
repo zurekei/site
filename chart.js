@@ -1,7 +1,7 @@
 const SVG_NS = "http://www.w3.org/2000/svg";
 const CHART_W = 960;
 const CHART_H = 480;
-const PAD = { top: 20, right: 64, bottom: 32, left: 44 };
+const PAD = { top: 20, right: 64, bottom: 32, left: 58 };
 
 const METRICS = {
   "gdp-real": {
@@ -58,6 +58,18 @@ const METRICS = {
     actualSourceCol: "actual_source_url",
     unit: "兆円",
     signed: false,
+  },
+  "bond-issuance": {
+    title: "国債発行額(一般会計)",
+    desc: "財務省の当初予算における公債発行予定額と、決算における実績発行額を並べたもの。復興債・年金特例公債など別枠区分の公債は含まない(原資料の区分に従う)。",
+    csv: "data/bond_issuance_forecast.csv",
+    forecastCol: "forecast_tn",
+    actualCol: "actual_tn",
+    forecastSourceCol: "forecast_source_url",
+    actualSourceCol: "actual_source_url",
+    unit: "兆円",
+    signed: false,
+    gapLabel: "当初予算に計画なし",
   },
   cpi: {
     title: "消費者物価指数(総合)",
@@ -162,7 +174,8 @@ async function main() {
     svg.appendChild(label);
   }
 
-  const yStep = yDomain[1] - yDomain[0] > 15 ? 5 : 2;
+  const yRange = yDomain[1] - yDomain[0];
+  const yStep = yRange > 60 ? 10 : yRange > 15 ? 5 : 2;
   for (let v = Math.ceil(yDomain[0] / yStep) * yStep; v <= yDomain[1]; v += yStep) {
     const y = yScale(v);
     if (v !== 0) {
@@ -205,7 +218,7 @@ async function main() {
         y: CHART_H - PAD.bottom - 10,
         "text-anchor": "middle",
       });
-      label.textContent = "データ未収集";
+      label.textContent = metric.gapLabel || "データ未収集";
       svg.appendChild(label);
     }
   }
