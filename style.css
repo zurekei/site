@@ -702,6 +702,91 @@ a.card:hover {
   color: var(--ink);
 }
 
+/* ---- about: data & methods ---- */
+
+.about-methods {
+  margin-top: 2.75rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1.5rem;
+}
+
+.about-methods-title {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin: 0 0 1.1rem;
+}
+
+.methods-table-wrap {
+  overflow-x: auto;
+}
+
+.methods-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.methods-table th,
+.methods-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.55rem 0.9rem 0.55rem 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.methods-table thead th {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--ink);
+  padding-top: 0;
+}
+
+.methods-table tbody th {
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.methods-table tbody td {
+  color: var(--desc);
+}
+
+.methods-notes {
+  margin: 1.75rem 0 0;
+}
+
+.methods-notes dt {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--amber);
+  margin-top: 1.4rem;
+}
+
+.methods-notes dt:first-child { margin-top: 0; }
+
+.methods-notes dd {
+  margin: 0.4rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.85;
+  color: var(--desc);
+}
+
+.methods-notes dd a { color: var(--navy); text-decoration: underline; }
+.methods-notes dd a:hover { opacity: 0.7; }
+
+@media (max-width: 560px) {
+  .methods-table { font-size: 0.76rem; }
+  .methods-table th, .methods-table td { padding: 0.5rem 0.6rem 0.5rem 0; }
+}
+
 /* ==================== corrections page ==================== */
 
 .correction-empty {
