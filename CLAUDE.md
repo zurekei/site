@@ -55,8 +55,14 @@
 
 ## 技術構成
 
-- 静的サイト。Cloudflare Pages + GitHub
+- 静的サイト。Cloudflare Pages(プロジェクト名 `zurekei-site`)
 - ドメイン: zurekei.org をCloudflare Registrarで取得(取得〜DNS〜Pagesまで全部Cloudflareで完結)
+- **デプロイはGitHub連携ではなくwranglerからの直接アップロード**。GitHubへのpushではデプロイされない。反映するには必ず下記を実行する
+  ```
+  npx wrangler pages deploy . --project-name=zurekei-site
+  ```
+  (Deployments画面にブランチ名とコミットメッセージが出るのはwranglerがgitメタデータを付けているだけで、Git連携ではない)
+- アクセス解析: Cloudflare Web Analytics。Pagesプロジェクトの Metrics タブで有効化済みで、ビーコンは配信時に全HTMLへ自動挿入される。**有効化・設定変更は次回デプロイから反映される**ためデプロイを1回挟む
 - フレームワーク: シンプル優先。Vite + React または素のHTML+JS。ビルドが複雑になるなら素のHTMLでよい
 - グラフ: インタラクティブ必須(下記)
 
