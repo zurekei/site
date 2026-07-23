@@ -26,6 +26,13 @@
 
 ## 未着手(今後の作業)
 
-- FY1980〜FY1997の見通しデータ収集
-- 名目/実質の乖離だけでなく、消費者物価見通しなど関連指標の追加
-- 税収見積もり(Phase 2)・出生率(Phase 3)は未着手
+- **FY1980〜FY1997の見通しデータ収集**(最優先)。実績はFY1981から揃っているのに見通しがFY1998始まりのため、17年分が片側だけの状態になっている。内閣府アーカイブページに掲載がなく、国立国会図書館デジタルコレクション・経済企画庁時代の年次資料・Wayback Machine等をあたる必要がある
+- 実績値のヴィンテージ(基準改定)の表現。現状は2020年基準の最新確報で全期間を統一しているため、「当時公表されていた実績」とは異なる。下記「既知の注意点」参照
+- 名目/実質の乖離だけでなく、関連指標の追加余地(消費者物価は`cpi_forecast.csv`として追加済み)
+
+## 対応済み(旧「未着手」からの繰り上げ)
+
+税収見積もり(Phase 2)・出生率(Phase 3)はいずれも実装・公開済み。現在サイトが扱う指標は次の8系列 + 出生率ページ。
+
+- `gdp_forecast.csv`(実質・名目) / `tax_revenue_forecast.csv` / `cpi_forecast.csv` / `unemployment_forecast.csv` / `current_account_forecast.csv` / `bond_issuance_forecast.csv` / `jgb_total_issuance_forecast.csv`
+- `fertility_forecast.csv` + `fertility_actual.csv`(専用ページ `/fertility`)
