@@ -13,6 +13,7 @@ const T = {
     actual: "実績",
     gap: "ズレ",
     actualPending: "実績未確定(年度未終了)",
+    actualUnavailable: "実績なし",
     dataNotCollected: "データ未収集",
     forecastSourcePrefix: "見通し出典: ",
     actualSourcePrefix: "実績出典: ",
@@ -25,6 +26,7 @@ const T = {
     actual: "Actual",
     gap: "Gap",
     actualPending: "Actual not yet finalized (fiscal year in progress)",
+    actualUnavailable: "No actual value",
     dataNotCollected: "Data not yet collected",
     forecastSourcePrefix: "Forecast source: ",
     actualSourcePrefix: "Actual source: ",
@@ -343,14 +345,14 @@ async function main() {
   const vSource = document.getElementById("v-source");
 
   // the slider only steps through years that HAVE a forecast (forecastYears),
-  // which can start well after xMin (e.g. GDP has actuals back to 1980 but no
-  // forecast archive before 1998) — so the slider's own value range covers a
+  // which can start well after xMin (e.g. nominal GDP has actuals back to 1981
+  // but no forecast for 1982-1997) — so the slider's own value range covers a
   // narrower span than the chart's x-axis. Inset the track by exactly the
   // pixel fraction the chart itself would place those start/end years at, so
-  // the thumb always sits directly under the year it represents. This assumes
-  // forecastYears has no internal gaps (every year in [first, last] has a
-  // forecast) — true for all metrics today, but a future metric with missing
-  // interior years would need per-step (not just endpoint) alignment.
+  // the thumb always sits directly under the year it represents. The slider's
+  // value is the calendar year rather than an index into forecastYears, which
+  // keeps the thumb linear in year — and therefore aligned with the x-axis —
+  // even for metrics whose forecasts have interior gaps.
   const controlsEl = document.querySelector(".controls");
   if (controlsEl && forecastYears.length > 1) {
     const fracLeft = xScale(forecastYears[0].year) / CHART_W;
@@ -358,8 +360,9 @@ async function main() {
     controlsEl.style.padding = `0 ${(fracRight * 100).toFixed(3)}% 0 ${(fracLeft * 100).toFixed(3)}%`;
   }
 
-  slider.min = 0;
-  slider.max = forecastYears.length - 1;
+  slider.min = forecastYears[0].year;
+  slider.max = forecastYears[forecastYears.length - 1].year;
+  slider.step = 1;
   let defaultIdx = forecastYears.length - 1;
   for (let i = forecastYears.length - 1; i >= 0; i--) {
     if (forecastYears[i].actualVal !== null) {
@@ -367,7 +370,23 @@ async function main() {
       break;
     }
   }
-  slider.value = defaultIdx;
+  let currentIdx = defaultIdx;
+  slider.value = forecastYears[defaultIdx].year;
+
+  // a year landing inside a forecast gap resolves to the nearest year that has
+  // one; ties go to the earlier year
+  function nearestForecastIdx(year) {
+    let best = 0;
+    let bestDist = Infinity;
+    forecastYears.forEach((r, i) => {
+      const d = Math.abs(r.year - year);
+      if (d < bestDist) {
+        bestDist = d;
+        best = i;
+      }
+    });
+    return best;
+  }
 
   function render(idx) {
     const r = forecastYears[idx];
@@ -426,7 +445,12 @@ async function main() {
     } else {
       actualPoint.setAttribute("opacity", 0);
       linkLine.setAttribute("opacity", 0);
-      vActual.textContent = T[lang].actualPending;
+      // a missing actual means "the fiscal year hasn't ended yet" only for years
+      // past the last one with an actual; earlier holes are years where no actual
+      // was ever published (e.g. FY1980 real GDP growth, which has no prior year
+      // to compute against), and calling those "in progress" would be wrong
+      const lastActualYear = actualPoints.length ? actualPoints[actualPoints.length - 1].year : -Infinity;
+      vActual.textContent = r.year > lastActualYear ? T[lang].actualPending : T[lang].actualUnavailable;
       vDiff.textContent = "—";
     }
 
@@ -438,7 +462,20 @@ async function main() {
     vSource.innerHTML = links.join("<br>");
   }
 
-  slider.addEventListener("input", () => render(Number(slider.value)));
+  slider.addEventListener("input", () => {
+    const raw = Number(slider.value);
+    let idx = nearestForecastIdx(raw);
+    // a single arrow-key step inside a gap wider than one year rounds straight
+    // back to the year we are already on — move to the neighbouring forecast
+    // year instead, so the keyboard can cross gaps at all
+    if (idx === currentIdx && Math.abs(raw - forecastYears[currentIdx].year) === 1) {
+      if (raw > forecastYears[currentIdx].year && currentIdx < forecastYears.length - 1) idx = currentIdx + 1;
+      else if (raw < forecastYears[currentIdx].year && currentIdx > 0) idx = currentIdx - 1;
+    }
+    currentIdx = idx;
+    slider.value = forecastYears[idx].year;
+    render(idx);
+  });
 
   function applyI18n() {
     const t = T[lang];
@@ -456,7 +493,7 @@ async function main() {
     document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
     document.getElementById("lang-en").classList.toggle("active", lang === "en");
     document.documentElement.lang = lang;
-    render(Number(slider.value));
+    render(currentIdx);
   }
 
   document.getElementById("lang-ja").addEventListener("click", () => { lang = "ja"; applyI18n(); });
