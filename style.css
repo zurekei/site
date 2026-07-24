@@ -535,6 +535,13 @@ a.card:hover {
   color: var(--muted);
 }
 
+.chart-note {
+  margin: 0.3rem 0 0;
+  font-size: 0.7rem;
+  line-height: 1.6;
+  color: var(--muted-2);
+}
+
 .chart-wrap {
   margin-top: 1rem;
   border: 1px solid var(--line);

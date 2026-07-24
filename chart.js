@@ -41,6 +41,8 @@ const METRICS = {
     titleEn: "Real GDP growth",
     desc: "政府の当初見通し(実質)と、確定した実績を並べたもの。",
     descEn: "The government's initial forecast (real) laid alongside the confirmed actual.",
+    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる。実績値は全期間を2020年基準(2024年度確報)にそろえているため、当時公表された値と異なる年度がある。",
+    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals. Actual values are unified to the 2020 base (FY2024 final estimate) across all years, so they differ from the figures published at the time in some years.",
     csv: "data/gdp_forecast.csv",
     forecastCol: "forecast_real",
     actualCol: "actual_real",
@@ -54,6 +56,8 @@ const METRICS = {
     titleEn: "Nominal GDP growth",
     desc: "政府の当初見通し(名目)と、確定した実績を並べたもの。",
     descEn: "The government's initial forecast (nominal) laid alongside the confirmed actual.",
+    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる。実績値は全期間を2020年基準(2024年度確報)にそろえているため、当時公表された値と異なる年度がある。",
+    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals. Actual values are unified to the 2020 base (FY2024 final estimate) across all years, so they differ from the figures published at the time in some years.",
     csv: "data/gdp_forecast.csv",
     forecastCol: "forecast_nominal",
     actualCol: "actual_nominal",
@@ -481,6 +485,14 @@ async function main() {
     const t = T[lang];
     document.getElementById("chart-title").textContent = lang === "ja" ? metric.title : metric.titleEn;
     document.getElementById("chart-desc").textContent = lang === "ja" ? metric.desc : metric.descEn;
+    const noteEl = document.getElementById("chart-note");
+    const noteText = lang === "ja" ? metric.note : metric.noteEn;
+    if (noteText) {
+      noteEl.textContent = noteText;
+      noteEl.hidden = false;
+    } else {
+      noteEl.hidden = true;
+    }
     document.getElementById("t-back").textContent = t.back;
     document.getElementById("t-stat-forecast").textContent = t.forecast;
     document.getElementById("t-stat-actual").textContent = t.actual;
