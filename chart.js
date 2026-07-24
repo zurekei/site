@@ -19,6 +19,9 @@ const T = {
     actualSourcePrefix: "実績出典: ",
     basisLabels: { "2015base-ref": "2015年基準・参考系列", "2020base-final": "2020年基準・確報" },
     actualBasisPrefix: "実績の基準: ",
+    forecastBasisLabels: { gnp: "GNPベース(国民総生産)", gdp: "GDPベース(国内総生産)" },
+    forecastBasisPrefix: "見通しの基準: ",
+    forecastEraBandLabel: "GNPベース期",
     footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
     footerAbout: "このサイトについて",
   },
@@ -34,6 +37,9 @@ const T = {
     actualSourcePrefix: "Actual source: ",
     basisLabels: { "2015base-ref": "2015 base, reference series", "2020base-final": "2020 base, final" },
     actualBasisPrefix: "Actual basis: ",
+    forecastBasisLabels: { gnp: "GNP basis", gdp: "GDP basis" },
+    forecastBasisPrefix: "Forecast basis: ",
+    forecastEraBandLabel: "GNP-basis era",
     footerSrc: "src: Cabinet Office of Japan / SNA",
     footerAbout: "About this site",
   },
@@ -45,8 +51,8 @@ const METRICS = {
     titleEn: "Real GDP growth",
     desc: "政府の当初見通し(実質)と、確定した実績を並べたもの。",
     descEn: "The government's initial forecast (real) laid alongside the confirmed actual.",
-    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(グラフ上は細い縦線で境目を示す)。当時公表された値とは異なる年度がある。",
-    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals. The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years.",
+    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。",
+    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years.",
     csv: "data/gdp_forecast.csv",
     forecastCol: "forecast_real",
     actualCol: "actual_real",
@@ -61,8 +67,8 @@ const METRICS = {
     titleEn: "Nominal GDP growth",
     desc: "政府の当初見通し(名目)と、確定した実績を並べたもの。",
     descEn: "The government's initial forecast (nominal) laid alongside the confirmed actual.",
-    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(グラフ上は細い縦線で境目を示す)。当時公表された値とは異なる年度がある。",
-    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals. The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years.",
+    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。",
+    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years.",
     csv: "data/gdp_forecast.csv",
     forecastCol: "forecast_nominal",
     actualCol: "actual_nominal",
@@ -218,6 +224,7 @@ async function main() {
       actualSourceUrl: extractSourceUrl(r[metric.actualSourceCol], metric.actualSourceLabel),
       notes: r.notes || "",
       basis: r.actual_basis || "",
+      forecastBasis: r.forecast_basis || "",
     }))
     .sort((a, b) => a.year - b.year);
 
@@ -242,6 +249,21 @@ async function main() {
 
   const svg = document.getElementById("chart");
   svg.setAttribute("viewBox", `0 0 ${CHART_W} ${CHART_H}`);
+
+  // background band marking the era whose forecasts are on a different conceptual
+  // basis (GNP vs GDP) — data-driven via forecast_basis, so metrics without the
+  // distinction draw no band. Drawn first so grid and data lines sit on top.
+  let basisBandLabel = null;
+  const gnpForecastYears = forecastYears.filter((p) => p.forecastBasis === "gnp");
+  if (gnpForecastYears.length > 0) {
+    const halfYearPx = innerW / (xMax - xMin) / 2;
+    const bandX1 = Math.max(PAD.left, xScale(gnpForecastYears[0].year) - halfYearPx);
+    const bandX2 = xScale(gnpForecastYears[gnpForecastYears.length - 1].year) + halfYearPx;
+    svg.appendChild(svgEl("rect", { class: "basis-band", x: bandX1, y: PAD.top, width: bandX2 - bandX1, height: innerH }));
+    basisBandLabel = svgEl("text", { class: "basis-band-label", x: bandX1 + 6, y: PAD.top + 12, "text-anchor": "start" });
+    basisBandLabel.textContent = T[lang].forecastEraBandLabel;
+    svg.appendChild(basisBandLabel);
+  }
 
   svg.appendChild(
     svgEl("line", { class: "zero-line", x1: PAD.left, x2: CHART_W - PAD.right, y1: yScale(0), y2: yScale(0) })
@@ -485,6 +507,7 @@ async function main() {
     const forecastUrl = safeUrl(r.forecastSourceUrl);
     const actualUrl = safeUrl(r.actualSourceUrl);
     if (forecastUrl) links.push(`${T[lang].forecastSourcePrefix}<a href="${escapeHTML(forecastUrl)}" target="_blank" rel="noopener">${escapeHTML(forecastUrl)}</a>`);
+    if (r.forecastBasis && T[lang].forecastBasisLabels[r.forecastBasis]) links.push(`${T[lang].forecastBasisPrefix}${T[lang].forecastBasisLabels[r.forecastBasis]}`);
     if (actualUrl) links.push(`${T[lang].actualSourcePrefix}<a href="${escapeHTML(actualUrl)}" target="_blank" rel="noopener">${escapeHTML(actualUrl)}</a>`);
     if (r.basis && T[lang].basisLabels[r.basis]) links.push(`${T[lang].actualBasisPrefix}${T[lang].basisLabels[r.basis]}`);
     vSource.innerHTML = links.join("<br>");
@@ -524,6 +547,7 @@ async function main() {
     document.getElementById("t-footer-src").textContent = t.footerSrc;
     document.getElementById("t-footer-about").textContent = t.footerAbout;
     if (actualLabel) actualLabel.textContent = t.actual;
+    if (basisBandLabel) basisBandLabel.textContent = t.forecastEraBandLabel;
     forecastLabel.textContent = t.forecast;
     gapLabelEls.forEach((el) => { el.textContent = gapLabelText(metric, lang); });
     document.getElementById("lang-ja").classList.toggle("active", lang === "ja");

@@ -48,8 +48,9 @@
 
 - DBなし。リポジトリ内のCSVをソースオブトゥルースとする
 - 形式例: `data/gdp_forecast.csv`
-  - columns: fiscal_year, forecast_real, forecast_nominal, actual_real, actual_nominal, forecast_source_url, forecast_published_date, actual_source_url, notes, actual_basis
+  - columns: fiscal_year, forecast_real, forecast_nominal, actual_real, actual_nominal, forecast_source_url, forecast_published_date, actual_source_url, notes, actual_basis, forecast_basis
   - actual_basis: 実績値がどの基準の系列か(`2015base-ref`=2015年基準の参考系列/`2020base-final`=2020年基準の確報/空=実績なし)。チャートで破線＋シーム線の描き分けに使う
+  - forecast_basis: 見通しの概念基準(`gnp`=FY1993以前・国民総生産ベース/`gdp`=FY1994以降・国内総生産ベース)。チャートでGNPベース期を淡い背景帯で示すのに使う。gdp_forecast.csv以外の指標にはこの区別がないため空
 - 実績値は改定されるため、取得日と確報/速報の別をnotesに記録
 - 更新は年1回の手動運用を前提とする(自動化しない。壊れない仕組み優先)
 - `csv.js`のパーサはクォート付きフィールド非対応の単純split(",")。自由記述欄(notes, reason等)に読点以外のカンマを含めない。カンマが必要な場面は「、」で代用する
@@ -105,7 +106,7 @@
 - [ ] **FY1982〜FY1988の名目成長率見通し**(残り7年度)。FY1989〜FY1997は財務省『平成財政史』から収集し反映済み。残りは『昭和財政史』がスキャン画像で直接引用できず、『国の予算』各年度版(現物)か閣議決定文書原本が必要。詳細は `README.md`
 - [ ] FY1989・FY1993〜FY1997の消費者物価見通し。経済演説に数値がなく空欄のまま
 - [ ] 実績値のヴィンテージ(基準改定)の表現。Phase 1(基準の明示`actual_basis`列・破線＋シーム線での可視化・注記)は対応済み。残るPhase 2は「当時公表された実績」(初回確報ヴィンテージ)を別系列として収集し最新確報と重ねること(ズレを予測誤差と改定ドリフトに分解できる)。当時の『国民経済計算年報』各年版が必要でデータ収集規模は大。急がない
-- [ ] FY1993以前の見通しはGNPベースで実績(GDP)と概念が異なる。サイト上でこの差をどう示すか(注記か、系列を分けるか)は未決
+- [x] FY1993以前の見通しはGNPベースで実績(GDP)と概念が異なる。チャートに`forecast_basis`列を持たせ、GNPベース期(FY1980〜1993)を淡い背景帯＋「GNPベース期」ラベルで示し、年別読み出しに「見通しの基準」を追加、注記でも明示。実績ヴィンテージのシーム(FY1994/1995)とは別レイヤー(帯=見通し概念/線=実績基準改定)として1年ずらして描き分けている
 
 ### 運用(人間の判断待ち)
 
