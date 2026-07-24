@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>法律の見直し条項 — 期限と検討状況 — ズレ計</title>
+<meta name="description" content="法律の附則に置かれた「施行後◯年を目途に検討」という見直し条項を、施行日から算出した期限順に並べて記録する。期限が来ているのに検討状況が確認できない法律が浮かび上がる。">
+<meta property="og:site_name" content="ズレ計">
+<meta property="og:type" content="website">
+<meta property="og:title" content="法律の見直し条項 — 期限と検討状況 — ズレ計">
+<meta property="og:description" content="法律の附則の見直し条項を、施行日から算出した期限順に並べて記録する計器。">
+<meta property="og:url" content="https://zurekei.org/hoan.html">
+<meta property="og:image" content="https://zurekei.org/assets/og.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+  <header class="site-header">
+    <div class="brand">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </div>
+  </header>
+
+  <a class="chart-back" href="index.html">← 指標一覧</a>
+
+  <main>
+    <section class="hoan-head">
+      <h1 class="chart-title">法律の見直し条項 — 期限と検討状況</h1>
+      <p class="chart-desc">
+        多くの法律は、その附則に「施行後◯年を目途に検討を加える」という見直し条項を置いている。見直しの期限は「施行日＋◯年」で機械的に算出できる。ここでは期限順に並べ、期限が到来した法律を上に置く。数値・条文・出典のみを並べ、評価は書かない。
+      </p>
+      <p class="hoan-note mono">
+        「未確認」は検討が行われていないことを意味しない。検討の有無（審議会・報告書・改正等）は形態が多様なため自動判定しておらず、ここでは期限の到来までを機械的に記録している。
+      </p>
+    </section>
+
+    <section class="hoan-controls">
+      <div class="hoan-filter" id="status-filter" role="group" aria-label="ステータスで絞り込み"></div>
+      <div class="hoan-filter-right">
+        <label class="hoan-year-label mono" for="year-filter">年</label>
+        <select id="year-filter" class="hoan-year mono"></select>
+      </div>
+    </section>
+
+    <div class="hoan-summary mono" id="summary"></div>
+
+    <div class="hoan-table-wrap">
+      <table class="hoan-table">
+        <thead>
+          <tr>
+            <th class="col-title">法律</th>
+            <th class="col-date mono">施行日</th>
+            <th class="col-date mono">見直し期限</th>
+            <th class="col-status">状況</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer class="site-footer-row">
+    <a class="footer-src" href="https://laws.e-gov.go.jp/" target="_blank" rel="noopener">src: e-Gov 法令検索(デジタル庁) 法令API</a>
+    <a class="footer-about" href="corrections.html">訂正履歴</a>
+    <a class="footer-about" href="about.html">このサイトについて</a>
+  </footer>
+</div>
+<script src="csv.js"></script>
+<script src="hoan.js"></script>
+</body>
+</html>

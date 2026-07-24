@@ -172,6 +172,35 @@
 
 現状0行(訂正記録なし)。`corrections.html`は`corrections.js`により、0行の場合「現時点で訂正の記録はありません」と表示する。`url`は`http(s)`以外を除外して表示される(`csv.js`の`safeUrl()`)。
 
+### hoan_review.csv(＋ hoan_clauses/)
+
+法律の附則に置かれた「見直し条項」(施行後◯年を目途に検討を加える等)を、施行日から算出した見直し期限順に記録する。他のファイルが「見通し vs 実績」の数値ペアを扱うのに対し、これは FORECAST=見直し条項(立法時の約束) / ACTUAL=期限到来後に検討が確認できたか、という立法版のズレを扱う。1行1法律。
+
+対象は**直近5年(2021年以降)に成立した制定法のみ**(改正法は対象外。理由は下記)。データは `bin/build_hoan.py` が e-Gov 法令API v2 から自動生成する(手書きしない)。
+
+| 列 | 内容 |
+|---|---|
+| `law_id` | e-Gov法令ID。原文サイドカー(`hoan_clauses/{law_id}.txt`)のキーも兼ねる |
+| `law_title` | 法律名 |
+| `law_num` | 法令番号(例: `令和三年法律第三十二号`) |
+| `promulgation_date` | 公布日(YYYY-MM-DD) |
+| `enforcement_date` | 当初施行日(本体施行日)。段階施行がある場合は最も遅い制定リビジョンの施行日 |
+| `enforcement_note` | 注記。段階施行の法律は`段階施行`が入る |
+| `review_years` | 見直し条項の「施行後◯年」の年数。期限の定めなし型は空欄 |
+| `review_deadline` | 見直し期限。`enforcement_date`+`review_years`の機械算出。期限なし型は空欄 |
+| `review_status` | `due`(期限到来・検討未確認) / `pending`(期限前) / `no_deadline`(期限の定めなし) / `reviewed`(検討確認済み。手動昇格) |
+| `status_note` | 検討状況の説明(手動記入。現状は空欄) |
+| `source_law_url` | 人間表示用の一次資料リンク(`https://laws.e-gov.go.jp/law/{law_id}`) |
+| `last_checked` | 最終巡回日(YYYY-MM-DD) |
+
+サイドカー `hoan_clauses/{law_id}.txt` は見直し条項の**原文(逐語)**を保持する。要約で置き換えない(原文＋出典が信頼性の根拠)。原文は長文でカンマ・改行を含みうるため、`csv.js`の単純パーサ(§4.4)を壊さないようCSV本体から分離している。表示側(`hoan.js`)は行展開時にこのファイルを遅延取得する。
+
+`review_status`の設計上の要点: 検討が実施されたか否かの**自動判定はしない**(審議会・報告書・改正法など形態が多様で機械化しきれないため)。`due`までを機械的に付与し、`reviewed`への昇格は手動運用。表示でも「未確認」と「未実施」を混同しない文言にしている(検討の不在を断定しない)。
+
+改正法を対象外とする理由: e-Gov `/laws` は制定法しか返さず、改正法の見直し条項は改正対象の既存法の附則に`AmendLawNum`付きで畳み込まれるため、公布日フィルタでは拾えない。`build_hoan.py`は`AmendLawNum`を持たない`<SupplProvision>`(その法自身の附則)だけを抽出する。改正法対応はv2の課題。
+
+再生成: `python3 bin/build_hoan.py`(既定で2021-01-01〜2025-12-31)。期間は`--from`/`--to`で変更できる。※このファイルは他ファイルの「年1回手動更新」(§5)と異なり、成立法の追加に合わせた定期巡回を想定している(週次自動巡回は今後)。
+
 ## 4. 共通規約
 
 ### 4.1 列構成パターン
@@ -187,6 +216,7 @@ fiscal_year, forecast_<指標>, actual_<指標>, forecast_source_url, actual_sou
 - `gdp_forecast.csv`: 実質・名目の2指標を1ファイルに収めているため9列になる。加えて`forecast_published_date`列を持つ点、`actual_source_url`が`forecast_published_date`の後に来る点で、上記の列順とは異なる。`actual_source_url`は実質・名目のURLを`ラベル:URL`形式で1セルにまとめており、これは同一ファイルの他5ファイルには見られない記法である。
 - `fertility_forecast.csv`: `fiscal_year`ではなく`vintage_year`/`target_year`を使う。1回の公表(vintage)が複数の対象年の仮定値をまとめて含むため、単年の見通し/実績ペアという枠組みに合わない。`actual_*`列を持たず、実績は`fertility_actual.csv`に分離されている。
 - `fertility_actual.csv`・`corrections.csv`: それぞれ目的が異なる最小構成のファイルであり、上記パターンの対象外。
+- `hoan_review.csv`: 「見通し vs 実績」の数値ペアではなく、法律の見直し条項とその期限・状況を扱う台帳であり、`fiscal_year`も`forecast_*`/`actual_*`列も持たない。上記パターンの対象外(§3の該当ファイル参照)。
 
 ### 4.2 空欄と0の違い
 

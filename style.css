@@ -841,3 +841,134 @@ a.card:hover {
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* ---- 法案タブ (hoan) ---- */
+.hoan-head { margin-bottom: 22px; }
+.hoan-note {
+  margin-top: 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+  border-left: 2px solid var(--line);
+  padding-left: 12px;
+}
+
+.hoan-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.hoan-filter { display: flex; flex-wrap: wrap; gap: 6px; }
+.hoan-fbtn {
+  font-size: 12px;
+  padding: 5px 11px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.hoan-fbtn:hover { border-color: var(--muted-2); }
+.hoan-fbtn.is-active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+.hoan-filter-right { display: flex; align-items: center; gap: 8px; }
+.hoan-year-label { font-size: 12px; color: var(--muted); }
+.hoan-year {
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  border-radius: 2px;
+}
+
+.hoan-summary {
+  font-size: 12px;
+  color: var(--muted-2);
+  margin-bottom: 10px;
+}
+
+.hoan-table-wrap { overflow-x: auto; }
+.hoan-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.hoan-table thead th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--ink);
+  padding: 8px 10px;
+}
+.hoan-table .col-date { width: 120px; white-space: nowrap; }
+.hoan-table .col-status { width: 132px; }
+
+.hoan-row { border-bottom: 1px solid var(--line-soft); cursor: pointer; }
+.hoan-row:hover { background: var(--hover-bg); }
+.hoan-row.is-open { background: var(--hover-bg); }
+.hoan-row td { padding: 11px 10px; vertical-align: top; }
+.hoan-lawtitle { line-height: 1.45; }
+.hoan-lawnum { font-size: 11px; color: var(--muted-2); margin-top: 3px; }
+.hoan-yrs { font-size: 11px; color: var(--muted-2); margin-top: 3px; }
+.hoan-staged {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 10px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 0 4px;
+}
+
+/* 状況バッジ: 色で善悪を示さない。濃淡と枠のみで区別する */
+.hoan-badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 2px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.st-due  { background: var(--navy); color: #fff; }
+.st-pend { background: var(--bg); color: var(--muted); border-color: var(--line); }
+.st-none { background: var(--bg); color: var(--muted-2); border-color: var(--line-soft); }
+.st-rev  { background: var(--bg); color: var(--navy); border-color: var(--navy-soft); }
+
+.hoan-detail td { padding: 0 10px 14px; background: var(--hover-bg); }
+.hoan-clause-head {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 10px 0 6px;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+.hoan-srclink { color: var(--navy-soft); text-decoration: none; }
+.hoan-srclink:hover { opacity: 0.7; }
+.hoan-clause {
+  font-family: "IBM Plex Sans JP", sans-serif;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  border-left: 2px solid var(--navy-soft);
+  padding: 4px 0 4px 12px;
+}
+.hoan-empty { padding: 24px 10px; color: var(--muted); }
+
+@media (max-width: 560px) {
+  .hoan-table { font-size: 13px; }
+  .hoan-table .col-date { width: auto; }
+  .hoan-table .col-status { width: auto; }
+}
