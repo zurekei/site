@@ -38,17 +38,23 @@
         <div class="brand-tag">FORECAST × ACTUAL</div>
       </div>
     </a>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <button id="lang-ja" class="lang-btn mono">JA</button>
+        <button id="lang-en" class="lang-btn mono">EN</button>
+      </div>
+    </div>
   </header>
 
-  <a class="chart-back" href="index.html">← 指標一覧</a>
+  <a class="chart-back" href="index.html" id="t-back">← 指標一覧</a>
 
   <main>
     <section class="hoan-head">
-      <h1 class="chart-title">法律の見直し条項 — 期限と検討状況</h1>
-      <p class="chart-desc">
+      <h1 class="chart-title" id="t-title">法律の見直し条項 — 期限と検討状況</h1>
+      <p class="chart-desc" id="t-desc">
         多くの法律は、その附則に「施行後◯年を目途に検討を加える」という見直し条項を置いている。見直しの期限は「施行日＋◯年」で機械的に算出できる。ここでは期限順に並べ、期限が到来した法律を上に置く。数値・条文・出典のみを並べ、評価は書かない。
       </p>
-      <p class="hoan-note mono">
+      <p class="hoan-note mono" id="t-note">
         「未確認」は検討が行われていないことを意味しない。検討の有無（審議会・報告書・改正等）は形態が多様なため自動判定しておらず、ここでは期限の到来までを機械的に記録している。
       </p>
     </section>
@@ -56,7 +62,7 @@
     <section class="hoan-controls">
       <div class="hoan-filter" id="status-filter" role="group" aria-label="ステータスで絞り込み"></div>
       <div class="hoan-filter-right">
-        <label class="hoan-year-label mono" for="year-filter">年</label>
+        <label class="hoan-year-label mono" for="year-filter" id="t-year-label">年</label>
         <select id="year-filter" class="hoan-year mono"></select>
       </div>
     </section>
@@ -67,10 +73,10 @@
       <table class="hoan-table">
         <thead>
           <tr>
-            <th class="col-title">法律</th>
-            <th class="col-date mono">施行日</th>
-            <th class="col-date mono">見直し期限</th>
-            <th class="col-status">状況</th>
+            <th class="col-title" id="t-col-law">法律</th>
+            <th class="col-date mono" id="t-col-enact">施行日</th>
+            <th class="col-date mono" id="t-col-deadline">見直し期限</th>
+            <th class="col-status" id="t-col-status">状況</th>
           </tr>
         </thead>
         <tbody id="rows"></tbody>
@@ -79,9 +85,9 @@
   </main>
 
   <footer class="site-footer-row">
-    <a class="footer-src" href="https://laws.e-gov.go.jp/" target="_blank" rel="noopener">src: e-Gov 法令検索(デジタル庁) 法令API</a>
-    <a class="footer-about" href="corrections.html">訂正履歴</a>
-    <a class="footer-about" href="about.html">このサイトについて</a>
+    <a class="footer-src" id="t-footer-src" href="https://laws.e-gov.go.jp/" target="_blank" rel="noopener">src: e-Gov 法令検索(デジタル庁) 法令API</a>
+    <a class="footer-about" id="t-footer-corrections" href="corrections.html">訂正履歴</a>
+    <a class="footer-about" id="t-footer-about" href="about.html">このサイトについて</a>
   </footer>
 </div>
 <script src="csv.js"></script>

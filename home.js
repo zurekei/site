@@ -2,6 +2,7 @@ const T = {
   ja: {
     tag: "FORECAST × ACTUAL",
     nav: "[指標]",
+    navHoan: "法案",
     navData: "[データ]",
     navAbout: "[about]",
     lead: "政府は各年度のはじめに経済の「見通し」を示し、約一年後に「実績」が確定する。ズレ計は、その二つを並べて時系列で記録するだけの場所。",
@@ -26,6 +27,7 @@ const T = {
   en: {
     tag: "FORECAST × ACTUAL",
     nav: "[Indicators]",
+    navHoan: "Bills",
     navData: "[Data]",
     navAbout: "[About]",
     lead: "At the start of each fiscal year, the government issues an economic forecast; about a year later, the actual figures are confirmed. Zurekei simply records the two side by side, over time.",
@@ -266,12 +268,13 @@ async function main() {
     })
   );
 
-  let lang = "ja";
+  let lang = localStorage.getItem("zurekei-lang") === "en" ? "en" : "ja";
 
   function applyI18n() {
     const t = T[lang];
     document.getElementById("t-tag").textContent = t.tag;
     document.getElementById("t-nav").textContent = t.nav;
+    document.getElementById("t-nav-hoan").textContent = t.navHoan;
     document.getElementById("t-nav-data").textContent = t.navData;
     document.getElementById("t-nav-about").textContent = t.navAbout;
     document.getElementById("t-lead").textContent = t.lead;
@@ -299,8 +302,8 @@ async function main() {
     grid.innerHTML = INDICATOR_META.map((m) => renderCard(m, lang, seriesData[m.key])).join("");
   }
 
-  document.getElementById("lang-ja").addEventListener("click", () => { lang = "ja"; applyI18n(); });
-  document.getElementById("lang-en").addEventListener("click", () => { lang = "en"; applyI18n(); });
+  document.getElementById("lang-ja").addEventListener("click", () => { lang = "ja"; localStorage.setItem("zurekei-lang", "ja"); applyI18n(); });
+  document.getElementById("lang-en").addEventListener("click", () => { lang = "en"; localStorage.setItem("zurekei-lang", "en"); applyI18n(); });
 
   applyI18n();
 }
