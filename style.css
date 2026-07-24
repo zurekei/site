@@ -650,6 +650,21 @@ a.card:hover {
   stroke-linecap: round;
 }
 .line-actual-dot { fill: var(--navy); opacity: 0.6; }
+.line-actual-ref {
+  fill: none;
+  stroke: var(--navy);
+  stroke-width: 1.75;
+  stroke-dasharray: 3 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+.seam-line {
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  opacity: 0.9;
+}
 .line-forecast-dot { fill: var(--amber); opacity: 0.65; }
 
 .gap-label { fill: var(--muted-2); font-size: 10px; font-family: "IBM Plex Mono", monospace; }

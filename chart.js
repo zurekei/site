@@ -17,6 +17,8 @@ const T = {
     dataNotCollected: "データ未収集",
     forecastSourcePrefix: "見通し出典: ",
     actualSourcePrefix: "実績出典: ",
+    basisLabels: { "2015base-ref": "2015年基準・参考系列", "2020base-final": "2020年基準・確報" },
+    actualBasisPrefix: "実績の基準: ",
     footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
     footerAbout: "このサイトについて",
   },
@@ -30,6 +32,8 @@ const T = {
     dataNotCollected: "Data not yet collected",
     forecastSourcePrefix: "Forecast source: ",
     actualSourcePrefix: "Actual source: ",
+    basisLabels: { "2015base-ref": "2015 base, reference series", "2020base-final": "2020 base, final" },
+    actualBasisPrefix: "Actual basis: ",
     footerSrc: "src: Cabinet Office of Japan / SNA",
     footerAbout: "About this site",
   },
@@ -41,8 +45,8 @@ const METRICS = {
     titleEn: "Real GDP growth",
     desc: "政府の当初見通し(実質)と、確定した実績を並べたもの。",
     descEn: "The government's initial forecast (real) laid alongside the confirmed actual.",
-    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる。実績値は全期間を2020年基準(2024年度確報)にそろえているため、当時公表された値と異なる年度がある。",
-    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals. Actual values are unified to the 2020 base (FY2024 final estimate) across all years, so they differ from the figures published at the time in some years.",
+    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(グラフ上は細い縦線で境目を示す)。当時公表された値とは異なる年度がある。",
+    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals. The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years.",
     csv: "data/gdp_forecast.csv",
     forecastCol: "forecast_real",
     actualCol: "actual_real",
@@ -57,8 +61,8 @@ const METRICS = {
     titleEn: "Nominal GDP growth",
     desc: "政府の当初見通し(名目)と、確定した実績を並べたもの。",
     descEn: "The government's initial forecast (nominal) laid alongside the confirmed actual.",
-    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる。実績値は全期間を2020年基準(2024年度確報)にそろえているため、当時公表された値と異なる年度がある。",
-    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals. Actual values are unified to the 2020 base (FY2024 final estimate) across all years, so they differ from the figures published at the time in some years.",
+    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(グラフ上は細い縦線で境目を示す)。当時公表された値とは異なる年度がある。",
+    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals. The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years.",
     csv: "data/gdp_forecast.csv",
     forecastCol: "forecast_nominal",
     actualCol: "actual_nominal",
@@ -213,6 +217,7 @@ async function main() {
       forecastSourceUrl: extractSourceUrl(r[metric.forecastSourceCol], metric.forecastSourceLabel),
       actualSourceUrl: extractSourceUrl(r[metric.actualSourceCol], metric.actualSourceLabel),
       notes: r.notes || "",
+      basis: r.actual_basis || "",
     }))
     .sort((a, b) => a.year - b.year);
 
@@ -315,7 +320,23 @@ async function main() {
 
   let actualLabel = null;
   if (actualPoints.length > 0) {
-    svg.appendChild(svgEl("path", { class: "line-actual", d: pathFromSegments(buildSegments(actualPoints), "actualVal") }));
+    // actual series may stitch multiple statistical vintages (e.g. GDP: a
+    // 2015-base reference series through FY1994, then the 2020-base final
+    // series from FY1995). Draw each vintage separately so the basis change
+    // reads as a break rather than a smooth—and misleading—continuous line.
+    const refPoints = actualPoints.filter((p) => p.basis === "2015base-ref");
+    const mainPoints = actualPoints.filter((p) => p.basis !== "2015base-ref");
+    if (mainPoints.length > 0) {
+      svg.appendChild(svgEl("path", { class: "line-actual", d: pathFromSegments(buildSegments(mainPoints), "actualVal") }));
+    }
+    if (refPoints.length > 0) {
+      svg.appendChild(svgEl("path", { class: "line-actual-ref", d: pathFromSegments(buildSegments(refPoints), "actualVal") }));
+    }
+    // faint seam marker at the basis boundary
+    if (refPoints.length > 0 && mainPoints.length > 0) {
+      const seamX = (xScale(refPoints[refPoints.length - 1].year) + xScale(mainPoints[0].year)) / 2;
+      svg.appendChild(svgEl("line", { class: "seam-line", x1: seamX, x2: seamX, y1: PAD.top, y2: CHART_H - PAD.bottom }));
+    }
 
     actualPoints.forEach((r) => {
       svg.appendChild(svgEl("circle", { class: "line-actual-dot", cx: xScale(r.year), cy: yScale(r.actualVal), r: 1.75 }));
@@ -465,6 +486,7 @@ async function main() {
     const actualUrl = safeUrl(r.actualSourceUrl);
     if (forecastUrl) links.push(`${T[lang].forecastSourcePrefix}<a href="${escapeHTML(forecastUrl)}" target="_blank" rel="noopener">${escapeHTML(forecastUrl)}</a>`);
     if (actualUrl) links.push(`${T[lang].actualSourcePrefix}<a href="${escapeHTML(actualUrl)}" target="_blank" rel="noopener">${escapeHTML(actualUrl)}</a>`);
+    if (r.basis && T[lang].basisLabels[r.basis]) links.push(`${T[lang].actualBasisPrefix}${T[lang].basisLabels[r.basis]}`);
     vSource.innerHTML = links.join("<br>");
   }
 
