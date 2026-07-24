@@ -2,7 +2,7 @@ const T = {
   ja: {
     tag: "FORECAST × ACTUAL",
     nav: "[指標]",
-    navHoan: "法案",
+    navHoan: "[法案]",
     navData: "[データ]",
     navAbout: "[about]",
     lead: "政府は各年度のはじめに経済の「見通し」を示し、約一年後に「実績」が確定する。ズレ計は、その二つを並べて時系列で記録するだけの場所。",
@@ -23,11 +23,14 @@ const T = {
     src: "src: 内閣府 / 国民経済計算(SNA)",
     aboutLink: "このサイトについて",
     correctionsLink: "訂正履歴",
+    hoanEntryLabel: "別の計器",
+    hoanEntryTitle: "法律の見直し条項 — 期限と検討状況",
+    hoanEntryDesc: "附則の「施行後◯年を目途に検討」という見直し条項を、施行日から算出した期限順に並べる。",
   },
   en: {
     tag: "FORECAST × ACTUAL",
     nav: "[Indicators]",
-    navHoan: "Bills",
+    navHoan: "[bills]",
     navData: "[Data]",
     navAbout: "[About]",
     lead: "At the start of each fiscal year, the government issues an economic forecast; about a year later, the actual figures are confirmed. Zurekei simply records the two side by side, over time.",
@@ -284,6 +287,9 @@ async function main() {
     document.getElementById("t-indicators-latest").textContent = t.indicatorsLatest;
     document.getElementById("t-legend-forecast").textContent = t.plan;
     document.getElementById("t-legend-actual").textContent = t.actual;
+    document.getElementById("t-hoan-entry-label").textContent = t.hoanEntryLabel;
+    document.getElementById("t-hoan-entry-title").textContent = t.hoanEntryTitle;
+    document.getElementById("t-hoan-entry-desc").textContent = t.hoanEntryDesc;
     document.getElementById("hero-caption").textContent = t.heroCaption;
     document.getElementById("hero-copy").textContent = t.heroCopy;
     // hero.js が描画完了する前に applyI18n が走るため、ラベルは存在チェック付きで反映

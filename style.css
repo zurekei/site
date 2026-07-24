@@ -411,6 +411,60 @@ a.card:hover {
 .legend-swatch-actual { height: 2px; background: var(--navy); }
 .legend-swatch-vintage { border-top: 1.5px solid var(--amber); }
 
+/* ---- hoan entry (別の計器への導線) ---- */
+
+.hoan-entry {
+  position: relative;
+  display: block;
+  margin: 28px 0 0;
+  border: 1px solid var(--line);
+  padding: 18px 56px 18px 22px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.hoan-entry:hover {
+  border-color: var(--navy);
+  background: var(--hover-bg);
+}
+
+.hoan-entry-label {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--muted-2);
+}
+
+.hoan-entry-title {
+  margin-top: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.hoan-entry-desc {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+  max-width: 640px;
+  color: var(--muted);
+}
+
+.hoan-entry-arrow {
+  position: absolute;
+  top: 50%;
+  right: 22px;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: var(--muted-2);
+}
+
+@media (max-width: 520px) {
+  .hoan-entry { padding: 16px 44px 16px 18px; }
+  .hoan-entry-arrow { right: 16px; font-size: 16px; }
+}
+
 .fertility-legend {
   display: flex;
   flex-wrap: wrap;
