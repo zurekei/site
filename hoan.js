@@ -12,6 +12,13 @@ const STATUS = {
 
 const FILTER_KEYS = ["all", "due", "pending", "no_deadline"];
 
+// enforcement_note は統制語彙(空 or "段階施行")。原文の一次資料ではなく本サイトが付す注記ラベルなので、
+// ステータスバッジと同じく EN では訳す。未知の値はそのまま(原文)フォールバックする。
+const NOTE_LABEL = {
+  ja: { "段階施行": "段階施行" },
+  en: { "段階施行": "Staged enforcement" },
+};
+
 const T = {
   ja: {
     back: "← 指標一覧",
@@ -130,7 +137,8 @@ function rowHTML(r) {
   const meta = statusMeta(r);
   const deadline = r.review_deadline || t.noDeadline;
   const yrs = r.review_years ? t.yearsAfter(r.review_years) : t.noDeadlineYears;
-  const staged = r.enforcement_note ? `<span class="hoan-staged mono">${escapeHTML(r.enforcement_note)}</span>` : "";
+  const noteText = r.enforcement_note ? (NOTE_LABEL[lang][r.enforcement_note] || r.enforcement_note) : "";
+  const staged = noteText ? `<span class="hoan-staged mono">${escapeHTML(noteText)}</span>` : "";
   const url = safeUrl(r.source_law_url);
   const src = url
     ? `<a class="hoan-srclink mono" href="${escapeHTML(url)}" target="_blank" rel="noopener">${t.srcLink}</a>`
