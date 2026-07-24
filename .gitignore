@@ -4,3 +4,5 @@ CLAUDE.local.md
 .wrangler/
 *.dc.html
 support.js
+
+.deploy.env

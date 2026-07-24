@@ -58,7 +58,10 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   gap: 14px;
+  text-decoration: none;
+  color: inherit;
 }
+.brand:hover { opacity: 0.85; }
 
 .brand-logo { display: block; flex-shrink: 0; width: 40px; height: 40px; }
 
@@ -115,6 +118,7 @@ a { color: inherit; }
 
 .nav-current { color: var(--ink); }
 .nav-link { color: var(--muted); text-decoration: none; }
+.nav-link.nav-current { color: var(--ink); }
 .nav-link:hover { opacity: 0.7; }
 
 /* ---- hero (開幕演出) ----
