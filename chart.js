@@ -22,6 +22,8 @@ const T = {
     forecastBasisLabels: { gnp: "GNPベース(国民総生産)", gdp: "GDPベース(国内総生産)" },
     forecastBasisPrefix: "見通しの基準: ",
     forecastEraBandLabel: "GNPベース期",
+    vintageRangePrefix: "実績の改定幅(基準別): ",
+    vintageSeriesSuffix: "系列",
     footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
     footerAbout: "このサイトについて",
   },
@@ -40,6 +42,8 @@ const T = {
     forecastBasisLabels: { gnp: "GNP basis", gdp: "GDP basis" },
     forecastBasisPrefix: "Forecast basis: ",
     forecastEraBandLabel: "GNP-basis era",
+    vintageRangePrefix: "Revision range across bases: ",
+    vintageSeriesSuffix: " vintages",
     footerSrc: "src: Cabinet Office of Japan / SNA",
     footerAbout: "About this site",
   },
@@ -51,8 +55,8 @@ const METRICS = {
     titleEn: "Real GDP growth",
     desc: "政府の当初見通し(実質)と、確定した実績を並べたもの。",
     descEn: "The government's initial forecast (real) laid alongside the confirmed actual.",
-    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。",
-    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years.",
+    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。",
+    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases).",
     csv: "data/gdp_forecast.csv",
     forecastCol: "forecast_real",
     actualCol: "actual_real",
@@ -60,6 +64,8 @@ const METRICS = {
     forecastSourceLabel: "実質",
     actualSourceCol: "actual_source_url",
     actualSourceLabel: "実質",
+    vintageCsv: "data/gdp_vintages.csv",
+    vintageCols: ["real_1990base", "real_1995base", "real_2000base", "real_2005base_ref", "real_2011base_ref", "real_2015base_ref"],
     unit: "%",
   },
   "gdp-nominal": {
@@ -67,8 +73,8 @@ const METRICS = {
     titleEn: "Nominal GDP growth",
     desc: "政府の当初見通し(名目)と、確定した実績を並べたもの。",
     descEn: "The government's initial forecast (nominal) laid alongside the confirmed actual.",
-    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。名目の見通しはFY1988が未収集のため、この年は線が途切れる。",
-    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The nominal forecast for FY1988 has not been collected, so the line breaks at that year.",
+    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。名目の見通しはFY1988が未収集のため、この年は線が途切れる。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。",
+    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The nominal forecast for FY1988 has not been collected, so the line breaks at that year. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases).",
     csv: "data/gdp_forecast.csv",
     forecastCol: "forecast_nominal",
     actualCol: "actual_nominal",
@@ -76,6 +82,8 @@ const METRICS = {
     forecastSourceLabel: "名目",
     actualSourceCol: "actual_source_url",
     actualSourceLabel: "名目",
+    vintageCsv: "data/gdp_vintages.csv",
+    vintageCols: ["nominal_1990base", "nominal_1995base", "nominal_2000base", "nominal_2005base_ref", "nominal_2011base_ref", "nominal_2015base_ref"],
     unit: "%",
   },
   "unemployment": {
@@ -228,6 +236,20 @@ async function main() {
     }))
     .sort((a, b) => a.year - b.year);
 
+  // vintage envelope data (optional, per-metric): min–max of the actual across
+  // statistical base-years, for years where >=2 base vintages exist. Keyed by year.
+  const vintageByYear = new Map();
+  if (metric.vintageCsv) {
+    const vrows = await loadCSV(metric.vintageCsv);
+    vrows.forEach((vr) => {
+      const year = Number(vr.fiscal_year);
+      const vals = metric.vintageCols.map((c) => toNum(vr[c])).filter((v) => v !== null);
+      if (vals.length >= 2) {
+        vintageByYear.set(year, { min: Math.min(...vals), max: Math.max(...vals), count: vals.length });
+      }
+    });
+  }
+
   const actualPoints = rows.filter((r) => r.actualVal !== null);
   const forecastYears = rows.filter((r) => r.forecastVal !== null);
 
@@ -235,7 +257,8 @@ async function main() {
   const xMin = Math.min(...allYears);
   const xMax = Math.max(...allYears);
 
-  const allValues = rows.flatMap((r) => [r.forecastVal, r.actualVal]).filter((v) => v !== null);
+  const vintageExtremes = [...vintageByYear.values()].flatMap((v) => [v.min, v.max]);
+  const allValues = rows.flatMap((r) => [r.forecastVal, r.actualVal]).filter((v) => v !== null).concat(vintageExtremes);
   const yMin = Math.min(...allValues, 0);
   const yMax = Math.max(...allValues, 0);
   const yPad = (yMax - yMin) * 0.12 || 1;
@@ -263,6 +286,26 @@ async function main() {
     basisBandLabel = svgEl("text", { class: "basis-band-label", x: bandX1 + 6, y: PAD.top + 12, "text-anchor": "start" });
     basisBandLabel.textContent = T[lang].forecastEraBandLabel;
     svg.appendChild(basisBandLabel);
+  }
+
+  // vintage envelope: how much the actual itself has been revised across
+  // statistical base-years. A faint min–max ribbon drawn behind the grid and
+  // data lines, over contiguous runs of years that have >=2 base vintages.
+  if (vintageByYear.size > 0) {
+    const vYears = [...vintageByYear.keys()].sort((a, b) => a - b);
+    const runs = [];
+    let run = [];
+    vYears.forEach((y) => {
+      if (run.length && y - run[run.length - 1] > 1) { runs.push(run); run = []; }
+      run.push(y);
+    });
+    if (run.length) runs.push(run);
+    runs.forEach((r) => {
+      if (r.length < 2) return;
+      const top = r.map((y) => `${xScale(y)},${yScale(vintageByYear.get(y).max)}`);
+      const bottom = r.slice().reverse().map((y) => `${xScale(y)},${yScale(vintageByYear.get(y).min)}`);
+      svg.appendChild(svgEl("path", { class: "vintage-band", d: `M ${top.join(" L ")} L ${bottom.join(" L ")} Z` }));
+    });
   }
 
   svg.appendChild(
@@ -510,6 +553,8 @@ async function main() {
     if (r.forecastBasis && T[lang].forecastBasisLabels[r.forecastBasis]) links.push(`${T[lang].forecastBasisPrefix}${T[lang].forecastBasisLabels[r.forecastBasis]}`);
     if (actualUrl) links.push(`${T[lang].actualSourcePrefix}<a href="${escapeHTML(actualUrl)}" target="_blank" rel="noopener">${escapeHTML(actualUrl)}</a>`);
     if (r.basis && T[lang].basisLabels[r.basis]) links.push(`${T[lang].actualBasisPrefix}${T[lang].basisLabels[r.basis]}`);
+    const vRange = vintageByYear.get(r.year);
+    if (vRange) links.push(`${T[lang].vintageRangePrefix}${vRange.min.toFixed(1)}${metric.unit}〜${vRange.max.toFixed(1)}${metric.unit} (${vRange.count}${T[lang].vintageSeriesSuffix})`);
     vSource.innerHTML = links.join("<br>");
   }
 
