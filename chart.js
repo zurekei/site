@@ -294,15 +294,48 @@ function extractEventNote(raw) {
     .join(" ");
 }
 
+const SITE = "https://zurekei.org";
+
+// All 8 indicators share this one HTML file, so everything that identifies a page
+// has to be rewritten per indicator — not just the title. Leaving canonical/og:url
+// fixed told search engines the 8 URLs were one page; they were being folded into a
+// single entry whose HTML contains no numbers at all.
+// Falls back to the served key rather than the resolved one so an unknown ?m= value
+// canonicalises to the indicator actually rendered, not to the bogus URL requested.
+function applyHeadMeta(metricKey, metric) {
+  const url = `${SITE}/chart?m=${metricKey}`;
+  const title = `${metric.title} — ズレ計`;
+
+  document.getElementById("page-title").textContent = title;
+
+  const setMeta = (selector, content) => {
+    const el = document.head.querySelector(selector);
+    if (el) el.setAttribute("content", content);
+  };
+  setMeta('meta[name="description"]', metric.desc);
+  setMeta('meta[property="og:title"]', title);
+  setMeta('meta[property="og:description"]', metric.desc);
+  setMeta('meta[property="og:url"]', url);
+
+  let link = document.head.querySelector('link[rel="canonical"]');
+  if (!link) {
+    link = document.createElement("link");
+    link.rel = "canonical";
+    document.head.appendChild(link);
+  }
+  link.href = url;
+}
+
 async function main() {
   const params = new URLSearchParams(location.search);
-  const metricKey = params.get("m") || "gdp-real";
-  const metric = Object.hasOwn(METRICS, metricKey) ? METRICS[metricKey] : METRICS["gdp-real"];
+  const requestedKey = params.get("m") || "gdp-real";
+  const metricKey = Object.hasOwn(METRICS, requestedKey) ? requestedKey : "gdp-real";
+  const metric = METRICS[metricKey];
 
   // the static <title>/meta description in chart.html stay JA regardless of
   // the in-page language toggle (per site convention: static head tags are
-  // JA-authoritative); only this dynamic per-metric document.title follows.
-  document.getElementById("page-title").textContent = `${metric.title} — ズレ計`;
+  // JA-authoritative); only these dynamic per-metric head tags follow.
+  applyHeadMeta(metricKey, metric);
 
   let lang = "ja";
 

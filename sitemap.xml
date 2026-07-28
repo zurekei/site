@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  8つの指標は chart.html 1ファイルを ?m= で共有しており、トップページからのリンクは
+  home.js が実行時に生成する。つまり静的なHTMLだけを辿るクローラには、この14本のうち
+  8本がどこからも発見できない。このファイルがその唯一の発見経路になる。
+  指標を増やしたら chart.js の METRICS とここの両方を直すこと。
+  lastmod は入れていない(正確な値を持てないため。推測日を書くと信用できない情報になる)。
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://zurekei.org/</loc><priority>1.0</priority></url>
+
+  <url><loc>https://zurekei.org/chart?m=gdp-real</loc><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/chart?m=gdp-nominal</loc><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/chart?m=tax-revenue</loc><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/chart?m=cpi</loc><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/chart?m=unemployment</loc><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/chart?m=current-account</loc><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/chart?m=bond-issuance</loc><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/chart?m=jgb-total</loc><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/fertility</loc><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/hoan</loc><priority>0.8</priority></url>
+
+  <url><loc>https://zurekei.org/about</loc><priority>0.7</priority></url>
+  <url><loc>https://zurekei.org/corrections</loc><priority>0.5</priority></url>
+  <url><loc>https://zurekei.org/contact</loc><priority>0.3</priority></url>
+</urlset>

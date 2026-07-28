@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title id="page-title">ズレ計</title>
 <meta name="description" content="政府の当初見通しと確定した実績を、出典つきで年度ごとに並べたグラフ。">
-<!-- Canonical is the extension-less URL: /x.html 308-redirects to /x, so the two
-     spellings are the same page. Without this, aggregators that key on URL (はてなブックマーク)
-     count them as separate entries and split the bookmark total. -->
-<link rel="canonical" href="https://zurekei.org/chart">
+<!-- No static canonical here, unlike every other page. This one file serves all 8
+     indicators via ?m=, so a fixed canonical would declare them the same page and
+     collapse 7 of the 8 out of the index — which is exactly what it was doing.
+     chart.js writes a self-referential per-indicator canonical instead.
+     If the tag is absent (crawler didn't run JS), each ?m= URL is self-canonical by
+     default, which is also correct — so both paths land right. Do not add one back. -->
 <meta property="og:site_name" content="ズレ計">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ズレ計 — 政府経済見通しと実績のズレ">
