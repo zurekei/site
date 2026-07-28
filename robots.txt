@@ -1,12 +1,17 @@
 # ⚠ このファイルは、配信時に Cloudflare の Managed robots.txt が「前に」連結される。
-#   つまりここに何を書いても、上に置かれた規則を消せない。2026-07-29 時点で上側は
-#   ClaudeBot / GPTBot / CCBot / Google-Extended などに Disallow: / を出しており、
-#   AIに引用されるという方針と正面から衝突している。外すのは Cloudflare ダッシュボード
-#   側の設定で、このファイルの編集では不可能。実際の配信内容は必ず本番で確かめること:
+#   つまりここに何を書いても、上に置かれた規則を消せない。外すのはダッシュボードの
+#   AI Crawl Control > Security 側の設定で、このファイルの編集では不可能。
+#   実際の配信内容は必ず本番で確かめること:
 #     curl -s https://zurekei.org/robots.txt
 #
-# AIクローラは意図的に許可する方針。このサイトの目的は参照されることなので、
-# 検索・回答への引用は歓迎する。
+# 2026-07-29 時点の方針: 引用は歓迎、学習用の一括収集は断る。
+#   Cloudflare はボットを3カテゴリに分けており、Disallow: / が出ているのは
+#   AI Crawler(CCBot / GPTBot / ClaudeBot = 訓練コーパス向け)だけ。
+#   AI Search(OAI-SearchBot / Claude-SearchBot / PerplexityBot)と
+#   AI Assistant(ChatGPT-User)は許可されていて、取得実績もある。
+#   **AI回答への引用に効くのは後者なので、方針は成立している。**
+#   Disallow: / という文字列だけを見て「引用が塞がれている」と読まないこと
+#   (実際に一度そう誤読した。層が3つあり、1つ見ただけでは結論が出ない)。
 #
 # 下の User-agent: * は省略できない。これが無いと Disallow: /og が、上の Cloudflare
 # ブロックの最後のグループ(meta-externalagent)への規則として読まれてしまう。
