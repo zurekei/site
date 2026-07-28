@@ -64,12 +64,13 @@ if (( ${#STRAY_OTHER[@]} > 0 )); then
   printf '  %s\n' "${STRAY_OTHER[@]}" >&2
 fi
 
-# 指標ページ（chart/*.html）は data/*.csv から生成している。CSV を直してビルドを
-# 忘れると、同じ年度について表とグラフが違う数字を出す状態のまま公開される。
-# ズレの記録を名乗るサイトでそれは最悪の壊れ方なので、記憶ではなくここで止める。
+# chart/*.html と、fertility.html / hoan.html の数値部分は data/*.csv から生成して
+# いる。CSV を直してビルドを忘れると、同じ年について表とグラフが違う数字を出す
+# 状態のまま公開される。ズレの記録を名乗るサイトでそれは最悪の壊れ方なので、
+# 記憶ではなくここで止める。
 # 併せて、sitemap とトップの素のリンクが指標を取りこぼしていないかも見る
 # （欠けても見た目には何も起きず、静かに索引から漏れるだけなので）。
-if ! node "$ROOT/bin/build_charts.mjs" --check; then
+if ! node "$ROOT/bin/build.mjs" --check; then
   echo "エラー: 指標ページが最新ではありません。" >&2
   exit 1
 fi

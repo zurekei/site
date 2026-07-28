@@ -17,6 +17,19 @@ const T = {
     footerSrc: "src: 国立社会保障・人口問題研究所「日本の将来推計人口」",
     footerAbout: "このサイトについて",
     footerContact: "お問い合わせ",
+    // ── 静的な数値表（bin/build.mjs が生成し、fertility.html に埋め込む）──
+    // 表はJSでは組み立てない（JSを実行しないクローラに読ませるのが目的なので、
+    // HTMLに実体として入っている必要がある）。ここに置いてあるのは、ビルド側が
+    // 文言を書き写さずに済ませるため。辞書はこの1箇所だけにする。
+    tableToggle: (n) => `歴代推計と実績を表で見る（${n}年分）`,
+    tableCaption: "合計特殊出生率｜歴代推計の仮定(中位)と実績",
+    thYear: "年",
+    thActual: "実績",
+    gapHead: "実績と重なる期間で見た、推計ごとの平均のズレ",
+    gapLine: (label, n, mean, below, above) =>
+      `${label}｜重なる${n}年で 平均 ${mean}（実績が下回った ${below}年 / 上回った ${above}年）`,
+    tableRoundNote: "推計の仮定は小数第2位に丸めて表示している（元データは小数第5位まで）。空欄はその推計が扱っていない年。",
+    tableCsvLabel: "元データ: ",
   },
   en: {
     back: "← Indicators",
@@ -29,6 +42,16 @@ const T = {
     footerSrc: "src: NIPSSR / Population Projections for Japan",
     footerAbout: "About this site",
     footerContact: "Contact",
+    tableToggle: (n) => `Show the figures as a table (${n} years)`,
+    tableCaption: "Total fertility rate — assumptions (medium variant) of each projection, and the actual rate",
+    thYear: "Year",
+    thActual: "Actual",
+    gapHead: "Mean gap per projection, over the years where an actual figure exists",
+    gapLine: (label, n, mean, below, above) =>
+      `${label} | mean ${mean} over ${n} overlapping years (actual below the assumption in ${below}, above in ${above})`,
+    tableRoundNote:
+      "Assumptions are shown rounded to 2 decimal places (the source CSV carries 5). A blank cell means that projection does not cover that year.",
+    tableCsvLabel: "Source data: ",
   },
 };
 
@@ -253,6 +276,17 @@ async function main() {
     return sourceLines.join("<br>");
   }
 
+  // 数値表は bin/build.mjs が data/*.csv から HTML に埋め込んでいる。JSでは組み直さない
+  // （JSを実行しないクローラにとって、このページで数値が読める唯一の場所だから）。
+  // ビルド側が EN 訳を data-en に入れてあるので、ここは辞書を引かずに入れ替えるだけ。
+  // textContent ごと差し替えるため、data-en は子要素を持たない節点にだけ付けてある。
+  function applyTableI18n() {
+    document.querySelectorAll(".data-section [data-en]").forEach((el) => {
+      if (el.dataset.ja === undefined) el.dataset.ja = el.textContent;
+      el.textContent = lang === "en" ? el.dataset.en : el.dataset.ja;
+    });
+  }
+
   function applyI18n() {
     const t = T[lang];
     document.getElementById("t-back").textContent = t.back;
@@ -267,6 +301,7 @@ async function main() {
     document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
     document.getElementById("lang-en").classList.toggle("active", lang === "en");
     document.documentElement.lang = lang;
+    applyTableI18n();
   }
 
   document.getElementById("lang-ja").addEventListener("click", () => { lang = "ja"; applyI18n(); });

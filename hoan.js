@@ -280,6 +280,9 @@ async function main() {
     render();
   });
   applyAll();
+  // 絞り込みは中身が入ってから出す。JSが動かない場合は隠れたままになるが、
+  // 表そのものは HTML に静的に入っている（bin/build.mjs が書き出す）ので読める。
+  document.getElementById("controls").hidden = false;
 }
 
 main();

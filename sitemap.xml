@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  指標ページは bin/build_charts.mjs が data/*.csv から生成している(chart/<key>.html)。
+  指標ページは bin/build.mjs が data/*.csv から生成している(chart/<key>.html)。
   指標を増やしたら chart.js の METRICS とここの両方を直すこと。
   静的な発見経路は /chart/ のハブとトップページのカードにもあるので、このファイルが
   唯一の入口だった時期(2026-07-29まで)とは事情が変わっている。それでも重複して

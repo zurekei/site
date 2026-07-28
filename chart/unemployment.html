@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- このファイルは bin/build_charts.mjs が data/*.csv から生成している。直接編集しない。
+<!-- このファイルは bin/build.mjs が data/*.csv から生成している。直接編集しない。
      直すのは chart.js の METRICS か data/*.csv のどちらか。 -->
 <title id="page-title">完全失業率 — ズレ計</title>
 <meta name="description" content="政府の当初見通しと、確定した実績を並べたもの。">
@@ -18,7 +18,8 @@
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="/style.css?v=20260731c">
+<link rel="stylesheet" href="/style.css?v=20260731i">
+<noscript><style>.chart-wrap > svg, .controls, .readout, #v-notes, #v-source { display: none !important; } .chart-noscript { display: block; }</style></noscript>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -95,6 +96,10 @@
 
       <div class="chart-wrap">
         <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title"></svg>
+        <!-- グラフはJSでしか描かない。JSが無いとこの枠が空箱として残り、壊れて
+             いるようにしか見えないので、行き先を書いておく。表示の切り替えは
+             <head> の <noscript><style> が持つ。 -->
+        <p class="chart-noscript mono">グラフの描画には JavaScript が必要です。数値は下の表にあります。</p>
       </div>
 
       <p class="chart-summary mono" id="chart-summary">実績が見通しを上回った年 9回 / 下回った年 12回 / 見通しどおり 5回 / 平均のズレ ±0.0pt / 対象26年度分</p>
@@ -391,7 +396,7 @@
     <a class="footer-about" id="t-footer-contact" href="/contact.html">お問い合わせ</a>
   </footer>
 </div>
-<script src="/csv.js?v=20260731c"></script>
-<script src="/chart.js?v=20260731c"></script>
+<script src="/csv.js?v=20260731i"></script>
+<script src="/chart.js?v=20260731i"></script>
 </body>
 </html>

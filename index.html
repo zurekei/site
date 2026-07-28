@@ -19,7 +19,7 @@
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=20260731c">
+<link rel="stylesheet" href="style.css?v=20260731i">
 </head>
 <body>
 <div class="page">
@@ -80,7 +80,7 @@
   <!-- 中身は home.js が最新年度の数値つきカードに差し替える。素のリンクを置いて
        あるのは、JSを実行しないクローラにとって、トップから各指標へ辿れる唯一の
        経路になるため(sitemap.xml だけに頼らない)。指標を足してここを直し忘れると
-       bin/build_charts.mjs --check が止める。 -->
+       bin/build.mjs --check が止める。 -->
   <div class="card-grid" id="card-grid">
     <a class="card-fallback" href="chart/gdp-real">実質GDP成長率</a>
     <a class="card-fallback" href="chart/gdp-nominal">名目GDP成長率</a>
@@ -115,8 +115,8 @@
     <a class="footer-about" id="t-footer-contact" href="contact.html">お問い合わせ</a>
   </footer>
 </div>
-<script src="csv.js?v=20260731c"></script>
-<script src="hero.js?v=20260731c"></script>
-<script src="home.js?v=20260731c"></script>
+<script src="csv.js?v=20260731i"></script>
+<script src="hero.js?v=20260731i"></script>
+<script src="home.js?v=20260731i"></script>
 </body>
 </html>

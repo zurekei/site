@@ -816,7 +816,7 @@ a.card:hover {
 
 /* ==================== 指標ページ: 数値表 ==================== */
 
-/* bin/build_charts.mjs が静的に書き出す表。JSを実行しない読み手(クローラを含む)に
+/* bin/build.mjs が静的に書き出す表。JSを実行しない読み手(クローラを含む)に
    とっては、このページで数値が読める唯一の場所なので、CSSで隠さない。畳んである
    のは <details> なのでHTMLには常に全行入っている。開閉の見た目は about ページの
    .about-more と揃えてある。 */
@@ -904,6 +904,47 @@ a.card:hover {
   padding-bottom: 0.55rem;
   border-bottom: 1px solid var(--line-soft);
 }
+
+/* JSが動かないときにグラフ枠の中に出る案内。既定では隠してあり、各ページの <head> に
+   置いた <noscript><style> が SVG と入れ替える(SVGを消さないと、空のまま480px分の
+   高さを取り続けて、案内がその下にぶら下がる)。
+   JSが動く読み手には最初から最後まで出ないので、描画待ちのちらつきも起きない。 */
+.chart-noscript {
+  display: none;
+  padding: 1.5rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* 出生率の表は「年 + 実績 + 歴代7推計」で9列ある。指標ページの5列に合わせた
+   760px では潰れるので、この表だけ本文幅いっぱいを使う。溢れる分の横スクロールは
+   .data-table-wrap 側が持つ(ページ本体は横に流さない)。 */
+.data-table-wide { max-width: 880px; }
+
+/* 推計ごとの平均のズレ。表そのものより先に読ませたいので表の上に置く */
+.gap-head {
+  margin-top: 1.25rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+
+.gap-list {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.7rem;
+  line-height: 1.9;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.gap-list a {
+  color: var(--muted-2);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+.gap-list a:hover { color: var(--ink); }
 
 /* トップの card-grid に静的に置いてあるリンク。home.js が動けば即座にカードへ
    差し替わるので、これが見えるのは JS が無いとき(と、差し替わる前の一瞬)。 */
@@ -1194,6 +1235,10 @@ a.card:hover {
   padding-left: 12px;
 }
 
+/* display:flex は hidden 属性に勝ってしまうので、明示的に打ち消す。
+   絞り込みは JS が使えるときにだけ出す（hoan.html の注記を参照）。 */
+.hoan-controls[hidden] { display: none; }
+
 .hoan-controls {
   display: flex;
   flex-wrap: wrap;
@@ -1307,6 +1352,20 @@ a.card:hover {
   padding: 4px 0 4px 12px;
 }
 .hoan-empty { padding: 24px 10px; color: var(--muted); }
+
+/* bin/build.mjs が HTML に直接書き出す版。hoan.js が動けば同じ内容を組み直して
+   丸ごと差し替えるので、これが表に出るのは JS が無いときだけ。
+   違いは開閉の仕組み: JS版は行クリックで開く(だから .hoan-row に cursor:pointer が
+   付いている)が、JSが無ければクリックは効かない。押せそうに見せない。
+   代わりに <details> を使う — 素のHTMLだけで開閉でき、閉じていても中身はHTMLに
+   入ったままなので、読み手が人でもクローラでも条文原文に届く。 */
+.hoan-row-static { cursor: default; }
+.hoan-row-static:hover { background: none; }
+.hoan-detail-static > td { padding-bottom: 8px; }
+.hoan-detail-static summary { cursor: pointer; list-style: none; }
+.hoan-detail-static summary::-webkit-details-marker { display: none; }
+.hoan-detail-static summary::before { content: "+ "; color: var(--amber); }
+.hoan-detail-static details[open] > summary::before { content: "− "; }
 
 @media (max-width: 560px) {
   .hoan-table { font-size: 13px; }

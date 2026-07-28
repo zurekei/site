@@ -1,25 +1,34 @@
 #!/usr/bin/env node
-/* 指標ページ ビルダー
+/* ページ ビルダー — 数値を HTML の実体として置くためのもの
  *
- *   chart/<key>.html   … 指標ごとの本体（数値の実体つき）
- *   chart/index.html   … 8指標へのハブ（sitemap 以外の発見経路）
+ * 生成するもの:
+ *   chart/<key>.html   … 8指標の本体（丸ごと生成）
+ *   chart/index.html   … 8指標へのハブ（丸ごと生成）
+ * 差し込むもの（既存ファイルの <!-- BUILD:名前 --> … <!-- /BUILD:名前 --> の中だけ）:
+ *   fertility.html     … 歴代推計 × 実績の表、推計ごとの平均ズレ、JSON-LD
+ *   hoan.html          … 見直し条項49件の表と条文原文、JSON-LD
  *
  * 使い方:
- *   node bin/build_charts.mjs           # 生成する
- *   node bin/build_charts.mjs --check   # 生成物が最新かだけ見る（書かない）
+ *   node bin/build.mjs           # 生成・差し込みをする
+ *   node bin/build.mjs --check   # 最新かだけ見る（書かない）
  *
- * ■ なぜ生成するのか
- *   8指標は長らく chart.html 1ファイルを ?m= で共有していた。クエリ文字列では
- *   ファイルを出し分けられないので、本文は空（"—" と "----"）のまま JS が描く形に
- *   なっていた。JSを実行しないクローラ（GPTBot / ClaudeBot 系のほとんど）にとっては
- *   読む中身が無く、検索側では8URLが1件に畳まれる。指標ごとに実ファイルを持たせる
- *   ことでしか、この2つは同時に直らない。
+ * ■ なぜこれが要るのか
+ *   このサイトは全ページがJSで描画していた。ブラウザでは正しく見えるが、JSを実行
+ *   しないクローラにとっては読む中身が無い（本文は "—" と空の tbody だけ）。
+ *   出典つきで確かめられることを主旨に置いている以上、確かめる相手がHTMLしか
+ *   読まないなら、HTMLに数値が入っていなければ意味がない。
  *
- * ■ なぜ METRICS をこちらに書き写さないのか
- *   指標定義と数値の整形規則は chart.js にある。ビルド側に複製すると、いつか必ず
- *   ズレて「表とグラフが同じ年度に違う数字を出す」状態になる。ズレの記録を名乗る
- *   サイトでそれは起こしてはいけない。なので chart.js / csv.js をそのまま評価して
- *   本物の METRICS と本物の整形関数を取り込む。表とグラフは定義上一致する。
+ *   8指標は加えて chart.html 1ファイルを ?m= で共有していた。クエリ文字列では
+ *   ファイルを出し分けられないので、指標ごとに実ファイルを持たせないと、検索側では
+ *   8URLが1件に畳まれたままになる。だからそちらは丸ごと生成にした。
+ *   fertility / hoan は元から専用URLを持っているので、手書きのページ構造はそのまま
+ *   残し、数値の入る領域だけを機械の持ち物にしている。
+ *
+ * ■ なぜ定義や文言をこちらに書き写さないのか
+ *   指標定義・整形規則・UIの文言は chart.js / fertility.js / hoan.js にある。ビルド側に
+ *   複製すると、いつか必ずズレて「表とグラフが同じ年について違う数字を出す」状態に
+ *   なる。ズレの記録を名乗るサイトでそれは起こしてはいけない。なので各 .js をその
+ *   まま評価して本物の定義を取り込む。表と描画は定義上一致する。
  *
  * ■ 陳腐化について
  *   生成物は data/*.csv に依存するので、CSVを直したら再生成が要る。手順の記憶に
@@ -36,41 +45,44 @@ const OUT_DIR = path.join(SITE_DIR, "chart");
 const SITE = "https://zurekei.org";
 
 // style.css / chart.js のキャッシュバスター。ページ側の ?v= と揃える。
-const ASSET_V = "20260731c";
+const ASSET_V = "20260731i";
 
-/* ── chart.js / csv.js を「本物のまま」取り込む ───────────────────── */
+const read = (f) => fs.readFileSync(path.join(SITE_DIR, f), "utf8");
 
-function loadRuntime() {
-  const csvSrc = fs.readFileSync(path.join(SITE_DIR, "csv.js"), "utf8");
-  const chartSrc = fs.readFileSync(path.join(SITE_DIR, "chart.js"), "utf8");
+/* ── 各ページの .js を「本物のまま」取り込む ─────────────────────── */
 
-  // chart.js はブラウザ用で、最後の main() だけが DOM に触る。それより上は
-  // 定数と整形関数だけなので、この1行を落とせば Node でそのまま評価できる。
-  // 見つからなくなったら「たまたま動いた」状態で生成を続けず、ここで止める。
-  const stripped = chartSrc.replace(/\bmain\(\);\s*$/, "");
-  if (stripped === chartSrc) {
-    throw new Error("chart.js の末尾に main(); が見つからない。構造が変わった可能性がある");
+const CSV_SRC = read("csv.js");
+
+// ブラウザ用の .js を Node で評価して、トップレベルの定義を取り出す。
+// どのファイルも最後の main() だけが DOM に触るので、その1行を落とせば評価できる。
+// 見つからなくなったら「たまたま動いた」状態で生成を続けず、ここで止める。
+// globals は、トップレベルでブラウザAPIを触るファイル用の最小限の代役。
+function loadModule(file, names, globals = {}) {
+  const src = read(file);
+  const stripped = src.replace(/\bmain\(\);\s*$/, "");
+  if (stripped === src) {
+    throw new Error(`${file} の末尾に main(); が見つからない。構造が変わった可能性がある`);
   }
-
-  const names = [
-    // csv.js
-    "parseCSV", "toNum", "computeGapStats", "escapeHTML", "safeUrl",
-    // chart.js
-    "T", "METRICS", "fmtFY", "gapLabelText", "gapUnitSuffix",
-    "gapSummaryText", "fmtVal", "extractSourceUrl", "extractEventNote",
-  ];
-  const ctx = { __out: null };
-  vm.runInNewContext(`${csvSrc}\n${stripped}\n__out = { ${names.join(", ")} };`, ctx, {
-    filename: "zurekei-runtime.js",
+  // ファイルごとに別コンテキストにする。chart.js / fertility.js / hoan.js は
+  // どれもトップレベルで const T を宣言しているので、混ぜると衝突する。
+  const ctx = { __out: null, ...globals };
+  vm.runInNewContext(`${CSV_SRC}\n${stripped}\n__out = { ${names.join(", ")} };`, ctx, {
+    filename: `zurekei:${file}`,
   });
-
   const missing = names.filter((n) => ctx.__out[n] === undefined);
-  if (missing.length) throw new Error(`取り込めなかった定義: ${missing.join(", ")}`);
+  if (missing.length) throw new Error(`${file} から取り込めなかった定義: ${missing.join(", ")}`);
   return ctx.__out;
 }
 
-const R = loadRuntime();
-const { METRICS, T, escapeHTML, safeUrl, toNum, parseCSV } = R;
+const R = loadModule("chart.js", [
+  // csv.js
+  "parseCSV", "toNum", "computeGapStats", "escapeHTML", "safeUrl",
+  // chart.js
+  "T", "METRICS", "fmtFY", "gapLabelText", "gapUnitSuffix",
+  "gapSummaryText", "fmtVal", "extractSourceUrl", "extractEventNote",
+]);
+
+const { METRICS, T, escapeHTML, safeUrl, toNum, parseCSV, computeGapStats } = R;
 
 /* ── データ ───────────────────────────────────────────────── */
 
@@ -254,6 +266,21 @@ function assetHead() {
 <link rel="stylesheet" href="/style.css?v=${ASSET_V}">`;
 }
 
+// JSが動かないときに、中身が入らないまま残る部品を畳んで、案内文と入れ替える。
+// 対象は「JSでしか中身が入らないもの」だけ: 空のSVG、年を選ぶスライダー、その年の
+// 読み取り欄（"—" のまま）、注記・出典欄（空のまま）。集計行と数値表は静的に
+// 入っているので触らない。
+//
+// <head> の <noscript> に <style> を置くのは仕様どおりの使い方で、JSが動く側には
+// 一切影響しない。body 側で出し分けようとすると、描画されるまでの一瞬だけ案内が
+// 見えてしまう。!important なのは style.css 側が #chart や display:flex で強いため
+// （セレクタを盛って勝ちにいくより、上書きの意図が読めるこちらを採る）。
+const NOSCRIPT_STYLE =
+  `<noscript><style>` +
+  `.chart-wrap > svg, .controls, .readout, #v-notes, #v-source { display: none !important; }` +
+  ` .chart-noscript { display: block; }` +
+  `</style></noscript>`;
+
 function buildPage(key, metric) {
   const rows = readRows(metric);
   const url = `${SITE}/chart/${key}`;
@@ -277,7 +304,7 @@ function buildPage(key, metric) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- このファイルは bin/build_charts.mjs が data/*.csv から生成している。直接編集しない。
+<!-- このファイルは bin/build.mjs が data/*.csv から生成している。直接編集しない。
      直すのは chart.js の METRICS か data/*.csv のどちらか。 -->
 <title id="page-title">${escapeHTML(title)}</title>
 <meta name="description" content="${escapeHTML(metric.desc)}">
@@ -292,6 +319,7 @@ function buildPage(key, metric) {
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
 ${assetHead()}
+${NOSCRIPT_STYLE}
 <script type="application/ld+json">
 ${buildJsonLd(key, metric, rows)}
 </script>
@@ -310,6 +338,10 @@ ${note}
 
       <div class="chart-wrap">
         <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title"></svg>
+        <!-- グラフはJSでしか描かない。JSが無いとこの枠が空箱として残り、壊れて
+             いるようにしか見えないので、行き先を書いておく。表示の切り替えは
+             <head> の <noscript><style> が持つ。 -->
+        <p class="chart-noscript mono">グラフの描画には JavaScript が必要です。数値は下の表にあります。</p>
       </div>
 
 ${summary}
@@ -381,7 +413,7 @@ function buildIndex(keys) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- bin/build_charts.mjs が生成している。直接編集しない。 -->
+<!-- bin/build.mjs が生成している。直接編集しない。 -->
 <title>指標一覧 — ズレ計</title>
 <meta name="description" content="政府の当初見通しと確定した実績を並べた指標の一覧。">
 <link rel="canonical" href="${SITE}/chart/">
@@ -447,6 +479,298 @@ ${items}
 `;
 }
 
+/* ── 既存ページへの差し込み ───────────────────────────────────
+ * fertility / hoan は手書きのページで、URL も構造も既にある。丸ごと生成にすると
+ * 版面まで機械の持ち物になってしまうので、数値の入る領域だけを置き換える。
+ * 領域の外は人間が自由に触ってよい、というのがこのマーカーの意味。
+ */
+function injectRegion(html, name, body, file) {
+  const open = `<!-- BUILD:${name} -->`;
+  const close = `<!-- /BUILD:${name} -->`;
+  const i = html.indexOf(open);
+  const j = html.indexOf(close);
+  if (i < 0 || j < 0 || j < i) {
+    throw new Error(`${file} に ${open} … ${close} が見つからない`);
+  }
+  return html.slice(0, i + open.length) + body + html.slice(j);
+}
+
+// JA を本文に、EN を data-en に置く。入れ替えは各ページの applyTableI18n が行う。
+// 訳を辞書ごとビルド側に持たせないのは、文言の出所を .js 側の T 一箇所に保つため。
+function dual(en) {
+  return ` data-en="${escapeHTML(en)}"`;
+}
+
+/* ── 合計特殊出生率 ──────────────────────────────────────── */
+
+const FERT = loadModule("fertility.js", ["T", "vintageLabel"]);
+
+function fertilityData() {
+  const forecast = parseCSV(read("data/fertility_forecast.csv"))
+    .map((r) => ({
+      vintage: Number(r.vintage_year),
+      year: Number(r.target_year),
+      mid: toNum(r.assumed_tfr_mid),
+      sourceUrl: r.forecast_source_url,
+    }))
+    .filter((r) => r.mid !== null);
+  const actual = parseCSV(read("data/fertility_actual.csv"))
+    .map((r) => ({ year: Number(r.year), tfr: toNum(r.actual_tfr), sourceUrl: r.source_url }))
+    .filter((r) => r.tfr !== null);
+
+  const vintages = [...new Set(forecast.map((r) => r.vintage))].sort((a, b) => a - b);
+  const actualByYear = new Map(actual.map((r) => [r.year, r.tfr]));
+  const years = [...new Set([...actual.map((r) => r.year), ...forecast.map((r) => r.year)])].sort(
+    (a, b) => a - b
+  );
+  const cell = new Map(forecast.map((r) => [`${r.vintage}:${r.year}`, r.mid]));
+  return { forecast, actual, vintages, actualByYear, years, cell };
+}
+
+// 出生率は小数第2位まで。実績が2桁で公表されているので、推計側の5桁は表示上そこへ
+// 揃える（元データの精度は CSV に残っていると表の下に書いてある）。
+const fmtTfr = (v) => v.toFixed(2);
+const fmtTfrGap = (v) => `${v > 0 ? "+" : ""}${v.toFixed(2)}`;
+
+function fertilityGapLines(d, lang) {
+  const t = FERT.T[lang];
+  const lines = [];
+  for (const v of d.vintages) {
+    const rows = d.forecast
+      .filter((r) => r.vintage === v)
+      .map((r) => ({ year: r.year, f: r.mid, a: d.actualByYear.has(r.year) ? d.actualByYear.get(r.year) : null }));
+    // 実績と重なる年が無い推計（将来だけを扱う版が来た場合）は黙って飛ばす。
+    // 0年分を「平均 0.00」と書くと、ズレが無かったように読めてしまう。
+    const st = computeGapStats(rows, "f", "a");
+    if (!st) continue;
+    lines.push({
+      text: t.gapLine(FERT.vintageLabel(v, lang), st.count, fmtTfrGap(st.meanGap), st.below, st.above),
+      url: safeUrl(d.forecast.find((r) => r.vintage === v).sourceUrl),
+    });
+  }
+  return lines;
+}
+
+function fertilityTable(d) {
+  const head =
+    `            <th scope="col"${dual(FERT.T.en.thYear)}>${escapeHTML(FERT.T.ja.thYear)}</th>\n` +
+    `            <th scope="col"${dual(FERT.T.en.thActual)}>${escapeHTML(FERT.T.ja.thActual)}</th>\n` +
+    d.vintages
+      .map(
+        (v) =>
+          `            <th scope="col"${dual(FERT.vintageLabel(v, "en"))}>${escapeHTML(FERT.vintageLabel(v, "ja"))}</th>`
+      )
+      .join("\n");
+
+  const body = d.years
+    .map((y) => {
+      const a = d.actualByYear.has(y) ? fmtTfr(d.actualByYear.get(y)) : "";
+      const cells = d.vintages
+        .map((v) => {
+          const val = d.cell.get(`${v}:${y}`);
+          return `        <td class="mono">${val === undefined ? "" : fmtTfr(val)}</td>`;
+        })
+        .join("\n");
+      return (
+        `      <tr>\n` +
+        `        <th scope="row" class="mono">${y}</th>\n` +
+        `        <td class="mono">${a}</td>\n` +
+        `${cells}\n` +
+        `      </tr>`
+      );
+    })
+    .join("\n");
+
+  return (
+    `      <div class="data-table-wrap">\n` +
+    `      <table class="data-table data-table-wide">\n` +
+    `        <caption${dual(FERT.T.en.tableCaption)}>${escapeHTML(FERT.T.ja.tableCaption)}</caption>\n` +
+    `        <thead>\n          <tr>\n${head}\n          </tr>\n        </thead>\n` +
+    `        <tbody>\n${body}\n        </tbody>\n` +
+    `      </table>\n` +
+    `      </div>`
+  );
+}
+
+function fertilitySection(d) {
+  const gapJa = fertilityGapLines(d, "ja");
+  const gapEn = fertilityGapLines(d, "en");
+  const gaps = gapJa
+    .map((g, i) => {
+      const src = g.url
+        ? ` <a href="${escapeHTML(g.url)}" target="_blank" rel="noopener">出典</a>`
+        : "";
+      return `          <li><span${dual(gapEn[i].text)}>${escapeHTML(g.text)}</span>${src}</li>`;
+    })
+    .join("\n");
+
+  return `
+  <section class="data-section">
+    <details class="data-details">
+      <summary${dual(FERT.T.en.tableToggle(d.years.length))}>${escapeHTML(FERT.T.ja.tableToggle(d.years.length))}</summary>
+
+      <p class="gap-head mono"${dual(FERT.T.en.gapHead)}>${escapeHTML(FERT.T.ja.gapHead)}</p>
+      <ul class="gap-list mono">
+${gaps}
+      </ul>
+
+${fertilityTable(d)}
+
+      <p class="chart-note mono"${dual(FERT.T.en.tableRoundNote)}>${escapeHTML(FERT.T.ja.tableRoundNote)}</p>
+      <p class="chart-note mono"><span${dual(FERT.T.en.tableCsvLabel)}>${escapeHTML(FERT.T.ja.tableCsvLabel)}</span><a href="/data/fertility_forecast.csv">/data/fertility_forecast.csv</a> · <a href="/data/fertility_actual.csv">/data/fertility_actual.csv</a></p>
+    </details>
+  </section>
+  `;
+}
+
+function fertilityJsonLd(d) {
+  return `
+<script type="application/ld+json">
+${JSON.stringify(
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    name: "合計特殊出生率｜歴代の将来推計の仮定と実績",
+    description: FERT.T.ja.desc,
+    url: `${SITE}/fertility`,
+    isAccessibleForFree: true,
+    inLanguage: "ja",
+    temporalCoverage: `${d.years[0]}/${d.years[d.years.length - 1]}`,
+    creator: { "@type": "Organization", name: "ズレ計", url: SITE },
+    variableMeasured: [
+      { "@type": "PropertyValue", name: "推計の仮定（中位）", unitText: "合計特殊出生率" },
+      { "@type": "PropertyValue", name: "実績", unitText: "合計特殊出生率" },
+    ],
+    distribution: [
+      { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/fertility_forecast.csv` },
+      { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/fertility_actual.csv` },
+    ],
+  },
+  null,
+  2
+)}
+</script>
+`;
+}
+
+function buildFertility() {
+  const d = fertilityData();
+  let html = read("fertility.html");
+  html = injectRegion(html, "jsonld", fertilityJsonLd(d), "fertility.html");
+  html = injectRegion(html, "table", fertilitySection(d), "fertility.html");
+  return html;
+}
+
+/* ── 見直し条項 ─────────────────────────────────────────── */
+
+// hoan.js はトップレベルで localStorage を読む（言語の記憶）。Node には無いので
+// 代役を置く。値は使わないので null を返すだけでよい。
+const HOAN = loadModule("hoan.js", ["T", "STATUS", "NOTE_LABEL"], {
+  localStorage: { getItem: () => null, setItem: () => {} },
+});
+
+// 並びは hoan.js の sortRows と同じ規則（状況 → 期限）。STATUS も本物を使う。
+function hoanRows() {
+  return parseCSV(read("data/hoan_review.csv")).slice().sort((a, b) => {
+    const oa = (HOAN.STATUS[a.review_status] || HOAN.STATUS.pending).order;
+    const ob = (HOAN.STATUS[b.review_status] || HOAN.STATUS.pending).order;
+    if (oa !== ob) return oa - ob;
+    return (a.review_deadline || "9999-99-99").localeCompare(b.review_deadline || "9999-99-99");
+  });
+}
+
+// 条文原文は data/hoan_clauses/<law_id>.txt にある。JS版はクリック時に取りに行くが、
+// JSを実行しない相手には取りに行く手立てが無いので、ここでHTMLに入れてしまう。
+// 全49件で約31KB。このページで最も引用される価値があるのは一次資料そのもの
+// なので、隠したままにしない。
+function hoanClause(id) {
+  const f = path.join(SITE_DIR, "data", "hoan_clauses", `${id}.txt`);
+  return fs.existsSync(f) ? fs.readFileSync(f, "utf8").trim() : null;
+}
+
+function hoanRowHtml(r) {
+  const t = HOAN.T.ja;
+  const meta = HOAN.STATUS[r.review_status] || HOAN.STATUS.pending;
+  const status = t.status[r.review_status] || t.status.pending;
+  const deadline = r.review_deadline || t.noDeadline;
+  const yrs = r.review_years ? t.yearsAfter(r.review_years) : t.noDeadlineYears;
+  const noteText = r.enforcement_note ? HOAN.NOTE_LABEL.ja[r.enforcement_note] || r.enforcement_note : "";
+  const staged = noteText ? `<span class="hoan-staged mono">${escapeHTML(noteText)}</span>` : "";
+  const url = safeUrl(r.source_law_url);
+  const src = url
+    ? `<a class="hoan-srclink mono" href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(t.srcLink)}</a>`
+    : "";
+  const clause = hoanClause(r.law_id);
+
+  // 詳細行は hidden にしない。hidden にすると、JSが動かない相手には「HTMLには
+  // あるが決して開けない」状態になる。<details> なら素のHTMLだけで開閉できる。
+  // JSが動く場合は hoan.js の render() がこの行ごと差し替えるので、操作感は不変。
+  const detail = clause
+    ? `      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">${escapeHTML(t.clauseHead)}</summary>
+            <pre class="hoan-clause">${escapeHTML(clause)}</pre>
+          </details>
+        </td>
+      </tr>`
+    : "";
+
+  return `      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">${escapeHTML(r.law_title)}</div>
+          <div class="hoan-lawnum mono">${escapeHTML(r.law_num)} ${src}</div>
+        </td>
+        <td class="col-date mono">${escapeHTML(r.enforcement_date || t.enforceMissing)}${staged}</td>
+        <td class="col-date mono">${escapeHTML(deadline)}<div class="hoan-yrs mono">${escapeHTML(yrs)}</div></td>
+        <td class="col-status"><span class="hoan-badge ${meta.cls}">${escapeHTML(status)}</span></td>
+      </tr>
+${detail}`;
+}
+
+function hoanJsonLd(rows) {
+  const years = rows.map((r) => (r.promulgation_date || "").slice(0, 4)).filter(Boolean).sort();
+  return `
+<script type="application/ld+json">
+${JSON.stringify(
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    name: "法律の見直し条項｜期限と検討状況",
+    description: HOAN.T.ja.desc,
+    url: `${SITE}/hoan`,
+    isAccessibleForFree: true,
+    inLanguage: "ja",
+    temporalCoverage: `${years[0]}/${years[years.length - 1]}`,
+    creator: { "@type": "Organization", name: "ズレ計", url: SITE },
+    variableMeasured: [
+      { "@type": "PropertyValue", name: "施行日" },
+      { "@type": "PropertyValue", name: "見直し期限（施行日＋条項の年数）" },
+      { "@type": "PropertyValue", name: "期限到来の有無" },
+    ],
+    distribution: [
+      { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/hoan_review.csv` },
+    ],
+  },
+  null,
+  2
+)}
+</script>
+`;
+}
+
+function buildHoan() {
+  const rows = hoanRows();
+  const due = rows.filter((r) => r.review_status === "due").length;
+  let html = read("hoan.html");
+  html = injectRegion(html, "jsonld", hoanJsonLd(rows), "hoan.html");
+  // #summary と tbody#rows は、JSが動けば hoan.js が同じ規則で書き直す領域。
+  // 静的版はその初期状態（絞り込み無し）にあたる。
+  html = injectRegion(html, "summary", escapeHTML(HOAN.T.ja.summary(rows.length, due)), "hoan.html");
+  html = injectRegion(html, "rows", `\n${rows.map(hoanRowHtml).join("\n")}\n    `, "hoan.html");
+  return html;
+}
+
 /* ── 実行 ────────────────────────────────────────────────── */
 
 /* ── 参照側の取りこぼし検査 ──────────────────────────────────
@@ -456,7 +780,6 @@ ${items}
  */
 function crossRefErrors(keys) {
   const errs = [];
-  const read = (f) => fs.readFileSync(path.join(SITE_DIR, f), "utf8");
 
   const sitemap = read("sitemap.xml");
   const listed = new Set([...sitemap.matchAll(/<loc>https:\/\/zurekei\.org\/chart\/([a-z-]+)<\/loc>/g)].map((m) => m[1]));
@@ -473,9 +796,14 @@ function crossRefErrors(keys) {
 
 const check = process.argv.includes("--check");
 const keys = Object.keys(METRICS);
+
+// 丸ごと生成する側（chart/）と、既存ファイルに差し込む側（fertility / hoan）を
+// 同じ Map に載せる。中身が最終形として一致すればよいので、扱いは同じでよい。
 const files = new Map();
 for (const k of keys) files.set(path.join(OUT_DIR, `${k}.html`), buildPage(k, METRICS[k]));
 files.set(path.join(OUT_DIR, "index.html"), buildIndex(keys));
+files.set(path.join(SITE_DIR, "fertility.html"), buildFertility());
+files.set(path.join(SITE_DIR, "hoan.html"), buildHoan());
 
 if (check) {
   const stale = [];
@@ -489,28 +817,32 @@ if (check) {
     if (got !== want) stale.push(path.relative(SITE_DIR, f));
   }
   // 生成対象から外れた指標の置き土産も落とす（指標をリネームした時に残る）
-  const known = new Set([...files.keys()].map((f) => path.basename(f)));
+  const chartKnown = new Set(
+    [...files.keys()].filter((f) => path.dirname(f) === OUT_DIR).map((f) => path.basename(f))
+  );
   const orphans = fs.existsSync(OUT_DIR)
-    ? fs.readdirSync(OUT_DIR).filter((f) => f.endsWith(".html") && !known.has(f))
+    ? fs.readdirSync(OUT_DIR).filter((f) => f.endsWith(".html") && !chartKnown.has(f))
     : [];
 
   const refs = crossRefErrors(keys);
   if (stale.length || orphans.length || refs.length) {
     if (stale.length) console.error(`✗ 生成物が古い: ${stale.join(", ")}`);
-    if (orphans.length) console.error(`✗ 余分なファイル: ${orphans.join(", ")}`);
+    if (orphans.length) console.error(`✗ 余分なファイル: chart/${orphans.join(", chart/")}`);
     refs.forEach((e) => console.error(`✗ ${e}`));
-    if (stale.length || orphans.length) console.error("  node bin/build_charts.mjs を実行してからデプロイすること");
+    if (stale.length || orphans.length) console.error("  node bin/build.mjs を実行してからデプロイすること");
     process.exit(1);
   }
-  console.log(`✓ 指標ページ ${files.size} 本は最新（sitemap / トップのリンクとも一致）`);
+  console.log(`✓ ${files.size} ページは最新（sitemap / トップのリンクとも一致）`);
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
-  const known = new Set([...files.keys()].map((f) => path.basename(f)));
+  const chartKnown = new Set(
+    [...files.keys()].filter((f) => path.dirname(f) === OUT_DIR).map((f) => path.basename(f))
+  );
   for (const f of fs.readdirSync(OUT_DIR)) {
-    if (f.endsWith(".html") && !known.has(f)) fs.unlinkSync(path.join(OUT_DIR, f));
+    if (f.endsWith(".html") && !chartKnown.has(f)) fs.unlinkSync(path.join(OUT_DIR, f));
   }
   for (const [f, html] of files) fs.writeFileSync(f, html);
-  console.log(`✓ ${files.size} 本を生成: ${path.relative(SITE_DIR, OUT_DIR)}/`);
+  console.log(`✓ ${files.size} ページを更新（chart/ ${chartKnown.size} 本 + fertility.html + hoan.html）`);
   // 生成そのものは成功しても、辿らせる側が欠けていれば索引には出ない。
   // 落ちるほどではないので警告にとどめ、デプロイは --check 側で止める。
   crossRefErrors(keys).forEach((e) => console.warn(`⚠ ${e}`));

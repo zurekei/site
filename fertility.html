@@ -19,7 +19,54 @@
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=20260731c">
+<link rel="stylesheet" href="style.css?v=20260731i">
+<!-- JSが動かないときに、中身が入らないまま残る部品（空のSVG・凡例・出典欄）を畳んで、
+     案内文と入れ替える。数値表は静的に入っているので触らない。
+     詳細は bin/build.mjs の NOSCRIPT_STYLE のコメントを参照。 -->
+<noscript><style>.chart-wrap > svg, #fertility-legend, #fertility-source { display: none !important; } .chart-noscript { display: block; }</style></noscript>
+<!-- BUILD:jsonld -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "合計特殊出生率｜歴代の将来推計の仮定と実績",
+  "description": "国立社会保障・人口問題研究所「日本の将来推計人口」が版ごとに置いた合計特殊出生率の仮定(中位)を重ねたもの。線の色が薄いほど古い推計、濃いほど新しい推計。",
+  "url": "https://zurekei.org/fertility",
+  "isAccessibleForFree": true,
+  "inLanguage": "ja",
+  "temporalCoverage": "1980/2070",
+  "creator": {
+    "@type": "Organization",
+    "name": "ズレ計",
+    "url": "https://zurekei.org"
+  },
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "推計の仮定（中位）",
+      "unitText": "合計特殊出生率"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "実績",
+      "unitText": "合計特殊出生率"
+    }
+  ],
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/fertility_forecast.csv"
+    },
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/fertility_actual.csv"
+    }
+  ]
+}
+</script>
+<!-- /BUILD:jsonld -->
 </head>
 <body>
 <div class="page">
@@ -59,12 +106,1063 @@
 
       <div class="chart-wrap">
         <svg id="fertility-chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-label="合計特殊出生率の歴代推計と実績"></svg>
+        <!-- グラフはJSでしか描かない。JSが無いとこの枠が空箱として残り、壊れて
+             いるようにしか見えないので、行き先を書いておく。表示の切り替えは
+             <head> の <noscript><style> が持つ。 -->
+        <p class="chart-noscript mono">グラフの描画には JavaScript が必要です。数値は下の表にあります。</p>
       </div>
 
       <div class="fertility-legend" id="fertility-legend"></div>
 
       <div class="readout-source" id="fertility-source"></div>
     </section>
+
+  <!-- ここから下は bin/build.mjs が data/fertility_*.csv から差し込む。直接編集しない。
+       グラフはJSでしか描かれないので、JSを実行しない読み手にとっては、この表が
+       このページで数値を読める唯一の場所になる。 -->
+  <!-- BUILD:table -->
+  <section class="data-section">
+    <details class="data-details">
+      <summary data-en="Show the figures as a table (91 years)">歴代推計と実績を表で見る（91年分）</summary>
+
+      <p class="gap-head mono" data-en="Mean gap per projection, over the years where an actual figure exists">実績と重なる期間で見た、推計ごとの平均のズレ</p>
+      <ul class="gap-list mono">
+          <li><span data-en="1992 projection | mean -0.33 over 35 overlapping years (actual below the assumption in 34, above in 1)">1992年推計｜重なる35年で 平均 -0.33（実績が下回った 34年 / 上回った 1年）</span> <a href="https://www.ipss.go.jp/syoushika/bunken/data/pdf/101827_4.pdf" target="_blank" rel="noopener">出典</a></li>
+          <li><span data-en="1997 projection | mean -0.15 over 31 overlapping years (actual below the assumption in 30, above in 1)">1997年推計｜重なる31年で 平均 -0.15（実績が下回った 30年 / 上回った 1年）</span> <a href="https://www.ipss.go.jp/syoushika/bunken/data/pdf/120010.pdf" target="_blank" rel="noopener">出典</a></li>
+          <li><span data-en="2002 projection | mean -0.01 over 26 overlapping years (actual below the assumption in 13, above in 13)">2002年推計｜重なる26年で 平均 -0.01（実績が下回った 13年 / 上回った 13年）</span> <a href="https://www.ipss.go.jp/syoushika/bunken/data/pdf/126596.pdf" target="_blank" rel="noopener">出典</a></li>
+          <li><span data-en="2006 projection | mean +0.11 over 21 overlapping years (actual below the assumption in 4, above in 17)">2006年推計｜重なる21年で 平均 +0.11（実績が下回った 4年 / 上回った 17年）</span> <a href="https://www.ipss.go.jp/syoushika/bunken/data/pdf/132498.pdf" target="_blank" rel="noopener">出典</a></li>
+          <li><span data-en="2012 projection | mean -0.01 over 16 overlapping years (actual below the assumption in 6, above in 10)">2012年推計｜重なる16年で 平均 -0.01（実績が下回った 6年 / 上回った 10年）</span> <a href="https://www.ipss.go.jp/syoushika/tohkei/newest04/gh2401.pdf" target="_blank" rel="noopener">出典</a></li>
+          <li><span data-en="2017 projection | mean -0.11 over 11 overlapping years (actual below the assumption in 11, above in 0)">2017年推計｜重なる11年で 平均 -0.11（実績が下回った 11年 / 上回った 0年）</span> <a href="https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2017/pp29_gaiyou.pdf" target="_blank" rel="noopener">出典</a></li>
+          <li><span data-en="2023 projection | mean -0.04 over 6 overlapping years (actual below the assumption in 4, above in 2)">2023年推計｜重なる6年で 平均 -0.04（実績が下回った 4年 / 上回った 2年）</span> <a href="https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2023/pp2023_gaiyou.pdf" target="_blank" rel="noopener">出典</a></li>
+      </ul>
+
+      <div class="data-table-wrap">
+      <table class="data-table data-table-wide">
+        <caption data-en="Total fertility rate — assumptions (medium variant) of each projection, and the actual rate">合計特殊出生率｜歴代推計の仮定(中位)と実績</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-en="Year">年</th>
+            <th scope="col" data-en="Actual">実績</th>
+            <th scope="col" data-en="1992 projection">1992年推計</th>
+            <th scope="col" data-en="1997 projection">1997年推計</th>
+            <th scope="col" data-en="2002 projection">2002年推計</th>
+            <th scope="col" data-en="2006 projection">2006年推計</th>
+            <th scope="col" data-en="2012 projection">2012年推計</th>
+            <th scope="col" data-en="2017 projection">2017年推計</th>
+            <th scope="col" data-en="2023 projection">2023年推計</th>
+          </tr>
+        </thead>
+        <tbody>
+      <tr>
+        <th scope="row" class="mono">1980</th>
+        <td class="mono">1.75</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1981</th>
+        <td class="mono">1.74</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1982</th>
+        <td class="mono">1.77</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1983</th>
+        <td class="mono">1.80</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1984</th>
+        <td class="mono">1.81</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1985</th>
+        <td class="mono">1.76</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1986</th>
+        <td class="mono">1.72</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1987</th>
+        <td class="mono">1.69</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1988</th>
+        <td class="mono">1.66</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1989</th>
+        <td class="mono">1.57</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1990</th>
+        <td class="mono">1.54</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1991</th>
+        <td class="mono">1.53</td>
+        <td class="mono">1.53</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1992</th>
+        <td class="mono">1.50</td>
+        <td class="mono">1.51</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1993</th>
+        <td class="mono">1.46</td>
+        <td class="mono">1.50</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1994</th>
+        <td class="mono">1.50</td>
+        <td class="mono">1.49</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1995</th>
+        <td class="mono">1.42</td>
+        <td class="mono">1.50</td>
+        <td class="mono">1.42</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1996</th>
+        <td class="mono">1.43</td>
+        <td class="mono">1.51</td>
+        <td class="mono">1.42</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1997</th>
+        <td class="mono">1.39</td>
+        <td class="mono">1.53</td>
+        <td class="mono">1.40</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1998</th>
+        <td class="mono">1.38</td>
+        <td class="mono">1.55</td>
+        <td class="mono">1.39</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1999</th>
+        <td class="mono">1.34</td>
+        <td class="mono">1.58</td>
+        <td class="mono">1.38</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2000</th>
+        <td class="mono">1.36</td>
+        <td class="mono">1.60</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.36</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2001</th>
+        <td class="mono">1.33</td>
+        <td class="mono">1.63</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.34</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2002</th>
+        <td class="mono">1.32</td>
+        <td class="mono">1.66</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.33</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2003</th>
+        <td class="mono">1.29</td>
+        <td class="mono">1.68</td>
+        <td class="mono">1.40</td>
+        <td class="mono">1.32</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2004</th>
+        <td class="mono">1.29</td>
+        <td class="mono">1.70</td>
+        <td class="mono">1.41</td>
+        <td class="mono">1.32</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2005</th>
+        <td class="mono">1.26</td>
+        <td class="mono">1.72</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.31</td>
+        <td class="mono">1.26</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2006</th>
+        <td class="mono">1.32</td>
+        <td class="mono">1.73</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.31</td>
+        <td class="mono">1.29</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2007</th>
+        <td class="mono">1.34</td>
+        <td class="mono">1.75</td>
+        <td class="mono">1.46</td>
+        <td class="mono">1.31</td>
+        <td class="mono">1.25</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2008</th>
+        <td class="mono">1.37</td>
+        <td class="mono">1.76</td>
+        <td class="mono">1.47</td>
+        <td class="mono">1.31</td>
+        <td class="mono">1.23</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2009</th>
+        <td class="mono">1.37</td>
+        <td class="mono">1.77</td>
+        <td class="mono">1.48</td>
+        <td class="mono">1.31</td>
+        <td class="mono">1.22</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2010</th>
+        <td class="mono">1.39</td>
+        <td class="mono">1.78</td>
+        <td class="mono">1.50</td>
+        <td class="mono">1.32</td>
+        <td class="mono">1.22</td>
+        <td class="mono">1.39</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2011</th>
+        <td class="mono">1.39</td>
+        <td class="mono">1.78</td>
+        <td class="mono">1.51</td>
+        <td class="mono">1.32</td>
+        <td class="mono">1.22</td>
+        <td class="mono">1.39</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2012</th>
+        <td class="mono">1.41</td>
+        <td class="mono">1.79</td>
+        <td class="mono">1.52</td>
+        <td class="mono">1.33</td>
+        <td class="mono">1.21</td>
+        <td class="mono">1.37</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2013</th>
+        <td class="mono">1.43</td>
+        <td class="mono">1.79</td>
+        <td class="mono">1.54</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.21</td>
+        <td class="mono">1.39</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2014</th>
+        <td class="mono">1.42</td>
+        <td class="mono">1.79</td>
+        <td class="mono">1.55</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.21</td>
+        <td class="mono">1.39</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2015</th>
+        <td class="mono">1.45</td>
+        <td class="mono">1.80</td>
+        <td class="mono">1.56</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.22</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.45</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2016</th>
+        <td class="mono">1.44</td>
+        <td class="mono">1.80</td>
+        <td class="mono">1.57</td>
+        <td class="mono">1.36</td>
+        <td class="mono">1.22</td>
+        <td class="mono">1.37</td>
+        <td class="mono">1.44</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2017</th>
+        <td class="mono">1.43</td>
+        <td class="mono">1.80</td>
+        <td class="mono">1.57</td>
+        <td class="mono">1.37</td>
+        <td class="mono">1.22</td>
+        <td class="mono">1.36</td>
+        <td class="mono">1.44</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2018</th>
+        <td class="mono">1.42</td>
+        <td class="mono">1.80</td>
+        <td class="mono">1.58</td>
+        <td class="mono">1.37</td>
+        <td class="mono">1.23</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2019</th>
+        <td class="mono">1.36</td>
+        <td class="mono">1.80</td>
+        <td class="mono">1.59</td>
+        <td class="mono">1.37</td>
+        <td class="mono">1.23</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.43</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2020</th>
+        <td class="mono">1.33</td>
+        <td class="mono">1.80</td>
+        <td class="mono">1.59</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.23</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.33</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2021</th>
+        <td class="mono">1.30</td>
+        <td class="mono">1.80</td>
+        <td class="mono">1.60</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.23</td>
+        <td class="mono">1.33</td>
+        <td class="mono">1.42</td>
+        <td class="mono">1.30</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2022</th>
+        <td class="mono">1.26</td>
+        <td class="mono">1.80</td>
+        <td class="mono">1.60</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.23</td>
+        <td class="mono">1.33</td>
+        <td class="mono">1.42</td>
+        <td class="mono">1.25</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2023</th>
+        <td class="mono">1.20</td>
+        <td class="mono">1.80</td>
+        <td class="mono">1.60</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.23</td>
+        <td class="mono">1.33</td>
+        <td class="mono">1.42</td>
+        <td class="mono">1.23</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2024</th>
+        <td class="mono">1.15</td>
+        <td class="mono">1.80</td>
+        <td class="mono">1.60</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.23</td>
+        <td class="mono">1.33</td>
+        <td class="mono">1.42</td>
+        <td class="mono">1.27</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2025</th>
+        <td class="mono">1.14</td>
+        <td class="mono">1.80</td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.23</td>
+        <td class="mono">1.33</td>
+        <td class="mono">1.42</td>
+        <td class="mono">1.27</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2026</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.23</td>
+        <td class="mono">1.33</td>
+        <td class="mono">1.42</td>
+        <td class="mono">1.28</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2027</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.24</td>
+        <td class="mono">1.33</td>
+        <td class="mono">1.42</td>
+        <td class="mono">1.29</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2028</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.24</td>
+        <td class="mono">1.33</td>
+        <td class="mono">1.42</td>
+        <td class="mono">1.30</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2029</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.24</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.31</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2030</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.24</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.32</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2031</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.38</td>
+        <td class="mono">1.24</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.32</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2032</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.24</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.33</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2033</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.24</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.33</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2034</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.24</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.33</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2035</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.25</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.33</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2036</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.25</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.33</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2037</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.25</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.33</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2038</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.25</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.33</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2039</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.25</td>
+        <td class="mono">1.34</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.33</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2040</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.25</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.43</td>
+        <td class="mono">1.33</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2041</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.25</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.33</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2042</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.25</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.34</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2043</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.25</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.34</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2044</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.26</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.34</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2045</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.26</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.34</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2046</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.26</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.34</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2047</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.26</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.34</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2048</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.26</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.34</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2049</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.26</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.34</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2050</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.61</td>
+        <td class="mono">1.39</td>
+        <td class="mono">1.26</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2051</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.26</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2052</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.26</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2053</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.26</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2054</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.26</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2055</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.26</td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2056</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2057</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2058</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2059</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2060</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.35</td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2061</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2062</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2063</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2064</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2065</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.44</td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2066</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2067</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.35</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2068</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.36</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2069</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.36</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2070</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">1.36</td>
+      </tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p class="chart-note mono" data-en="Assumptions are shown rounded to 2 decimal places (the source CSV carries 5). A blank cell means that projection does not cover that year.">推計の仮定は小数第2位に丸めて表示している（元データは小数第5位まで）。空欄はその推計が扱っていない年。</p>
+      <p class="chart-note mono"><span data-en="Source data: ">元データ: </span><a href="/data/fertility_forecast.csv">/data/fertility_forecast.csv</a> · <a href="/data/fertility_actual.csv">/data/fertility_actual.csv</a></p>
+    </details>
+  </section>
+  <!-- /BUILD:table -->
   </main>
 
   <footer class="site-footer-row">
@@ -73,7 +1171,7 @@
     <a class="footer-about" id="t-footer-contact" href="contact.html">お問い合わせ</a>
   </footer>
 </div>
-<script src="csv.js?v=20260731c"></script>
-<script src="fertility.js?v=20260731c"></script>
+<script src="csv.js?v=20260731i"></script>
+<script src="fertility.js?v=20260731i"></script>
 </body>
 </html>

@@ -19,7 +19,47 @@
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=20260731c">
+<link rel="stylesheet" href="style.css?v=20260731i">
+<!-- BUILD:jsonld -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "法律の見直し条項｜期限と検討状況",
+  "description": "多くの法律は、その附則に「施行後◯年を目途に検討を加える」という見直し条項を置いている。見直しの期限は「施行日＋◯年」で機械的に算出できる。ここでは期限順に並べ、期限が到来した法律を上に置く。数値・条文・出典のみを並べ、評価は書かない。",
+  "url": "https://zurekei.org/hoan",
+  "isAccessibleForFree": true,
+  "inLanguage": "ja",
+  "temporalCoverage": "2021/2025",
+  "creator": {
+    "@type": "Organization",
+    "name": "ズレ計",
+    "url": "https://zurekei.org"
+  },
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "施行日"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "見直し期限（施行日＋条項の年数）"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "期限到来の有無"
+    }
+  ],
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/hoan_review.csv"
+    }
+  ]
+}
+</script>
+<!-- /BUILD:jsonld -->
 </head>
 <body>
 <div class="page">
@@ -63,7 +103,10 @@
       </p>
     </section>
 
-    <section class="hoan-controls">
+    <!-- 絞り込みは hoan.js が中身を作って hidden を外す。表そのものは静的に出ている
+         ので、JSが動かなくても表は読める。動かない絞り込みだけを出さない
+         （空の <select> と空のボタン群が並ぶと、壊れているようにしか見えない）。 -->
+    <section class="hoan-controls" id="controls" hidden>
       <div class="hoan-filter" id="status-filter" role="group" aria-label="ステータスで絞り込み"></div>
       <div class="hoan-filter-right">
         <label class="hoan-year-label mono" for="year-filter" id="t-year-label">年</label>
@@ -71,7 +114,11 @@
       </div>
     </section>
 
-    <div class="hoan-summary mono" id="summary"></div>
+    <!-- 集計と行は bin/build.mjs が data/hoan_review.csv と data/hoan_clauses/ から
+         差し込む。直接編集しない。JSが動く場合は hoan.js が同じ規則で書き直すので、
+         ここにあるのは絞り込みをかける前の初期状態にあたる。JSを実行しない読み手に
+         とっては、これがこのページの内容そのものになる。 -->
+    <div class="hoan-summary mono" id="summary"><!-- BUILD:summary -->49 件（うち 期限到来・未確認 7 件）<!-- /BUILD:summary --></div>
 
     <div class="hoan-table-wrap">
       <table class="hoan-table">
@@ -83,7 +130,1109 @@
             <th class="col-status" id="t-col-status">状況</th>
           </tr>
         </thead>
-        <tbody id="rows"></tbody>
+        <tbody id="rows"><!-- BUILD:rows -->
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">性をめぐる個人の尊厳が重んぜられる社会の形成に資するために性行為映像制作物への出演に係る被害の防止を図り及び出演者の救済に資するための出演契約等に関する特則等に関する法律</div>
+          <div class="hoan-lawnum mono">令和四年法律第七十八号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/504AC1000000078" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2022-07-12<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2024-07-12<div class="hoan-yrs mono">施行後2年</div></td>
+        <td class="col-status"><span class="hoan-badge st-due">期限到来・未確認</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">性をめぐる個人の尊厳が重んぜられる社会の形成に資するために性行為映像制作物への出演に係る被害の防止を図り及び出演者の救済に資するための出演契約等に関する特則等に関する法律（令和四年法律第七十八号）
+出典: https://laws.e-gov.go.jp/law/504AC1000000078
+
+（検討）
+第四条
+この法律の規定については、この法律の施行後二年以内に、この法律の施行状況等を勘案し、検討が加えられ、その結果に基づいて必要な措置が講ぜられるものとする。
+２
+前項の検討に当たっては、性行為映像制作物の公表期間の制限及び無効とする出演契約等の条項の範囲その他の出演契約等に関する特則の在り方についても、検討を行うようにするものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">医療的ケア児及びその家族に対する支援に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第八十一号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC0000000081" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2021-09-18</td>
+        <td class="col-date mono">2024-09-18<div class="hoan-yrs mono">施行後3年</div></td>
+        <td class="col-status"><span class="hoan-badge st-due">期限到来・未確認</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">医療的ケア児及びその家族に対する支援に関する法律（令和三年法律第八十一号）
+出典: https://laws.e-gov.go.jp/law/503AC0000000081
+
+（検討）
+第二条
+この法律の規定については、この法律の施行後三年を目途として、この法律の実施状況等を勘案して検討が加えられ、その結果に基づいて必要な措置が講ぜられるものとする。
+２
+政府は、医療的ケア児の実態を把握するための具体的な方策について検討を加え、その結果に基づいて必要な措置を講ずるものとする。
+３
+政府は、災害時においても医療的ケア児が適切な医療的ケアを受けることができるようにするため、災害時における医療的ケア児に対する支援の在り方について検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">取引デジタルプラットフォームを利用する消費者の利益の保護に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第三十二号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC0000000032" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2022-05-01</td>
+        <td class="col-date mono">2025-05-01<div class="hoan-yrs mono">施行後3年</div></td>
+        <td class="col-status"><span class="hoan-badge st-due">期限到来・未確認</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">取引デジタルプラットフォームを利用する消費者の利益の保護に関する法律（令和三年法律第三十二号）
+出典: https://laws.e-gov.go.jp/law/503AC0000000032
+
+（検討）
+第三条
+政府は、この法律の施行後三年を目途として、この法律の規定の施行の状況及び経済社会情勢の変化を勘案し、この法律の規定について検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">法人等による寄附の不当な勧誘の防止等に関する法律</div>
+          <div class="hoan-lawnum mono">令和四年法律第百五号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/504AC0000000105" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2023-06-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2025-06-01<div class="hoan-yrs mono">施行後2年</div></td>
+        <td class="col-status"><span class="hoan-badge st-due">期限到来・未確認</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">法人等による寄附の不当な勧誘の防止等に関する法律（令和四年法律第百五号）
+出典: https://laws.e-gov.go.jp/law/504AC0000000105
+
+（検討）
+第五条
+政府は、この法律の施行後二年を目途として、この法律の規定の施行の状況及び経済社会情勢の変化を勘案し、この法律の規定について検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">脱炭素成長型経済構造への円滑な移行の推進に関する法律</div>
+          <div class="hoan-lawnum mono">令和五年法律第三十二号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/505AC0000000032" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-02-16<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2026-02-16<div class="hoan-yrs mono">施行後2年</div></td>
+        <td class="col-status"><span class="hoan-badge st-due">期限到来・未確認</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">脱炭素成長型経済構造への円滑な移行の推進に関する法律（令和五年法律第三十二号）
+出典: https://laws.e-gov.go.jp/law/505AC0000000032
+
+（検討）
+第十一条
+政府は、国及び事業者の相互の密接な連携による脱炭素成長型経済構造への円滑な移行に資する投資その他の事業活動の実施状況、二酸化炭素の排出に係る国内外の経済動向その他の事情を勘案しつつ、脱炭素成長型経済構造への円滑な移行の推進に関する施策の在り方について、脱炭素成長型経済構造移行推進戦略の実施状況を踏まえて検討を加え、必要があると認めるときは、その結果に基づいて所要の措置を講ずるものとする。
+２
+政府は、脱炭素成長型経済構造への円滑な移行を推進する観点から、前項の規定による検討とともに、第十四条及び第十九条の規定に基づき、特定事業者排出枠並びに化石燃料賦課金及び特定事業者負担金に係る制度を実施する方法について、特定事業者排出枠に係る取引を行う市場の本格的な稼働のための具体的な方策を含めて検討を加え、それらの結果に基づいて、この法律の施行後二年以内に、必要な法制上の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">教育職員等による児童生徒性暴力等の防止等に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第五十七号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC1000000057" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2023-04-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2026-04-01<div class="hoan-yrs mono">施行後3年</div></td>
+        <td class="col-status"><span class="hoan-badge st-due">期限到来・未確認</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">教育職員等による児童生徒性暴力等の防止等に関する法律（令和三年法律第五十七号）
+出典: https://laws.e-gov.go.jp/law/503AC1000000057
+
+（検討）
+第七条
+政府は、この法律の施行後速やかに、教育職員等以外の学校において児童生徒等と接する業務に従事する者による児童生徒性暴力等の防止に関する措置の在り方等について検討を加え、その結果に基づいて必要な措置を講ずるものとする。
+２
+政府は、この法律の施行後速やかに、児童生徒等の性的な被害を防止する観点から、児童生徒等と接する業務に従事する者の資格及び児童生徒等に性的な被害を与えた者に係る照会制度の在り方等について検討を加え、必要があると認めるときは、その結果に基づいて所要の措置を講ずるものとする。
+３
+政府は、前二項に定めるもののほか、この法律の施行後三年を目途として、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">性的指向及びジェンダーアイデンティティの多様性に関する国民の理解の増進に関する法律</div>
+          <div class="hoan-lawnum mono">令和五年法律第六十八号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/505AC1000000068" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2023-06-23</td>
+        <td class="col-date mono">2026-06-23<div class="hoan-yrs mono">施行後3年</div></td>
+        <td class="col-status"><span class="hoan-badge st-due">期限到来・未確認</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">性的指向及びジェンダーアイデンティティの多様性に関する国民の理解の増進に関する法律（令和五年法律第六十八号）
+出典: https://laws.e-gov.go.jp/law/505AC1000000068
+
+（検討）
+第二条
+この法律の規定については、この法律の施行後三年を目途として、この法律の施行状況等を勘案し、検討が加えられ、その結果に基づいて必要な措置が講ぜられるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">地方公共団体情報システムの標準化に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第四十号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC0000000040" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2021-09-01</td>
+        <td class="col-date mono">2026-09-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">地方公共団体情報システムの標準化に関する法律（令和三年法律第四十号）
+出典: https://laws.e-gov.go.jp/law/503AC0000000040
+
+（検討）
+２
+政府は、この法律の施行後五年を経過した場合において、この法律の施行の状況について検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">特定不法行為等に係る被害者の迅速かつ円滑な救済に資するための日本司法支援センターの業務の特例並びに宗教法人による財産の処分及び管理の特例に関する法律</div>
+          <div class="hoan-lawnum mono">令和五年法律第八十九号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/505AC1000000089" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-03-19<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2027-03-19<div class="hoan-yrs mono">施行後3年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">特定不法行為等に係る被害者の迅速かつ円滑な救済に資するための日本司法支援センターの業務の特例並びに宗教法人による財産の処分及び管理の特例に関する法律（令和五年法律第八十九号）
+出典: https://laws.e-gov.go.jp/law/505AC1000000089
+
+（検討）
+第六条
+政府は、この法律の施行後三年を目途として、その施行の状況等を勘案し、この法律の延長及び財産保全の在り方を含めこの法律の規定について検討を加え、必要があると認めるときは、その結果に基づいて法制上の措置その他所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">公的給付の支給等の迅速かつ確実な実施のための預貯金口座の登録等に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第三十八号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC0000000038" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-04-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2027-04-01<div class="hoan-yrs mono">施行後3年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">公的給付の支給等の迅速かつ確実な実施のための預貯金口座の登録等に関する法律（令和三年法律第三十八号）
+出典: https://laws.e-gov.go.jp/law/503AC0000000038
+
+（検討等）
+第五条
+政府は、附則第一条第三号に掲げる規定の施行後三年を目途として、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて、国民の理解を得つつ、所要の措置を講ずるものとする。
+２
+政府は、社会福祉協議会（行政手続における特定の個人を識別するための番号の利用等に関する法律別表第一の十八の項に規定する社会福祉協議会をいう。以下この項において同じ。）が附則第九条の規定による改正後の同法別表第二の三十の項の規定による特定個人情報の提供の求めをすることにより国民の利便性の向上及び行政運営の効率化を図るためには、情報通信技術を活用して同項第二欄に掲げる事務及びこれに関連する社会福祉協議会の事務を効率的に実施するための情報システムが必要であることに鑑み、社会福祉協議会を代表する者その他の関係者の意見を聴いて、当該情報システムの整備の支援その他必要な措置を講ずるとともに、同項の規定に基づく主務省令を定めるに当たっては、当該情報システムの整備の状況を踏まえるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">預貯金者の意思に基づく個人番号の利用による預貯金口座の管理等に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第三十九号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC0000000039" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-04-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2027-04-01<div class="hoan-yrs mono">施行後3年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">預貯金者の意思に基づく個人番号の利用による預貯金口座の管理等に関する法律（令和三年法律第三十九号）
+出典: https://laws.e-gov.go.jp/law/503AC0000000039
+
+（検討）
+第五条
+政府は、この法律の施行後三年を目途として、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて、国民の理解を得つつ、所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">プラスチックに係る資源循環の促進等に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第六十号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC0000000060" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2022-04-01</td>
+        <td class="col-date mono">2027-04-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">プラスチックに係る資源循環の促進等に関する法律（令和三年法律第六十号）
+出典: https://laws.e-gov.go.jp/law/503AC0000000060
+
+（検討）
+２
+政府は、この法律の施行後五年を経過した場合において、この法律の施行の状況について検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">困難な問題を抱える女性への支援に関する法律</div>
+          <div class="hoan-lawnum mono">令和四年法律第五十二号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/504AC0100000052" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-04-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2027-04-01<div class="hoan-yrs mono">施行後3年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">困難な問題を抱える女性への支援に関する法律（令和四年法律第五十二号）
+出典: https://laws.e-gov.go.jp/law/504AC0100000052
+
+（検討）
+第二条
+政府は、この法律の公布後三年を目途として、この法律に基づく支援を受ける者の権利を擁護する仕組みの構築及び当該支援の質を公正かつ適切に評価する仕組みの構築について検討を加え、その結果に基づいて所要の措置を講ずるものとする。
+２
+政府は、前項に定める事項のほか、この法律の施行後三年を目途として、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">経済施策を一体的に講ずることによる安全保障の確保の推進に関する法律</div>
+          <div class="hoan-lawnum mono">令和四年法律第四十三号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/504AC0000000043" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-05-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2027-05-01<div class="hoan-yrs mono">施行後3年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">経済施策を一体的に講ずることによる安全保障の確保の推進に関する法律（令和四年法律第四十三号）
+出典: https://laws.e-gov.go.jp/law/504AC0000000043
+
+（検討）
+第四条
+政府は、この法律の施行後三年を目途として、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">環境と調和のとれた食料システムの確立のための環境負荷低減事業活動の促進等に関する法律</div>
+          <div class="hoan-lawnum mono">令和四年法律第三十七号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/504AC0000000037" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2022-07-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2027-07-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">環境と調和のとれた食料システムの確立のための環境負荷低減事業活動の促進等に関する法律（令和四年法律第三十七号）
+出典: https://laws.e-gov.go.jp/law/504AC0000000037
+
+（検討）
+第六条
+政府は、この法律の施行後五年を目途として、この法律の施行の状況を勘案し、必要があると認めるときは、この法律の規定について検討を加え、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">重要施設周辺及び国境離島等における土地等の利用状況の調査及び利用の規制等に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第八十四号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC0000000084" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2022-09-20<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2027-09-20<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">重要施設周辺及び国境離島等における土地等の利用状況の調査及び利用の規制等に関する法律（令和三年法律第八十四号）
+出典: https://laws.e-gov.go.jp/law/503AC0000000084
+
+（検討）
+第二条
+政府は、この法律の施行後五年を経過した場合において、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">特定受託事業者に係る取引の適正化等に関する法律</div>
+          <div class="hoan-lawnum mono">令和五年法律第二十五号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/505AC0000000025" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-11-01</td>
+        <td class="col-date mono">2027-11-01<div class="hoan-yrs mono">施行後3年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">特定受託事業者に係る取引の適正化等に関する法律（令和五年法律第二十五号）
+出典: https://laws.e-gov.go.jp/law/505AC0000000025
+
+（検討）
+２
+政府は、この法律の施行後三年を目途として、この法律の規定の施行の状況を勘案し、この法律の規定について検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">こども家庭庁設置法</div>
+          <div class="hoan-lawnum mono">令和四年法律第七十五号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/504AC0000000075" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2023-04-01</td>
+        <td class="col-date mono">2028-04-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">こども家庭庁設置法（令和四年法律第七十五号）
+出典: https://laws.e-gov.go.jp/law/504AC0000000075
+
+（検討）
+２
+政府は、この法律の施行後五年を目途として、小学校就学前のこどもに対する質の高い教育及び保育の提供その他のこどもの健やかな成長及びこどものある家庭における子育てに対する支援に関する施策の実施の状況を勘案し、これらの施策を総合的かつ効果的に実施するための組織及び体制の在り方について検討を加え、必要があると認めるときは、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">こども基本法</div>
+          <div class="hoan-lawnum mono">令和四年法律第七十七号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/504AC1000000077" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2023-04-01</td>
+        <td class="col-date mono">2028-04-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">こども基本法（令和四年法律第七十七号）
+出典: https://laws.e-gov.go.jp/law/504AC1000000077
+
+（検討）
+第二条
+国は、この法律の施行後五年を目途として、この法律の施行の状況及びこども施策の実施の状況を勘案し、こども施策が基本理念にのっとって実施されているかどうか等の観点からその実態を把握し及び公正かつ適切に評価する仕組みの整備その他の基本理念にのっとったこども施策の一層の推進のために必要な方策について検討を加え、その結果に基づき、法制上の措置その他の必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">相続等により取得した土地所有権の国庫への帰属に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第二十五号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC0000000025" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2023-04-27</td>
+        <td class="col-date mono">2028-04-27<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">相続等により取得した土地所有権の国庫への帰属に関する法律（令和三年法律第二十五号）
+出典: https://laws.e-gov.go.jp/law/503AC0000000025
+
+（検討）
+２
+政府は、この法律の施行後五年を経過した場合において、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">良質かつ適切なゲノム医療を国民が安心して受けられるようにするための施策の総合的かつ計画的な推進に関する法律</div>
+          <div class="hoan-lawnum mono">令和五年法律第五十七号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/505AC1000000057" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2023-06-16</td>
+        <td class="col-date mono">2028-06-16<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">良質かつ適切なゲノム医療を国民が安心して受けられるようにするための施策の総合的かつ計画的な推進に関する法律（令和五年法律第五十七号）
+出典: https://laws.e-gov.go.jp/law/505AC1000000057
+
+（検討）
+２
+政府は、この法律の施行後五年を目途として、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">スマートフォンにおいて利用される特定ソフトウェアに係る競争の促進に関する法律</div>
+          <div class="hoan-lawnum mono">令和六年法律第五十八号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/506AC0000000058" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2025-12-18<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2028-12-18<div class="hoan-yrs mono">施行後3年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">スマートフォンにおいて利用される特定ソフトウェアに係る競争の促進に関する法律（令和六年法律第五十八号）
+出典: https://laws.e-gov.go.jp/law/506AC0000000058
+
+（検討）
+第二条
+政府は、この法律の施行後三年を目途として、この法律の規定の施行の状況を勘案し、この法律の規定について検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">共生社会の実現を推進するための認知症基本法</div>
+          <div class="hoan-lawnum mono">令和五年法律第六十五号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/505AC1000000065" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-01-01</td>
+        <td class="col-date mono">2029-01-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">共生社会の実現を推進するための認知症基本法（令和五年法律第六十五号）
+出典: https://laws.e-gov.go.jp/law/505AC1000000065
+
+（検討）
+２
+本部については、この法律の施行後五年を目途として総合的な検討が加えられ、その結果に基づいて必要な措置が講ぜられるものとする。
+
+３
+前項に定める事項のほか、国は、この法律の施行後五年を目途として、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">日本語教育の適正かつ確実な実施を図るための日本語教育機関の認定等に関する法律</div>
+          <div class="hoan-lawnum mono">令和五年法律第四十一号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/505AC0000000041" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-04-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2029-04-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">日本語教育の適正かつ確実な実施を図るための日本語教育機関の認定等に関する法律（令和五年法律第四十一号）
+出典: https://laws.e-gov.go.jp/law/505AC0000000041
+
+（検討）
+第五条
+政府は、この法律の施行後五年を目途として、この法律の規定について、その施行の状況等を勘案して検討を加え、必要があると認めるときは、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">孤独・孤立対策推進法</div>
+          <div class="hoan-lawnum mono">令和五年法律第四十五号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/505AC0000000045" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-04-01</td>
+        <td class="col-date mono">2029-04-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">孤独・孤立対策推進法（令和五年法律第四十五号）
+出典: https://laws.e-gov.go.jp/law/505AC0000000045
+
+（検討）
+第三条
+政府は、この法律の施行後五年を経過した場合において、この法律の施行の状況等を踏まえ、孤独・孤立対策の在り方について検討を加え、必要があると認めるときは、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">防衛省が調達する装備品等の開発及び生産のための基盤の強化に関する法律</div>
+          <div class="hoan-lawnum mono">令和五年法律第五十四号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/505AC0000000054" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-04-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2029-04-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">防衛省が調達する装備品等の開発及び生産のための基盤の強化に関する法律（令和五年法律第五十四号）
+出典: https://laws.e-gov.go.jp/law/505AC0000000054
+
+（検討）
+３
+政府は、この法律の施行後五年を目途として、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">高次脳機能障害者支援法</div>
+          <div class="hoan-lawnum mono">令和七年法律第九十六号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/507AC1000000096" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2026-04-01</td>
+        <td class="col-date mono">2029-04-01<div class="hoan-yrs mono">施行後3年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">高次脳機能障害者支援法（令和七年法律第九十六号）
+出典: https://laws.e-gov.go.jp/law/507AC1000000096
+
+（検討）
+２
+国は、この法律の施行後三年を目途として、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">災害時等における船舶を活用した医療提供体制の整備の推進に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第七十九号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC1000000079" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-06-01</td>
+        <td class="col-date mono">2029-06-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">災害時等における船舶を活用した医療提供体制の整備の推進に関する法律（令和三年法律第七十九号）
+出典: https://laws.e-gov.go.jp/law/503AC1000000079
+
+（検討）
+２
+本部については、この法律の施行後五年を目途として総合的な検討が加えられ、その結果に基づいて必要な措置が講ぜられるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">事業性融資の推進等に関する法律</div>
+          <div class="hoan-lawnum mono">令和六年法律第五十二号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/506AC0000000052" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-06-14</td>
+        <td class="col-date mono">2029-06-14<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">事業性融資の推進等に関する法律（令和六年法律第五十二号）
+出典: https://laws.e-gov.go.jp/law/506AC0000000052
+
+（検討）
+第四十九条
+政府は、この法律の施行後五年を経過した場合において、この法律の規定の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">農業の生産性の向上のためのスマート農業技術の活用の促進に関する法律</div>
+          <div class="hoan-lawnum mono">令和六年法律第六十三号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/506AC0000000063" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-10-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2029-10-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">農業の生産性の向上のためのスマート農業技術の活用の促進に関する法律（令和六年法律第六十三号）
+出典: https://laws.e-gov.go.jp/law/506AC0000000063
+
+（検討）
+第三条
+政府は、この法律の施行後五年を目途として、この法律の施行の状況を勘案し、必要があると認めるときは、この法律の規定について検討を加え、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">脱炭素成長型経済構造への円滑な移行のための低炭素水素等の供給及び利用の促進に関する法律</div>
+          <div class="hoan-lawnum mono">令和六年法律第三十七号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/506AC0000000037" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2024-10-23<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2029-10-23<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">脱炭素成長型経済構造への円滑な移行のための低炭素水素等の供給及び利用の促進に関する法律（令和六年法律第三十七号）
+出典: https://laws.e-gov.go.jp/law/506AC0000000037
+
+（検討）
+第二条
+政府は、この法律の施行後五年を目途として、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて必要な措置を講ずるものとする。
+２
+政府は、前項の規定による検討とともに、低炭素水素等の供給及び利用を促進し、脱炭素成長型経済構造への円滑な移行を図るため、脱炭素成長型経済構造への円滑な移行の推進に関する法律第二条第六項に規定する化石燃料賦課金及び特定事業者負担金に係る制度との整合性の確保、低炭素水素等の利用に係る技術水準及び経済性等に留意しつつ、電気事業及びガス事業並びに石油精製業、製造業、運輸業等の産業における低炭素水素等の利用を促進するための制度の在り方について検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">風力発電設備の設置等による電波の伝搬障害を回避し電波を用いた自衛隊等の円滑かつ安全な活動を確保するための措置に関する法律</div>
+          <div class="hoan-lawnum mono">令和六年法律第三十九号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/506AC0000000039" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2025-03-01</td>
+        <td class="col-date mono">2030-03-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">風力発電設備の設置等による電波の伝搬障害を回避し電波を用いた自衛隊等の円滑かつ安全な活動を確保するための措置に関する法律（令和六年法律第三十九号）
+出典: https://laws.e-gov.go.jp/law/506AC0000000039
+
+（検討）
+３
+政府は、この法律の施行後五年を目途として、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">地域における生物の多様性の増進のための活動の促進等に関する法律</div>
+          <div class="hoan-lawnum mono">令和六年法律第十八号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/506AC0000000018" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2025-04-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2030-04-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">地域における生物の多様性の増進のための活動の促進等に関する法律（令和六年法律第十八号）
+出典: https://laws.e-gov.go.jp/law/506AC0000000018
+
+（検討）
+第六条
+政府は、この法律の施行後五年を目途として、この法律の施行の状況を勘案し、必要があると認めるときは、この法律の規定について検討を加え、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">資源循環の促進のための再資源化事業等の高度化に関する法律</div>
+          <div class="hoan-lawnum mono">令和六年法律第四十一号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/506AC0000000041" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2025-11-21<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2030-11-21<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">資源循環の促進のための再資源化事業等の高度化に関する法律（令和六年法律第四十一号）
+出典: https://laws.e-gov.go.jp/law/506AC0000000041
+
+（検討）
+第四条
+政府は、この法律の施行後五年を経過した場合において、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">二酸化炭素の貯留事業に関する法律</div>
+          <div class="hoan-lawnum mono">令和六年法律第三十八号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/506AC0000000038" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2026-05-22<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2031-05-22<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">二酸化炭素の貯留事業に関する法律（令和六年法律第三十八号）
+出典: https://laws.e-gov.go.jp/law/506AC0000000038
+
+（検討）
+第二条
+政府は、この法律の施行後五年を目途として、我が国における貯留事業の実施状況、諸外国における貯留事業に相当する事業の実施状況及び当該事業に係る制度等を勘案し、必要があると認めるときは、この法律の規定について検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">盗難特定金属製物品の処分の防止等に関する法律</div>
+          <div class="hoan-lawnum mono">令和七年法律第七十五号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/507AC0000000075" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2026-06-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2031-06-01<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">盗難特定金属製物品の処分の防止等に関する法律（令和七年法律第七十五号）
+出典: https://laws.e-gov.go.jp/law/507AC0000000075
+
+（検討）
+第四条
+政府は、この法律の施行後五年を目途として、第二章の規定の実施状況を勘案し、必要があると認めるときは、当該規定について検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">デジタル庁設置法</div>
+          <div class="hoan-lawnum mono">令和三年法律第三十六号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC0000000036" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2021-09-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2031-09-01<div class="hoan-yrs mono">施行後10年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">デジタル庁設置法（令和三年法律第三十六号）
+出典: https://laws.e-gov.go.jp/law/503AC0000000036
+
+（検討）
+第六十一条
+政府は、この法律の施行後十年を経過した場合において、この法律の施行の状況及びデジタル社会の形成の状況を勘案し、デジタル庁の在り方について検討を加え、必要があると認めるときは、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">官報の発行に関する法律</div>
+          <div class="hoan-lawnum mono">令和五年法律第八十五号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/505AC0000000085" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2025-04-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2032-04-01<div class="hoan-yrs mono">施行後7年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">官報の発行に関する法律（令和五年法律第八十五号）
+出典: https://laws.e-gov.go.jp/law/505AC0000000085
+
+（検討）
+第七条
+政府は、この法律の施行後七年を経過した場合において、この法律の施行の状況、デジタル社会（デジタル社会形成基本法（令和三年法律第三十五号）第二条に規定するデジタル社会をいう。）の形成の状況等を勘案し、第十条に規定する書面等による官報掲載事項の提供その他官報の発行に係る手続等の在り方について検討を加え、必要があると認めるときは、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">民事裁判情報の活用の促進に関する法律</div>
+          <div class="hoan-lawnum mono">令和七年法律第四十九号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/507AC0000000049" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2027-05-29<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">2032-05-29<div class="hoan-yrs mono">施行後5年</div></td>
+        <td class="col-status"><span class="hoan-badge st-pend">期限前</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">民事裁判情報の活用の促進に関する法律（令和七年法律第四十九号）
+出典: https://laws.e-gov.go.jp/law/507AC0000000049
+
+（検討）
+第五条
+政府は、附則第一条ただし書に規定する規定の施行後五年を経過した場合において、この法律の施行の状況について検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">特定石綿被害建設業務労働者等に対する給付金等の支給に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第七十四号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC1000000074" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2022-01-19<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">定めなし<div class="hoan-yrs mono">期限の定めなし</div></td>
+        <td class="col-status"><span class="hoan-badge st-none">定めなし</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">特定石綿被害建設業務労働者等に対する給付金等の支給に関する法律（令和三年法律第七十四号）
+出典: https://laws.e-gov.go.jp/law/503AC1000000074
+
+（検討）
+第二条
+国は、国以外の者による特定石綿被害建設業務労働者等に対する損害賠償その他特定石綿被害建設業務労働者等に対する補償の在り方について検討を加え、必要があると認めるときは、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">中小事業主が行う事業に従事する者等の労働災害等に係る共済事業に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第八十号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC1000000080" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2023-06-01</td>
+        <td class="col-date mono">定めなし<div class="hoan-yrs mono">期限の定めなし</div></td>
+        <td class="col-status"><span class="hoan-badge st-none">定めなし</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">中小事業主が行う事業に従事する者等の労働災害等に係る共済事業に関する法律（令和三年法律第八十号）
+出典: https://laws.e-gov.go.jp/law/503AC1000000080
+
+（検討）
+第五条
+政府は、第五十四条第一項及び第二項の規定により銀行等が行う共済募集の状況を踏まえ、共済契約者等の一層の保護の在り方について検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">宇宙資源の探査及び開発に関する事業活動の促進に関する法律</div>
+          <div class="hoan-lawnum mono">令和三年法律第八十三号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/503AC1000000083" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2021-12-23<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">定めなし<div class="hoan-yrs mono">期限の定めなし</div></td>
+        <td class="col-status"><span class="hoan-badge st-none">定めなし</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">宇宙資源の探査及び開発に関する事業活動の促進に関する法律（令和三年法律第八十三号）
+出典: https://laws.e-gov.go.jp/law/503AC1000000083
+
+（検討）
+第四条
+政府は、この法律の施行の状況、科学技術の進展の状況、第七条第一項に規定する制度の構築に向けた取組の状況等を勘案して、民間事業者による宇宙資源の探査及び開発に関する事業活動に関する法制度の在り方について抜本的な見直しを含め検討を行い、その結果に基づき、法制の整備その他の所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">国際卓越研究大学の研究及び研究成果の活用のための体制の強化に関する法律</div>
+          <div class="hoan-lawnum mono">令和四年法律第五十一号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/504AC0000000051" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2022-11-15<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">定めなし<div class="hoan-yrs mono">期限の定めなし</div></td>
+        <td class="col-status"><span class="hoan-badge st-none">定めなし</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">国際卓越研究大学の研究及び研究成果の活用のための体制の強化に関する法律（令和四年法律第五十一号）
+出典: https://laws.e-gov.go.jp/law/504AC0000000051
+
+（検討）
+第三条
+政府は、我が国の大学の国際競争力の強化及びイノベーションの創出（第一条に規定するイノベーションの創出をいう。）を推進するためには、国際的に卓越した研究の展開及び経済社会に変化をもたらす研究成果の活用が相当程度見込まれる大学について、研究及び研究成果の活用のための体制を強化することに加え、研究及び研究成果の活用をより効率的かつ持続的に推進することができるように大学の経営管理体制の強化を図ることが重要であることに鑑み、教育及び研究に必要な資金、人材等の資源の確保及び配分その他の大学の経営に係る重要事項の決定及び実施に多様な専門的知見を有する者の参画を得られるようにするため、大学を設置する法人の機関の権限や構成の在り方、人材の確保の方策等について検討を行い、その結果に基づき法制上の措置その他の必要な措置を講じ、特に科学技術・イノベーション創出の活性化に関する法律（平成二十年法律第六十三号）第四十九条の趣旨を踏まえて国立大学法人（国立大学法人法（平成十五年法律第百十二号）第二条第一項に規定する国立大学法人をいう。）の経営管理体制に係る改革を早急に進めるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">在外教育施設における教育の振興に関する法律</div>
+          <div class="hoan-lawnum mono">令和四年法律第七十三号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/504AC1000000073" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2022-06-17</td>
+        <td class="col-date mono">定めなし<div class="hoan-yrs mono">期限の定めなし</div></td>
+        <td class="col-status"><span class="hoan-badge st-none">定めなし</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">在外教育施設における教育の振興に関する法律（令和四年法律第七十三号）
+出典: https://laws.e-gov.go.jp/law/504AC1000000073
+
+（検討）
+第二条
+政府は、この法律の施行後速やかに、海外から帰国した児童及び生徒であって日本語に通じないものに対する支援の一層の充実のための方策について検討を加え、その結果に基づいて必要な措置を講ずるものとする。
+２
+政府は、在留邦人の子のために海外に設置された教育施設における小学校就学前子ども（子ども・子育て支援法（平成二十四年法律第六十五号）第六条第一項に規定する小学校就学前子どもをいう。以下同じ。）に対する教育の実態について調査を行い、その結果を踏まえ、当該教育施設における小学校就学前子どもに対する教育の内容について検討を加え、必要があると認めるときは、所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">重要経済安保情報の保護及び活用に関する法律</div>
+          <div class="hoan-lawnum mono">令和六年法律第二十七号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/506AC0000000027" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2025-05-16<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">定めなし<div class="hoan-yrs mono">期限の定めなし</div></td>
+        <td class="col-status"><span class="hoan-badge st-none">定めなし</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">重要経済安保情報の保護及び活用に関する法律（令和六年法律第二十七号）
+出典: https://laws.e-gov.go.jp/law/506AC0000000027
+
+（国会に対する重要経済安保情報の提供及び国会におけるその保護措置の在り方）
+第十条
+国会に対する重要経済安保情報の提供については、政府は、国会が国権の最高機関であり各議院がその会議その他の手続及び内部の規律に関する規則を定める権能を有することを定める日本国憲法及びこれに基づく国会法等の精神にのっとり、この法律を運用するものとし、重要経済安保情報の提供を受ける国会におけるその保護に関する方策については、国会において、検討を加え、その結果に基づいて必要な措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">食料供給困難事態対策法</div>
+          <div class="hoan-lawnum mono">令和六年法律第六十一号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/506AC0000000061" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2025-04-01</td>
+        <td class="col-date mono">定めなし<div class="hoan-yrs mono">期限の定めなし</div></td>
+        <td class="col-status"><span class="hoan-badge st-none">定めなし</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">食料供給困難事態対策法（令和六年法律第六十一号）
+出典: https://laws.e-gov.go.jp/law/506AC0000000061
+
+（検討）
+第二条
+政府は、この法律の施行後適当な時期において、この法律の施行の状況を勘案し、必要があると認めるときは、この法律の規定について検討を加え、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">旧優生保護法に基づく優生手術等を受けた者等に対する補償金等の支給等に関する法律</div>
+          <div class="hoan-lawnum mono">令和六年法律第七十号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/506AC1000000070" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2025-01-17<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">定めなし<div class="hoan-yrs mono">期限の定めなし</div></td>
+        <td class="col-status"><span class="hoan-badge st-none">定めなし</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">旧優生保護法に基づく優生手術等を受けた者等に対する補償金等の支給等に関する法律（令和六年法律第七十号）
+出典: https://laws.e-gov.go.jp/law/506AC1000000070
+
+（請求の期限の検討）
+第二条
+第五条第三項（第十二条第二項及び第十七条第二項において準用する場合を含む。）に規定する請求の期限については、この法律の施行後における第五条第一項の補償金の支給の請求、第十二条第一項の優生手術等一時金の支給の請求及び第十七条第一項の人工妊娠中絶一時金の支給の請求の状況を勘案し、必要に応じ、検討が加えられるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">人工知能関連技術の研究開発及び活用の推進に関する法律</div>
+          <div class="hoan-lawnum mono">令和七年法律第五十三号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/507AC0000000053" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2025-09-01<span class="hoan-staged mono">段階施行</span></td>
+        <td class="col-date mono">定めなし<div class="hoan-yrs mono">期限の定めなし</div></td>
+        <td class="col-status"><span class="hoan-badge st-none">定めなし</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">人工知能関連技術の研究開発及び活用の推進に関する法律（令和七年法律第五十三号）
+出典: https://laws.e-gov.go.jp/law/507AC0000000053
+
+（検討）
+第二条
+政府は、人工知能関連技術の研究開発及び活用の推進に関する諸施策についての国際的動向その他の社会経済情勢の変化を勘案しつつ、この法律の施行の状況について検討を加え、必要があると認めるときは、その結果に基づいて所要の措置を講ずるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+      <tr class="hoan-row hoan-row-static">
+        <td class="col-title">
+          <div class="hoan-lawtitle">手話に関する施策の推進に関する法律</div>
+          <div class="hoan-lawnum mono">令和七年法律第七十八号 <a class="hoan-srclink mono" href="https://laws.e-gov.go.jp/law/507AC0100000078" target="_blank" rel="noopener">e-Gov ↗</a></div>
+        </td>
+        <td class="col-date mono">2025-06-25</td>
+        <td class="col-date mono">定めなし<div class="hoan-yrs mono">期限の定めなし</div></td>
+        <td class="col-status"><span class="hoan-badge st-none">定めなし</span></td>
+      </tr>
+      <tr class="hoan-detail hoan-detail-static">
+        <td colspan="4">
+          <details>
+            <summary class="hoan-clause-head mono">見直し条項（原文）</summary>
+            <pre class="hoan-clause">手話に関する施策の推進に関する法律（令和七年法律第七十八号）
+出典: https://laws.e-gov.go.jp/law/507AC0100000078
+
+（検討）
+２
+この法律の規定については、この法律の施行後おおむね五年を目途として、その施行の状況等を勘案して検討が加えられ、必要があると認められるときは、その結果に基づいて必要な措置が講ぜられるものとする。</pre>
+          </details>
+        </td>
+      </tr>
+    <!-- /BUILD:rows --></tbody>
       </table>
     </div>
   </main>
@@ -95,7 +1244,7 @@
     <a class="footer-about" id="t-footer-contact" href="contact.html">お問い合わせ</a>
   </footer>
 </div>
-<script src="csv.js?v=20260731c"></script>
-<script src="hoan.js?v=20260731c"></script>
+<script src="csv.js?v=20260731i"></script>
+<script src="hoan.js?v=20260731i"></script>
 </body>
 </html>
