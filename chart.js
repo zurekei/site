@@ -17,8 +17,16 @@ const T = {
     dataNotCollected: "データ未収集",
     forecastSourcePrefix: "見通し出典: ",
     actualSourcePrefix: "実績出典: ",
-    gapSummaryAbove: "実績が見通しを上回った年",
-    gapSummaryBelow: "下回った年",
+    // Which pair of series the aggregate is counting, per metric.statsVocab.
+    // Only "forecast" is a prediction: for the budget and plan indicators the
+    // left-hand series is an appropriation or an issuance plan, so a revision
+    // by supplementary budget is a decision, not a missed forecast, and the
+    // wording must not describe it as one.
+    gapVocab: {
+      forecast: { above: "実績が見通しを上回った年", below: "下回った年", equal: "見通しどおり" },
+      budget: { above: "決算が当初予算を上回った年", below: "下回った年", equal: "当初予算どおり" },
+      plan: { above: "実績が当初計画を上回った年", below: "下回った年", equal: "当初計画どおり" },
+    },
     gapSummaryAvg: "平均のズレ",
     gapSummaryCountPrefix: "対象",
     gapSummaryCountSuffix: "年度分",
@@ -43,8 +51,11 @@ const T = {
     dataNotCollected: "Data not yet collected",
     forecastSourcePrefix: "Forecast source: ",
     actualSourcePrefix: "Actual source: ",
-    gapSummaryAbove: "Years actual came in above forecast",
-    gapSummaryBelow: "below",
+    gapVocab: {
+      forecast: { above: "Years actual came in above forecast", below: "below", equal: "matched the forecast" },
+      budget: { above: "Years the settlement came in above the initial budget", below: "below", equal: "matched the initial budget" },
+      plan: { above: "Years actual came in above the initial plan", below: "below", equal: "matched the initial plan" },
+    },
     gapSummaryAvg: "mean gap",
     gapSummaryCountPrefix: "n=",
     gapSummaryCountSuffix: " fiscal years",
@@ -140,6 +151,7 @@ const METRICS = {
     actualSourceCol: "actual_source_url",
     unit: "兆円",
     signed: false,
+    statsVocab: "budget",
   },
   "bond-issuance": {
     title: "国債発行額(一般会計)",
@@ -154,6 +166,17 @@ const METRICS = {
     unit: "兆円",
     signed: false,
     gapLabel: { ja: "当初予算に計画なし", en: "No issuance planned in the initial budget" },
+    statsVocab: "budget",
+    // FY1947-1964 are all 0 planned vs 0 issued (Japan issued no bonds in that
+    // era). Counting them as years the budget was met exactly would inflate the
+    // total to 77 and bury the actual record, so the aggregate starts at the
+    // first year with a planned issuance. The chart itself still draws the full
+    // series from FY1947.
+    statsFromYear: 1965,
+    statsScopeNote: {
+      ja: "※国債の発行がなかったFY1964以前を除く",
+      en: "(excludes FY1964 and earlier, when no bonds were issued)",
+    },
   },
   "jgb-total": {
     title: "国債発行総額",
@@ -167,6 +190,7 @@ const METRICS = {
     actualSourceCol: "actual_source_url",
     unit: "兆円",
     signed: false,
+    statsVocab: "plan",
   },
   cpi: {
     title: "消費者物価指数(総合)",
@@ -207,14 +231,29 @@ function gapUnitSuffix(metric) {
 function gapSummaryText(stats, metric, lang) {
   if (!stats) return "";
   const t = T[lang];
+  const vocab = t.gapVocab[metric.statsVocab] || t.gapVocab.forecast;
   const unit = gapUnitSuffix(metric);
   // signed mean (実績 − 見通し の規約通り), same sign convention as the
-  // per-year gap readout — not a magnitude, so no "±" prefix.
-  const avg = `${stats.meanGap > 0 ? "+" : ""}${stats.meanGap.toFixed(1)}`;
-  if (lang === "ja") {
-    return `${t.gapSummaryAbove} ${stats.above}${t.gapSummaryUnit} / ${t.gapSummaryBelow} ${stats.below}${t.gapSummaryUnit} / ${t.gapSummaryAvg} ${avg}${unit} / ${t.gapSummaryCountPrefix}${stats.count}${t.gapSummaryCountSuffix}`;
-  }
-  return `${t.gapSummaryAbove}: ${stats.above} / ${t.gapSummaryBelow}: ${stats.below} / ${t.gapSummaryAvg} ${avg}${unit} / ${t.gapSummaryCountPrefix}${stats.count}${t.gapSummaryCountSuffix}`;
+  // per-year gap readout — not a magnitude. Round before reading the sign so a
+  // mean that rounds to zero prints "±0.0" instead of a misleading "-0.0".
+  const rounded = Math.round(stats.meanGap * 10) / 10;
+  const sign = rounded > 0 ? "+" : rounded < 0 ? "-" : "±";
+  const avg = `${sign}${Math.abs(rounded).toFixed(1)}`;
+  const item = lang === "ja"
+    ? (label, n) => `${label} ${n}${t.gapSummaryUnit}`
+    : (label, n) => `${label}: ${n}`;
+
+  const parts = [item(vocab.above, stats.above), item(vocab.below, stats.below)];
+  // ties are printed only when there are any: most indicators have none, and a
+  // "0回" would be noise. When they exist the count is required, otherwise
+  // above + below silently falls short of the stated total.
+  if (stats.equal > 0) parts.push(item(vocab.equal, stats.equal));
+  parts.push(`${t.gapSummaryAvg} ${avg}${unit}`);
+  parts.push(`${t.gapSummaryCountPrefix}${stats.count}${t.gapSummaryCountSuffix}`);
+
+  // per-metric note explaining a restricted counting window (metric.statsFromYear)
+  const scope = metric.statsScopeNote ? ` ${metric.statsScopeNote[lang]}` : "";
+  return parts.join(" / ") + scope;
 }
 
 function svgEl(tag, attrs) {
@@ -296,9 +335,10 @@ async function main() {
   const actualPoints = rows.filter((r) => r.actualVal !== null);
   const forecastYears = rows.filter((r) => r.forecastVal !== null);
 
-  // aggregate over/under-forecast counts, computed once from the full series
-  // (not per selected year) — see computeGapStats() in csv.js.
-  const gapStats = computeGapStats(rows, "forecastVal", "actualVal");
+  // aggregate over/under counts for the whole series (not the selected year),
+  // computed once — see computeGapStats() in csv.js. metric.statsFromYear, where
+  // set, narrows the window; the note explaining why is shown alongside.
+  const gapStats = computeGapStats(rows, "forecastVal", "actualVal", { fromYear: metric.statsFromYear });
 
   const allYears = rows.map((r) => r.year);
   const xMin = Math.min(...allYears);

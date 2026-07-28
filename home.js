@@ -118,6 +118,9 @@ const INDICATOR_META = [
     descJa: "国の一般会計が発行する新規国債(建設国債+特例国債)の額。", descEn: "New bonds issued by the general account (construction and deficit-financing bonds).",
     unit: "兆円", kind: "series", signed: false,
     csv: "data/bond_issuance_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
+    // keep in sync with METRICS["bond-issuance"].statsFromYear in chart.js —
+    // FY1947-1964 are 0 planned vs 0 issued and are not counted
+    statsFromYear: 1965,
     chartHref: "chart.html?m=bond-issuance",
   },
   {
@@ -287,7 +290,7 @@ async function loadSeries(meta) {
   const withForecast = rows.filter((r) => r[meta.forecastCol] !== null);
   const latest = withForecast[withForecast.length - 1] || null;
   const spark = buildSparkline(rows, meta.forecastCol, meta.actualCol);
-  const stats = computeGapStats(rows, meta.forecastCol, meta.actualCol);
+  const stats = computeGapStats(rows, meta.forecastCol, meta.actualCol, { fromYear: meta.statsFromYear });
   const years = rows.map((r) => r.year);
   const yearRange = years.length ? { min: Math.min(...years), max: Math.max(...years) } : null;
 
@@ -296,12 +299,17 @@ async function loadSeries(meta) {
 
 // compact one-line version of the same over/under-forecast counts shown in
 // full on the chart page (see gapSummaryText() in chart.js / computeGapStats()
-// in csv.js) — counts only, no average gap, to keep the card small.
+// in csv.js) — counts only, no average gap, to keep the card small. Ties are
+// shown only when there are any, but they must be shown then: without them
+// above + below does not reach the stated year count. The wording names no
+// subject ("上回り" / "above"), so one phrasing reads correctly for all three
+// kinds of pair the chart page spells out per metric (見通し vs 実績,
+// 当初予算 vs 決算, 当初計画 vs 実績) — see T.gapVocab in chart.js.
 function cardGapSummaryText(stats, lang) {
   if (!stats) return "";
   return lang === "ja"
-    ? `上回り ${stats.above}・下回り ${stats.below} / ${stats.count}年`
-    : `above ${stats.above} · below ${stats.below} / ${stats.count} yrs`;
+    ? `上回り ${stats.above}・下回り ${stats.below}${stats.equal > 0 ? `・同値 ${stats.equal}` : ""} / ${stats.count}年`
+    : `above ${stats.above} · below ${stats.below}${stats.equal > 0 ? ` · tied ${stats.equal}` : ""} / ${stats.count} yrs`;
 }
 
 function renderCard(meta, lang, data) {
@@ -358,13 +366,13 @@ function renderCard(meta, lang, data) {
       <div><div class="stat-label">${t.actual}</div><div class="stat-value">${actualStr}</div></div>
       <div><div class="stat-label stat-label-gap">${t.gap}</div><div class="stat-value stat-value-gap">${gapStr}</div></div>
     </div>
-    ${gapSummaryStr ? `<div class="card-gap-summary mono">${gapSummaryStr}</div>` : ""}
     <svg class="card-spark" viewBox="0 0 300 80">
       ${spark.fc.map((pts) => `<polyline class="spark-forecast" points="${pts}"></polyline>`).join("")}
       ${spark.ac.map((pts) => `<polyline class="spark-actual" points="${pts}"></polyline>`).join("")}
       ${spark.fcDots.map((p) => `<circle class="spark-forecast-dot" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2"></circle>`).join("")}
       ${spark.acDots.map((p) => `<circle class="spark-actual-dot" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2"></circle>`).join("")}
-    </svg>`;
+    </svg>
+    ${gapSummaryStr ? `<div class="card-gap-summary mono">${gapSummaryStr}</div>` : ""}`;
 
   if (meta.chartHref) {
     return `<a class="card" href="${meta.chartHref}">${inner}</a>`;

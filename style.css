@@ -342,10 +342,12 @@ a.card:hover {
 
 .stat-value-gap { color: var(--amber); font-weight: 600; }
 
+/* caption for the sparkline above it: both describe the whole series, whereas
+   .card-stats above them is the latest fiscal year only */
 .card-gap-summary {
   font-size: 10.5px;
   color: var(--muted-2);
-  margin: -6px 0 8px;
+  margin: 6px 0 0;
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
 }
@@ -772,13 +774,20 @@ a.card:hover {
   text-align: right;
 }
 
+/* caption for the chart above it — the whole series in one line. Sits between
+   the chart and the slider, so .controls carries extra top margin to keep the
+   slider visibly paired with the per-year readout below it rather than with
+   this line. */
 .chart-summary {
-  margin-top: 0.7rem;
+  margin: 0.7rem 0 0;
   font-size: 0.72rem;
+  line-height: 1.7;
   letter-spacing: 0.01em;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
+
+.chart-summary:not([hidden]) + .controls { margin-top: 1.4rem; }
 
 .readout-source {
   margin-top: 1rem;
