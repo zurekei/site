@@ -24,6 +24,7 @@ const T = {
     heroGapBelow: (below, total) => `名目GDP成長率: ${total}年度中、実績が見通しを下回った年 ${below}回`,
     src: "src: 内閣府 / 国民経済計算(SNA)",
     aboutLink: "このサイトについて",
+    contactLink: "お問い合わせ",
     correctionsLink: "訂正履歴",
     hoanEntryLabel: "別の計器",
     hoanEntryTitle: "法律の見直し条項 — 期限と検討状況",
@@ -56,6 +57,7 @@ const T = {
     heroGapBelow: (below, total) => `Nominal GDP growth: actual came in below forecast in ${below} of ${total} fiscal years`,
     src: "src: Cabinet Office of Japan / SNA",
     aboutLink: "About this site",
+    contactLink: "Contact",
     correctionsLink: "Corrections",
     hoanEntryLabel: "Another instrument",
     hoanEntryTitle: "Statutory review clauses — deadlines and status",
@@ -473,6 +475,7 @@ async function main() {
     document.getElementById("t-footer-src").textContent = t.src;
     document.getElementById("t-footer-corrections").textContent = t.correctionsLink;
     document.getElementById("t-footer-about").textContent = t.aboutLink;
+    document.getElementById("t-footer-contact").textContent = t.contactLink;
     document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
     document.getElementById("lang-en").classList.toggle("active", lang === "en");
     document.documentElement.lang = lang;

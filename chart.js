@@ -40,6 +40,7 @@ const T = {
     vintageSeriesSuffix: "系列",
     footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
     footerAbout: "このサイトについて",
+    footerContact: "お問い合わせ",
   },
   en: {
     back: "← Indicators",
@@ -69,6 +70,7 @@ const T = {
     vintageSeriesSuffix: " vintages",
     footerSrc: "src: Cabinet Office of Japan / SNA",
     footerAbout: "About this site",
+    footerContact: "Contact",
   },
 };
 
@@ -678,6 +680,7 @@ async function main() {
     document.getElementById("t-stat-gap").textContent = t.gap;
     document.getElementById("t-footer-src").textContent = t.footerSrc;
     document.getElementById("t-footer-about").textContent = t.footerAbout;
+    document.getElementById("t-footer-contact").textContent = t.footerContact;
     const summaryEl = document.getElementById("chart-summary");
     if (summaryEl) {
       const summaryText = gapSummaryText(gapStats, metric, lang);

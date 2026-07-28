@@ -33,6 +33,7 @@ const T = {
     footerSrc: "src: e-Gov 法令検索(デジタル庁) 法令API",
     footerCorrections: "訂正履歴",
     footerAbout: "このサイトについて",
+    footerContact: "お問い合わせ",
     all: "すべて",
     yearAll: "すべて",
     empty: "該当する法律はありません。",
@@ -65,6 +66,7 @@ const T = {
     footerSrc: "src: e-Gov Law Search (Digital Agency) Law API",
     footerCorrections: "Corrections",
     footerAbout: "About this site",
+    footerContact: "Contact",
     all: "All",
     yearAll: "All",
     empty: "No laws match.",
@@ -249,6 +251,7 @@ function applyStatic() {
   set("t-footer-src", t.footerSrc);
   set("t-footer-corrections", t.footerCorrections);
   set("t-footer-about", t.footerAbout);
+  set("t-footer-contact", t.footerContact);
   document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
   document.getElementById("lang-en").classList.toggle("active", lang === "en");
   document.documentElement.lang = lang;

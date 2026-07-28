@@ -16,6 +16,7 @@ const T = {
     sourceActualPrefix: "実績: ",
     footerSrc: "src: 国立社会保障・人口問題研究所「日本の将来推計人口」",
     footerAbout: "このサイトについて",
+    footerContact: "お問い合わせ",
   },
   en: {
     back: "← Indicators",
@@ -27,6 +28,7 @@ const T = {
     sourceActualPrefix: "Actual: ",
     footerSrc: "src: NIPSSR / Population Projections for Japan",
     footerAbout: "About this site",
+    footerContact: "Contact",
   },
 };
 
@@ -259,6 +261,7 @@ async function main() {
     document.getElementById("fertility-chart").setAttribute("aria-label", t.chartAriaLabel);
     document.getElementById("t-footer-src").textContent = t.footerSrc;
     document.getElementById("t-footer-about").textContent = t.footerAbout;
+    document.getElementById("t-footer-contact").textContent = t.footerContact;
     document.getElementById("fertility-legend").innerHTML = buildLegendHtml();
     document.getElementById("fertility-source").innerHTML = buildSourceHtml();
     document.getElementById("lang-ja").classList.toggle("active", lang === "ja");

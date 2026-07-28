@@ -5,15 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>お問い合わせ — ズレ計</title>
 <meta name="description" content="ズレ計へのご質問・ご指摘・データ修正提案はこちらから。">
+<!-- Canonical is the extension-less URL: /x.html 308-redirects to /x, so the two
+     spellings are the same page. Without this, aggregators that key on URL (はてなブックマーク)
+     count them as separate entries and split the bookmark total. -->
+<link rel="canonical" href="https://zurekei.org/contact">
 <meta property="og:site_name" content="ズレ計">
 <meta property="og:type" content="website">
 <meta property="og:title" content="お問い合わせ — ズレ計">
 <meta property="og:description" content="ズレ計へのご質問・ご指摘・データ修正提案はこちらから。">
-<meta property="og:url" content="https://zurekei.org/contact.html">
+<meta property="og:url" content="https://zurekei.org/contact">
 <meta property="og:image" content="https://zurekei.org/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=20260731b">
+<link rel="stylesheet" href="style.css?v=20260731c">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
   .contact-page-wrap {
@@ -211,8 +215,14 @@
       </div>
     </form>
   </div>
+
+  <footer class="site-footer-row">
+    <a class="footer-about" id="t-footer-index" href="index.html">指標一覧へ</a>
+    <a class="footer-about" id="t-footer-corrections" href="corrections.html">訂正履歴</a>
+    <a class="footer-about" id="t-footer-about" href="about.html">このサイトについて</a>
+  </footer>
 </div>
 
-<script src="contact.js?v=20260731b"></script>
+<script src="contact.js?v=20260731c"></script>
 </body>
 </html>

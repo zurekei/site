@@ -16,7 +16,7 @@ const T = {
     goalTitle: "目標",
     g1: "このサイトの目標は、日本に独立した検証機関が生まれて、ここが不要になることです。その日まで、キツツキのように、毎年同じ木をつつき続けます。",
     contactTitle: "ご質問・ご指摘",
-    contactBody: 'データの誤りや見通しの修正提案、このサイトについてのご質問がございましたら、<a href="contact.html">お問い合わせフォーム</a>からお気軽にご連絡ください。',
+    contactBody: '運営は一個人です。データの誤りや見通しの修正提案、このサイトについてのご質問がございましたら、<a href="contact.html">お問い合わせフォーム</a>からお気軽にご連絡ください。',
     methodsTitle: "データと方法",
     thIndicator: "指標",
     thForecast: "見通しの出典",
@@ -31,6 +31,7 @@ const T = {
     dataBody: 'このサイトの数値は、リポジトリ内のCSVファイルを唯一の原本(ソースオブトゥルース)としている。各行に一次資料の出典URLを付けている。→ <a href="https://github.com/zurekei/site/tree/main/data" target="_blank" rel="noopener">GitHub上のdata/</a>',
     footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
     footerCorrections: "訂正履歴",
+    footerContact: "お問い合わせ",
     footerIndex: "指標一覧へ",
   },
   en: {
@@ -50,7 +51,7 @@ const T = {
     goalTitle: "The goal",
     g1: "The goal of this site is for Japan to get an independent verification body, and for this site to become unnecessary. Until that day, I'll keep pecking at the same tree every year, like a woodpecker.",
     contactTitle: "Questions and corrections",
-    contactBody: 'If you spot an error in the data, want to suggest a correction to a forecast or actual figure, or have a question about this site, please get in touch via the <a href="contact.html">contact form</a>.',
+    contactBody: 'This site is run by one individual. If you spot an error in the data, want to suggest a correction to a forecast or actual figure, or have a question about this site, please get in touch via the <a href="contact.html">contact form</a>.',
     methodsTitle: "Data and methods",
     thIndicator: "Indicator",
     thForecast: "Forecast source",
@@ -65,6 +66,7 @@ const T = {
     dataBody: 'Every figure on this site traces back to CSV files in the repository, which are the single source of truth. Each row carries a link to its primary source. → <a href="https://github.com/zurekei/site/tree/main/data" target="_blank" rel="noopener">data/ on GitHub</a>',
     footerSrc: "src: Cabinet Office of Japan / SNA",
     footerCorrections: "Corrections",
+    footerContact: "Contact",
     footerIndex: "Indicators",
   },
 };
@@ -151,6 +153,7 @@ function main() {
     document.getElementById("t-footer-src").textContent = t.footerSrc;
     document.getElementById("t-footer-corrections").textContent = t.footerCorrections;
     document.getElementById("t-footer-index").textContent = t.footerIndex;
+    document.getElementById("t-footer-contact").textContent = t.footerContact;
     document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
     document.getElementById("lang-en").classList.toggle("active", lang === "en");
     document.documentElement.lang = lang;
