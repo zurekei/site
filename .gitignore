@@ -6,3 +6,4 @@ CLAUDE.local.md
 support.js
 
 .deploy.env
+node_modules/
