@@ -1,25 +1,84 @@
-# ⚠ このファイルは、配信時に Cloudflare の Managed robots.txt が「前に」連結される。
-#   つまりここに何を書いても、上に置かれた規則を消せない。外すのはダッシュボードの
-#   AI Crawl Control > Security 側の設定で、このファイルの編集では不可能。
-#   実際の配信内容は必ず本番で確かめること:
+# 方針(2026-07-29): 検索とAI回答への引用は歓迎する。学習用の一括収集は断る。
+#
+# このサイトの目的は参照されることなので、拾われる側の障害は極力なくす。
+# 一方で「予測と実績のズレを記録し続ける計器」という性格上、記録が引用元として
+# 名前ごと残ることに意味があり、匿名の学習素材として溶けることには意味がない。
+#
+# ■ なぜダッシュボードだけに任せないのか
+#   ここに書いてある内容は Cloudflare の AI Crawl Control 側の設定と重複している。
+#   それでも repo 側に書くのは、ダッシュボードの設定が画面外で効いていて気づけない
+#   事故を2回踏んでいるため(Pages の環境変数名の先頭空白 / 下記の Managed robots.txt)。
+#   **バージョン管理されていて diff が取れる側を正とする。**
+#   ダッシュボードを変えたらこのファイルも合わせること。
+#
+# ■ Cloudflare Managed robots.txt について
+#   Cloudflare は配信時に、独自のブロック規則をこのファイルの「前に」連結できる。
+#   その状態では、ここに何を書いても上の規則を消せない。
+#   **実際の配信内容は必ず本番で確かめること**(ローカルのファイルとは違う):
 #     curl -s https://zurekei.org/robots.txt
 #
-# 2026-07-29 時点の方針: 引用は歓迎、学習用の一括収集は断る。
-#   Cloudflare はボットを3カテゴリに分けており、Disallow: / が出ているのは
-#   AI Crawler(CCBot / GPTBot / ClaudeBot = 訓練コーパス向け)だけ。
-#   AI Search(OAI-SearchBot / Claude-SearchBot / PerplexityBot)と
-#   AI Assistant(ChatGPT-User)は許可されていて、取得実績もある。
-#   **AI回答への引用に効くのは後者なので、方針は成立している。**
-#   Disallow: / という文字列だけを見て「引用が塞がれている」と読まないこと
-#   (実際に一度そう誤読した。層が3つあり、1つ見ただけでは結論が出ない)。
-#
-# 下の User-agent: * は省略できない。これが無いと Disallow: /og が、上の Cloudflare
-# ブロックの最後のグループ(meta-externalagent)への規則として読まれてしまう。
+# ■ 読み違えた記録(繰り返さないため)
+#   Disallow: / という文字列を見て「AI引用が塞がれている」と判断したが、誤りだった。
+#   Cloudflare はボットを3カテゴリに分けており、対象は AI Crawler(訓練用)だけ。
+#   引用に効くのは AI Search(OAI-SearchBot / Claude-SearchBot / PerplexityBot)と
+#   AI Assistant(ChatGPT-User / Claude-User 等)で、こちらは別枠。
+#   さらにその前段では、UA を偽装して 200 が返るのを見て「ブロックなし」と判断していた。
+#   **同じ対象を粗く見て2回違う結論を出している。層を1つ見ただけで決めない。**
+
 User-agent: *
+Content-Signal: search=yes,ai-input=yes,ai-train=no
 Allow: /
 
 # OGP画像を書き出すための作業用ページ。読み物ではないので索引に入れない。
 Disallow: /og
 Disallow: /og.html
+
+# ここから下は学習用の収集を断る宣言。
+#
+# ⚠ Google-Extended と Applebot-Extended は「クローラ」ではなく robots.txt 専用の
+#   トークンで、実際の巡回は Googlebot / Applebot が行う。そのため Cloudflare の
+#   AI Crawl Control の一覧には出てこず、**ダッシュボードでは設定できない**。
+#   Managed robots.txt を切るとこの2つの宣言も一緒に消えるので、ここで明示する。
+#   (検索インデックス自体は Googlebot / Applebot 側で許可しているので影響しない)
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /
+
+# 以下は主要な学習用クローラで、ダッシュボード側でもブロックしてある。
+# Cloudflare の設定が変わっても意思表示が消えないように、repo 側にも置いておく。
+# (ダッシュボードには他にも0件の無名クローラがブロック済みで並んでいる。
+#  トラフィックが無く UA 文字列も確かめられないものはここに書かない。
+#  推測でトークン名を書くと、効かないのに効いているつもりになる)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: meta-externalagent
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: TikTokSpider
+Disallow: /
+
+User-agent: Timpibot
+Disallow: /
+
+User-agent: Google-CloudVertexBot
+Disallow: /
 
 Sitemap: https://zurekei.org/sitemap.xml
