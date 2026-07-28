@@ -342,8 +342,20 @@ a.card:hover {
 
 .stat-value-gap { color: var(--amber); font-weight: 600; }
 
+/* the fiscal year the government is currently on, whose actual has not landed
+   yet. Sits between the settled gap and the sparkline as a single muted line so
+   it reads as an annex to that gap rather than as a second headline. The
+   negative top margin closes the gap .card-stats leaves below itself. */
+.card-pending-line {
+  margin: -8px 0 12px;
+  font-size: 11px;
+  color: var(--muted-2);
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
 /* caption for the sparkline above it: both describe the whole series, whereas
-   .card-stats above them is the latest fiscal year only */
+   .card-stats above them is the most recent fiscal year whose gap is settled */
 .card-gap-summary {
   font-size: 10.5px;
   color: var(--muted-2);

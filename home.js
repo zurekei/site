@@ -9,12 +9,13 @@ const T = {
     calloutTitle: "ズレの読み方",
     calloutBody: "ズレは「実績 − 見通し」の差であり、良し悪しの評価ではない。景気変動・災害・資源価格・政策変更など、見通しの前提が外れると生じる。プラスは実績が見通しを上回ったこと、マイナスは下回ったことを意味する。",
     indicatorsLabel: "指標一覧 · 9",
-    indicatorsLatest: "最新年度 / 見通し vs 実績",
+    indicatorsLatest: "確定した直近年度 / 見通し vs 実績",
     plan: "見通し",
     actual: "実績",
     gap: "ズレ",
     pending: "データ収集中",
     noActual: "未確定",
+    awaitingActual: "（実績待ち）",
     noLinkNote: "実績データ収集後に詳細チャートを公開予定",
     fertilityNote: "歴代7推計(1992〜2023) vs 実績",
     sourceLabel: "出典",
@@ -28,7 +29,7 @@ const T = {
     hoanEntryTitle: "法律の見直し条項 — 期限と検討状況",
     hoanEntryDesc: "附則の「施行後◯年を目途に検討」という見直し条項を、施行日から算出した期限順に並べる。",
     hoanEntryNote: (total, due) => `${total}件中、期限到来・未確認 ${due}件`,
-    nextUpdate: "次回更新予定: 2027年1月頃(令和9年度 政府経済見通し)",
+    nextUpdate: "次回更新予定: 2026年12月頃(令和7年度 国民経済計算年次推計・令和9年度予算案)",
   },
   en: {
     tag: "FORECAST × ACTUAL",
@@ -40,12 +41,13 @@ const T = {
     calloutTitle: "Reading the gap",
     calloutBody: 'The gap is "actual − forecast" — not a verdict. It arises when conditions diverge from the assumptions underlying a forecast: business-cycle swings, disasters, commodity prices, policy changes. A positive gap means the actual came in above the forecast; a negative, below.',
     indicatorsLabel: "INDICATORS · 9",
-    indicatorsLatest: "Latest FY / Forecast vs Actual",
+    indicatorsLatest: "Latest settled FY / Forecast vs Actual",
     plan: "Forecast",
     actual: "Actual",
     gap: "Gap",
     pending: "Collecting data",
     noActual: "not final",
+    awaitingActual: " (awaiting actual)",
     noLinkNote: "Detail chart to follow once actual data is available",
     fertilityNote: "7 vintages (1992–2023) vs actual",
     sourceLabel: "Source",
@@ -59,7 +61,7 @@ const T = {
     hoanEntryTitle: "Statutory review clauses — deadlines and status",
     hoanEntryDesc: 'A review clause in supplementary provisions — "review to be considered around N years after enforcement" — ordered by the deadline calculated from the enforcement date.',
     hoanEntryNote: (total, due) => `${due} of ${total} laws past review deadline, unconfirmed`,
-    nextUpdate: "Next update: around Jan 2027 (FY2027 government economic outlook)",
+    nextUpdate: "Next update: around Dec 2026 (FY2025 national accounts annual estimates / FY2027 budget)",
   },
 };
 
@@ -287,14 +289,29 @@ async function loadSeries(meta) {
     }))
     .sort((a, b) => a.year - b.year);
 
+  // The card leads with the most recent year whose gap is actually settled, not
+  // with the most recent forecast. A new forecast lands every January and the
+  // matching actual does not arrive until the following July-December, so keying
+  // the card off the newest forecast would leave every card reading "実績未確定 /
+  // ズレ—" for over half the year — a front page about the gap, showing no gap.
+  // The newest forecast is still worth showing (it is what the government is
+  // looking at now), so it goes on its own line as `pending`.
+  const paired = rows.filter((r) => r[meta.forecastCol] !== null && r[meta.actualCol] !== null);
+  const settled = paired[paired.length - 1] || null;
   const withForecast = rows.filter((r) => r[meta.forecastCol] !== null);
-  const latest = withForecast[withForecast.length - 1] || null;
+  const newestForecast = withForecast[withForecast.length - 1] || null;
+  // only a forecast for a year *after* the settled one is still awaiting its
+  // actual. Where several years are outstanding (国債発行額 has FY2025 and FY2026
+  // both open) the newest is shown — that is the one the government is on.
+  const pending =
+    newestForecast && (!settled || newestForecast.year > settled.year) ? newestForecast : null;
+  const latest = settled || newestForecast;
   const spark = buildSparkline(rows, meta.forecastCol, meta.actualCol);
   const stats = computeGapStats(rows, meta.forecastCol, meta.actualCol, { fromYear: meta.statsFromYear });
   const years = rows.map((r) => r.year);
   const yearRange = years.length ? { min: Math.min(...years), max: Math.max(...years) } : null;
 
-  return { latest, spark, stats, yearRange };
+  return { latest, pending, spark, stats, yearRange };
 }
 
 // compact one-line version of the same over/under-forecast counts shown in
@@ -344,7 +361,7 @@ function renderCard(meta, lang, data) {
       </a>`;
   }
 
-  const { latest, spark, stats } = data;
+  const { latest, pending, spark, stats } = data;
   const fy = latest ? `'${String(latest.year).slice(-2)}` : "—";
   const planVal = latest ? latest[meta.forecastCol] : null;
   const actualVal = latest ? latest[meta.actualCol] : null;
@@ -354,6 +371,14 @@ function renderCard(meta, lang, data) {
   const actualStr = actualVal !== null ? fmtSigned(actualVal, meta.unit, meta.signed) : t.noActual;
   const gapStr = fmtSigned(gapVal, meta.unit) ?? "—";
   const gapSummaryStr = cardGapSummaryText(stats, lang);
+  // the year the government is currently on, when its actual has not landed yet.
+  // Deliberately one plain line rather than a second stat row: the settled gap
+  // above it is the point of the card, and this must not compete with it.
+  const pendingLine = pending
+    ? `<div class="card-pending-line mono">'${String(pending.year).slice(-2)} ${t.plan} ${
+        fmtSigned(pending[meta.forecastCol], meta.unit, meta.signed) ?? "—"
+      }${t.awaitingActual}</div>`
+    : "";
 
   const inner = `
     <div class="card-top">
@@ -366,6 +391,7 @@ function renderCard(meta, lang, data) {
       <div><div class="stat-label">${t.actual}</div><div class="stat-value">${actualStr}</div></div>
       <div><div class="stat-label stat-label-gap">${t.gap}</div><div class="stat-value stat-value-gap">${gapStr}</div></div>
     </div>
+    ${pendingLine}
     <svg class="card-spark" viewBox="0 0 300 80">
       ${spark.fc.map((pts) => `<polyline class="spark-forecast" points="${pts}"></polyline>`).join("")}
       ${spark.ac.map((pts) => `<polyline class="spark-actual" points="${pts}"></polyline>`).join("")}
