@@ -795,9 +795,16 @@ a.card:hover {
 
 /* ==================== about page ==================== */
 
-.page-narrow { max-width: 760px; }
-
+/* 文章ページのページ枠は指標ページと同じ(.page = 1120px)。
+   罫線・表は全幅、本文だけ可読な行長(760px)に収める */
 .about-body { margin-top: 2.5rem; }
+
+.about-lead,
+.about-more > summary,
+.about-more-body p,
+.about-more-body h2,
+.about-contact p,
+.methods-notes dd { max-width: 760px; }
 
 .about-title {
   font-family: "IBM Plex Mono", monospace;
@@ -854,6 +861,33 @@ a.card:hover {
   margin-top: 2rem;
   color: var(--ink);
 }
+
+/* ---- about: contact ---- */
+
+.about-contact {
+  margin-top: 2.75rem;
+  border-top: 1px solid var(--line);
+  padding-top: 1.5rem;
+}
+
+.about-contact-title {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  margin: 0 0 1.1rem;
+}
+
+.about-contact p {
+  font-size: 0.94rem;
+  line-height: 1.9;
+  color: var(--desc);
+  margin: 0;
+}
+
+.about-contact a { color: var(--navy); text-decoration: underline; }
+.about-contact a:hover { opacity: 0.7; }
 
 /* ---- about: data & methods ---- */
 

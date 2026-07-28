@@ -15,6 +15,8 @@ const T = {
     w2: "このサイトは、その空白を一個人が埋めようとする試みです。埋まるはずがないことは分かっています。それでも、「予測と実績のズレが記録され続けている」という事実がひとつあるだけで、次の見通しは少しだけ歪みにくくなるはずです。",
     goalTitle: "目標",
     g1: "このサイトの目標は、日本に独立した検証機関が生まれて、ここが不要になることです。その日まで、キツツキのように、毎年同じ木をつつき続けます。",
+    contactTitle: "ご質問・ご指摘",
+    contactBody: 'データの誤りや見通しの修正提案、このサイトについてのご質問がございましたら、<a href="contact.html">お問い合わせフォーム</a>からお気軽にご連絡ください。',
     methodsTitle: "データと方法",
     thIndicator: "指標",
     thForecast: "見通しの出典",
@@ -47,6 +49,8 @@ const T = {
     w2: "This site is one individual's attempt to fill that gap. I know it can't actually fill it. But even just the fact that the gap between forecast and actual keeps being recorded should make the next forecast a little harder to distort.",
     goalTitle: "The goal",
     g1: "The goal of this site is for Japan to get an independent verification body, and for this site to become unnecessary. Until that day, I'll keep pecking at the same tree every year, like a woodpecker.",
+    contactTitle: "Questions and corrections",
+    contactBody: 'If you spot an error in the data, want to suggest a correction to a forecast or actual figure, or have a question about this site, please get in touch via the <a href="contact.html">contact form</a>.',
     methodsTitle: "Data and methods",
     thIndicator: "Indicator",
     thForecast: "Forecast source",
@@ -129,6 +133,8 @@ function main() {
     document.getElementById("p-w2").textContent = t.w2;
     document.getElementById("h2-goal").textContent = t.goalTitle;
     document.getElementById("p-g1").textContent = t.g1;
+    document.getElementById("contact-title").textContent = t.contactTitle;
+    document.getElementById("contact-lead").innerHTML = t.contactBody;
     document.getElementById("methods-title").textContent = t.methodsTitle;
     document.getElementById("th-indicator").textContent = t.thIndicator;
     document.getElementById("th-forecast").textContent = t.thForecast;
