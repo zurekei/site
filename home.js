@@ -27,6 +27,8 @@ const T = {
     hoanEntryLabel: "別の計器",
     hoanEntryTitle: "法律の見直し条項 — 期限と検討状況",
     hoanEntryDesc: "附則の「施行後◯年を目途に検討」という見直し条項を、施行日から算出した期限順に並べる。",
+    hoanEntryNote: (total, due) => `${total}件中、期限到来・未確認 ${due}件`,
+    nextUpdate: "次回更新予定: 2027年1月頃(令和9年度 政府経済見通し)",
   },
   en: {
     tag: "FORECAST × ACTUAL",
@@ -53,6 +55,11 @@ const T = {
     src: "src: Cabinet Office of Japan / SNA",
     aboutLink: "About this site",
     correctionsLink: "Corrections",
+    hoanEntryLabel: "Another instrument",
+    hoanEntryTitle: "Statutory review clauses — deadlines and status",
+    hoanEntryDesc: 'A review clause in supplementary provisions — "review to be considered around N years after enforcement" — ordered by the deadline calculated from the enforcement date.',
+    hoanEntryNote: (total, due) => `${due} of ${total} laws past review deadline, unconfirmed`,
+    nextUpdate: "Next update: around Jan 2027 (FY2027 government economic outlook)",
   },
 };
 
@@ -184,6 +191,87 @@ function buildSparkline(rows, forecastCol, actualCol) {
   return { fc: fc.lines, fcDots: fc.dots, ac: ac.lines, acDots: ac.dots };
 }
 
+// Fertility's card mini-chart has a different shape than the other indicators:
+// one actual series against *several* forecast vintages (not a 1:1 forecast/actual
+// pair), so it can't reuse buildSparkline above. Mirrors the scaling approach of
+// fertility.js's full chart (shared x/y domain across all vintages + actual) but
+// projected into the same 300x80 card-spark viewBox as the other cards.
+function buildFertilitySparkline(actualRows, forecastRows) {
+  const years = actualRows.map((r) => r.year).concat(forecastRows.map((r) => r.targetYear));
+  if (years.length < 2) return { actual: [], vintages: [] };
+
+  const xMin = Math.min(...years);
+  const xMax = Math.max(...years);
+  const vals = actualRows.map((r) => r.tfr).concat(forecastRows.map((r) => r.mid));
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const span = max - min || 1;
+  const W = 300;
+  const H = 80;
+  const PADY = 8;
+  const scaleX = (y) => (xMax === xMin ? W / 2 : ((y - xMin) / (xMax - xMin)) * (W - 16) + 8);
+  const scaleY = (v) => H - PADY - ((v - min) / span) * (H - PADY * 2);
+
+  // same non-contiguous-year splitting as buildSparkline, so a gap in a series
+  // is never bridged by a fabricated straight line
+  function segmentsFor(rows, yearKey, valKey) {
+    const sorted = rows.slice().sort((a, b) => a[yearKey] - b[yearKey]);
+    const segments = [];
+    let current = [];
+    sorted.forEach((r, idx) => {
+      if (current.length > 0 && r[yearKey] - sorted[idx - 1][yearKey] > 1) {
+        segments.push(current);
+        current = [];
+      }
+      current.push(r);
+    });
+    if (current.length > 0) segments.push(current);
+    return segments
+      .filter((seg) => seg.length > 1)
+      .map((seg) => seg.map((r) => `${scaleX(r[yearKey]).toFixed(1)},${scaleY(r[valKey]).toFixed(1)}`).join(" "));
+  }
+
+  const actual = segmentsFor(actualRows, "year", "tfr");
+
+  const vintages = [...new Set(forecastRows.map((r) => r.vintageYear))].sort((a, b) => a - b);
+  const vintageSpan = vintages.length - 1 || 1;
+  const vintageLines = vintages.map((vy, idx) => {
+    const rows = forecastRows.filter((r) => r.vintageYear === vy).sort((a, b) => a.targetYear - b.targetYear);
+    const points = rows.map((r) => `${scaleX(r.targetYear).toFixed(1)},${scaleY(r.mid).toFixed(1)}`).join(" ");
+    // older vintages fade further back, same intent as fertility.js's opacityFor,
+    // but capped lower (~0.38-0.60) since this chart is small and the actual
+    // line needs to stay the thing the eye lands on
+    const opacity = (0.38 + (idx / vintageSpan) * 0.22).toFixed(2);
+    return { points, opacity };
+  });
+
+  return { actual, vintages: vintageLines };
+}
+
+async function loadFertilityCard() {
+  const [forecastRaw, actualRaw] = await Promise.all([
+    loadCSV("data/fertility_forecast.csv"),
+    loadCSV("data/fertility_actual.csv"),
+  ]);
+  const forecastRows = forecastRaw
+    .map((r) => ({ vintageYear: Number(r.vintage_year), targetYear: Number(r.target_year), mid: toNum(r.assumed_tfr_mid) }))
+    .filter((r) => r.mid !== null);
+  const actualRows = actualRaw
+    .map((r) => ({ year: Number(r.year), tfr: toNum(r.actual_tfr) }))
+    .filter((r) => r.tfr !== null);
+  return { spark: buildFertilitySparkline(actualRows, forecastRows) };
+}
+
+// Same total/due definition as hoan.js's renderSummary() (due = review_status
+// === "due", total = row count) so the entry card's count always agrees with
+// the bills page it links to.
+async function loadHoanSummary() {
+  const rows = await loadCSV("data/hoan_review.csv");
+  const total = rows.length;
+  const due = rows.filter((r) => r.review_status === "due").length;
+  return { total, due };
+}
+
 async function loadSeries(meta) {
   const raw = await loadCSV(meta.csv);
   const rows = raw
@@ -231,10 +319,19 @@ function renderCard(meta, lang, data) {
   }
 
   if (meta.kind === "fertility") {
+    const spark = data && data.spark;
+    const sparkSvg = spark
+      ? `
+    <svg class="card-spark" viewBox="0 0 300 80">
+      ${spark.vintages.map((v) => `<polyline class="spark-fertility-vintage" points="${v.points}" style="opacity:${v.opacity}"></polyline>`).join("")}
+      ${spark.actual.map((pts) => `<polyline class="spark-fertility-actual" points="${pts}"></polyline>`).join("")}
+    </svg>`
+      : "";
     return `
       <a class="card" href="${meta.chartHref}">
         <div class="card-top"><span class="card-name mono">${name}</span></div>
         <div class="card-desc">${desc}</div>
+        ${sparkSvg}
         <div class="card-note card-note-fertility">${t.fertilityNote}</div>
       </a>`;
   }
@@ -282,11 +379,16 @@ function renderCard(meta, lang, data) {
 async function main() {
   const seriesMeta = INDICATOR_META.filter((m) => m.kind === "series");
   const seriesData = {};
-  await Promise.all(
-    seriesMeta.map(async (m) => {
-      seriesData[m.key] = await loadSeries(m);
-    })
-  );
+  const [, fertilityCard, hoanSummary] = await Promise.all([
+    Promise.all(
+      seriesMeta.map(async (m) => {
+        seriesData[m.key] = await loadSeries(m);
+      })
+    ),
+    loadFertilityCard(),
+    loadHoanSummary(),
+  ]);
+  seriesData["fertility"] = fertilityCard;
 
   let lang = localStorage.getItem("zurekei-lang") === "en" ? "en" : "ja";
 
@@ -307,6 +409,8 @@ async function main() {
     document.getElementById("t-hoan-entry-label").textContent = t.hoanEntryLabel;
     document.getElementById("t-hoan-entry-title").textContent = t.hoanEntryTitle;
     document.getElementById("t-hoan-entry-desc").textContent = t.hoanEntryDesc;
+    document.getElementById("t-hoan-entry-note").textContent = t.hoanEntryNote(hoanSummary.total, hoanSummary.due);
+    document.getElementById("t-next-update").textContent = t.nextUpdate;
     // 年範囲はCSVから動的に出す(gdp-nominalカードで読み込み済みのgdp_forecast.csv
     // をそのまま使う。実質/名目とも同じファイル・同じfiscal_year列なので範囲は共通)
     const heroRange = seriesData["gdp-nominal"] && seriesData["gdp-nominal"].yearRange;

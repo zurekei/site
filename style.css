@@ -373,6 +373,22 @@ a.card:hover {
 .spark-forecast-dot { fill: var(--forecast-dashed); opacity: 0.65; }
 .spark-actual-dot { fill: var(--navy); }
 
+/* fertility card's mini-chart: one actual line against several forecast
+   vintages, so it needs its own pair of classes rather than spark-forecast /
+   spark-actual (which assume a single 1:1 forecast/actual pair). Same color
+   language (navy = actual, amber = forecast) as the rest of the site. */
+.spark-fertility-actual {
+  fill: none;
+  stroke: var(--navy);
+  stroke-width: 2.5;
+}
+
+.spark-fertility-vintage {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 1;
+}
+
 .card-note {
   font-size: 10.5px;
   color: var(--muted-2);
@@ -471,6 +487,14 @@ a.card:hover {
   color: var(--muted);
 }
 
+.hoan-entry-note {
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.01em;
+  color: var(--muted-2);
+  font-variant-numeric: tabular-nums;
+}
+
 .hoan-entry-arrow {
   position: absolute;
   top: 50%;
@@ -494,6 +518,13 @@ a.card:hover {
   font-family: "IBM Plex Mono", monospace;
   font-size: 12px;
   color: var(--muted);
+}
+
+.next-update {
+  margin-top: 28px;
+  font-size: 11px;
+  text-align: center;
+  color: var(--muted-2);
 }
 
 .site-footer-row {
@@ -700,6 +731,17 @@ a.card:hover {
   stroke-linecap: round;
 }
 .vintage-label { fill: var(--amber); font-size: 9px; font-family: "IBM Plex Mono", monospace; }
+
+/* fertility.html only: the actual line was getting lost among 7 overlapping
+   vintage lines. Bolden the actual line and thin/dim the vintage lines,
+   scoped to #fertility-chart so hero.js and chart.js (which reuse the same
+   .line-actual / .line-forecast-vintage classes) are unaffected. */
+#fertility-chart .line-actual {
+  stroke-width: 2.5;
+}
+#fertility-chart .line-forecast-vintage {
+  stroke-width: 1;
+}
 
 .line-forecast-point {
   fill: var(--amber);

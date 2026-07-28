@@ -132,11 +132,14 @@ async function main() {
 
   // opacity scales with vintage age: older assumptions fade back, the
   // current (newest) projection stays most visible — this distinguishes
-  // "how long ago was this guessed", not a value judgment on the guess
+  // "how long ago was this guessed", not a value judgment on the guess.
+  // Kept in a lower band (0.2-0.6) than before so the actual line (now
+  // bolder, see #fertility-chart .line-actual in style.css) reads clearly
+  // even where several vintages converge on it.
   const opacityFor = (vy) => {
     const idx = vintages.indexOf(vy);
     const span = vintages.length - 1 || 1;
-    return 0.22 + (idx / span) * 0.6;
+    return 0.2 + (idx / span) * 0.4;
   };
 
   const actualSegments = buildSegments(actualRows, "year");
