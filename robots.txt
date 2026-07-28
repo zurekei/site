@@ -25,6 +25,43 @@
 #   さらにその前段では、UA を偽装して 200 が返るのを見て「ブロックなし」と判断していた。
 #   **同じ対象を粗く見て2回違う結論を出している。層を1つ見ただけで決めない。**
 
+# ■ Content Signals について(下の Content-Signal 行の意味)
+#   これは contentsignals.org の規約で、robots.txt の宣言に権利留保の意味を
+#   持たせようとするもの。定型文は Cloudflare の Managed robots.txt に入っていた
+#   ものを、こちらに移した(Managed を切っても意思表示が消えないようにするため)。
+#   法的な効き目は評価できないが、入れる判断に評価は要らなかった。
+#   数行増えるだけで、効くなら方針どおりの方向にしか働かず、効かなくても損はない。
+#
+#   このサイトの宣言は3つ:
+#     search=yes    検索インデックスと検索結果への表示は歓迎(AI要約は含まない定義)
+#     ai-input=yes  AI回答を作るときに参照するのは歓迎 ← 引用に効くのはこれ
+#     ai-train=no   学習・ファインチューニングの素材にすることは断る
+#
+# --- ここから contentsignals.org の定型文 ---
+# As a condition of accessing this website, you agree to abide by the following
+# content signals:
+#
+# (a)  If a Content-Signal = yes, you may collect content for the corresponding use.
+# (b)  If a Content-Signal = no, you may not collect content for the corresponding use.
+# (c)  If the website operator does not include a Content-Signal for a corresponding
+#      use, the website operator neither grants nor restricts permission via
+#      Content-Signal with respect to the corresponding use.
+#
+# The content signals and their meanings are:
+#
+# search:   building a search index and providing search results (e.g., returning
+#           hyperlinks and short excerpts from your website's contents). Search does
+#           not include providing AI-generated search summaries.
+# ai-input: inputting content into one or more AI models (e.g., retrieval augmented
+#           generation, grounding, or other real-time taking of content for
+#           generative AI search answers).
+# ai-train: training or fine-tuning AI models.
+#
+# ANY RESTRICTIONS EXPRESSED VIA CONTENT SIGNALS ARE EXPRESS RESERVATIONS OF
+# RIGHTS UNDER ARTICLE 4 OF THE EUROPEAN UNION DIRECTIVE 2019/790 ON COPYRIGHT
+# AND RELATED RIGHTS IN THE DIGITAL SINGLE MARKET.
+# --- 定型文ここまで ---
+
 User-agent: *
 Content-Signal: search=yes,ai-input=yes,ai-train=no
 Allow: /
