@@ -74,7 +74,7 @@ const INDICATOR_META = [
     descJa: "物価変動を除いた、経済全体の成長率。", descEn: "Overall economic growth, adjusted for price changes.",
     unit: "%", kind: "series",
     csv: "data/gdp_forecast.csv", forecastCol: "forecast_real", actualCol: "actual_real",
-    chartHref: "chart.html?m=gdp-real",
+    chartHref: "chart/gdp-real",
   },
   {
     key: "gdp-nominal",
@@ -82,7 +82,7 @@ const INDICATOR_META = [
     descJa: "物価変動を含む、金額ベースの成長率。", descEn: "Growth in monetary terms, including price changes.",
     unit: "%", kind: "series",
     csv: "data/gdp_forecast.csv", forecastCol: "forecast_nominal", actualCol: "actual_nominal",
-    chartHref: "chart.html?m=gdp-nominal",
+    chartHref: "chart/gdp-nominal",
   },
   {
     key: "cpi",
@@ -90,7 +90,7 @@ const INDICATOR_META = [
     descJa: "家計が購入する財・サービスの価格変動。", descEn: "Change in prices of the goods and services households buy.",
     unit: "%", kind: "series",
     csv: "data/cpi_forecast.csv", forecastCol: "forecast_cpi", actualCol: "actual_cpi",
-    chartHref: "chart.html?m=cpi",
+    chartHref: "chart/cpi",
   },
   {
     key: "unemployment",
@@ -98,7 +98,7 @@ const INDICATOR_META = [
     descJa: "働く意思がありながら職に就けない人の割合。", descEn: "Share of the labor force without a job and actively seeking one.",
     unit: "%", kind: "series", signed: false,
     csv: "data/unemployment_forecast.csv", forecastCol: "forecast_rate", actualCol: "actual_rate",
-    chartHref: "chart.html?m=unemployment",
+    chartHref: "chart/unemployment",
   },
   {
     key: "current-account",
@@ -106,7 +106,7 @@ const INDICATOR_META = [
     descJa: "海外との取引で生じる収支の合計。", descEn: "Net balance of transactions with the rest of the world.",
     unit: "兆円", kind: "series", signed: false,
     csv: "data/current_account_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
-    chartHref: "chart.html?m=current-account",
+    chartHref: "chart/current-account",
   },
   {
     key: "tax-revenue",
@@ -114,7 +114,7 @@ const INDICATOR_META = [
     descJa: "国の一般会計に入る税の総額。", descEn: "Total tax revenue flowing into the general account.",
     unit: "兆円", kind: "series", signed: false,
     csv: "data/tax_revenue_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
-    chartHref: "chart.html?m=tax-revenue",
+    chartHref: "chart/tax-revenue",
   },
   {
     key: "bond-issuance",
@@ -125,7 +125,7 @@ const INDICATOR_META = [
     // keep in sync with METRICS["bond-issuance"].statsFromYear in chart.js —
     // FY1947-1964 are 0 planned vs 0 issued and are not counted
     statsFromYear: 1965,
-    chartHref: "chart.html?m=bond-issuance",
+    chartHref: "chart/bond-issuance",
   },
   {
     key: "jgb-total",
@@ -133,7 +133,7 @@ const INDICATOR_META = [
     descJa: "借換債・財投債等を含む、国債発行の総額。", descEn: "Total JGB issuance, including refunding and FILP bonds.",
     unit: "兆円", kind: "series", signed: false,
     csv: "data/jgb_total_issuance_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
-    chartHref: "chart.html?m=jgb-total",
+    chartHref: "chart/jgb-total",
   },
   {
     key: "fertility",

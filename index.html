@@ -77,7 +77,21 @@
     <div class="indicators-latest" id="t-indicators-latest"></div>
   </div>
 
-  <div class="card-grid" id="card-grid"></div>
+  <!-- 中身は home.js が最新年度の数値つきカードに差し替える。素のリンクを置いて
+       あるのは、JSを実行しないクローラにとって、トップから各指標へ辿れる唯一の
+       経路になるため(sitemap.xml だけに頼らない)。指標を足してここを直し忘れると
+       bin/build_charts.mjs --check が止める。 -->
+  <div class="card-grid" id="card-grid">
+    <a class="card-fallback" href="chart/gdp-real">実質GDP成長率</a>
+    <a class="card-fallback" href="chart/gdp-nominal">名目GDP成長率</a>
+    <a class="card-fallback" href="chart/cpi">消費者物価 (CPI)</a>
+    <a class="card-fallback" href="chart/unemployment">完全失業率</a>
+    <a class="card-fallback" href="chart/current-account">経常収支</a>
+    <a class="card-fallback" href="chart/tax-revenue">一般会計税収</a>
+    <a class="card-fallback" href="chart/bond-issuance">国債発行額</a>
+    <a class="card-fallback" href="chart/jgb-total">国債発行総額</a>
+    <a class="card-fallback" href="fertility.html">合計特殊出生率</a>
+  </div>
 
   <div class="legend-row">
     <span class="legend-item"><span class="legend-swatch legend-swatch-forecast"></span><span id="t-legend-forecast"></span></span>

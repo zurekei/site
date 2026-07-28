@@ -41,6 +41,13 @@ const T = {
     footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
     footerAbout: "このサイトについて",
     footerContact: "お問い合わせ",
+    // 静的な数値表(bin/build_charts.mjs が生成)の見出し。見通し/実績/ズレ の3つは
+    // 上の forecast/actual/gap をそのまま使うので、ここには無い分だけ置く。
+    thYear: "年度",
+    thSource: "出典",
+    tableToggle: (n) => `年度ごとの数値を表で見る（${n}年度分）`,
+    tableCaptionSuffix: "｜年度ごとの見通し・実績・ズレ",
+    tableCsvLabel: "元データ: ",
   },
   en: {
     back: "← Indicators",
@@ -71,9 +78,20 @@ const T = {
     footerSrc: "src: Cabinet Office of Japan / SNA",
     footerAbout: "About this site",
     footerContact: "Contact",
+    thYear: "Fiscal year",
+    thSource: "Source",
+    tableToggle: (n) => `Show the figures as a table (${n} fiscal years)`,
+    tableCaptionSuffix: " — forecast, actual and gap by fiscal year",
+    tableCsvLabel: "Source data: ",
   },
 };
 
+// このファイルは bin/build_charts.mjs からも「そのまま」読み込まれ、指標ページの
+// 静的HTMLを生成する側の唯一の定義になる。ビルド側に写しは無いので、指標を足す・
+// 直すのはここだけでよい（表とグラフが違う数字を出す事故が原理的に起きない）。
+// csv のパスがルート絶対なのは、ページが /chart/<key> に置かれているため。相対に
+// 戻すと /chart/data/... を取りに行き、Pages は存在しないパスにもトップページの
+// HTML を 200 で返すので、CSVのつもりでHTMLを読む壊れ方をする。
 const METRICS = {
   "gdp-real": {
     title: "実質GDP成長率",
@@ -84,14 +102,14 @@ const METRICS = {
     noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases).",
     archiveNote: "FY1997以前の実質GDP見通しは内閣府の見通しアーカイブ(FY1998年度分〜)には存在しない。経済企画庁長官の経済演説(国会会議録・衆議院本会議)から、FY1980〜1997の18年分を独自に収集した。",
     archiveNoteEn: "The real GDP forecast for FY1997 and earlier is not in the Cabinet Office's online forecast archive, which begins at FY1998. It was collected independently from the Diet record of the Director-General of the Economic Planning Agency's economic address to the House of Representatives, covering all 18 fiscal years from FY1980 through FY1997.",
-    csv: "data/gdp_forecast.csv",
+    csv: "/data/gdp_forecast.csv",
     forecastCol: "forecast_real",
     actualCol: "actual_real",
     forecastSourceCol: "forecast_source_url",
     forecastSourceLabel: "実質",
     actualSourceCol: "actual_source_url",
     actualSourceLabel: "実質",
-    vintageCsv: "data/gdp_vintages.csv",
+    vintageCsv: "/data/gdp_vintages.csv",
     vintageCols: ["real_1990base", "real_1995base", "real_2000base", "real_2005base_ref", "real_2011base_ref", "real_2015base_ref"],
     unit: "%",
   },
@@ -104,14 +122,14 @@ const METRICS = {
     noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The nominal forecast for FY1988 has not been collected, so the line breaks at that year. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases).",
     archiveNote: "FY1997以前の名目GDP見通しも内閣府の見通しアーカイブには存在しない。FY1982〜1987は国会会議録の委員会質疑・政府答弁から、FY1989〜1997は財務省『平成財政史』の記述から収集した。FY1988のみ一次資料が未特定で欠落している。",
     archiveNoteEn: "The nominal GDP forecast for FY1997 and earlier is likewise absent from the Cabinet Office's archive. FY1982–1987 was collected from Diet committee questioning and government responses, and FY1989–1997 from the Ministry of Finance's Heisei Zaisei-shi (Fiscal History of the Heisei Era). FY1988 alone remains uncollected, as no primary source for it has yet been identified.",
-    csv: "data/gdp_forecast.csv",
+    csv: "/data/gdp_forecast.csv",
     forecastCol: "forecast_nominal",
     actualCol: "actual_nominal",
     forecastSourceCol: "forecast_source_url",
     forecastSourceLabel: "名目",
     actualSourceCol: "actual_source_url",
     actualSourceLabel: "名目",
-    vintageCsv: "data/gdp_vintages.csv",
+    vintageCsv: "/data/gdp_vintages.csv",
     vintageCols: ["nominal_1990base", "nominal_1995base", "nominal_2000base", "nominal_2005base_ref", "nominal_2011base_ref", "nominal_2015base_ref"],
     unit: "%",
   },
@@ -120,7 +138,7 @@ const METRICS = {
     titleEn: "Unemployment rate",
     desc: "政府の当初見通しと、確定した実績を並べたもの。",
     descEn: "The government's initial forecast laid alongside the confirmed actual.",
-    csv: "data/unemployment_forecast.csv",
+    csv: "/data/unemployment_forecast.csv",
     forecastCol: "forecast_rate",
     actualCol: "actual_rate",
     forecastSourceCol: "forecast_source_url",
@@ -133,7 +151,7 @@ const METRICS = {
     titleEn: "Current account",
     desc: "政府の当初見通しと、確定した実績を並べたもの。",
     descEn: "The government's initial forecast laid alongside the confirmed actual.",
-    csv: "data/current_account_forecast.csv",
+    csv: "/data/current_account_forecast.csv",
     forecastCol: "forecast_tn",
     actualCol: "actual_tn",
     forecastSourceCol: "forecast_source_url",
@@ -146,7 +164,7 @@ const METRICS = {
     titleEn: "Tax revenue",
     desc: "財務省の当初予算における税収見積もりと、確定した決算額を並べたもの。",
     descEn: "The Ministry of Finance's initial budget estimate for tax revenue, laid alongside the confirmed settlement figure.",
-    csv: "data/tax_revenue_forecast.csv",
+    csv: "/data/tax_revenue_forecast.csv",
     forecastCol: "forecast_tn",
     actualCol: "actual_tn",
     forecastSourceCol: "forecast_source_url",
@@ -160,7 +178,7 @@ const METRICS = {
     titleEn: "Government bond issuance",
     desc: "財務省の当初予算における公債発行予定額と、決算における実績発行額を並べたもの。復興債・年金特例公債など別枠区分の公債は含まない(原資料の区分に従う)。",
     descEn: "The Ministry of Finance's initial budget plan for bond issuance, laid alongside the actual issuance recorded in the settlement. Bonds tracked in separate categories, such as reconstruction bonds or pension special-issue bonds, are not included, following the classification used in the primary source.",
-    csv: "data/bond_issuance_forecast.csv",
+    csv: "/data/bond_issuance_forecast.csv",
     forecastCol: "forecast_tn",
     actualCol: "actual_tn",
     forecastSourceCol: "forecast_source_url",
@@ -185,7 +203,7 @@ const METRICS = {
     titleEn: "Total JGB issuance",
     desc: "財務省の当初の国債発行計画(総額)と、実績の発行総額を並べたもの。建設国債・特例国債・復興債等・財投債・借換債を含む(収入金ベース、原資料の区分に従う)。",
     descEn: "The Ministry of Finance's initial JGB issuance plan (total), laid alongside actual total issuance. Includes construction bonds, deficit-financing bonds, reconstruction and other special bonds, FILP bonds, and refunding bonds (revenue basis, following the classification used in the primary source).",
-    csv: "data/jgb_total_issuance_forecast.csv",
+    csv: "/data/jgb_total_issuance_forecast.csv",
     forecastCol: "forecast_tn",
     actualCol: "actual_tn",
     forecastSourceCol: "forecast_source_url",
@@ -201,7 +219,7 @@ const METRICS = {
     descEn: "The government's initial forecast laid alongside the confirmed actual published by the Ministry of Internal Affairs and Communications' Statistics Bureau.",
     archiveNote: "FY1997以前の消費者物価見通しも内閣府の見通しアーカイブには存在しないため、同じ経済演説から収集した。演説に言及がない年度(FY1989、FY1993〜1997)は未収集のまま空欄にしている。",
     archiveNoteEn: "The consumer price forecast for FY1997 and earlier is likewise absent from the Cabinet Office's archive; it was collected from the same economic addresses. Years the address did not mention (FY1989, FY1993–1997) remain uncollected and blank.",
-    csv: "data/cpi_forecast.csv",
+    csv: "/data/cpi_forecast.csv",
     forecastCol: "forecast_cpi",
     actualCol: "actual_cpi",
     forecastSourceCol: "forecast_source_url",
@@ -294,48 +312,20 @@ function extractEventNote(raw) {
     .join(" ");
 }
 
-const SITE = "https://zurekei.org";
-
-// All 8 indicators share this one HTML file, so everything that identifies a page
-// has to be rewritten per indicator — not just the title. Leaving canonical/og:url
-// fixed told search engines the 8 URLs were one page; they were being folded into a
-// single entry whose HTML contains no numbers at all.
-// Falls back to the served key rather than the resolved one so an unknown ?m= value
-// canonicalises to the indicator actually rendered, not to the bogus URL requested.
-function applyHeadMeta(metricKey, metric) {
-  const url = `${SITE}/chart?m=${metricKey}`;
-  const title = `${metric.title} — ズレ計`;
-
-  document.getElementById("page-title").textContent = title;
-
-  const setMeta = (selector, content) => {
-    const el = document.head.querySelector(selector);
-    if (el) el.setAttribute("content", content);
-  };
-  setMeta('meta[name="description"]', metric.desc);
-  setMeta('meta[property="og:title"]', title);
-  setMeta('meta[property="og:description"]', metric.desc);
-  setMeta('meta[property="og:url"]', url);
-
-  let link = document.head.querySelector('link[rel="canonical"]');
-  if (!link) {
-    link = document.createElement("link");
-    link.rel = "canonical";
-    document.head.appendChild(link);
-  }
-  link.href = url;
-}
-
 async function main() {
-  const params = new URLSearchParams(location.search);
-  const requestedKey = params.get("m") || "gdp-real";
-  const metricKey = Object.hasOwn(METRICS, requestedKey) ? requestedKey : "gdp-real";
+  // Which indicator this page is comes from the document, not the URL: the page
+  // was generated for exactly one metric and says so on <body data-metric>.
+  // Reading it from the path instead would break the moment the URL shape
+  // changes, and there is nothing to fall back to here — a page with no
+  // data-metric is a build error, not a user typing a bad address, so bail
+  // loudly rather than silently rendering the wrong indicator's numbers under
+  // another indicator's heading and table.
+  const metricKey = document.body.dataset.metric;
   const metric = METRICS[metricKey];
-
-  // the static <title>/meta description in chart.html stay JA regardless of
-  // the in-page language toggle (per site convention: static head tags are
-  // JA-authoritative); only these dynamic per-metric head tags follow.
-  applyHeadMeta(metricKey, metric);
+  if (!metric) {
+    console.error(`unknown metric on <body data-metric>: ${metricKey}`);
+    return;
+  }
 
   let lang = "ja";
 
@@ -695,6 +685,47 @@ async function main() {
     render(idx);
   });
 
+  // The numbers table is written into the HTML at build time, in Japanese, so the
+  // page carries its data without JS — that is the whole reason it exists. What
+  // JS adds is only the language switch: retranslate the parts that are words,
+  // and leave the figures and source URLs alone (they are language-independent).
+  // Nothing here rebuilds or re-reads the table, so the table a crawler sees and
+  // the table a reader sees are the same rows.
+  const dataTable = document.querySelector(".data-table");
+
+  function applyTableI18n() {
+    if (!dataTable) return;
+    const t = T[lang];
+    const set = (id, text) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+    set("t-th-year", t.thYear);
+    set("t-th-forecast", t.forecast);
+    set("t-th-actual", t.actual);
+    set("t-th-gap", t.gap);
+    set("t-th-source", t.thSource);
+    set("t-table-csv", t.tableCsvLabel);
+    set("t-table-caption", (lang === "ja" ? metric.title : metric.titleEn) + t.tableCaptionSuffix);
+
+    const yearCells = dataTable.querySelectorAll("th[data-year]");
+    set("t-table-toggle", t.tableToggle(yearCells.length));
+    yearCells.forEach((el) => { el.textContent = fmtFY(Number(el.dataset.year), lang); });
+
+    // cells that hold a phrase instead of a number, keyed by why the value is absent
+    const placeholder = {
+      pending: t.actualPending,
+      unavailable: t.actualUnavailable,
+      gap: gapLabelText(metric, lang),
+    };
+    dataTable.querySelectorAll("[data-ph]").forEach((el) => {
+      el.textContent = placeholder[el.dataset.ph] ?? el.textContent;
+    });
+    dataTable.querySelectorAll("a[data-src]").forEach((el) => {
+      el.textContent = el.dataset.src === "forecast" ? t.forecast : t.actual;
+    });
+  }
+
   function applyI18n() {
     const t = T[lang];
     document.getElementById("chart-title").textContent = lang === "ja" ? metric.title : metric.titleEn;
@@ -733,6 +764,7 @@ async function main() {
     document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
     document.getElementById("lang-en").classList.toggle("active", lang === "en");
     document.documentElement.lang = lang;
+    applyTableI18n();
     render(currentIdx);
   }
 

@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- このファイルは bin/build_charts.mjs が data/*.csv から生成している。直接編集しない。
+     直すのは chart.js の METRICS か data/*.csv のどちらか。 -->
+<title id="page-title">名目GDP成長率 — ズレ計</title>
+<meta name="description" content="政府の当初見通し(名目)と、確定した実績を並べたもの。">
+<link rel="canonical" href="https://zurekei.org/chart/gdp-nominal">
+<meta property="og:site_name" content="ズレ計">
+<meta property="og:type" content="website">
+<meta property="og:title" content="名目GDP成長率 — ズレ計">
+<meta property="og:description" content="政府の当初見通し(名目)と、確定した実績を並べたもの。">
+<meta property="og:url" content="https://zurekei.org/chart/gdp-nominal">
+<meta property="og:image" content="https://zurekei.org/assets/og.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=20260731c">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "名目GDP成長率｜政府の当初見通しと実績",
+  "description": "政府の当初見通し(名目)と、確定した実績を並べたもの。",
+  "url": "https://zurekei.org/chart/gdp-nominal",
+  "isAccessibleForFree": true,
+  "inLanguage": "ja",
+  "temporalCoverage": "1980/2026",
+  "creator": {
+    "@type": "Organization",
+    "name": "ズレ計",
+    "url": "https://zurekei.org"
+  },
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "見通し（当初）",
+      "unitText": "%"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "実績（確定）",
+      "unitText": "%"
+    }
+  ],
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/gdp_forecast.csv"
+    }
+  ]
+}
+</script>
+</head>
+<body data-metric="gdp-nominal">
+<div class="page">
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="ズレ計 トップへ">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <button id="lang-ja" class="lang-btn mono">JA</button>
+        <button id="lang-en" class="lang-btn mono">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <a class="chart-back" id="t-back" href="/">← 指標一覧</a>
+
+  <main>
+    <section class="chart-section">
+      <h1 class="chart-title" id="chart-title">名目GDP成長率</h1>
+      <p class="chart-desc" id="chart-desc">政府の当初見通し(名目)と、確定した実績を並べたもの。</p>
+      <p class="chart-note mono" id="chart-note">注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。名目の見通しはFY1988が未収集のため、この年は線が途切れる。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。</p>
+
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title"></svg>
+      </div>
+
+      <p class="chart-summary mono" id="chart-summary">実績が見通しを上回った年 12回 / 下回った年 29回 / 見通しどおり 2回 / 平均のズレ -1.2pt / 対象43年度分</p>
+
+      <div class="controls">
+        <input type="range" id="year-select" min="0" max="0" value="0" step="1">
+      </div>
+
+      <div class="readout">
+        <div class="readout-year mono" id="year-readout">----</div>
+        <div class="stat-row">
+          <div class="stat-chip">
+            <span class="stat-chip-dot stat-chip-dot-forecast"></span>
+            <span class="stat-chip-label" id="t-stat-forecast">見通し</span>
+            <span class="stat-chip-value" id="v-forecast">—</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-chip-dot stat-chip-dot-actual"></span>
+            <span class="stat-chip-label" id="t-stat-actual">実績</span>
+            <span class="stat-chip-value" id="v-actual">—</span>
+          </div>
+          <div class="stat-chip stat-chip-diff">
+            <span class="stat-chip-label" id="t-stat-gap">ズレ</span>
+            <span class="stat-chip-value" id="v-diff">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="readout-notes" id="v-notes"></div>
+
+      <div class="readout-source" id="v-source"></div>
+
+      <p class="chart-note mono" id="archive-note">FY1997以前の名目GDP見通しも内閣府の見通しアーカイブには存在しない。FY1982〜1987は国会会議録の委員会質疑・政府答弁から、FY1989〜1997は財務省『平成財政史』の記述から収集した。FY1988のみ一次資料が未特定で欠落している。</p>
+    </section>
+
+    <section class="data-section">
+      <details class="data-details">
+        <summary id="t-table-toggle">年度ごとの数値を表で見る（47年度分）</summary>
+      <div class="data-table-wrap">
+      <table class="data-table">
+        <caption id="t-table-caption">名目GDP成長率｜年度ごとの見通し・実績・ズレ</caption>
+        <thead>
+          <tr>
+            <th scope="col" id="t-th-year">年度</th>
+            <th scope="col" id="t-th-forecast">見通し</th>
+            <th scope="col" id="t-th-actual">実績</th>
+            <th scope="col" id="t-th-gap">ズレ</th>
+            <th scope="col" id="t-th-source">出典</th>
+          </tr>
+        </thead>
+        <tbody>
+      <tr>
+        <th scope="row" class="mono" data-year="1980">1980年度</th>
+        <td class="mono">+9.4%</td>
+        <td class="mono" data-ph="unavailable">実績なし</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/109105254X00219800125/9" target="_blank" rel="noopener" data-src="forecast">見通し</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">1980年度は接続元系列の起点で前年度データがなく、成長率は算出不能（一次資料でも空欄）。実績値は確認できず。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1981">1981年度</th>
+        <td class="mono">+9.1%</td>
+        <td class="mono">+6.4%</td>
+        <td class="mono">-2.7pt</td>
+        <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/109405254X00219810126/17" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1982">1982年度</th>
+        <td class="mono">+8.4%</td>
+        <td class="mono">+4.7%</td>
+        <td class="mono">-3.7pt</td>
+        <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/109604629X02319820707/45" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1983">1983年度</th>
+        <td class="mono">+5.6%</td>
+        <td class="mono">+4.9%</td>
+        <td class="mono">-0.7pt</td>
+        <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/109805063X00319830304/58" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1984">1984年度</th>
+        <td class="mono">+5.9%</td>
+        <td class="mono">+6.2%</td>
+        <td class="mono">+0.3pt</td>
+        <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/110104430X00119840709/5" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1985">1985年度</th>
+        <td class="mono">+6.1%</td>
+        <td class="mono">+6.6%</td>
+        <td class="mono">+0.5pt</td>
+        <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/110204461X00319850222/175" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1986">1986年度</th>
+        <td class="mono">+5.1%</td>
+        <td class="mono">+4.1%</td>
+        <td class="mono">-1.0pt</td>
+        <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/110405063X00419860306/88" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1987">1987年度</th>
+        <td class="mono">+4.6%</td>
+        <td class="mono">+5.9%</td>
+        <td class="mono">+1.3pt</td>
+        <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/110805254X00419870202/16" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1988">1988年度</th>
+        <td class="mono" data-ph="gap">データ未収集</td>
+        <td class="mono">+6.9%</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/111205254X00219880125/9" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1989">1989年度</th>
+        <td class="mono">+5.2%</td>
+        <td class="mono">+6.7%</td>
+        <td class="mono">+1.5pt</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_1_5.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1990">1990年度</th>
+        <td class="mono">+5.2%</td>
+        <td class="mono">+8.3%</td>
+        <td class="mono">+3.1pt</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_1_5.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">バブル期のピーク。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1991">1991年度</th>
+        <td class="mono">+5.5%</td>
+        <td class="mono">+5.3%</td>
+        <td class="mono">-0.2pt</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_1_5.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1992">1992年度</th>
+        <td class="mono">+5.0%</td>
+        <td class="mono">+2.0%</td>
+        <td class="mono">-3.0pt</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_1_6.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1993">1993年度</th>
+        <td class="mono">+4.9%</td>
+        <td class="mono">-0.3%</td>
+        <td class="mono">-5.2pt</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_1_6.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1994">1994年度</th>
+        <td class="mono">+3.8%</td>
+        <td class="mono">+1.5%</td>
+        <td class="mono">-2.3pt</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_1_6.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">1994年度で1995年度以降の正式系列（2020年基準）と接続する境目。基準が異なるため直接接続はしていない。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1995">1995年度</th>
+        <td class="mono">+3.6%</td>
+        <td class="mono">+2.4%</td>
+        <td class="mono">-1.2pt</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_2_1.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1996">1996年度</th>
+        <td class="mono">+2.7%</td>
+        <td class="mono">+2.7%</td>
+        <td class="mono">0.0pt</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_2_1.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1997">1997年度</th>
+        <td class="mono">+3.1%</td>
+        <td class="mono">+0.5%</td>
+        <td class="mono">-2.6pt</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_2_2.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">消費税率引き上げ・アジア通貨危機の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1998">1998年度</th>
+        <td class="mono">+2.4%</td>
+        <td class="mono">-2.0%</td>
+        <td class="mono">-4.4pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/1998/19980119mitoshi.html" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1999">1999年度</th>
+        <td class="mono">+0.5%</td>
+        <td class="mono">-0.8%</td>
+        <td class="mono">-1.3pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/1999/19990118b-mitoshi.html" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2000">2000年度</th>
+        <td class="mono">+0.8%</td>
+        <td class="mono">+1.7%</td>
+        <td class="mono">+0.9pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2000/0128b-mitoshi.html" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2001">2001年度</th>
+        <td class="mono">+1.0%</td>
+        <td class="mono">-1.9%</td>
+        <td class="mono">-2.9pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2001/0131b-mitoshi.html" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2002">2002年度</th>
+        <td class="mono">-0.9%</td>
+        <td class="mono">-0.9%</td>
+        <td class="mono">0.0pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2002/0125mitoshi.html" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2003">2003年度</th>
+        <td class="mono">-0.2%</td>
+        <td class="mono">+0.4%</td>
+        <td class="mono">+0.6pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2003/h150124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2004">2004年度</th>
+        <td class="mono">+0.5%</td>
+        <td class="mono">+0.4%</td>
+        <td class="mono">-0.1pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2004/h160119mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2005">2005年度</th>
+        <td class="mono">+1.3%</td>
+        <td class="mono">+0.8%</td>
+        <td class="mono">-0.5pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2005/h170121mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2006">2006年度</th>
+        <td class="mono">+2.0%</td>
+        <td class="mono">+0.7%</td>
+        <td class="mono">-1.3pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2006/h180120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2007">2007年度</th>
+        <td class="mono">+2.2%</td>
+        <td class="mono">+0.2%</td>
+        <td class="mono">-2.0pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2007/h190125mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2008">2008年度</th>
+        <td class="mono">+2.1%</td>
+        <td class="mono">-3.9%</td>
+        <td class="mono">-6.0pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2008/h200118mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">リーマンショック年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2009">2009年度</th>
+        <td class="mono">+0.1%</td>
+        <td class="mono">-4.1%</td>
+        <td class="mono">-4.2pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2009/0119mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2010">2010年度</th>
+        <td class="mono">+0.4%</td>
+        <td class="mono">+1.7%</td>
+        <td class="mono">+1.3pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2010/h220122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2011">2011年度</th>
+        <td class="mono">+1.0%</td>
+        <td class="mono">-1.0%</td>
+        <td class="mono">-2.0pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2011/h230124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">東日本大震災年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2012">2012年度</th>
+        <td class="mono">+2.0%</td>
+        <td class="mono">+0.1%</td>
+        <td class="mono">-1.9pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2012/h240124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2013">2013年度</th>
+        <td class="mono">+2.7%</td>
+        <td class="mono">+2.9%</td>
+        <td class="mono">+0.2pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2013/h250228mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2014">2014年度</th>
+        <td class="mono">+3.3%</td>
+        <td class="mono">+2.8%</td>
+        <td class="mono">-0.5pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2014/h260124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">消費税率8%引き上げ年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2015">2015年度</th>
+        <td class="mono">+2.7%</td>
+        <td class="mono">+3.4%</td>
+        <td class="mono">+0.7pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2015/h270212mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2016">2016年度</th>
+        <td class="mono">+3.1%</td>
+        <td class="mono">+0.8%</td>
+        <td class="mono">-2.3pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2016/h280122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2017">2017年度</th>
+        <td class="mono">+2.5%</td>
+        <td class="mono">+2.0%</td>
+        <td class="mono">-0.5pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2017/h290120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2018">2018年度</th>
+        <td class="mono">+2.5%</td>
+        <td class="mono">+0.4%</td>
+        <td class="mono">-2.1pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2018/h300122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2019">2019年度</th>
+        <td class="mono">+2.4%</td>
+        <td class="mono">+0.1%</td>
+        <td class="mono">-2.3pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2019/h310128mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">消費税率10%引き上げ・新型コロナ発生初期年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2020">2020年度</th>
+        <td class="mono">+2.1%</td>
+        <td class="mono">-2.9%</td>
+        <td class="mono">-5.0pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2019/r020120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">新型コロナ影響の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2021">2021年度</th>
+        <td class="mono">+4.4%</td>
+        <td class="mono">+4.0%</td>
+        <td class="mono">-0.4pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2020/r030118mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2022">2022年度</th>
+        <td class="mono">+3.6%</td>
+        <td class="mono">+2.6%</td>
+        <td class="mono">-1.0pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2021/r040117mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2023">2023年度</th>
+        <td class="mono">+2.1%</td>
+        <td class="mono">+4.7%</td>
+        <td class="mono">+2.6pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2022/r050123mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">円安・輸入物価高で名実逆転が大きい年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2024">2024年度</th>
+        <td class="mono">+3.0%</td>
+        <td class="mono">+3.7%</td>
+        <td class="mono">+0.7pt</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2023/r060126mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">本年次推計に収録された最新（現時点で最終）確定年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2025">2025年度</th>
+        <td class="mono">+2.7%</td>
+        <td class="mono" data-ph="pending">実績未確定(年度未終了)</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2024/r070124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2026">2026年度</th>
+        <td class="mono">+3.4%</td>
+        <td class="mono" data-ph="pending">実績未確定(年度未終了)</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/r080123mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a></td>
+      </tr>
+        </tbody>
+      </table>
+      </div>
+        <p class="chart-note mono"><span id="t-table-csv">元データ: </span><a href="/data/gdp_forecast.csv">/data/gdp_forecast.csv</a></p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="site-footer-row">
+    <span id="t-footer-src">src: 内閣府 / 国民経済計算(SNA)</span>
+    <a class="footer-about" id="t-footer-about" href="/about.html">このサイトについて</a>
+    <a class="footer-about" id="t-footer-contact" href="/contact.html">お問い合わせ</a>
+  </footer>
+</div>
+<script src="/csv.js?v=20260731c"></script>
+<script src="/chart.js?v=20260731c"></script>
+</body>
+</html>

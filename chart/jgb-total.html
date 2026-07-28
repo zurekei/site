@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- このファイルは bin/build_charts.mjs が data/*.csv から生成している。直接編集しない。
+     直すのは chart.js の METRICS か data/*.csv のどちらか。 -->
+<title id="page-title">国債発行総額 — ズレ計</title>
+<meta name="description" content="財務省の当初の国債発行計画(総額)と、実績の発行総額を並べたもの。建設国債・特例国債・復興債等・財投債・借換債を含む(収入金ベース、原資料の区分に従う)。">
+<link rel="canonical" href="https://zurekei.org/chart/jgb-total">
+<meta property="og:site_name" content="ズレ計">
+<meta property="og:type" content="website">
+<meta property="og:title" content="国債発行総額 — ズレ計">
+<meta property="og:description" content="財務省の当初の国債発行計画(総額)と、実績の発行総額を並べたもの。建設国債・特例国債・復興債等・財投債・借換債を含む(収入金ベース、原資料の区分に従う)。">
+<meta property="og:url" content="https://zurekei.org/chart/jgb-total">
+<meta property="og:image" content="https://zurekei.org/assets/og.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=20260731c">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "国債発行総額｜政府の当初見通しと実績",
+  "description": "財務省の当初の国債発行計画(総額)と、実績の発行総額を並べたもの。建設国債・特例国債・復興債等・財投債・借換債を含む(収入金ベース、原資料の区分に従う)。",
+  "url": "https://zurekei.org/chart/jgb-total",
+  "isAccessibleForFree": true,
+  "inLanguage": "ja",
+  "temporalCoverage": "1990/2026",
+  "creator": {
+    "@type": "Organization",
+    "name": "ズレ計",
+    "url": "https://zurekei.org"
+  },
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "見通し（当初）",
+      "unitText": "兆円"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "実績（確定）",
+      "unitText": "兆円"
+    }
+  ],
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/jgb_total_issuance_forecast.csv"
+    }
+  ]
+}
+</script>
+</head>
+<body data-metric="jgb-total">
+<div class="page">
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="ズレ計 トップへ">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <button id="lang-ja" class="lang-btn mono">JA</button>
+        <button id="lang-en" class="lang-btn mono">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <a class="chart-back" id="t-back" href="/">← 指標一覧</a>
+
+  <main>
+    <section class="chart-section">
+      <h1 class="chart-title" id="chart-title">国債発行総額</h1>
+      <p class="chart-desc" id="chart-desc">財務省の当初の国債発行計画(総額)と、実績の発行総額を並べたもの。建設国債・特例国債・復興債等・財投債・借換債を含む(収入金ベース、原資料の区分に従う)。</p>
+      <p class="chart-note mono" id="chart-note" hidden></p>
+
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title"></svg>
+      </div>
+
+      <p class="chart-summary mono" id="chart-summary">実績が当初計画を上回った年 20回 / 下回った年 15回 / 平均のズレ +3.3兆円 / 対象35年度分</p>
+
+      <div class="controls">
+        <input type="range" id="year-select" min="0" max="0" value="0" step="1">
+      </div>
+
+      <div class="readout">
+        <div class="readout-year mono" id="year-readout">----</div>
+        <div class="stat-row">
+          <div class="stat-chip">
+            <span class="stat-chip-dot stat-chip-dot-forecast"></span>
+            <span class="stat-chip-label" id="t-stat-forecast">見通し</span>
+            <span class="stat-chip-value" id="v-forecast">—</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-chip-dot stat-chip-dot-actual"></span>
+            <span class="stat-chip-label" id="t-stat-actual">実績</span>
+            <span class="stat-chip-value" id="v-actual">—</span>
+          </div>
+          <div class="stat-chip stat-chip-diff">
+            <span class="stat-chip-label" id="t-stat-gap">ズレ</span>
+            <span class="stat-chip-value" id="v-diff">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="readout-notes" id="v-notes"></div>
+
+      <div class="readout-source" id="v-source"></div>
+
+      <p class="chart-note mono" id="archive-note" hidden></p>
+    </section>
+
+    <section class="data-section">
+      <details class="data-details">
+        <summary id="t-table-toggle">年度ごとの数値を表で見る（37年度分）</summary>
+      <div class="data-table-wrap">
+      <table class="data-table">
+        <caption id="t-table-caption">国債発行総額｜年度ごとの見通し・実績・ズレ</caption>
+        <thead>
+          <tr>
+            <th scope="col" id="t-th-year">年度</th>
+            <th scope="col" id="t-th-forecast">見通し</th>
+            <th scope="col" id="t-th-actual">実績</th>
+            <th scope="col" id="t-th-gap">ズレ</th>
+            <th scope="col" id="t-th-source">出典</th>
+          </tr>
+        </thead>
+        <tbody>
+      <tr>
+        <th scope="row" class="mono" data-year="1990">1990年度</th>
+        <td class="mono">23.5兆円</td>
+        <td class="mono">26.0兆円</td>
+        <td class="mono">+2.5兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20110523025841/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1991">1991年度</th>
+        <td class="mono">24.3兆円</td>
+        <td class="mono">25.6兆円</td>
+        <td class="mono">+1.3兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20110523025841/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1992">1992年度</th>
+        <td class="mono">28.8兆円</td>
+        <td class="mono">31.0兆円</td>
+        <td class="mono">+2.3兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20110523025841/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1993">1993年度</th>
+        <td class="mono">29.9兆円</td>
+        <td class="mono">38.0兆円</td>
+        <td class="mono">+8.1兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20110523025841/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">バブル崩壊後の景気後退期の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1994">1994年度</th>
+        <td class="mono">36.5兆円</td>
+        <td class="mono">39.4兆円</td>
+        <td class="mono">+2.8兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20110523025841/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1995">1995年度</th>
+        <td class="mono">38.0兆円</td>
+        <td class="mono">46.6兆円</td>
+        <td class="mono">+8.6兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20110523025841/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">阪神・淡路大震災の復興対策が続いた年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1996">1996年度</th>
+        <td class="mono">47.6兆円</td>
+        <td class="mono">48.3兆円</td>
+        <td class="mono">+0.7兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20110523025841/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1997">1997年度</th>
+        <td class="mono">48.1兆円</td>
+        <td class="mono">49.9兆円</td>
+        <td class="mono">+1.7兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20110523025841/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1998">1998年度</th>
+        <td class="mono">57.9兆円</td>
+        <td class="mono">76.4兆円</td>
+        <td class="mono">+18.5兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">金融機関破綻が相次いだ金融危機の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1999">1999年度</th>
+        <td class="mono">71.1兆円</td>
+        <td class="mono">77.6兆円</td>
+        <td class="mono">+6.5兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2000">2000年度</th>
+        <td class="mono">85.9兆円</td>
+        <td class="mono">86.3兆円</td>
+        <td class="mono">+0.4兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2001">2001年度</th>
+        <td class="mono">131.9兆円</td>
+        <td class="mono">133.2兆円</td>
+        <td class="mono">+1.3兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2002">2002年度</th>
+        <td class="mono">134.0兆円</td>
+        <td class="mono">136.4兆円</td>
+        <td class="mono">+2.5兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2003">2003年度</th>
+        <td class="mono">141.4兆円</td>
+        <td class="mono">138.8兆円</td>
+        <td class="mono">-2.6兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2004">2004年度</th>
+        <td class="mono">162.3兆円</td>
+        <td class="mono">160.1兆円</td>
+        <td class="mono">-2.3兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2005">2005年度</th>
+        <td class="mono">169.5兆円</td>
+        <td class="mono">165.0兆円</td>
+        <td class="mono">-4.5兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2006">2006年度</th>
+        <td class="mono">165.4兆円</td>
+        <td class="mono">161.2兆円</td>
+        <td class="mono">-4.3兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2007">2007年度</th>
+        <td class="mono">143.8兆円</td>
+        <td class="mono">141.3兆円</td>
+        <td class="mono">-2.5兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2008">2008年度</th>
+        <td class="mono">126.3兆円</td>
+        <td class="mono">135.7兆円</td>
+        <td class="mono">+9.4兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">リーマンショック年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2009">2009年度</th>
+        <td class="mono">132.3兆円</td>
+        <td class="mono">151.8兆円</td>
+        <td class="mono">+19.6兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">リーマンショック後の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2010">2010年度</th>
+        <td class="mono">162.4兆円</td>
+        <td class="mono">151.5兆円</td>
+        <td class="mono">-10.9兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2011">2011年度</th>
+        <td class="mono">169.6兆円</td>
+        <td class="mono">176.2兆円</td>
+        <td class="mono">+6.6兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">東日本大震災年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2012">2012年度</th>
+        <td class="mono">174.2兆円</td>
+        <td class="mono">177.5兆円</td>
+        <td class="mono">+3.3兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2013">2013年度</th>
+        <td class="mono">170.5兆円</td>
+        <td class="mono">164.3兆円</td>
+        <td class="mono">-6.2兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2014">2014年度</th>
+        <td class="mono">181.5兆円</td>
+        <td class="mono">172.0兆円</td>
+        <td class="mono">-9.6兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2015">2015年度</th>
+        <td class="mono">170.0兆円</td>
+        <td class="mono">163.9兆円</td>
+        <td class="mono">-6.2兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2016">2016年度</th>
+        <td class="mono">162.2兆円</td>
+        <td class="mono">167.9兆円</td>
+        <td class="mono">+5.7兆円</td>
+        <td class="data-table-src"><a href="https://web.archive.org/web/20170825102805/http://www.mof.go.jp/jgbs/reference/appendix/hakkou03.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2017">2017年度</th>
+        <td class="mono">154.0兆円</td>
+        <td class="mono">152.0兆円</td>
+        <td class="mono">-1.9兆円</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou01.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2018">2018年度</th>
+        <td class="mono">149.9兆円</td>
+        <td class="mono">148.3兆円</td>
+        <td class="mono">-1.6兆円</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou01.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2019">2019年度</th>
+        <td class="mono">148.7兆円</td>
+        <td class="mono">154.2兆円</td>
+        <td class="mono">+5.5兆円</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou01.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2020">2020年度</th>
+        <td class="mono">153.5兆円</td>
+        <td class="mono">256.9兆円</td>
+        <td class="mono">+103.4兆円</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou01.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">新型コロナ影響の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2021">2021年度</th>
+        <td class="mono">236.0兆円</td>
+        <td class="mono">210.7兆円</td>
+        <td class="mono">-25.3兆円</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou01.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2022">2022年度</th>
+        <td class="mono">215.0兆円</td>
+        <td class="mono">212.3兆円</td>
+        <td class="mono">-2.7兆円</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou01.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2023">2023年度</th>
+        <td class="mono">205.8兆円</td>
+        <td class="mono">193.5兆円</td>
+        <td class="mono">-12.3兆円</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou01.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2024">2024年度</th>
+        <td class="mono">182.0兆円</td>
+        <td class="mono">180.9兆円</td>
+        <td class="mono">-1.1兆円</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou01.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2025">2025年度</th>
+        <td class="mono">176.9兆円</td>
+        <td class="mono" data-ph="pending">実績未確定(年度未終了)</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou01.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2026">2026年度</th>
+        <td class="mono">180.7兆円</td>
+        <td class="mono" data-ph="pending">実績未確定(年度未終了)</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou01.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+        </tbody>
+      </table>
+      </div>
+        <p class="chart-note mono"><span id="t-table-csv">元データ: </span><a href="/data/jgb_total_issuance_forecast.csv">/data/jgb_total_issuance_forecast.csv</a></p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="site-footer-row">
+    <span id="t-footer-src">src: 内閣府 / 国民経済計算(SNA)</span>
+    <a class="footer-about" id="t-footer-about" href="/about.html">このサイトについて</a>
+    <a class="footer-about" id="t-footer-contact" href="/contact.html">お問い合わせ</a>
+  </footer>
+</div>
+<script src="/csv.js?v=20260731c"></script>
+<script src="/chart.js?v=20260731c"></script>
+</body>
+</html>

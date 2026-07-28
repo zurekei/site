@@ -814,6 +814,139 @@ a.card:hover {
 
 .readout-source a { color: var(--muted-2); }
 
+/* ==================== 指標ページ: 数値表 ==================== */
+
+/* bin/build_charts.mjs が静的に書き出す表。JSを実行しない読み手(クローラを含む)に
+   とっては、このページで数値が読める唯一の場所なので、CSSで隠さない。畳んである
+   のは <details> なのでHTMLには常に全行入っている。開閉の見た目は about ページの
+   .about-more と揃えてある。 */
+.data-section { margin-top: 2rem; }
+
+.data-details {
+  border-top: 1px solid var(--line);
+  padding-top: 1.25rem;
+}
+
+.data-details > summary {
+  cursor: pointer;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  list-style: none;
+}
+
+.data-details > summary::-webkit-details-marker { display: none; }
+.data-details > summary::before { content: "+ "; color: var(--amber); }
+.data-details[open] > summary::before { content: "− "; }
+
+/* 狭い画面では表だけを横に流す。ページ本体は横スクロールさせない。
+   スクロールは外側の箱が持つ: <table> に display:block をかけると内側が
+   shrink-to-fit になり、指標ごとに表の幅が変わってしまう。 */
+.data-table-wrap { overflow-x: auto; }
+
+.data-table {
+  width: 100%;
+  max-width: 760px;
+  margin-top: 1.25rem;
+  border-collapse: collapse;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table caption {
+  text-align: left;
+  font-size: 0.7rem;
+  color: var(--muted-2);
+  padding-bottom: 0.6rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.4rem 0.7rem 0.4rem 0;
+  text-align: right;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.data-table thead th {
+  text-align: right;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+
+.data-table tbody th[data-year],
+.data-table thead th:first-child { text-align: left; color: var(--ink); font-weight: 500; }
+
+/* 見通しだけあって実績が無い年など、数値ではなく語句が入るセル。
+   数字と同じ濃さで並ぶと読み違えるので落とす。 */
+.data-table [data-ph] { color: var(--muted-2); }
+
+.data-table-src { text-align: left; }
+.data-table-src a {
+  color: var(--muted-2);
+  margin-right: 0.6rem;
+  text-decoration: none;
+  border-bottom: 1px solid var(--line);
+}
+.data-table-src a:hover { color: var(--ink); }
+
+/* 一次資料からの注記。その年度の行にぶら下げる */
+.data-table-note td {
+  text-align: left;
+  white-space: normal;
+  font-size: 0.66rem;
+  line-height: 1.7;
+  color: var(--muted-2);
+  padding-top: 0;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+/* トップの card-grid に静的に置いてあるリンク。home.js が動けば即座にカードへ
+   差し替わるので、これが見えるのは JS が無いとき(と、差し替わる前の一瞬)。 */
+.card-fallback {
+  display: block;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.85rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.card-fallback:hover { color: var(--red); }
+
+/* ==================== 指標ハブ (/chart/) ==================== */
+
+.hub-list {
+  margin: 1.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.hub-list li { border-bottom: 1px solid var(--line-soft); padding: 0.9rem 0; }
+
+.hub-list a {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.9rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.hub-list a:hover { color: var(--red); }
+
+.hub-desc {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
 /* ==================== about page ==================== */
 
 /* 文章ページのページ枠は指標ページと同じ(.page = 1120px)。
