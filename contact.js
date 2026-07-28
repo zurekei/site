@@ -1,4 +1,6 @@
-const WORKER_URL = 'https://contact-backend.invalid';
+// Same-origin Pages Function (functions/api/contact.js). Deliberately a relative
+// path: an absolute URL here would publish the backend's hostname to every visitor.
+const ENDPOINT = '/api/contact';
 
 document.getElementById('contactForm').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -19,7 +21,7 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
   errorMsg.classList.remove('show');
 
   try {
-    const res = await fetch(WORKER_URL, {
+    const res = await fetch(ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -41,6 +43,10 @@ document.getElementById('contactForm').addEventListener('submit', async (e) => {
     }
   } catch (err) {
     errorMsg.classList.add('show');
+    // A Turnstile token is single-use. Without resetting here, every retry after a
+    // failure reuses the spent token and is rejected as a duplicate — so a transient
+    // error would look permanent, and the real cause would be masked.
+    if (window.turnstile) window.turnstile.reset();
   } finally {
     btn.disabled = false;
     btn.textContent = originalText;

@@ -13,7 +13,7 @@
 <meta property="og:image" content="https://zurekei.org/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=20260730">
+<link rel="stylesheet" href="style.css?v=20260731b">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
   .contact-page-wrap {
@@ -196,7 +196,10 @@
         <textarea id="message" placeholder="ご質問・ご指摘をご記入ください" required></textarea>
       </div>
 
-      <div class="cf-turnstile" data-sitekey="0x4AAAAAAD_Ft12YrgynMDEM" data-appearance="interaction-only"></div>
+      <!-- Site key of the "zurekei-contact" widget. Public by design (it ships to every
+           visitor); the paired Secret Key lives in the Pages project's env vars. Both must
+           come from the SAME widget — a mismatch fails server-side verification. -->
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAD_Ftl2YrgymWDtM" data-appearance="interaction-only"></div>
 
       <button type="submit" class="submit-btn" id="submitBtn" data-text="送信する">送信する</button>
 
@@ -210,6 +213,6 @@
   </div>
 </div>
 
-<script src="contact.js?v=20260730"></script>
+<script src="contact.js?v=20260731b"></script>
 </body>
 </html>
