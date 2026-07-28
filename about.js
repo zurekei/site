@@ -21,6 +21,8 @@ const T = {
     thActual: "実績の出典",
     freqTitle: "更新頻度",
     freqBody: "年1回、手動で更新する。政府の経済見通し(当初)は例年12月末〜1月に公表され、それに合わせて追加する。決算・確報値などの実績は、年度終了後の7〜12月頃に確定するものが多く、確定次第反映する。",
+    archiveTitle: "FY1997以前の見通し値",
+    archiveBody: "内閣府の見通しアーカイブはFY1998年度分から公開されており、それ以前は掲載されていない。このサイトでは、実質GDP・消費者物価の見通し(FY1980〜1997)を国会会議録の経済演説(衆議院本会議)から、名目GDPの見通し(FY1982〜1987は国会会議録の委員会質疑・政府答弁、FY1989〜1997は財務省『平成財政史』、FY1988のみ一次資料未特定で欠落)を独自に収集し、一次資料のURLとともに掲載している。",
     correctionsTitle: "訂正方針",
     correctionsBody: '誤りに気づいた場合は、値を黙って書き換えず、変更前後の値と理由を記録した上で訂正する。→ <a href="corrections.html">訂正履歴</a>',
     dataTitle: "データ本体",
@@ -51,6 +53,8 @@ const T = {
     thActual: "Actual source",
     freqTitle: "Update frequency",
     freqBody: "Updated once a year, by hand. The government's initial economic outlook is usually published in late December or January, and the new forecast is added around then. Settlement figures and confirmed actuals are mostly finalized from around July to December after the fiscal year ends, and are added once confirmed.",
+    archiveTitle: "Forecasts from before FY1997",
+    archiveBody: "The Cabinet Office's online forecast archive only goes back to FY1998; nothing earlier is published there. For this site, the real GDP and consumer price forecasts (FY1980–1997) were collected from the Diet record of the economic address to the House of Representatives, and the nominal GDP forecast (FY1982–1987 from Diet committee questioning and government responses, FY1989–1997 from the Ministry of Finance's Heisei Zaisei-shi, with FY1988 alone still missing as no primary source has been identified) was collected the same way — each figure listed with a link to its primary source.",
     correctionsTitle: "Corrections policy",
     correctionsBody: 'When an error is found, the value isn’t quietly changed — the correction is recorded, with the old value, the new value, and the reason. → <a href="corrections.html">Corrections</a>',
     dataTitle: "The data itself",
@@ -132,6 +136,8 @@ function main() {
     document.getElementById("methods-tbody").innerHTML = renderMethodsRows(lang);
     document.getElementById("freq-title").textContent = t.freqTitle;
     document.getElementById("freq-body").textContent = t.freqBody;
+    document.getElementById("archive-title").textContent = t.archiveTitle;
+    document.getElementById("archive-body").textContent = t.archiveBody;
     document.getElementById("corrections-title").textContent = t.correctionsTitle;
     document.getElementById("corrections-body").innerHTML = t.correctionsBody;
     document.getElementById("data-title").textContent = t.dataTitle;

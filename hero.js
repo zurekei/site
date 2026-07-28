@@ -21,10 +21,16 @@
   const rows = (await loadCSV("data/gdp_forecast.csv"))
     .map((r) => ({
       year: Number(r.fiscal_year),
-      f: toNum(r.forecast_real),
-      a: toNum(r.actual_real),
+      f: toNum(r.forecast_nominal),
+      a: toNum(r.actual_nominal),
     }))
     .sort((x, y) => x.year - y.year);
+
+  // hero-copy-summary の集計行("46年度中..."的な一文)は home.js の
+  // applyI18n() が seriesData["gdp-nominal"].stats(computeGapStats 済み)
+  // から直接組み立てる。ここでは触らない — hero.js 側で日本語を書いてから
+  // home.js が上書きする二段構えだと、EN表示時に描画順次第でJAが残る
+  // レースがあったため一本化した。
 
   const years = rows.map((r) => r.year);
   const xMin = Math.min(...years);
@@ -37,6 +43,29 @@
   const x = (yr) => PAD.left + ((yr - xMin) / (xMax - xMin)) * (W - PAD.left - PAD.right);
   const y = (v) => PAD.top + (H - PAD.top - PAD.bottom) * (1 - (v - yMin) / (yMax - yMin));
 
+  // FY1988は名目見通しが未収集(一次資料未特定)のため forecast_nominal が
+  // 欠損する。欠損年をまたいで直線で繋がず、パスを分割(M で新規サブパス)
+  // して途切れを正直に描く。実績側も同じ関数で同様の耐性を持たせる。
+  function buildSegments(points) {
+    const segments = [];
+    let current = [];
+    points.forEach((r) => {
+      if (current.length > 0 && r.year - current[current.length - 1].year > 1) {
+        segments.push(current);
+        current = [];
+      }
+      current.push(r);
+    });
+    if (current.length > 0) segments.push(current);
+    return segments;
+  }
+
+  function pathFromSegments(segments, valKey) {
+    return segments.map((seg) => `M ${seg.map((r) => `${x(r.year)},${y(r[valKey])}`).join(" L ")}`).join(" ");
+  }
+
+  svg.setAttribute("aria-label", `名目GDP成長率 — 政府の当初見通しと実績 ${xMin}–${xMax}年度`);
+
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // --- axes ---
@@ -48,7 +77,11 @@
     t.textContent = yr;
     axesGroup.appendChild(t);
   }
-  for (let v = -4; v <= 6; v += 2) {
+  // gridline step scales with the y-domain's span so it stays readable
+  // whichever series (real or nominal — nominal swings wider) is plotted
+  const yRange = yMax - yMin;
+  const yStep = yRange > 15 ? 5 : yRange > 8 ? 2 : 1;
+  for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) {
     if (v !== 0) axesGroup.appendChild(el("line", { class: "grid-line-y", x1: PAD.left, x2: W - PAD.right, y1: y(v), y2: y(v) }));
     const t = el("text", { class: "axis-label", x: PAD.left - 8, y: y(v) + 3, "text-anchor": "end" });
     t.textContent = `${v}%`;
@@ -69,20 +102,20 @@
   defs.appendChild(aClip);
   svg.appendChild(defs);
 
-  // --- forecast line (見通しを繋いだ1本の破線) ---
+  // --- forecast line (見通しを繋いだ線。FY1988の欠損でサブパスが分かれる) ---
   const forecastPts = rows.filter((r) => r.f !== null);
   const forecastPath = el("path", {
     class: "line-forecast",
-    d: `M ${forecastPts.map((r) => `${x(r.year)},${y(r.f)}`).join(" L ")}`,
+    d: pathFromSegments(buildSegments(forecastPts), "f"),
     "clip-path": "url(#hero-clip-forecast)",
   });
   svg.appendChild(forecastPath);
 
-  // --- actual line ---
+  // --- actual line (同様に欠損耐性を持たせる。現状は連続しているため見た目は変わらない) ---
   const actualPts = rows.filter((r) => r.a !== null);
   const actualPath = el("path", {
     class: "line-actual",
-    d: `M ${actualPts.map((r) => `${x(r.year)},${y(r.a)}`).join(" L ")}`,
+    d: pathFromSegments(buildSegments(actualPts), "a"),
     "clip-path": "url(#hero-clip-actual)",
   });
   svg.appendChild(actualPath);

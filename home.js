@@ -19,7 +19,8 @@ const T = {
     fertilityNote: "歴代7推計(1992〜2023) vs 実績",
     sourceLabel: "出典",
     heroCopy: "見通しと実績のズレを、\n記録し続ける。",
-    heroCaption: "実質GDP成長率 — 当初見通しと実績 1980–2025年度",
+    heroCaption: (min, max) => `名目GDP成長率 — 当初見通しと実績 ${min}–${max}年度`,
+    heroGapBelow: (below, total) => `名目GDP成長率: ${total}年度中、実績が見通しを下回った年 ${below}回`,
     src: "src: 内閣府 / 国民経済計算(SNA)",
     aboutLink: "このサイトについて",
     correctionsLink: "訂正履歴",
@@ -47,7 +48,8 @@ const T = {
     fertilityNote: "7 vintages (1992–2023) vs actual",
     sourceLabel: "Source",
     heroCopy: "A running record of the gap\nbetween forecast and actual.",
-    heroCaption: "Real GDP growth — initial forecast vs actual, FY1980–2025",
+    heroCaption: (min, max) => `Nominal GDP growth — initial forecast vs actual, FY${min}–${max}`,
+    heroGapBelow: (below, total) => `Nominal GDP growth: actual came in below forecast in ${below} of ${total} fiscal years`,
     src: "src: Cabinet Office of Japan / SNA",
     aboutLink: "About this site",
     correctionsLink: "Corrections",
@@ -197,8 +199,21 @@ async function loadSeries(meta) {
   const withForecast = rows.filter((r) => r[meta.forecastCol] !== null);
   const latest = withForecast[withForecast.length - 1] || null;
   const spark = buildSparkline(rows, meta.forecastCol, meta.actualCol);
+  const stats = computeGapStats(rows, meta.forecastCol, meta.actualCol);
+  const years = rows.map((r) => r.year);
+  const yearRange = years.length ? { min: Math.min(...years), max: Math.max(...years) } : null;
 
-  return { latest, spark };
+  return { latest, spark, stats, yearRange };
+}
+
+// compact one-line version of the same over/under-forecast counts shown in
+// full on the chart page (see gapSummaryText() in chart.js / computeGapStats()
+// in csv.js) — counts only, no average gap, to keep the card small.
+function cardGapSummaryText(stats, lang) {
+  if (!stats) return "";
+  return lang === "ja"
+    ? `上回り ${stats.above}・下回り ${stats.below} / ${stats.count}年`
+    : `above ${stats.above} · below ${stats.below} / ${stats.count} yrs`;
 }
 
 function renderCard(meta, lang, data) {
@@ -224,7 +239,7 @@ function renderCard(meta, lang, data) {
       </a>`;
   }
 
-  const { latest, spark } = data;
+  const { latest, spark, stats } = data;
   const fy = latest ? `'${String(latest.year).slice(-2)}` : "—";
   const planVal = latest ? latest[meta.forecastCol] : null;
   const actualVal = latest ? latest[meta.actualCol] : null;
@@ -233,6 +248,7 @@ function renderCard(meta, lang, data) {
   const planStr = fmtSigned(planVal, meta.unit, meta.signed) ?? "—";
   const actualStr = actualVal !== null ? fmtSigned(actualVal, meta.unit, meta.signed) : t.noActual;
   const gapStr = fmtSigned(gapVal, meta.unit) ?? "—";
+  const gapSummaryStr = cardGapSummaryText(stats, lang);
 
   const inner = `
     <div class="card-top">
@@ -245,6 +261,7 @@ function renderCard(meta, lang, data) {
       <div><div class="stat-label">${t.actual}</div><div class="stat-value">${actualStr}</div></div>
       <div><div class="stat-label stat-label-gap">${t.gap}</div><div class="stat-value stat-value-gap">${gapStr}</div></div>
     </div>
+    ${gapSummaryStr ? `<div class="card-gap-summary mono">${gapSummaryStr}</div>` : ""}
     <svg class="card-spark" viewBox="0 0 300 80">
       ${spark.fc.map((pts) => `<polyline class="spark-forecast" points="${pts}"></polyline>`).join("")}
       ${spark.ac.map((pts) => `<polyline class="spark-actual" points="${pts}"></polyline>`).join("")}
@@ -290,13 +307,31 @@ async function main() {
     document.getElementById("t-hoan-entry-label").textContent = t.hoanEntryLabel;
     document.getElementById("t-hoan-entry-title").textContent = t.hoanEntryTitle;
     document.getElementById("t-hoan-entry-desc").textContent = t.hoanEntryDesc;
-    document.getElementById("hero-caption").textContent = t.heroCaption;
-    document.getElementById("hero-copy").textContent = t.heroCopy;
+    // 年範囲はCSVから動的に出す(gdp-nominalカードで読み込み済みのgdp_forecast.csv
+    // をそのまま使う。実質/名目とも同じファイル・同じfiscal_year列なので範囲は共通)
+    const heroRange = seriesData["gdp-nominal"] && seriesData["gdp-nominal"].yearRange;
+    if (heroRange) {
+      document.getElementById("hero-caption").textContent = t.heroCaption(heroRange.min, heroRange.max);
+    }
+    document.getElementById("hero-copy-headline").textContent = t.heroCopy;
     // hero.js が描画完了する前に applyI18n が走るため、ラベルは存在チェック付きで反映
     const heroActual = document.getElementById("hero-label-actual");
     if (heroActual) heroActual.textContent = t.actual;
     const heroForecast = document.getElementById("hero-label-forecast");
     if (heroForecast) heroForecast.textContent = t.plan;
+    // hero.js が計算した集計値(above/below/total)をdataset経由で受け取り、
+    // 言語ごとの文言を組み立てる。同じく存在チェック付き(hero.jsの描画順に依存しない)
+    // composed directly from seriesData (already loaded/computed above via
+    // computeGapStats) rather than reading anything hero.js wrote to the DOM —
+    // avoids a draw-order race where hero.js's JA default could still be
+    // showing after an EN switch. "total" is stats.count (years where both a
+    // forecast and an actual exist), not the CSV's full row count — FY1980,
+    // FY1988, and FY2025 aren't comparable and are correctly excluded.
+    const heroStats = seriesData["gdp-nominal"] && seriesData["gdp-nominal"].stats;
+    const heroSummary = document.getElementById("hero-copy-summary");
+    if (heroSummary && heroStats) {
+      heroSummary.textContent = t.heroGapBelow(heroStats.below, heroStats.count);
+    }
     document.getElementById("t-footer-src").textContent = t.src;
     document.getElementById("t-footer-corrections").textContent = t.correctionsLink;
     document.getElementById("t-footer-about").textContent = t.aboutLink;

@@ -13,6 +13,30 @@ function toNum(s) {
   return s === "" || s === undefined ? null : Number(s);
 }
 
+// Aggregate over/under-forecast stats for a forecast/actual pair, counted
+// only over rows where both values are present (non-null). Shared by
+// home.js (card summary) and chart.js (per-metric readout) so the two
+// figures are always computed the same way. Ties (actual === forecast)
+// count toward neither above nor below. Returns null when there are no
+// years with both values, so callers can hide the summary rather than show
+// a fabricated zero.
+function computeGapStats(rows, forecastKey, actualKey) {
+  const paired = rows.filter(
+    (r) => r[forecastKey] !== null && r[forecastKey] !== undefined && r[actualKey] !== null && r[actualKey] !== undefined
+  );
+  if (paired.length === 0) return null;
+  let above = 0;
+  let below = 0;
+  let sumGap = 0;
+  paired.forEach((r) => {
+    const diff = r[actualKey] - r[forecastKey];
+    if (diff > 0) above++;
+    else if (diff < 0) below++;
+    sumGap += diff;
+  });
+  return { count: paired.length, above, below, meanGap: sumGap / paired.length };
+}
+
 function escapeHTML(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({
     "&": "&amp;",

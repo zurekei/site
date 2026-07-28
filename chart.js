@@ -17,6 +17,12 @@ const T = {
     dataNotCollected: "データ未収集",
     forecastSourcePrefix: "見通し出典: ",
     actualSourcePrefix: "実績出典: ",
+    gapSummaryAbove: "実績が見通しを上回った年",
+    gapSummaryBelow: "下回った年",
+    gapSummaryAvg: "平均のズレ",
+    gapSummaryCountPrefix: "対象",
+    gapSummaryCountSuffix: "年度分",
+    gapSummaryUnit: "回",
     basisLabels: { "2015base-ref": "2015年基準・参考系列", "2020base-final": "2020年基準・確報" },
     actualBasisPrefix: "実績の基準: ",
     forecastBasisLabels: { gnp: "GNPベース(国民総生産)", gdp: "GDPベース(国内総生産)" },
@@ -37,6 +43,12 @@ const T = {
     dataNotCollected: "Data not yet collected",
     forecastSourcePrefix: "Forecast source: ",
     actualSourcePrefix: "Actual source: ",
+    gapSummaryAbove: "Years actual came in above forecast",
+    gapSummaryBelow: "below",
+    gapSummaryAvg: "mean gap",
+    gapSummaryCountPrefix: "n=",
+    gapSummaryCountSuffix: " fiscal years",
+    gapSummaryUnit: "",
     basisLabels: { "2015base-ref": "2015 base, reference series", "2020base-final": "2020 base, final" },
     actualBasisPrefix: "Actual basis: ",
     forecastBasisLabels: { gnp: "GNP basis", gdp: "GDP basis" },
@@ -57,6 +69,8 @@ const METRICS = {
     descEn: "The government's initial forecast (real) laid alongside the confirmed actual.",
     note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。",
     noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases).",
+    archiveNote: "FY1997以前の実質GDP見通しは内閣府の見通しアーカイブ(FY1998年度分〜)には存在しない。経済企画庁長官の経済演説(国会会議録・衆議院本会議)から、FY1980〜1997の18年分を独自に収集した。",
+    archiveNoteEn: "The real GDP forecast for FY1997 and earlier is not in the Cabinet Office's online forecast archive, which begins at FY1998. It was collected independently from the Diet record of the Director-General of the Economic Planning Agency's economic address to the House of Representatives, covering all 18 fiscal years from FY1980 through FY1997.",
     csv: "data/gdp_forecast.csv",
     forecastCol: "forecast_real",
     actualCol: "actual_real",
@@ -75,6 +89,8 @@ const METRICS = {
     descEn: "The government's initial forecast (nominal) laid alongside the confirmed actual.",
     note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。名目の見通しはFY1988が未収集のため、この年は線が途切れる。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。",
     noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The nominal forecast for FY1988 has not been collected, so the line breaks at that year. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases).",
+    archiveNote: "FY1997以前の名目GDP見通しも内閣府の見通しアーカイブには存在しない。FY1982〜1987は国会会議録の委員会質疑・政府答弁から、FY1989〜1997は財務省『平成財政史』の記述から収集した。FY1988のみ一次資料が未特定で欠落している。",
+    archiveNoteEn: "The nominal GDP forecast for FY1997 and earlier is likewise absent from the Cabinet Office's archive. FY1982–1987 was collected from Diet committee questioning and government responses, and FY1989–1997 from the Ministry of Finance's Heisei Zaisei-shi (Fiscal History of the Heisei Era). FY1988 alone remains uncollected, as no primary source for it has yet been identified.",
     csv: "data/gdp_forecast.csv",
     forecastCol: "forecast_nominal",
     actualCol: "actual_nominal",
@@ -157,6 +173,8 @@ const METRICS = {
     titleEn: "Consumer prices (CPI)",
     desc: "政府の当初見通しと、総務省統計局が公表する確定した実績を並べたもの。",
     descEn: "The government's initial forecast laid alongside the confirmed actual published by the Ministry of Internal Affairs and Communications' Statistics Bureau.",
+    archiveNote: "FY1997以前の消費者物価見通しも内閣府の見通しアーカイブには存在しないため、同じ経済演説から収集した。演説に言及がない年度(FY1989、FY1993〜1997)は未収集のまま空欄にしている。",
+    archiveNoteEn: "The consumer price forecast for FY1997 and earlier is likewise absent from the Cabinet Office's archive; it was collected from the same economic addresses. Years the address did not mention (FY1989, FY1993–1997) remain uncollected and blank.",
     csv: "data/cpi_forecast.csv",
     forecastCol: "forecast_cpi",
     actualCol: "actual_cpi",
@@ -172,6 +190,31 @@ function fmtFY(year, lang) {
 
 function gapLabelText(metric, lang) {
   return metric.gapLabel ? metric.gapLabel[lang] : T[lang].dataNotCollected;
+}
+
+// unit used for the aggregate mean-gap figure: percentage-point metrics
+// read "pt" (matching the per-year gap readout), amount metrics keep their
+// own unit (兆円).
+function gapUnitSuffix(metric) {
+  return metric.unit === "%" ? "pt" : metric.unit;
+}
+
+// one-line summary of how often, and by how much, the actual has diverged
+// from the forecast — computed from computeGapStats() (csv.js), which only
+// counts fiscal years where both a forecast and an actual exist. Returns ""
+// when there are no such years, so the caller can hide the line entirely
+// rather than show a fabricated "0 out of 0".
+function gapSummaryText(stats, metric, lang) {
+  if (!stats) return "";
+  const t = T[lang];
+  const unit = gapUnitSuffix(metric);
+  // signed mean (実績 − 見通し の規約通り), same sign convention as the
+  // per-year gap readout — not a magnitude, so no "±" prefix.
+  const avg = `${stats.meanGap > 0 ? "+" : ""}${stats.meanGap.toFixed(1)}`;
+  if (lang === "ja") {
+    return `${t.gapSummaryAbove} ${stats.above}${t.gapSummaryUnit} / ${t.gapSummaryBelow} ${stats.below}${t.gapSummaryUnit} / ${t.gapSummaryAvg} ${avg}${unit} / ${t.gapSummaryCountPrefix}${stats.count}${t.gapSummaryCountSuffix}`;
+  }
+  return `${t.gapSummaryAbove}: ${stats.above} / ${t.gapSummaryBelow}: ${stats.below} / ${t.gapSummaryAvg} ${avg}${unit} / ${t.gapSummaryCountPrefix}${stats.count}${t.gapSummaryCountSuffix}`;
 }
 
 function svgEl(tag, attrs) {
@@ -252,6 +295,10 @@ async function main() {
 
   const actualPoints = rows.filter((r) => r.actualVal !== null);
   const forecastYears = rows.filter((r) => r.forecastVal !== null);
+
+  // aggregate over/under-forecast counts, computed once from the full series
+  // (not per selected year) — see computeGapStats() in csv.js.
+  const gapStats = computeGapStats(rows, "forecastVal", "actualVal");
 
   const allYears = rows.map((r) => r.year);
   const xMin = Math.min(...allYears);
@@ -533,7 +580,7 @@ async function main() {
 
       vActual.textContent = fmtVal(r.actualVal, metric.unit, metric.signed);
       const diff = r.actualVal - r.forecastVal;
-      vDiff.textContent = `${diff > 0 ? "+" : ""}${diff.toFixed(1)}pt`;
+      vDiff.textContent = `${diff > 0 ? "+" : ""}${diff.toFixed(1)}${gapUnitSuffix(metric)}`;
     } else {
       actualPoint.setAttribute("opacity", 0);
       linkLine.setAttribute("opacity", 0);
@@ -591,6 +638,18 @@ async function main() {
     document.getElementById("t-stat-gap").textContent = t.gap;
     document.getElementById("t-footer-src").textContent = t.footerSrc;
     document.getElementById("t-footer-about").textContent = t.footerAbout;
+    const summaryEl = document.getElementById("chart-summary");
+    if (summaryEl) {
+      const summaryText = gapSummaryText(gapStats, metric, lang);
+      summaryEl.textContent = summaryText;
+      summaryEl.hidden = !summaryText;
+    }
+    const archiveEl = document.getElementById("archive-note");
+    if (archiveEl) {
+      const archiveText = lang === "ja" ? metric.archiveNote : metric.archiveNoteEn;
+      archiveEl.textContent = archiveText || "";
+      archiveEl.hidden = !archiveText;
+    }
     if (actualLabel) actualLabel.textContent = t.actual;
     if (basisBandLabel) basisBandLabel.textContent = t.forecastEraBandLabel;
     forecastLabel.textContent = t.forecast;
