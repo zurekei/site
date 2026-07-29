@@ -75,6 +75,20 @@ if ! node "$ROOT/bin/build.mjs" --check; then
   exit 1
 fi
 
+# sitemap.xml は生成物であっても中身がXMLとして壊れうる(コメントに連続ハイフンを
+# 書いてしまい実際に一度パースエラーを起こしている)。--check は文字列比較しか
+# しないので壊れていても素通りする。ここでXMLとして開けるかだけ見る。
+# xmllint が無い環境(未インストールのCI等)でもデプロイ自体は止めない(無ければ
+# 検査を飛ばすだけで、既存の運用を壊さない側に倒す)。
+if command -v xmllint >/dev/null 2>&1; then
+  if ! xmllint --noout "$ROOT/sitemap.xml"; then
+    echo "エラー: sitemap.xml がXMLとして壊れています。" >&2
+    exit 1
+  fi
+else
+  echo "警告: xmllint が無いので sitemap.xml の構文検査を飛ばしました。" >&2
+fi
+
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "エラー: $ENV_FILE がありません。" >&2
   echo "次の2行を書いた .deploy.env を「リポジトリの外」に作ってください:" >&2

@@ -37,12 +37,38 @@
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
+import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SITE_DIR = path.join(HERE, "..");
 const OUT_DIR = path.join(SITE_DIR, "chart");
 const SITE = "https://zurekei.org";
+
+// トップの Organization ノードの @id。各ページの Dataset の creator/publisher と
+// トップの WebSite/Organization を同じ実体として束ねるための共通の識別子。
+// 個人を特定する情報(founder等)は入れない(匿名運営を選択肢として残しているため)。
+const ORG_ID = `${SITE}/#organization`;
+
+// DataCatalog(10個の Dataset を束ねる節点)の @id。各 Dataset の
+// includedInDataCatalog が参照する共通の識別子。置き場所をトップ(index.html)に
+// したのは buildHomeJsonLd のコメントを参照。
+const CATALOG_ID = `${SITE}/#catalog`;
+
+// fertility / hoan の Dataset の name・@id・url は、Dataset 自身の JSON-LD
+// (fertilityJsonLd/hoanJsonLd)と、カタログ側(buildHomeJsonLd)の参照の両方から
+// 使う。1箇所にしないと「カタログに載っている名前」と「Dataset 自身が名乗る
+// 名前」がいつか別のものに書き換わってズレる。
+const FERTILITY_DATASET = {
+  id: `${SITE}/fertility#dataset`,
+  url: `${SITE}/fertility`,
+  name: "合計特殊出生率｜歴代の将来推計の仮定と実績",
+};
+const HOAN_DATASET = {
+  id: `${SITE}/hoan#dataset`,
+  url: `${SITE}/hoan`,
+  name: "法律の見直し条項｜期限と検討状況",
+};
 
 // style.css / chart.js のキャッシュバスター。ページ側の ?v= と揃える。
 const ASSET_V = "20260731i";
@@ -185,21 +211,38 @@ function buildTable(metric, rows) {
 
 /* ── JSON-LD ─────────────────────────────────────────────── */
 
+// カタログ側の参照(name/url)と Dataset 自身の name を1箇所にする(呼び出し側で
+// 同じ文言を書き写さない)。
+function metricDatasetName(metric) {
+  return `${metric.title}｜政府の当初見通しと実績`;
+}
+
 // ライセンスは書かない。サイトのどこにも利用条件の記載がなく、ここで勝手に
 // 宣言すると「出典つきで確かめられる」という主旨の逆をやることになる。
 // 利用条件を決めたら license を足すこと。
 function buildJsonLd(key, metric, rows) {
   const years = rows.map((r) => r.year);
+  const url = `${SITE}/chart/${key}`;
   const obj = {
     "@context": "https://schema.org",
     "@type": "Dataset",
-    name: `${metric.title}｜政府の当初見通しと実績`,
+    // トップ(index.html)の DataCatalog からこの @id で参照する。
+    "@id": `${url}#dataset`,
+    name: metricDatasetName(metric),
     description: metric.desc,
-    url: `${SITE}/chart/${key}`,
+    url,
     isAccessibleForFree: true,
     inLanguage: "ja",
     temporalCoverage: `${Math.min(...years)}/${Math.max(...years)}`,
-    creator: { "@type": "Organization", name: "ズレ計", url: SITE },
+    // @id を持たせて、トップの Organization(index.html) と同一実体だと機械に
+    // 分かる形にする。type/name/url も残すのは、このページ単体だけを読んだ
+    // クローラでも自己完結して解釈できるようにするため。
+    creator: { "@type": "Organization", "@id": ORG_ID, name: "ズレ計", url: SITE },
+    // カタログ→Dataset の裸の @id 参照だけでは、Google 等の消費側がページ単位
+    // でしか処理せず別文書の @id を解決しに行かないため実質不発になる
+    // (2026-07-29 に気づいた)。Google の Dataset ドキュメントが明記しているのは
+    // Dataset→DataCatalog のこの逆向きの参照で、効くのは実はこちらなので必ず持たせる。
+    includedInDataCatalog: { "@id": CATALOG_ID },
     variableMeasured: [
       { "@type": "PropertyValue", name: "見通し（当初）", unitText: metric.unit },
       { "@type": "PropertyValue", name: "実績（確定）", unitText: metric.unit },
@@ -397,7 +440,16 @@ ${footer()}
 
 /* ── ハブ ────────────────────────────────────────────────── */
 
+// DataCatalog(10個の Dataset を束ねる節点)はここ(chart/index.html)には置かない。
+// このハブが実際にリンクしているのは8指標だけで fertility/hoan へのリンクを
+// 持たない(経済指標だけの一覧として作られている)。ここに10件のカタログを
+// 置くと「そのページに実際に載っている内容と対応しない構造化データ」になり
+// スパム扱いされうる。置き場所と理由は buildHomeJsonLd のコメントを参照。
 function buildIndex(keys) {
+  // メタ description と JSON-LD の description を1箇所にする(新しいコピーを
+  // 発明しない)。
+  const desc = "政府の当初見通しと確定した実績を並べた指標の一覧。";
+
   const items = keys
     .map((k) => {
       const m = METRICS[k];
@@ -415,12 +467,12 @@ function buildIndex(keys) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- bin/build.mjs が生成している。直接編集しない。 -->
 <title>指標一覧 — ズレ計</title>
-<meta name="description" content="政府の当初見通しと確定した実績を並べた指標の一覧。">
+<meta name="description" content="${escapeHTML(desc)}">
 <link rel="canonical" href="${SITE}/chart/">
 <meta property="og:site_name" content="ズレ計">
 <meta property="og:type" content="website">
 <meta property="og:title" content="指標一覧 — ズレ計">
-<meta property="og:description" content="政府の当初見通しと確定した実績を並べた指標の一覧。">
+<meta property="og:description" content="${escapeHTML(desc)}">
 <meta property="og:url" content="${SITE}/chart/">
 <meta property="og:image" content="${SITE}/assets/og.png">
 ${assetHead()}
@@ -630,13 +682,20 @@ ${JSON.stringify(
   {
     "@context": "https://schema.org",
     "@type": "Dataset",
-    name: "合計特殊出生率｜歴代の将来推計の仮定と実績",
+    "@id": FERTILITY_DATASET.id,
+    name: FERTILITY_DATASET.name,
     description: FERT.T.ja.desc,
-    url: `${SITE}/fertility`,
+    url: FERTILITY_DATASET.url,
     isAccessibleForFree: true,
     inLanguage: "ja",
     temporalCoverage: `${d.years[0]}/${d.years[d.years.length - 1]}`,
-    creator: { "@type": "Organization", name: "ズレ計", url: SITE },
+    // @id はトップ(index.html)の Organization と共通。理由は chart 側の
+    // buildJsonLd のコメントを参照。
+    creator: { "@type": "Organization", "@id": ORG_ID, name: "ズレ計", url: SITE },
+    // トップの card-grid(.card-fallback)に実際にこのページへのリンクがある
+    // ので、10件のカタログに含めてよい。理由と裏向き参照の意味は chart 側の
+    // buildJsonLd のコメントを参照。
+    includedInDataCatalog: { "@id": CATALOG_ID },
     variableMeasured: [
       { "@type": "PropertyValue", name: "推計の仮定（中位）", unitText: "合計特殊出生率" },
       { "@type": "PropertyValue", name: "実績", unitText: "合計特殊出生率" },
@@ -736,13 +795,20 @@ ${JSON.stringify(
   {
     "@context": "https://schema.org",
     "@type": "Dataset",
-    name: "法律の見直し条項｜期限と検討状況",
+    "@id": HOAN_DATASET.id,
+    name: HOAN_DATASET.name,
     description: HOAN.T.ja.desc,
-    url: `${SITE}/hoan`,
+    url: HOAN_DATASET.url,
     isAccessibleForFree: true,
     inLanguage: "ja",
     temporalCoverage: `${years[0]}/${years[years.length - 1]}`,
-    creator: { "@type": "Organization", name: "ズレ計", url: SITE },
+    // @id はトップ(index.html)の Organization と共通。理由は chart 側の
+    // buildJsonLd のコメントを参照。
+    creator: { "@type": "Organization", "@id": ORG_ID, name: "ズレ計", url: SITE },
+    // トップに hoan-entry として実際にこのページへのリンクがあるので、10件の
+    // カタログに含めてよい。理由と裏向き参照の意味は chart 側の buildJsonLd の
+    // コメントを参照。
+    includedInDataCatalog: { "@id": CATALOG_ID },
     variableMeasured: [
       { "@type": "PropertyValue", name: "施行日" },
       { "@type": "PropertyValue", name: "見直し期限（施行日＋条項の年数）" },
@@ -771,12 +837,321 @@ function buildHoan() {
   return html;
 }
 
+/* ── トップページ(index.html) ───────────────────────────────
+ * index.html は元から手書きの静的ページ(丸ごと生成ではない)。fertility/hoan と
+ * 同じ理由で、JSON-LD の入る領域だけを BUILD マーカーで機械の持ち物にする。
+ */
+// DataCatalog(8指標 + fertility + hoan = 10個の Dataset を束ねる節点)をここに
+// 置く。かつては chart/index.html(指標一覧)に置いていたが、そのハブが実際に
+// リンクしているのは8指標だけで fertility/hoan へのリンクを持たない(経済指標
+// だけの一覧として作られている)。構造化データは、そのページに実際に載っている
+// 内容と対応していなければならない(対応していないものを書くとスパム扱い
+// されうる)ので、8件だけカタログに残す手もあったが、それだと「引用される
+// 主体をサイトにする」目的からは片手落ちになる。トップ(index.html)は
+// card-grid(.card-fallback、8指標+fertility)と hoan-entry(hoan)の両方で
+// 実際に10件全てへのリンクを持っており、内容と対応するのでここに移した。
+function buildHomeJsonLd(desc, keys) {
+  const catalogDatasets = [
+    ...keys.map((k) => {
+      const m = METRICS[k];
+      return {
+        "@type": "Dataset",
+        "@id": `${SITE}/chart/${k}#dataset`,
+        name: metricDatasetName(m),
+        url: `${SITE}/chart/${k}`,
+      };
+    }),
+    { "@type": "Dataset", "@id": FERTILITY_DATASET.id, name: FERTILITY_DATASET.name, url: FERTILITY_DATASET.url },
+    { "@type": "Dataset", "@id": HOAN_DATASET.id, name: HOAN_DATASET.name, url: HOAN_DATASET.url },
+  ];
+  return `<script type="application/ld+json">
+${JSON.stringify(
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      // Organization は各 Dataset(chart/*.html, fertility.html, hoan.html)の
+      // creator/publisher が @id で参照する共通ノード。個人を特定する情報
+      // (founder/employee/address/telephone等)は入れない。匿名運営を選択肢
+      // として残しているため。
+      { "@type": "Organization", "@id": ORG_ID, name: "ズレ計", url: SITE },
+      {
+        "@type": "WebSite",
+        "@id": `${SITE}/#website`,
+        url: SITE,
+        name: "ズレ計",
+        description: desc,
+        inLanguage: "ja",
+        publisher: { "@id": ORG_ID },
+      },
+      {
+        "@type": "DataCatalog",
+        "@id": CATALOG_ID,
+        name: "指標一覧",
+        // 新しいコピーを発明せず、トップの meta description をそのまま使う
+        // (WebSite と同じ文言でよい。このページ自体が10件へのリンクを持つ
+        // ことで内容と対応しているので、カタログ専用の説明文は要らない)。
+        description: desc,
+        url: SITE,
+        // creator ではなく publisher にしたのは、各 Dataset 側が creator を
+        // 名乗っているのに揃えるため(このカタログ自身がデータを作っている
+        // わけではなく、束ねて出しているだけ)。
+        publisher: { "@id": ORG_ID },
+        // ここも type/name/url を持たせた参照にする(裸の @id だけだと、この
+        // ページ単体を読んだ消費者には「型も名前も無い10個の参照」にしか
+        // 見えない)。ただし効くのは Dataset→ここへの includedInDataCatalog の
+        // 方(chart側の buildJsonLd のコメント参照)なので、こちらは主に
+        // このページを読む人間・クローラへの自己完結した説明として持たせる。
+        dataset: catalogDatasets,
+      },
+    ],
+  },
+  null,
+  2
+)}
+</script>`;
+}
+
+function buildHome(keys) {
+  let html = read("index.html");
+  // 新しいコピーを発明せず、既存の <meta name="description"> をそのまま使う。
+  const m = html.match(/<meta name="description" content="([^"]*)">/);
+  if (!m) throw new Error("index.html の meta description が見つからない(構造が変わった可能性がある)");
+  const desc = m[1];
+  html = injectRegion(html, "jsonld", buildHomeJsonLd(desc, keys), "index.html");
+  return html;
+}
+
+/* ── sitemap.xml ─────────────────────────────────────────────
+ * かつては手書きで、lastmod は「正確な値を持てない」として入れていなかった
+ * (推測日を書くと信用できない情報になる、という当時としては正しい判断)。
+ * 今は違う: bin/build.mjs が data/*.csv からページを生成するようになったので、
+ * 「そのページの中身がいつ変わったか」は推測ではなく実データ(元ファイルの
+ * コミット日)として取れる。政府の公表日に合わせてデータが更新されることが
+ * このサイトの価値の中心なのに、更新されたことを機械に伝える手段が今まで
+ * 無かった。lastmod は再クロール頻度に効く主要シグナルなので足す。
+ *
+ * ■ lastmod は「入力ファイル群」ではなく「出力そのもの」で決める
+ *   最初の実装は「そのページの元になっているファイル群の、最終更新日の
+ *   最大値」だった。その依存表に bin/build.mjs 自身を入れていたため、
+ *   bin/build.mjs のコメントを1行直すだけで配信されるHTMLが1バイトも
+ *   変わらないのに、それに依存する全ページの lastmod が「更新された」と
+ *   宣言されてしまっていた(2026-07-29にレビューで発覚)。lastmod は「中身が
+ *   変わった」と機械に伝える信号で、内容と対応しない更新を繰り返すと信号
+ *   そのものの信用を落とす。
+ *
+ *   直したのは判定対象そのもの: 「入力ファイル群」ではなく「生成された出力」
+ *   を見る。丸ごと/差し込み生成しているページ(chart/*.html, fertility.html,
+ *   hoan.html, index.html)は、いま生成した文字列を git show HEAD:<path> の
+ *   内容と比べ、
+ *     - 違う(=このビルドでバイトが変わった) → 今日の日付
+ *     - 同じ → その出力ファイル自身の git log -1 --format=%cs
+ *     - HEAD に無い(新規ページ) → 今日の日付
+ *   とする(outputDate())。これで bin/build.mjs 自身への変更は、それが実際に
+ *   配信バイトを変えたときだけ lastmod に効く。依存ファイルの対応表を人が
+ *   保守する必要も無くなった(このリポジトリが避けてきた「手書きの対応表」が
+ *   ひとつ消える)。
+ *
+ *   about/corrections/contact はビルダーの生成物ではない(ビルダーが触らない
+ *   ページ)ので、この判定は使えない。従来どおり「元になっているファイル群の
+ *   コミット日の最大値」(lastmod()/fileDate())のままでよい。この3ページの
+ *   依存表に bin/build.mjs は元から入っていない(触っていないので当然)。
+ *
+ *   ■ 循環しないことの確認
+ *   「出力を HEAD と比べる」設計がコミットの前後で安定するかを、実際に
+ *   コミットを挟まずに追う: ビルド時点でまだ書かれていない・変わった出力は
+ *   HEAD と不一致 → 今日の日付になり、そのままファイルへ書かれる。次に
+ *   コミットすると、HEAD の内容はいまディスクに書いた内容そのものになる。
+ *   入力(CSV等)が変わっていなければ、次にビルドしたときに生成される文字列は
+ *   前回と同一なので、HEAD の内容とも一致する → 今度は「その出力ファイルの
+ *   最終コミット日」を返す。この値は入力が変わらない限りビルドのたびに同じ
+ *   コミットを指し続けるので、それ以上動かない(安定点に落ちる)。逆に入力が
+ *   変わって生成文字列が変化すれば、また HEAD と不一致になり今日の日付へ
+ *   戻る。「今日の日付」と「安定したコミット日」の2状態しか無く、どちらの
+ *   遷移も一方向(不一致→今日、コミットで一致→固定)なので、検査が交互に
+ *   落ち続けるような輪にはならない。
+ *
+ * ■ TODAY はローカル日付にする(UTCだと早朝に破れる)
+ *   git log --format=%cs はコミットのローカルタイムゾーン(この運営は日本から
+ *   作業しておりJST)の日付を返す。new Date().toISOString() は一見正しく
+ *   見える(実際に一度これで書かれていた)が、これはUTCの日付を返す。この
+ *   運営は実際に早朝(JST 4時台)にコミットすることがあり、00:00〜09:00 JSTの
+ *   間はUTCがまだ前日なので、ビルド時点で「今日」として書いた日付が、直後の
+ *   コミットの %cs(JSTでの当日)より1日古くなる。同じ日にビルドしてコミット
+ *   すれば両者は一致する、という前提が朝の時間帯だけ崩れる。
+ *   Intl.DateTimeFormat("sv-SE") はロケールの書式に頼らず YYYY-MM-DD を返す
+ *   数少ない標準APIで、かつローカルタイムゾーンで評価される(toISOString()の
+ *   ようにUTCへ強制変換しない)ため、ここではこちらを使う。
+ */
+
+// git 未追跡・未コミットのパス一覧を1回だけ読む(ファイルごとに git を呼ぶと
+// 遅いうえ、輪の説明も「1回読んだ集合と突き合わせる」方が読みやすい)。
+const DIRTY_PATHS = (() => {
+  const out = execFileSync("git", ["status", "--porcelain"], { cwd: SITE_DIR, encoding: "utf8" });
+  const set = new Set();
+  for (const line of out.split("\n")) {
+    // ステータス2文字 + 半角スペース + パス。リネームの "old -> new" 形式は
+    // このリポジトリの依存ファイル(コード・CSV)には起きない運用なので考慮しない。
+    const m = line.match(/^.{2} (.+)$/);
+    if (m) set.add(m[1]);
+  }
+  return set;
+})();
+
+const TODAY = new Intl.DateTimeFormat("sv-SE").format(new Date());
+const fileDateCache = new Map();
+
+// 「入力ファイル群」から日付を決める(生成物ではない about/corrections/contact 用)。
+function fileDate(rel) {
+  if (fileDateCache.has(rel)) return fileDateCache.get(rel);
+  let d;
+  if (DIRTY_PATHS.has(rel)) {
+    d = TODAY;
+  } else {
+    d = execFileSync("git", ["log", "-1", "--format=%cs", "--", rel], { cwd: SITE_DIR, encoding: "utf8" }).trim();
+    if (!d) {
+      // 追跡されているはずなのに履歴が見つからない = パス指定ミスの可能性が
+      // 高い。誤った日付を静かに出さず、ここで止める。
+      throw new Error(`sitemap lastmod: ${rel} の git 履歴が見つからない(パスを確認すること)`);
+    }
+  }
+  fileDateCache.set(rel, d);
+  return d;
+}
+
+const lastmod = (deps) => deps.map(fileDate).reduce((a, b) => (a > b ? a : b));
+
+const outputDateCache = new Map();
+
+// 「生成された出力そのもの」から日付を決める(bin/build.mjs が丸ごと/差し込み
+// 生成する側: chart/*.html, chart/index.html, fertility.html, hoan.html,
+// index.html)。理由と循環しないことの説明は上のファイル冒頭コメントを参照。
+//
+// git status で出力ファイル自体を見る案は取らない: ビルドの時点で出力ファイルは
+// まだディスクに書かれておらず、直前のデプロイ分がそのまま clean に見えるため
+// 変化を取りこぼす(レビューで指摘された罠)。必ず HEAD の内容といま生成した
+// 文字列そのものを比べる。
+function outputDate(rel, generated) {
+  if (outputDateCache.has(rel)) return outputDateCache.get(rel);
+  let head = null;
+  try {
+    head = execFileSync("git", ["show", `HEAD:${rel}`], { cwd: SITE_DIR, encoding: "utf8" });
+  } catch {
+    head = null; // HEAD に無い = 新規ページ
+  }
+  let d;
+  if (head !== generated) {
+    d = TODAY;
+  } else {
+    d = execFileSync("git", ["log", "-1", "--format=%cs", "--", rel], { cwd: SITE_DIR, encoding: "utf8" }).trim();
+    if (!d) {
+      throw new Error(`sitemap lastmod: ${rel} の git 履歴が見つからない(パスを確認すること)`);
+    }
+  }
+  outputDateCache.set(rel, d);
+  return d;
+}
+
+// 出力ファイルの絶対パスを、git/<loc> で使う "/" 区切りの相対パスにする。
+function siteRel(absPath) {
+  return path.relative(SITE_DIR, absPath).split(path.sep).join("/");
+}
+
+function sitemapEntries(keys, files) {
+  // files(絶対パス→生成済み文字列)から、そのページに対応する出力の日付を引く。
+  // files に無いパスを渡したら呼び出し順の間違い(生成前にsitemapを作ろうと
+  // した等)なので、誤った日付を出さずここで止める。
+  const genDate = (absPath) => {
+    const rel = siteRel(absPath);
+    const generated = files.get(absPath);
+    if (generated === undefined) {
+      throw new Error(`sitemap lastmod: ${rel} が生成物の一覧に無い(呼び出し順を確認すること)`);
+    }
+    return outputDate(rel, generated);
+  };
+
+  const metricEntries = keys.map((k) => ({
+    loc: `${SITE}/chart/${k}`,
+    priority: "0.9",
+    date: genDate(path.join(OUT_DIR, `${k}.html`)),
+  }));
+
+  return {
+    home: [{ loc: `${SITE}/`, priority: "1.0", date: genDate(path.join(SITE_DIR, "index.html")) }],
+    hub: [{ loc: `${SITE}/chart/`, priority: "0.8", date: genDate(path.join(OUT_DIR, "index.html")) }],
+    metrics: [
+      ...metricEntries,
+      { loc: `${SITE}/fertility`, priority: "0.9", date: genDate(path.join(SITE_DIR, "fertility.html")) },
+      { loc: `${SITE}/hoan`, priority: "0.8", date: genDate(path.join(SITE_DIR, "hoan.html")) },
+    ],
+    static: [
+      { loc: `${SITE}/about`, priority: "0.7", date: lastmod(["about.html", "about.js", "about.md"]) },
+      { loc: `${SITE}/corrections`, priority: "0.5", date: lastmod(["corrections.html", "corrections.js", "data/corrections.csv"]) },
+      { loc: `${SITE}/contact`, priority: "0.3", date: lastmod(["contact.html", "contact.js"]) },
+    ],
+  };
+}
+
+function buildSitemap(keys, files) {
+  const groups = sitemapEntries(keys, files);
+  const urlTag = (e) => `  <url><loc>${e.loc}</loc><lastmod>${e.date}</lastmod><priority>${e.priority}</priority></url>`;
+  const body = [groups.home, groups.hub, groups.metrics, groups.static]
+    .map((g) => g.map(urlTag).join("\n"))
+    .join("\n\n");
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  bin/build.mjs が生成している(chart/*.html と同様、直接編集しない)。指標を
+  増やしたときにここを手で直す必要はない(METRICS からURLを導くため)。直すのは
+  chart.js の METRICS と、クローラ向けの素のリンクを持つ index.html の
+  card-grid だけでよい。静的な発見経路は /chart/ のハブとトップページの
+  カードにもあるので、このファイルが唯一の入口だった時期(2026-07-29まで)とは
+  事情が変わっている。それでも重複して置くのは、片方が壊れても拾われ続ける
+  ようにするため。
+
+  lastmod は当初入れていなかった(正確な値を持てないため。推測日を書くと
+  信用できない情報になる、というのが最初の判断)。しかしそれは「このファイルが
+  手書きで、更新日を追う手段が無かった」時期の話で、今は bin/build.mjs が
+  data/*.csv からページを生成するようになったので、「そのページの中身がいつ
+  変わったか」は推測ではなく実データ(元ファイルのコミット日)として取れる。
+  政府の公表日に合わせてデータが更新されることがこのサイトの価値の中心なのに、
+  更新されたことを機械に伝える手段が今まで無かったので、ここで足す。
+
+  丸ごと/差し込み生成しているページ(chart 系・fertility・hoan・トップ)の
+  lastmod は「そのページの元になっているファイル群」ではなく「生成された
+  出力そのもの」を見て決めている。生成した文字列を直前のコミット(HEAD)の
+  内容と比べ、違えば今日の日付、同じなら出力ファイル自身の最終コミット日と
+  する。理由は、依存ファイルの対応表に生成器自身を含めていた最初の実装だと、
+  生成器のコメントを直すだけで配信バイトが1つも変わらないのに更新扱いに
+  なってしまうため。about/corrections/contact はビルダーの生成物ではない
+  ページなので、この判定は使わず、従来どおり元ファイル群のコミット日の
+  最大値を使う。
+
+  日付は同じ日にビルドしてコミットする限り安定する。日をまたぐと検査(node
+  bin/build.mjs のcheckモード)が落ちるが、落ちる方向が安全側(誤った日付が
+  出ることはなく「ビルドし直せ」と言われるだけ)なので、これでよいとする。
+  詳細は bin/build.mjs の sitemapEntries()/buildSitemap() 手前のコメントを
+  参照。
+
+  ※ このコメント自体、XMLコメントはハイフンの連続を含められない制約があり、
+    ビルドオプション名をそのまま書けなかった(実際にこれで xmllint がパース
+    エラーになり、IndexNow送信が「URLを1件も読めない」という気づきにくい
+    壊れ方をした)。
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${body}
+</urlset>
+`;
+}
+
 /* ── 実行 ────────────────────────────────────────────────── */
 
 /* ── 参照側の取りこぼし検査 ──────────────────────────────────
- * 指標ページ本体は生成されるので増減に自動で追従するが、そこへ「辿らせる側」
- * (トップの素のリンクと sitemap)は手書きで、足し忘れても見た目には何も起きない。
- * 静かに索引から漏れるだけなので、生成のたびに機械で突き合わせる。
+ * 指標ページ本体は生成されるので増減に自動で追従する。sitemap.xml も
+ * 2026-07-29から生成物になり METRICS からURLを導くようになったので、この
+ * 関数のsitemap側チェックは構造上もう落ちようがない(常にkeysと一致する)。
+ * それでも残しているのは、生成ロジック自体を書き換えたときの安全網として。
+ * 一方 index.html の card-grid は今も手書きで、足し忘れても見た目には何も
+ * 起きず静かに索引から漏れるので、そちらは引き続き意味のある検査。
  */
 function crossRefErrors(keys) {
   const errs = [];
@@ -804,6 +1179,12 @@ for (const k of keys) files.set(path.join(OUT_DIR, `${k}.html`), buildPage(k, ME
 files.set(path.join(OUT_DIR, "index.html"), buildIndex(keys));
 files.set(path.join(SITE_DIR, "fertility.html"), buildFertility());
 files.set(path.join(SITE_DIR, "hoan.html"), buildHoan());
+files.set(path.join(SITE_DIR, "index.html"), buildHome(keys));
+// sitemap.xml の lastmod は他の生成ページの「いま生成した文字列」を直接見る
+// (outputDate()。詳細はそのコメントを参照)ので、今度こそ本当に順序が意味を
+// 持つ: files に他の全ページが積み終わったあとで呼ぶ必要がある(このMapに
+// まだ無いパスを buildSitemap が要求したら genDate() が例外で止める)。
+files.set(path.join(SITE_DIR, "sitemap.xml"), buildSitemap(keys, files));
 
 if (check) {
   const stale = [];
@@ -842,7 +1223,9 @@ if (check) {
     if (f.endsWith(".html") && !chartKnown.has(f)) fs.unlinkSync(path.join(OUT_DIR, f));
   }
   for (const [f, html] of files) fs.writeFileSync(f, html);
-  console.log(`✓ ${files.size} ページを更新（chart/ ${chartKnown.size} 本 + fertility.html + hoan.html）`);
+  console.log(
+    `✓ ${files.size} ページを更新（chart/ ${chartKnown.size} 本 + fertility.html + hoan.html + index.html + sitemap.xml）`
+  );
   // 生成そのものは成功しても、辿らせる側が欠けていれば索引には出ない。
   // 落ちるほどではないので警告にとどめ、デプロイは --check 側で止める。
   crossRefErrors(keys).forEach((e) => console.warn(`⚠ ${e}`));

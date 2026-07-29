@@ -25,6 +25,7 @@
 {
   "@context": "https://schema.org",
   "@type": "Dataset",
+  "@id": "https://zurekei.org/hoan#dataset",
   "name": "法律の見直し条項｜期限と検討状況",
   "description": "多くの法律は、その附則に「施行後◯年を目途に検討を加える」という見直し条項を置いている。見直しの期限は「施行日＋◯年」で機械的に算出できる。ここでは期限順に並べ、期限が到来した法律を上に置く。数値・条文・出典のみを並べ、評価は書かない。",
   "url": "https://zurekei.org/hoan",
@@ -33,8 +34,12 @@
   "temporalCoverage": "2021/2025",
   "creator": {
     "@type": "Organization",
+    "@id": "https://zurekei.org/#organization",
     "name": "ズレ計",
     "url": "https://zurekei.org"
+  },
+  "includedInDataCatalog": {
+    "@id": "https://zurekei.org/#catalog"
   },
   "variableMeasured": [
     {
