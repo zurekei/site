@@ -29,6 +29,8 @@ const T = {
     correctionsBody: '誤りに気づいた場合は、値を黙って書き換えず、変更前後の値と理由を記録した上で訂正する。→ <a href="corrections.html">訂正履歴</a>',
     dataTitle: "データ本体",
     dataBody: 'このサイトの数値は、リポジトリ内のCSVファイルを唯一の原本(ソースオブトゥルース)としている。各行に一次資料の出典URLを付けている。→ <a href="https://github.com/zurekei/site/tree/main/data" target="_blank" rel="noopener">GitHub上のdata/</a>',
+    licenseTitle: "ライセンス",
+    licenseBody: 'このサイトが作った部分(指標の選定と並べ方、注記、見直し条項の検討状況の分類、出典URLの対応づけ、本文など)は<a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>。個々の数値そのものは事実であり著作権の対象ではなく、<a href="hoan.html">見直し条項</a>ページの条文原文は著作権法13条によりそもそも著作権の対象外のため、いずれもCC BYの対象に含めていない。引用元の一次資料(政府刊行物・PDF等)の権利は各公表元にある。コードは<a href="https://github.com/zurekei/site/blob/main/LICENSE" target="_blank" rel="noopener">MIT</a>。詳細は<a href="https://github.com/zurekei/site/blob/main/LICENSE-DATA" target="_blank" rel="noopener">LICENSE-DATA</a>を参照。表示は例えば「ズレ計 (https://zurekei.org)」のように。',
     footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
     footerCorrections: "訂正履歴",
     footerContact: "お問い合わせ",
@@ -64,6 +66,8 @@ const T = {
     correctionsBody: 'When an error is found, the value isn’t quietly changed — the correction is recorded, with the old value, the new value, and the reason. → <a href="corrections.html">Corrections</a>',
     dataTitle: "The data itself",
     dataBody: 'Every figure on this site traces back to CSV files in the repository, which are the single source of truth. Each row carries a link to its primary source. → <a href="https://github.com/zurekei/site/tree/main/data" target="_blank" rel="noopener">data/ on GitHub</a>',
+    licenseTitle: "License",
+    licenseBody: 'The part this site made — such as which indicators were picked and how they’re laid out, the annotations and the classification of each review clause’s status, the mapping from each figure to its source URL, and the prose — is <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. The figures themselves are facts and aren’t subject to copyright, and the statutory text on the <a href="hoan.html">review clauses</a> page isn’t copyrightable to begin with under Article 13 of Japan’s Copyright Act — neither is covered by the CC BY here. Rights to the primary sources (government publications, PDFs) belong to whoever published them. The code is <a href="https://github.com/zurekei/site/blob/main/LICENSE" target="_blank" rel="noopener">MIT</a>; see <a href="https://github.com/zurekei/site/blob/main/LICENSE-DATA" target="_blank" rel="noopener">LICENSE-DATA</a> for detail. An example attribution: “zurekei (https://zurekei.org)”.',
     footerSrc: "src: Cabinet Office of Japan / SNA",
     footerCorrections: "Corrections",
     footerContact: "Contact",
@@ -152,6 +156,8 @@ function main() {
     document.getElementById("corrections-body").innerHTML = t.correctionsBody;
     document.getElementById("data-title").textContent = t.dataTitle;
     document.getElementById("data-body").innerHTML = t.dataBody;
+    document.getElementById("license-title").textContent = t.licenseTitle;
+    document.getElementById("license-body").innerHTML = t.licenseBody;
     document.getElementById("t-footer-src").textContent = t.footerSrc;
     document.getElementById("t-footer-corrections").textContent = t.footerCorrections;
     document.getElementById("t-footer-index").textContent = t.footerIndex;

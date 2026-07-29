@@ -1,0 +1,48 @@
+LICENSE-DATA — data and written content
+
+The parts of this project that are actually its own work are licensed under
+the terms below. That includes, but is not limited to: which indicators were
+chosen and how they're arranged; the annotations and the classification of
+each review clause's status; the mapping from each figure to its
+primary-source URL; the written prose (About page, per-page descriptions,
+etc.); and the images made for this site under `assets/`.
+
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+
+Full legal text: https://creativecommons.org/licenses/by/4.0/legalcode
+
+Copyright (c) 2026 ズレ計 (zurekei.org)
+
+Example attribution:
+  ズレ計 (https://zurekei.org)
+
+---
+
+## What this does NOT cover
+
+This project mirrors numbers published elsewhere and reproduces statutory
+text; CC BY is not applied to either, because this project doesn't hold
+rights to them:
+
+- **The individual figures themselves** (forecast values, actual values,
+  percentages, dates, etc.). A number reported by a government agency is a
+  fact, not a copyrightable expression. Reusing the bare figures needs no
+  permission from this project — though it wasn't this project's to grant in
+  the first place.
+- **`data/hoan_clauses/*.txt`** — the full text of Japanese statutory review
+  clauses. Under Article 13 of Japan's Copyright Act, laws, cabinet orders,
+  and other government notices are excluded from copyright protection
+  outright. This project didn't write them and can't license them.
+- **The primary sources** this project cites (Cabinet Office reports,
+  Ministry of Finance publications, Diet proceedings, PDFs, etc.). Whatever
+  rights exist in those belong to the bodies that published them, not to this
+  project.
+
+Both lists above name what's most likely to be asked about; they are examples,
+not an exhaustive inventory. The dividing line is authorship, not enumeration:
+what this project wrote or compiled is CC BY 4.0, and what it merely mirrors
+is not this project's to license.
+
+See LICENSE for the code (MIT), NOTICE for why the licensing is split this
+way, and README.md for how the CSVs are sourced and structured.

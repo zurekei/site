@@ -1,0 +1,47 @@
+NOTICE — how licensing is split in this repository
+
+Short version:
+  - Code            → LICENSE       (MIT)
+  - Data and text   → LICENSE-DATA  (CC BY 4.0)
+  - Everything else → not this project's to license (see below)
+
+## Why it's split
+
+This repository is mostly not this project's own work: it mirrors figures
+published by the Japanese government and other public bodies, and it
+reproduces the text of Japanese statutes. Applying one license to the whole
+repository would misstate rights this project doesn't hold. So the license is
+split by what's actually being licensed.
+
+**Code** (LICENSE, MIT) — the HTML/CSS/JS and build scripts that make the site
+run.
+
+**Data and text** (LICENSE-DATA, CC BY 4.0) — the parts this project made.
+That includes, but is not limited to: which indicators were chosen and how
+they're arranged; the annotations and the classification of each review
+clause's status; the mapping from each figure to its primary-source URL; the
+written prose (About page, per-page descriptions, etc.); and the images made
+for this site under `assets/`.
+
+**Not licensed by this project, because it isn't this project's to license:**
+
+- The individual government/public-body figures themselves. Facts are not
+  subject to copyright.
+- The full text of Japanese statutes under `data/hoan_clauses/*.txt`. Under
+  Article 13 of Japan's Copyright Act, laws and regulations are excluded from
+  copyright protection outright.
+- The underlying primary sources (government publications, PDFs, Diet
+  proceedings, etc.). Rights to those belong to whoever published them.
+
+## A note on the lists
+
+The lists above name what's most likely to be asked about. They are examples,
+not an exhaustive inventory — something not named is not thereby excluded. The
+dividing line is authorship, not enumeration: what this project wrote or
+compiled is CC BY 4.0, and what it merely mirrors is not this project's to
+license. If a specific file's status matters to you and isn't clear from that
+rule, ask via https://zurekei.org/contact rather than guessing.
+
+Third-party components: this site loads the IBM Plex fonts from the Google
+Fonts CDN at runtime. No copy of those fonts is redistributed in this
+repository, so their license is not implicated here.

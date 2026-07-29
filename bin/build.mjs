@@ -108,7 +108,7 @@ function hreflangTags(pair) {
 }
 
 // style.css / chart.js のキャッシュバスター。ページ側の ?v= と揃える。
-const ASSET_V = "20260731k";
+const ASSET_V = "20260731l";
 
 const read = (f) => fs.readFileSync(path.join(SITE_DIR, f), "utf8");
 
@@ -304,12 +304,18 @@ function orgNode() {
   return { "@type": "Organization", "@id": ORG_ID, name: ORG_NAME.en, alternateName: ORG_NAME.ja, url: SITE };
 }
 
-// ライセンスは書かない。サイトのどこにも利用条件の記載がなく、ここで勝手に
-// 宣言すると「出典つきで確かめられる」という主旨の逆をやることになる。
-// 利用条件を決めたら license を足すこと。
+// ライセンス: 2026-07-29、運営がCC BY 4.0(データ・本文)/MIT(コード)を決定。
+// それまでは「サイトのどこにも利用条件の記載がなく、ここで勝手に宣言すると
+// 出典つきで確かめられるという主旨の逆をやることになる」との理由で書いて
+// いなかった(このコメントは決定の経緯を残すために消さず書き換えている)。
+// CC BYの対象はズレ計が作った部分(指標の選定・並べ方、注記、出典URLの対応
+// づけ、本文)であり、個々の数値そのもの(著作権の対象外)や hoan_clauses の
+// 条文原文(著作権法13条によりそもそも著作権の対象外)には及ばない。詳細は
+// ../LICENSE-DATA と about.js の licenseBody を参照。
 //
 // EN側の @id は JA側と衝突しないよう /en/chart/<key>#dataset にする(同じ指標でも
 // 別言語の別ページなので、別のDatasetとして参照できる必要がある)。
+const CC_BY_4 = "https://creativecommons.org/licenses/by/4.0/";
 function buildJsonLd(key, metric, rows, lang) {
   const years = rows.map((r) => r.year);
   const url = abs(chartRel(key)[lang]);
@@ -322,6 +328,7 @@ function buildJsonLd(key, metric, rows, lang) {
     description: lang === "en" ? metric.descEn : metric.desc,
     url,
     isAccessibleForFree: true,
+    license: CC_BY_4,
     inLanguage: lang,
     temporalCoverage: `${Math.min(...years)}/${Math.max(...years)}`,
     // @id を持たせて、トップの Organization(index.html) と同一実体だと機械に
@@ -867,6 +874,7 @@ ${JSON.stringify(
     description: FERT.T[lang].desc,
     url,
     isAccessibleForFree: true,
+    license: CC_BY_4,
     inLanguage: lang,
     temporalCoverage: `${d.years[0]}/${d.years[d.years.length - 1]}`,
     // @id はトップ(index.html)の Organization と共通。理由は chart 側の
@@ -1058,6 +1066,11 @@ ${JSON.stringify(
     description: HOAN.T[lang].desc,
     url,
     isAccessibleForFree: true,
+    // CC BYの対象はこのDatasetが表す編集部分(見直し期限の算出・状況分類・
+    // 対応づけ)。条文原文(data/hoan_clauses/*.txt)は著作権法13条によりそもそも
+    // 著作権の対象外でCC BYの対象にならない(../LICENSE-DATA参照)。ここでの
+    // licenseはページ全体ではなくこのDataset(表側のデータ)にかかる宣言。
+    license: CC_BY_4,
     inLanguage: lang,
     temporalCoverage: `${years[0]}/${years[years.length - 1]}`,
     // @id はトップ(index.html)の Organization と共通。理由は chart 側の
@@ -1213,10 +1226,11 @@ function buildHomeJsonLd(desc, keys, lang = "ja") {
         "@id": `${url}#dataset`,
         name: metricDatasetName(m, lang),
         url,
+        license: CC_BY_4,
       };
     }),
-    { "@type": "Dataset", "@id": `${fertUrl}#dataset`, name: FERTILITY_DATASET.name[lang], url: fertUrl },
-    { "@type": "Dataset", "@id": `${hoanUrl}#dataset`, name: HOAN_DATASET.name[lang], url: hoanUrl },
+    { "@type": "Dataset", "@id": `${fertUrl}#dataset`, name: FERTILITY_DATASET.name[lang], url: fertUrl, license: CC_BY_4 },
+    { "@type": "Dataset", "@id": `${hoanUrl}#dataset`, name: HOAN_DATASET.name[lang], url: hoanUrl, license: CC_BY_4 },
   ];
   const catalogName = lang === "en" ? "Indicators" : "指標一覧";
   // @id 用(末尾スラッシュを含む形。/#website のような結合に使う)と、
@@ -1270,6 +1284,7 @@ ${JSON.stringify(
         // ことで内容と対応しているので、カタログ専用の説明文は要らない)。
         description: desc,
         url: siteUrlField,
+        license: CC_BY_4,
         // creator ではなく publisher にしたのは、各 Dataset 側が creator を
         // 名乗っているのに揃えるため(このカタログ自身がデータを作っている
         // わけではなく、束ねて出しているだけ)。
@@ -1549,6 +1564,9 @@ ${header("en", urls)}
 
         <dt id="data-title">${escapeHTML(t.dataTitle)}</dt>
         <dd id="data-body">${t.dataBody}</dd>
+
+        <dt id="license-title">${escapeHTML(t.licenseTitle)}</dt>
+        <dd id="license-body">${t.licenseBody}</dd>
       </dl>
     </section>
   </main>
