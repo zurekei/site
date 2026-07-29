@@ -7,6 +7,9 @@
 <title>指標一覧 — ズレ計</title>
 <meta name="description" content="政府の当初見通しと確定した実績を並べた指標の一覧。">
 <link rel="canonical" href="https://zurekei.org/chart/">
+<link rel="alternate" hreflang="ja" href="https://zurekei.org/chart/">
+<link rel="alternate" hreflang="en" href="https://zurekei.org/en/chart/">
+<link rel="alternate" hreflang="x-default" href="https://zurekei.org/chart/">
 <meta property="og:site_name" content="ズレ計">
 <meta property="og:type" content="website">
 <meta property="og:title" content="指標一覧 — ズレ計">
@@ -14,7 +17,7 @@
 <meta property="og:url" content="https://zurekei.org/chart/">
 <meta property="og:image" content="https://zurekei.org/assets/og.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="/style.css?v=20260731i">
+<link rel="stylesheet" href="/style.css?v=20260731k">
 </head>
 <body>
 <div class="page">
@@ -39,8 +42,8 @@
     </a>
     <div class="header-right">
       <div class="lang-toggle">
-        <button id="lang-ja" class="lang-btn mono">JA</button>
-        <button id="lang-en" class="lang-btn mono">EN</button>
+        <a id="lang-ja" class="lang-btn mono active" href="/chart/">JA</a>
+        <a id="lang-en" class="lang-btn mono" href="/en/chart/">EN</a>
       </div>
     </div>
   </header>
@@ -104,22 +107,12 @@
   if (link) location.replace(link.getAttribute("href"));
 })();
 
-// 言語トグル。他のページと同じ物がヘッダに載っている以上、押して何も起きない状態で
-// 出さない（/contact で一度その状態を出した）。JA は data-ja に退避して往復させる。
-// 訳は data-en に埋めてあるので、この一覧に固有の辞書は持たない。
-(function () {
-  var els = document.querySelectorAll("[data-en]");
-  els.forEach(function (el) { el.dataset.ja = el.textContent; });
-  function apply(lang) {
-    els.forEach(function (el) { el.textContent = lang === "en" ? el.dataset.en : el.dataset.ja; });
-    document.documentElement.lang = lang;
-    document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
-    document.getElementById("lang-en").classList.toggle("active", lang === "en");
-  }
-  document.getElementById("lang-ja").addEventListener("click", function () { apply("ja"); });
-  document.getElementById("lang-en").addEventListener("click", function () { apply("en"); });
-  apply("ja");
-})();
+// 言語トグルは他ページと同じ実リンク(<a>)。切り替えはブラウザの通常の
+// ナビゲーションに任せるので、クリック自体にJSは要らない(2026-07-29、
+// /en/ページ追加時に、旧来のその場swap方式(data-en/apply(lang))から差し替えた。
+// 以前はここでlocalStorageに選択を書き込んでいたが、読み返す処理がどこにも無い
+// 書くだけの死んだコードだったため2026-07-30に削除。詳細はhome.jsの同じ変更の
+// コメントを参照)。
 </script>
 </body>
 </html>

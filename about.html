@@ -9,6 +9,9 @@
      spellings are the same page. Without this, aggregators that key on URL (はてなブックマーク)
      count them as separate entries and split the bookmark total. -->
 <link rel="canonical" href="https://zurekei.org/about">
+<link rel="alternate" hreflang="ja" href="https://zurekei.org/about">
+<link rel="alternate" hreflang="en" href="https://zurekei.org/en/about">
+<link rel="alternate" hreflang="x-default" href="https://zurekei.org/about">
 <meta property="og:site_name" content="ズレ計">
 <meta property="og:type" content="website">
 <meta property="og:title" content="このサイトについて — ズレ計">
@@ -19,7 +22,7 @@
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=20260731i">
+<link rel="stylesheet" href="style.css?v=20260731k">
 </head>
 <body>
 <div class="page">
@@ -44,8 +47,8 @@
     </a>
     <div class="header-right">
       <div class="lang-toggle">
-        <button id="lang-ja" class="lang-btn mono">JA</button>
-        <button id="lang-en" class="lang-btn mono">EN</button>
+        <a id="lang-ja" class="lang-btn mono active" href="/about">JA</a>
+        <a id="lang-en" class="lang-btn mono" href="/en/about">EN</a>
       </div>
     </div>
   </header>
@@ -172,6 +175,6 @@
     <a class="footer-about" id="t-footer-contact" href="contact.html">お問い合わせ</a>
   </footer>
 </div>
-<script src="about.js?v=20260731i"></script>
+<script src="about.js?v=20260731k"></script>
 </body>
 </html>

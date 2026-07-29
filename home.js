@@ -104,7 +104,7 @@ const INDICATOR_META = [
     key: "current-account",
     nameJa: "経常収支", nameEn: "Current account",
     descJa: "海外との取引で生じる収支の合計。", descEn: "Net balance of transactions with the rest of the world.",
-    unit: "兆円", kind: "series", signed: false,
+    unit: "兆円", unitEn: "tn yen", kind: "series", signed: false,
     csv: "data/current_account_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
     chartHref: "chart/current-account",
   },
@@ -112,7 +112,7 @@ const INDICATOR_META = [
     key: "tax-revenue",
     nameJa: "一般会計税収", nameEn: "Tax revenue",
     descJa: "国の一般会計に入る税の総額。", descEn: "Total tax revenue flowing into the general account.",
-    unit: "兆円", kind: "series", signed: false,
+    unit: "兆円", unitEn: "tn yen", kind: "series", signed: false,
     csv: "data/tax_revenue_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
     chartHref: "chart/tax-revenue",
   },
@@ -120,7 +120,7 @@ const INDICATOR_META = [
     key: "bond-issuance",
     nameJa: "国債発行額", nameEn: "Government bond issuance",
     descJa: "国の一般会計が発行する新規国債(建設国債+特例国債)の額。", descEn: "New bonds issued by the general account (construction and deficit-financing bonds).",
-    unit: "兆円", kind: "series", signed: false,
+    unit: "兆円", unitEn: "tn yen", kind: "series", signed: false,
     csv: "data/bond_issuance_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
     // keep in sync with METRICS["bond-issuance"].statsFromYear in chart.js —
     // FY1947-1964 are 0 planned vs 0 issued and are not counted
@@ -131,7 +131,7 @@ const INDICATOR_META = [
     key: "jgb-total",
     nameJa: "国債発行総額", nameEn: "Total JGB issuance",
     descJa: "借換債・財投債等を含む、国債発行の総額。", descEn: "Total JGB issuance, including refunding and FILP bonds.",
-    unit: "兆円", kind: "series", signed: false,
+    unit: "兆円", unitEn: "tn yen", kind: "series", signed: false,
     csv: "data/jgb_total_issuance_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
     chartHref: "chart/jgb-total",
   },
@@ -143,6 +143,20 @@ const INDICATOR_META = [
     chartHref: "fertility.html",
   },
 ];
+
+// 単位の言語出し分け。chart.js の metricUnit と同じ規則にしてある(この2つは
+// 別々の指標定義を持っているので、揃えないと同じ指標がトップとチャートで
+// 違う単位を出す)。ASCIIでない単位に unitEn が無ければ黙って日本語を出さずに
+// 落とす。英語ページに「兆円」が出ていたのは、静的HTMLでは直したのに
+// このカード側の写しを直し忘れたためで、静かに戻る壊れ方だった。
+function metaUnit(meta, lang) {
+  if (lang !== "en") return meta.unit;
+  if (meta.unitEn) return meta.unitEn;
+  if (/[^\x00-\x7f]/.test(meta.unit)) {
+    throw new Error(`indicator unit "${meta.unit}" has no unitEn for the English page`);
+  }
+  return meta.unit;
+}
 
 function fmtSigned(v, unit, signed = true) {
   if (v === null || v === undefined) return null;
@@ -369,16 +383,16 @@ function renderCard(meta, lang, data) {
   const actualVal = latest ? latest[meta.actualCol] : null;
   const gapVal = planVal !== null && actualVal !== null ? actualVal - planVal : null;
 
-  const planStr = fmtSigned(planVal, meta.unit, meta.signed) ?? "—";
-  const actualStr = actualVal !== null ? fmtSigned(actualVal, meta.unit, meta.signed) : t.noActual;
-  const gapStr = fmtSigned(gapVal, meta.unit) ?? "—";
+  const planStr = fmtSigned(planVal, metaUnit(meta, lang), meta.signed) ?? "—";
+  const actualStr = actualVal !== null ? fmtSigned(actualVal, metaUnit(meta, lang), meta.signed) : t.noActual;
+  const gapStr = fmtSigned(gapVal, metaUnit(meta, lang)) ?? "—";
   const gapSummaryStr = cardGapSummaryText(stats, lang);
   // the year the government is currently on, when its actual has not landed yet.
   // Deliberately one plain line rather than a second stat row: the settled gap
   // above it is the point of the card, and this must not compete with it.
   const pendingLine = pending
     ? `<div class="card-pending-line mono">'${String(pending.year).slice(-2)} ${t.plan} ${
-        fmtSigned(pending[meta.forecastCol], meta.unit, meta.signed) ?? "—"
+        fmtSigned(pending[meta.forecastCol], metaUnit(meta, lang), meta.signed) ?? "—"
       }${t.awaitingActual}</div>`
     : "";
 
@@ -426,7 +440,14 @@ async function main() {
   ]);
   seriesData["fertility"] = fertilityCard;
 
-  let lang = localStorage.getItem("zurekei-lang") === "en" ? "en" : "ja";
+  // 言語はURL(=生成時に確定したdocument.documentElement.lang)が決める。localStorage は
+  // 使わない — 初期値の決定に使うと、英語版に古い値(ja)が残っていた場合に日本語へ
+  // 戻ってしまう(2026-07-29、/en/ページ追加時に踏んだ)。かつては「初期値には使わず
+  // トグルを押した記憶だけ書く」設計にしていたが、その記憶を読み返す処理がどこにも
+  // 無く(書くだけで一度も使われない)、書き込み自体に意味が無かった。「次回訪問時の
+  // 記憶を残す」という実在しない機能をコメントだけが約束している状態だったので、
+  // 2026-07-30に書き込みごと削除した(下のイベントリスナ跡を参照)。
+  let lang = document.documentElement.lang === "en" ? "en" : "ja";
 
   function applyI18n() {
     const t = T[lang];
@@ -454,11 +475,15 @@ async function main() {
       document.getElementById("hero-caption").textContent = t.heroCaption(heroRange.min, heroRange.max);
     }
     document.getElementById("hero-copy-headline").textContent = t.heroCopy;
-    // hero.js が描画完了する前に applyI18n が走るため、ラベルは存在チェック付きで反映
-    const heroActual = document.getElementById("hero-label-actual");
-    if (heroActual) heroActual.textContent = t.actual;
-    const heroForecast = document.getElementById("hero-label-forecast");
-    if (heroForecast) heroForecast.textContent = t.plan;
+    // hero-label-forecast/actual(hero.jsが作るend-label)はここでは触らない。
+    // 以前はhero.jsが日本語決め打ちで書いた後にここで存在チェック付き上書きする
+    // 二段構えだったが、EN表示時にhero.jsのCSV取得がhome.jsのPromise.all(8ファイル)
+    // より後に終わるとJAが残ったまま上書きされないレースがあった(2026-07-30
+    // レビュー指摘)。hero.js自身がdocument.documentElement.langを見て最初から
+    // 正しい言語で描くようにしたため、ここでの後追い修正は不要になった。
+    // 権威は要素を作る側(hero.js)に一本化する — hero-copy-summary を home.js側
+    // だけが書く(直下のコメント参照)のと対称の設計。
+    //
     // hero.js が計算した集計値(above/below/total)をdataset経由で受け取り、
     // 言語ごとの文言を組み立てる。同じく存在チェック付き(hero.jsの描画順に依存しない)
     // composed directly from seriesData (already loaded/computed above via
@@ -484,8 +509,8 @@ async function main() {
     grid.innerHTML = INDICATOR_META.map((m) => renderCard(m, lang, seriesData[m.key])).join("");
   }
 
-  document.getElementById("lang-ja").addEventListener("click", () => { lang = "ja"; localStorage.setItem("zurekei-lang", "ja"); applyI18n(); });
-  document.getElementById("lang-en").addEventListener("click", () => { lang = "en"; localStorage.setItem("zurekei-lang", "en"); applyI18n(); });
+  // lang-ja/lang-en は他ページの URL への実リンク(<a>)。切り替えはブラウザの通常の
+  // ナビゲーションに任せるので、クリック自体にJSは要らない(上のコメント参照)。
 
   applyI18n();
 }

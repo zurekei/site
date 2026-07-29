@@ -45,95 +45,107 @@ const T = {
   },
 };
 
-let lang = "ja";
+// このファイルはもともと main() を持たず、末尾までがトップレベルの実行コードだった。
+// bin/build.mjs の loadModule() は「末尾の main(); だけを落とせば、どのページの .js も
+// Node で安全に評価できる(トップレベルでは document 等のブラウザAPIに触れない)」という
+// 前提を全ページ共通で置いている。この前提を満たすため、2026-07-29(/en/ページ追加時)に
+// 中身は変えずに main() でくるんだ。
+function main() {
+  // 言語はURL(=生成時に確定したdocument.documentElement.lang)が決める。詳細は
+  // home.js の同じ変更のコメントを参照。
+  let lang = document.documentElement.lang === "en" ? "en" : "ja";
 
-function applyI18n() {
-  const t = T[lang];
-  const set = (id, text) => { document.getElementById(id).textContent = text; };
-  const ph = (id, text) => { document.getElementById(id).placeholder = text; };
+  function applyI18n() {
+    const t = T[lang];
+    const set = (id, text) => { document.getElementById(id).textContent = text; };
+    const ph = (id, text) => { document.getElementById(id).placeholder = text; };
 
-  set("t-back", t.back);
-  set("contact-title", t.title);
-  set("contact-lead", t.lead);
-  // The red asterisk lives inside the label, so replace the markup rather than the
-  // text — textContent alone would drop the required-field marker.
-  document.getElementById("label-name").innerHTML = `${t.labelName}<span>*</span>`;
-  document.getElementById("label-email").innerHTML = `${t.labelEmail}<span>*</span>`;
-  document.getElementById("label-affiliation").textContent = t.labelAffiliation;
-  document.getElementById("label-message").innerHTML = `${t.labelMessage}<span>*</span>`;
-  ph("name", t.phName);
-  ph("email", t.phEmail);
-  ph("affiliation", t.phAffiliation);
-  ph("message", t.phMessage);
-  set("successMsg", t.success);
-  set("errorMsg", t.error);
-  set("t-footer-index", t.footerIndex);
-  set("t-footer-corrections", t.footerCorrections);
-  set("t-footer-about", t.footerAbout);
+    set("t-back", t.back);
+    set("contact-title", t.title);
+    set("contact-lead", t.lead);
+    // The red asterisk lives inside the label, so replace the markup rather than the
+    // text — textContent alone would drop the required-field marker.
+    document.getElementById("label-name").innerHTML = `${t.labelName}<span>*</span>`;
+    document.getElementById("label-email").innerHTML = `${t.labelEmail}<span>*</span>`;
+    document.getElementById("label-affiliation").textContent = t.labelAffiliation;
+    document.getElementById("label-message").innerHTML = `${t.labelMessage}<span>*</span>`;
+    ph("name", t.phName);
+    ph("email", t.phEmail);
+    ph("affiliation", t.phAffiliation);
+    ph("message", t.phMessage);
+    set("successMsg", t.success);
+    set("errorMsg", t.error);
+    set("t-footer-index", t.footerIndex);
+    set("t-footer-corrections", t.footerCorrections);
+    set("t-footer-about", t.footerAbout);
 
-  // dataset.text is what the submit handler restores after a send, so it has to
-  // follow the language too — otherwise the button reverts to the previous one.
-  const btn = document.getElementById("submitBtn");
-  btn.dataset.text = t.submit;
-  if (!btn.disabled) btn.textContent = t.submit;
+    // dataset.text is what the submit handler restores after a send, so it has to
+    // follow the language too — otherwise the button reverts to the previous one.
+    const btn = document.getElementById("submitBtn");
+    btn.dataset.text = t.submit;
+    if (!btn.disabled) btn.textContent = t.submit;
 
-  document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
-  document.getElementById("lang-en").classList.toggle("active", lang === "en");
-  document.documentElement.lang = lang;
+    document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
+    document.getElementById("lang-en").classList.toggle("active", lang === "en");
+    document.documentElement.lang = lang;
+  }
+
+  // lang-ja/lang-en は他ページの URL への実リンク(<a>)。切り替えはブラウザの通常の
+  // ナビゲーションに任せるので、クリック自体にJSは要らない(home.js の同じ変更の
+  // コメントを参照)。
+
+  applyI18n();
+
+  document.getElementById('contactForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const successMsg = document.getElementById('successMsg');
+    const errorMsg = document.getElementById('errorMsg');
+
+    const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
+    if (!turnstileToken) {
+      errorMsg.classList.add('show');
+      return;
+    }
+
+    btn.disabled = true;
+    const originalText = btn.dataset.text;
+    btn.textContent = T[lang].submitting;
+    successMsg.classList.remove('show');
+    errorMsg.classList.remove('show');
+
+    try {
+      const res = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('name').value,
+          email: document.getElementById('email').value,
+          affiliation: document.getElementById('affiliation').value,
+          message: document.getElementById('message').value,
+          turnstileToken,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        successMsg.classList.add('show');
+        document.getElementById('contactForm').reset();
+        if (window.turnstile) window.turnstile.reset();
+      } else {
+        throw new Error(data.error || 'Unknown error');
+      }
+    } catch (err) {
+      errorMsg.classList.add('show');
+      // A Turnstile token is single-use. Without resetting here, every retry after a
+      // failure reuses the spent token and is rejected as a duplicate — so a transient
+      // error would look permanent, and the real cause would be masked.
+      if (window.turnstile) window.turnstile.reset();
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  });
 }
 
-document.getElementById("lang-ja").addEventListener("click", () => { lang = "ja"; applyI18n(); });
-document.getElementById("lang-en").addEventListener("click", () => { lang = "en"; applyI18n(); });
-
-applyI18n();
-
-document.getElementById('contactForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const btn = document.getElementById('submitBtn');
-  const successMsg = document.getElementById('successMsg');
-  const errorMsg = document.getElementById('errorMsg');
-
-  const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
-  if (!turnstileToken) {
-    errorMsg.classList.add('show');
-    return;
-  }
-
-  btn.disabled = true;
-  const originalText = btn.dataset.text;
-  btn.textContent = T[lang].submitting;
-  successMsg.classList.remove('show');
-  errorMsg.classList.remove('show');
-
-  try {
-    const res = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        affiliation: document.getElementById('affiliation').value,
-        message: document.getElementById('message').value,
-        turnstileToken,
-      }),
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      successMsg.classList.add('show');
-      document.getElementById('contactForm').reset();
-      if (window.turnstile) window.turnstile.reset();
-    } else {
-      throw new Error(data.error || 'Unknown error');
-    }
-  } catch (err) {
-    errorMsg.classList.add('show');
-    // A Turnstile token is single-use. Without resetting here, every retry after a
-    // failure reuses the spent token and is rejected as a duplicate — so a transient
-    // error would look permanent, and the real cause would be masked.
-    if (window.turnstile) window.turnstile.reset();
-  } finally {
-    btn.disabled = false;
-    btn.textContent = originalText;
-  }
-});
+main();

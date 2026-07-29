@@ -9,6 +9,9 @@
      spellings are the same page. Without this, aggregators that key on URL (はてなブックマーク)
      count them as separate entries and split the bookmark total. -->
 <link rel="canonical" href="https://zurekei.org/">
+<link rel="alternate" hreflang="ja" href="https://zurekei.org/">
+<link rel="alternate" hreflang="en" href="https://zurekei.org/en/">
+<link rel="alternate" hreflang="x-default" href="https://zurekei.org/">
 <meta property="og:site_name" content="ズレ計">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ズレ計 — 政府経済見通しと実績のズレ">
@@ -19,7 +22,7 @@
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=20260731i">
+<link rel="stylesheet" href="style.css?v=20260731k">
 <!-- BUILD:jsonld --><script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -27,7 +30,8 @@
     {
       "@type": "Organization",
       "@id": "https://zurekei.org/#organization",
-      "name": "ズレ計",
+      "name": "zurekei",
+      "alternateName": "ズレ計",
       "url": "https://zurekei.org"
     },
     {
@@ -140,8 +144,8 @@
     </a>
     <div class="header-right">
       <div class="lang-toggle">
-        <button id="lang-ja" class="lang-btn mono">JA</button>
-        <button id="lang-en" class="lang-btn mono">EN</button>
+        <a id="lang-ja" class="lang-btn mono active" href="/">JA</a>
+        <a id="lang-en" class="lang-btn mono" href="/en/">EN</a>
       </div>
       <nav class="site-nav">
         <a class="nav-link nav-current" id="t-nav" href="index.html"></a>
@@ -211,8 +215,8 @@
     <a class="footer-about" id="t-footer-contact" href="contact.html">お問い合わせ</a>
   </footer>
 </div>
-<script src="csv.js?v=20260731i"></script>
-<script src="hero.js?v=20260731i"></script>
-<script src="home.js?v=20260731i"></script>
+<script src="csv.js?v=20260731k"></script>
+<script src="hero.js?v=20260731k"></script>
+<script src="home.js?v=20260731k"></script>
 </body>
 </html>

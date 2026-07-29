@@ -30,6 +30,9 @@ const T = {
       `${label}｜重なる${n}年で 平均 ${mean}（実績が下回った ${below}年 / 上回った ${above}年）`,
     tableRoundNote: "推計の仮定は小数第2位に丸めて表示している（元データは小数第5位まで）。空欄はその推計が扱っていない年。",
     tableCsvLabel: "元データ: ",
+    // chart.js の同名キーと同じ理由で追加(2026-07-29)。<noscript> 内の案内文で
+    // JS実行時は参照されないため、これまで辞書に無かった。
+    chartNoscript: "グラフの描画には JavaScript が必要です。数値は下の表にあります。",
   },
   en: {
     back: "← Indicators",
@@ -52,6 +55,7 @@ const T = {
     tableRoundNote:
       "Assumptions are shown rounded to 2 decimal places (the source CSV carries 5). A blank cell means that projection does not cover that year.",
     tableCsvLabel: "Source data: ",
+    chartNoscript: "This chart requires JavaScript to draw. The figures are in the table below.",
   },
 };
 
@@ -89,7 +93,9 @@ function pathFromSegments(segments, xScale, yScale, yearKey, valKey) {
 }
 
 async function main() {
-  let lang = "ja";
+  // 言語はURL(=生成時に確定したdocument.documentElement.lang)が決める。詳細は
+  // home.js の同じ変更のコメントを参照(2026-07-29、/en/ページ追加時)。
+  let lang = document.documentElement.lang === "en" ? "en" : "ja";
 
   const [forecastRaw, actualRaw] = await Promise.all([
     loadCSV("data/fertility_forecast.csv"),
@@ -304,8 +310,9 @@ async function main() {
     applyTableI18n();
   }
 
-  document.getElementById("lang-ja").addEventListener("click", () => { lang = "ja"; applyI18n(); });
-  document.getElementById("lang-en").addEventListener("click", () => { lang = "en"; applyI18n(); });
+  // lang-ja/lang-en は他ページの URL への実リンク(<a>)。切り替えはブラウザの通常の
+  // ナビゲーションに任せるので、クリック自体にJSは要らない(home.js の同じ変更の
+  // コメントを参照)。
 
   applyI18n();
 }

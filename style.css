@@ -100,6 +100,11 @@ a { color: inherit; }
   background: var(--bg);
   color: var(--muted-2);
   cursor: pointer;
+  /* lang-ja/lang-en は button から実リンク(<a>)に変えた(2026-07-29、/en/ページ追加時。
+     URLが言語を決める設計にするため — 詳細は CLAUDE.md の言語トグルの節)。a のデフォルト
+     下線を消す以外、button と見た目が変わらないようにする。 */
+  text-decoration: none;
+  display: inline-block;
 }
 
 .lang-btn.active {

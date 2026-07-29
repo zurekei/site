@@ -48,6 +48,12 @@ const T = {
     tableToggle: (n) => `年度ごとの数値を表で見る（${n}年度分）`,
     tableCaptionSuffix: "｜年度ごとの見通し・実績・ズレ",
     tableCsvLabel: "元データ: ",
+    // グラフの <noscript> 案内文。JSが動く限りこの文言はどこにも表示されず
+    // applyI18n() からも参照されないため、これまで辞書に無く build.mjs に
+    // 直書きされていた。/en/ ページを機械生成するには英語側の文言も要るため、
+    // 2026-07-29にここへ移した(文言の出所を1箇所にする、という他のキーと
+    // 同じ理由)。
+    chartNoscript: "グラフの描画には JavaScript が必要です。数値は下の表にあります。",
   },
   en: {
     back: "← Indicators",
@@ -83,6 +89,7 @@ const T = {
     tableToggle: (n) => `Show the figures as a table (${n} fiscal years)`,
     tableCaptionSuffix: " — forecast, actual and gap by fiscal year",
     tableCsvLabel: "Source data: ",
+    chartNoscript: "This chart requires JavaScript to draw. The figures are in the table below.",
   },
 };
 
@@ -157,6 +164,10 @@ const METRICS = {
     forecastSourceCol: "forecast_source_url",
     actualSourceCol: "actual_source_url",
     unit: "兆円",
+    // "trillion yen" は表のセルで幅を取りすぎる(このデータの最大値は250超)ので、
+    // %/pt に倣い数値へ直接続けて読める短い接尾辞にする。空白は数値と単位の間には
+    // 置かず(既存の "pt" と同じ流儀)、単位内の語の間にだけ置く: "23.7tn yen"。
+    unitEn: "tn yen",
     signed: false,
   },
   "tax-revenue": {
@@ -170,6 +181,7 @@ const METRICS = {
     forecastSourceCol: "forecast_source_url",
     actualSourceCol: "actual_source_url",
     unit: "兆円",
+    unitEn: "tn yen",
     signed: false,
     statsVocab: "budget",
   },
@@ -184,6 +196,7 @@ const METRICS = {
     forecastSourceCol: "forecast_source_url",
     actualSourceCol: "actual_source_url",
     unit: "兆円",
+    unitEn: "tn yen",
     signed: false,
     gapLabel: { ja: "当初予算に計画なし", en: "No issuance planned in the initial budget" },
     statsVocab: "budget",
@@ -209,6 +222,7 @@ const METRICS = {
     forecastSourceCol: "forecast_source_url",
     actualSourceCol: "actual_source_url",
     unit: "兆円",
+    unitEn: "tn yen",
     signed: false,
     statsVocab: "plan",
   },
@@ -236,11 +250,27 @@ function gapLabelText(metric, lang) {
   return metric.gapLabel ? metric.gapLabel[lang] : T[lang].dataNotCollected;
 }
 
+// この関数だけが METRICS の unit/unitEn を解決する唯一の経路(静的HTMLも実行時の
+// 描画も loadModule 経由でこの1つの chart.js を評価するので、ここを直せば両方
+// 直る)。% のように日英で同じ単位は unitEn を省略してよいが、その省略を
+// 「書き忘れ」と区別する必要がある。unit 自体が ASCII のみ(=そもそも訳が要らない
+// 記号)ならフォールバックしてよいが、unit に日本語(非ASCII)が混じっているのに
+// unitEn が無い場合は、英語ページへ日本語の単位がそのまま漏れる書き忘れなので、
+// 黙って通さずここで止める(2026-07-30、兆円が/en/へ漏れていた件の再発防止)。
+function metricUnit(metric, lang) {
+  if (lang !== "en") return metric.unit;
+  if (metric.unitEn) return metric.unitEn;
+  if (/[^\x00-\x7f]/.test(metric.unit)) {
+    throw new Error(`metric unit "${metric.unit}" has no unitEn for the English page`);
+  }
+  return metric.unit;
+}
+
 // unit used for the aggregate mean-gap figure: percentage-point metrics
 // read "pt" (matching the per-year gap readout), amount metrics keep their
-// own unit (兆円).
-function gapUnitSuffix(metric) {
-  return metric.unit === "%" ? "pt" : metric.unit;
+// own (language-appropriate) unit.
+function gapUnitSuffix(metric, lang) {
+  return metric.unit === "%" ? "pt" : metricUnit(metric, lang);
 }
 
 // one-line summary of how often, and by how much, the actual has diverged
@@ -252,7 +282,7 @@ function gapSummaryText(stats, metric, lang) {
   if (!stats) return "";
   const t = T[lang];
   const vocab = t.gapVocab[metric.statsVocab] || t.gapVocab.forecast;
-  const unit = gapUnitSuffix(metric);
+  const unit = gapUnitSuffix(metric, lang);
   // signed mean (実績 − 見通し の規約通り), same sign convention as the
   // per-year gap readout — not a magnitude. Round before reading the sign so a
   // mean that rounds to zero prints "±0.0" instead of a misleading "-0.0".
@@ -327,7 +357,9 @@ async function main() {
     return;
   }
 
-  let lang = "ja";
+  // 言語はURL(=生成時に確定したdocument.documentElement.lang)が決める。詳細は
+  // home.js の同じ変更のコメントを参照(2026-07-29、/en/ページ追加時)。
+  let lang = document.documentElement.lang === "en" ? "en" : "ja";
 
   const rawRows = await loadCSV(metric.csv);
   const rows = rawRows
@@ -440,7 +472,7 @@ async function main() {
       svg.appendChild(svgEl("line", { class: "grid-line-y", x1: PAD.left, x2: CHART_W - PAD.right, y1: y, y2: y }));
     }
     const label = svgEl("text", { class: "axis-label", x: PAD.left - 8, y: y + 3, "text-anchor": "end" });
-    label.textContent = `${v}${metric.unit}`;
+    label.textContent = `${v}${metricUnit(metric, lang)}`;
     svg.appendChild(label);
   }
 
@@ -628,7 +660,7 @@ async function main() {
     }
     forecastLabel.setAttribute("y", forecastLabelY);
 
-    vForecast.textContent = fmtVal(r.forecastVal, metric.unit, metric.signed);
+    vForecast.textContent = fmtVal(r.forecastVal, metricUnit(metric, lang), metric.signed);
 
     if (r.actualVal !== null) {
       const ax = yearX;
@@ -643,9 +675,9 @@ async function main() {
       linkLine.setAttribute("y2", ay);
       linkLine.setAttribute("opacity", 1);
 
-      vActual.textContent = fmtVal(r.actualVal, metric.unit, metric.signed);
+      vActual.textContent = fmtVal(r.actualVal, metricUnit(metric, lang), metric.signed);
       const diff = r.actualVal - r.forecastVal;
-      vDiff.textContent = `${diff > 0 ? "+" : ""}${diff.toFixed(1)}${gapUnitSuffix(metric)}`;
+      vDiff.textContent = `${diff > 0 ? "+" : ""}${diff.toFixed(1)}${gapUnitSuffix(metric, lang)}`;
     } else {
       actualPoint.setAttribute("opacity", 0);
       linkLine.setAttribute("opacity", 0);
@@ -666,7 +698,14 @@ async function main() {
     if (actualUrl) links.push(`${T[lang].actualSourcePrefix}<a href="${escapeHTML(actualUrl)}" target="_blank" rel="noopener">${escapeHTML(actualUrl)}</a>`);
     if (r.basis && T[lang].basisLabels[r.basis]) links.push(`${T[lang].actualBasisPrefix}${T[lang].basisLabels[r.basis]}`);
     const vRange = vintageByYear.get(r.year);
-    if (vRange) links.push(`${T[lang].vintageRangePrefix}${vRange.min.toFixed(1)}${metric.unit}〜${vRange.max.toFixed(1)}${metric.unit} (${vRange.count}${T[lang].vintageSeriesSuffix})`);
+    if (vRange) {
+      const u = metricUnit(metric, lang);
+      // 〜(波ダッシュ)は日本語の範囲表記なので、英語ページでは en dash に
+      // 差し替える(単位そのものと同じく、レンダリングされる文字列自体が
+      // 言語ごとに変わるべき箇所)。
+      const rangeSep = lang === "ja" ? "〜" : "–";
+      links.push(`${T[lang].vintageRangePrefix}${vRange.min.toFixed(1)}${u}${rangeSep}${vRange.max.toFixed(1)}${u} (${vRange.count}${T[lang].vintageSeriesSuffix})`);
+    }
     vSource.innerHTML = links.join("<br>");
   }
 
@@ -768,8 +807,10 @@ async function main() {
     render(currentIdx);
   }
 
-  document.getElementById("lang-ja").addEventListener("click", () => { lang = "ja"; applyI18n(); });
-  document.getElementById("lang-en").addEventListener("click", () => { lang = "en"; applyI18n(); });
+  // lang-ja/lang-en は他ページの URL への実リンク(<a>)。切り替えはブラウザの通常の
+  // ナビゲーションに任せるので、クリック自体にJSは要らない(以前はlocalStorageに
+  // 選択を書き込んでいたが、読み返す処理がどこにも無い書くだけの死んだコードだった
+  // ため2026-07-30に削除。詳細はhome.jsの同じ変更のコメントを参照)。
 
   applyI18n();
 }

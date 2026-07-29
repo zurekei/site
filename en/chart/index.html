@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- bin/build.mjs が生成している。直接編集しない。 -->
+<title>Indicators — zurekei</title>
+<meta name="description" content="The government&#39;s initial forecast laid alongside the confirmed actual, one page per indicator.">
+<link rel="canonical" href="https://zurekei.org/en/chart/">
+<link rel="alternate" hreflang="ja" href="https://zurekei.org/chart/">
+<link rel="alternate" hreflang="en" href="https://zurekei.org/en/chart/">
+<link rel="alternate" hreflang="x-default" href="https://zurekei.org/chart/">
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Indicators — zurekei">
+<meta property="og:description" content="The government&#39;s initial forecast laid alongside the confirmed actual, one page per indicator.">
+<meta property="og:url" content="https://zurekei.org/en/chart/">
+<meta property="og:image" content="https://zurekei.org/assets/og.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=20260731k">
+</head>
+<body>
+<div class="page">
+  <header class="site-header">
+    <a class="brand" href="/en/" aria-label="zurekei home">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <a id="lang-ja" class="lang-btn mono" href="/chart/">JA</a>
+        <a id="lang-en" class="lang-btn mono active" href="/en/chart/">EN</a>
+      </div>
+    </div>
+  </header>
+
+  <a class="chart-back" href="/en/">← Home</a>
+
+  <main>
+    <section class="chart-section">
+      <h1 class="chart-title">Indicators</h1>
+      <p class="chart-desc">The forecast the government set at the start of each fiscal year, laid alongside the actual figure confirmed later — one page per indicator.</p>
+      <ul class="hub-list">
+        <li>
+          <a href="/en/chart/gdp-real">Real GDP growth</a>
+          <span class="hub-desc">The government&#39;s initial forecast (real) laid alongside the confirmed actual.</span>
+        </li>
+        <li>
+          <a href="/en/chart/gdp-nominal">Nominal GDP growth</a>
+          <span class="hub-desc">The government&#39;s initial forecast (nominal) laid alongside the confirmed actual.</span>
+        </li>
+        <li>
+          <a href="/en/chart/unemployment">Unemployment rate</a>
+          <span class="hub-desc">The government&#39;s initial forecast laid alongside the confirmed actual.</span>
+        </li>
+        <li>
+          <a href="/en/chart/current-account">Current account</a>
+          <span class="hub-desc">The government&#39;s initial forecast laid alongside the confirmed actual.</span>
+        </li>
+        <li>
+          <a href="/en/chart/tax-revenue">Tax revenue</a>
+          <span class="hub-desc">The Ministry of Finance&#39;s initial budget estimate for tax revenue, laid alongside the confirmed settlement figure.</span>
+        </li>
+        <li>
+          <a href="/en/chart/bond-issuance">Government bond issuance</a>
+          <span class="hub-desc">The Ministry of Finance&#39;s initial budget plan for bond issuance, laid alongside the actual issuance recorded in the settlement. Bonds tracked in separate categories, such as reconstruction bonds or pension special-issue bonds, are not included, following the classification used in the primary source.</span>
+        </li>
+        <li>
+          <a href="/en/chart/jgb-total">Total JGB issuance</a>
+          <span class="hub-desc">The Ministry of Finance&#39;s initial JGB issuance plan (total), laid alongside actual total issuance. Includes construction bonds, deficit-financing bonds, reconstruction and other special bonds, FILP bonds, and refunding bonds (revenue basis, following the classification used in the primary source).</span>
+        </li>
+        <li>
+          <a href="/en/chart/cpi">Consumer prices (CPI)</a>
+          <span class="hub-desc">The government&#39;s initial forecast laid alongside the confirmed actual published by the Ministry of Internal Affairs and Communications&#39; Statistics Bureau.</span>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer-row">
+    <span>src: Cabinet Office of Japan / SNA</span>
+    <a class="footer-about" href="/en/about">About this site</a>
+    <a class="footer-about" href="/en/contact">Contact</a>
+  </footer>
+</div>
+<script>
+// 旧URL（/chart?m=gdp-real）で来た人を、その指標の新しいURLへ送る。
+// 一覧そのものは静的に出ているので、JSが動かなくても行き止まりにはならない。
+(function () {
+  var m = new URLSearchParams(location.search).get("m");
+  if (!m) return;
+  var link = document.querySelector('.hub-list a[href="/en/chart/' + m.replace(/[^a-z-]/g, "") + '"]');
+  if (link) location.replace(link.getAttribute("href"));
+})();
+
+// 言語トグルは他ページと同じ実リンク(<a>)。切り替えはブラウザの通常の
+// ナビゲーションに任せるので、クリック自体にJSは要らない(2026-07-29、
+// /en/ページ追加時に、旧来のその場swap方式(data-en/apply(lang))から差し替えた。
+// 以前はここでlocalStorageに選択を書き込んでいたが、読み返す処理がどこにも無い
+// 書くだけの死んだコードだったため2026-07-30に削除。詳細はhome.jsの同じ変更の
+// コメントを参照)。
+</script>
+</body>
+</html>

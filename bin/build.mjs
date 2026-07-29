@@ -43,6 +43,10 @@ import { fileURLToPath } from "node:url";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SITE_DIR = path.join(HERE, "..");
 const OUT_DIR = path.join(SITE_DIR, "chart");
+// /en/ 配下は既存ページの言語違いなので、ディレクトリの切り方も /chart/ と
+// 揃える(EN_DIR/en/chart/<key>.html が /en/chart/<key> に対応)。
+const EN_DIR = path.join(SITE_DIR, "en");
+const EN_OUT_DIR = path.join(EN_DIR, "chart");
 const SITE = "https://zurekei.org";
 
 // トップの Organization ノードの @id。各ページの Dataset の creator/publisher と
@@ -62,16 +66,49 @@ const CATALOG_ID = `${SITE}/#catalog`;
 const FERTILITY_DATASET = {
   id: `${SITE}/fertility#dataset`,
   url: `${SITE}/fertility`,
-  name: "合計特殊出生率｜歴代の将来推計の仮定と実績",
+  name: {
+    ja: "合計特殊出生率｜歴代の将来推計の仮定と実績",
+    en: "Total fertility rate — assumptions across successive projections vs actual",
+  },
 };
 const HOAN_DATASET = {
   id: `${SITE}/hoan#dataset`,
   url: `${SITE}/hoan`,
-  name: "法律の見直し条項｜期限と検討状況",
+  name: {
+    ja: "法律の見直し条項｜期限と検討状況",
+    en: "Statutory review clauses — deadlines and status",
+  },
 };
 
+/* ── JA/EN 相互URL ───────────────────────────────────────────
+ * /en/ 以下は既存ページの言語違いなので、URLの対応関係を1箇所にする(ページごとに
+ * 書き写すと、いつか /en/ 側だけリンク切れになる)。root-absolute・拡張子なしに
+ * 統一している(新しく足すリンクの規約。既存の相対リンク・.html付きリンクは
+ * 触っていないページの中身なので変えない)。
+ */
+const REL = {
+  home: { ja: "/", en: "/en/" },
+  chartHub: { ja: "/chart/", en: "/en/chart/" },
+  fertility: { ja: "/fertility", en: "/en/fertility" },
+  hoan: { ja: "/hoan", en: "/en/hoan" },
+  about: { ja: "/about", en: "/en/about" },
+  corrections: { ja: "/corrections", en: "/en/corrections" },
+  contact: { ja: "/contact", en: "/en/contact" },
+};
+const chartRel = (key) => ({ ja: `/chart/${key}`, en: `/en/chart/${key}` });
+const abs = (rel) => `${SITE}${rel}`;
+
+// canonical は常に自ページを指す(相互に向けない。かつて ?m= で固定canonicalを
+// 共有し7ページが索引から消えた反省を参照)。hreflang は両言語 + x-default を
+// 両方向のページに置く。x-default は ja(サイトの既定言語)を指す。
+function hreflangTags(pair) {
+  return `<link rel="alternate" hreflang="ja" href="${abs(pair.ja)}">
+<link rel="alternate" hreflang="en" href="${abs(pair.en)}">
+<link rel="alternate" hreflang="x-default" href="${abs(pair.ja)}">`;
+}
+
 // style.css / chart.js のキャッシュバスター。ページ側の ?v= と揃える。
-const ASSET_V = "20260731i";
+const ASSET_V = "20260731k";
 
 const read = (f) => fs.readFileSync(path.join(SITE_DIR, f), "utf8");
 
@@ -104,11 +141,39 @@ const R = loadModule("chart.js", [
   // csv.js
   "parseCSV", "toNum", "computeGapStats", "escapeHTML", "safeUrl",
   // chart.js
-  "T", "METRICS", "fmtFY", "gapLabelText", "gapUnitSuffix",
+  "T", "METRICS", "fmtFY", "gapLabelText", "gapUnitSuffix", "metricUnit",
   "gapSummaryText", "fmtVal", "extractSourceUrl", "extractEventNote",
 ]);
 
 const { METRICS, T, escapeHTML, safeUrl, toNum, parseCSV, computeGapStats } = R;
+
+// JA を本文に、EN を data-en に置く（/en/ 生成前からある fertility.html / chart/index.html
+// の既存の二言語表現方式）。入れ替えは各ページの applyTableI18n 等が行う。訳を辞書ごと
+// ビルド側に持たせないのは、文言の出所を .js 側の T 一箇所に保つため。
+// /en/ ページ自体にはこの属性を持たせない（EN側は本文として直接その言語のテキストを
+// 出すので、data-en が要る場面はJA側の静的ページのみ）。
+function dual(en) {
+  return ` data-en="${escapeHTML(en)}"`;
+}
+
+// /en/ ページの生成に要る4ファイルぶんの取り込み。手書きページ(index/about/
+// contact/corrections)の文言・整形関数もここで本物を取り込む。chart.js等と同じ
+// 理由(表とページで文言が違う数字・言葉を出す事故を起こさない)。
+const HOME = loadModule("home.js", [
+  "T", "INDICATOR_META", "fmtSigned", "buildSparkline",
+  "buildFertilitySparkline", "cardGapSummaryText", "renderCard", "metaUnit",
+]);
+
+// chart.js の metricUnit は buildTable が英語生成時に全指標分呼ぶのでビルドが
+// unitEn漏れを踏める。home.js の metaUnit は buildHomeEn がカード名(nameEn)しか
+// 使わず一度も呼ばないため、同じ守りが無かった(2026-07-30レビュー指摘)。将来
+// INDICATOR_META に兆円系の指標を足して unitEn を書き忘れても、ビルドも
+// --check も緑のままデプロイされ、英語トップのカード描画が実行時に throw する
+// ところだった。ここで全指標×英語を1回強制評価し、書き忘れをビルド時に踏む。
+HOME.INDICATOR_META.forEach((m) => HOME.metaUnit(m, "en"));
+const ABOUT = loadModule("about.js", ["T", "METHODS_ROWS", "renderMethodsRows"]);
+const CONTACT = loadModule("contact.js", ["T"]);
+const CORR = loadModule("corrections.js", ["T"]);
 
 /* ── データ ───────────────────────────────────────────────── */
 
@@ -133,74 +198,76 @@ function readRows(metric) {
 
 // 数値セルの文言は chart.js の render() と同じ規則で作る（関数も同じものを使う）。
 // 表とグラフで丸めや符号が違って見えることが無いようにするため。
-function cellForecast(metric, r) {
+function cellForecast(metric, r, lang) {
   return r.forecastVal !== null
-    ? { text: R.fmtVal(r.forecastVal, metric.unit, metric.signed), ph: null }
-    : { text: R.gapLabelText(metric, "ja"), ph: "gap" };
+    ? { text: R.fmtVal(r.forecastVal, R.metricUnit(metric, lang), metric.signed), ph: null }
+    : { text: R.gapLabelText(metric, lang), ph: "gap" };
 }
 
-function cellActual(metric, r, lastActualYear) {
-  if (r.actualVal !== null) return { text: R.fmtVal(r.actualVal, metric.unit, metric.signed), ph: null };
+function cellActual(metric, r, lastActualYear, lang) {
+  if (r.actualVal !== null) return { text: R.fmtVal(r.actualVal, R.metricUnit(metric, lang), metric.signed), ph: null };
   return r.year > lastActualYear
-    ? { text: T.ja.actualPending, ph: "pending" }
-    : { text: T.ja.actualUnavailable, ph: "unavailable" };
+    ? { text: T[lang].actualPending, ph: "pending" }
+    : { text: T[lang].actualUnavailable, ph: "unavailable" };
 }
 
-function cellGap(metric, r) {
+function cellGap(metric, r, lang) {
   if (r.forecastVal === null || r.actualVal === null) return "—";
   const diff = r.actualVal - r.forecastVal;
-  return `${diff > 0 ? "+" : ""}${diff.toFixed(1)}${R.gapUnitSuffix(metric)}`;
+  return `${diff > 0 ? "+" : ""}${diff.toFixed(1)}${R.gapUnitSuffix(metric, lang)}`;
 }
 
-function sourceCell(r) {
+function sourceCell(r, lang) {
   const parts = [];
   const f = safeUrl(r.forecastSourceUrl);
   const a = safeUrl(r.actualSourceUrl);
-  if (f) parts.push(`<a href="${escapeHTML(f)}" target="_blank" rel="noopener" data-src="forecast">見通し</a>`);
-  if (a) parts.push(`<a href="${escapeHTML(a)}" target="_blank" rel="noopener" data-src="actual">実績</a>`);
+  if (f) parts.push(`<a href="${escapeHTML(f)}" target="_blank" rel="noopener" data-src="forecast">${escapeHTML(T[lang].forecast)}</a>`);
+  if (a) parts.push(`<a href="${escapeHTML(a)}" target="_blank" rel="noopener" data-src="actual">${escapeHTML(T[lang].actual)}</a>`);
   return parts.join(" ");
 }
 
-function buildTable(metric, rows) {
+function buildTable(metric, rows, lang) {
   const actuals = rows.filter((r) => r.actualVal !== null);
   const lastActualYear = actuals.length ? actuals[actuals.length - 1].year : -Infinity;
 
   const body = rows
     .map((r) => {
-      const f = cellForecast(metric, r);
-      const a = cellActual(metric, r, lastActualYear);
+      const f = cellForecast(metric, r, lang);
+      const a = cellActual(metric, r, lastActualYear, lang);
       const phAttr = (c) => (c.ph ? ` data-ph="${c.ph}"` : "");
       const tr =
         `      <tr>\n` +
-        `        <th scope="row" class="mono" data-year="${r.year}">${escapeHTML(R.fmtFY(r.year, "ja"))}</th>\n` +
+        `        <th scope="row" class="mono" data-year="${r.year}">${escapeHTML(R.fmtFY(r.year, lang))}</th>\n` +
         `        <td class="mono"${phAttr(f)}>${escapeHTML(f.text)}</td>\n` +
         `        <td class="mono"${phAttr(a)}>${escapeHTML(a.text)}</td>\n` +
-        `        <td class="mono">${escapeHTML(cellGap(metric, r))}</td>\n` +
-        `        <td class="data-table-src">${sourceCell(r)}</td>\n` +
+        `        <td class="mono">${escapeHTML(cellGap(metric, r, lang))}</td>\n` +
+        `        <td class="data-table-src">${sourceCell(r, lang)}</td>\n` +
         `      </tr>`;
       // 実績側の注記だけを出す（[見通し原文] 等は転記者向けの控えなので出さない）。
       // chart.js の readout と同じ extractEventNote に判断を委ねている。
       const note = R.extractEventNote(r.notes);
       if (!note) return tr;
-      // 注記は一次資料からの転記そのままなので日本語のみ。EN に切り替えても
-      // 翻訳しない（訳を用意していないのに訳したふりをしない）ため lang を明示する。
+      // 注記は一次資料からの転記そのままなので常に日本語(EN表でも訳さない。
+      // 訳を用意していないのに訳したふりをしない)。lang="ja" は表自体の言語が
+      // enでも、この1セルだけ日本語であることを明示する(かつ元からの規約)。
       return `${tr}\n      <tr class="data-table-note"><td colspan="5" lang="ja">${escapeHTML(note)}</td></tr>`;
     })
     .join("\n");
 
+  const t = T[lang];
   return (
     // 横スクロールは <table> 自身ではなく外側の箱に持たせる。table に display:block を
     // かけると内側が shrink-to-fit になり、指標ごとに表の幅が変わってしまう。
     `      <div class="data-table-wrap">\n` +
     `      <table class="data-table">\n` +
-    `        <caption id="t-table-caption">${escapeHTML(metric.title)}｜年度ごとの見通し・実績・ズレ</caption>\n` +
+    `        <caption id="t-table-caption">${escapeHTML(lang === "ja" ? metric.title : metric.titleEn)}${escapeHTML(t.tableCaptionSuffix)}</caption>\n` +
     `        <thead>\n` +
     `          <tr>\n` +
-    `            <th scope="col" id="t-th-year">年度</th>\n` +
-    `            <th scope="col" id="t-th-forecast">見通し</th>\n` +
-    `            <th scope="col" id="t-th-actual">実績</th>\n` +
-    `            <th scope="col" id="t-th-gap">ズレ</th>\n` +
-    `            <th scope="col" id="t-th-source">出典</th>\n` +
+    `            <th scope="col" id="t-th-year">${escapeHTML(t.thYear)}</th>\n` +
+    `            <th scope="col" id="t-th-forecast">${escapeHTML(t.forecast)}</th>\n` +
+    `            <th scope="col" id="t-th-actual">${escapeHTML(t.actual)}</th>\n` +
+    `            <th scope="col" id="t-th-gap">${escapeHTML(t.gap)}</th>\n` +
+    `            <th scope="col" id="t-th-source">${escapeHTML(t.thSource)}</th>\n` +
     `          </tr>\n` +
     `        </thead>\n` +
     `        <tbody>\n${body}\n        </tbody>\n` +
@@ -212,41 +279,72 @@ function buildTable(metric, rows) {
 /* ── JSON-LD ─────────────────────────────────────────────── */
 
 // カタログ側の参照(name/url)と Dataset 自身の name を1箇所にする(呼び出し側で
-// 同じ文言を書き写さない)。
-function metricDatasetName(metric) {
-  return `${metric.title}｜政府の当初見通しと実績`;
+// 同じ文言を書き写さない)。EN側の文言はどの.jsのT辞書にも属さないJSON-LD専用の
+// 短い名前なので、ここで新規に用意する(2026-07-29、/en/ページ追加時。他の
+// メタ情報用コピー─タイトルタグ・meta descriptionと同じ扱い)。
+function metricDatasetName(metric, lang) {
+  return lang === "en"
+    ? `${metric.titleEn} — government's initial forecast and confirmed actual`
+    : `${metric.title}｜政府の当初見通しと実績`;
+}
+
+const ORG_NAME = { ja: "ズレ計", en: "zurekei" };
+
+// Organization ノード(ORG_ID)は全ページ(JA/EN問わず)から同じ @id で参照される
+// 単一の実体なので、name はページの言語で変えてはいけない — 変えると「同じ@idの
+// 実体が2つの矛盾したnameを名乗る」ことになる(2026-07-30レビュー指摘。JAページは
+// name:"ズレ計"、ENページはname:"zurekei"を主張していた)。canonicalは
+// "zurekei"にした: header()のブランドの文字(brand-name-main)がJA/EN共通で常に
+// 英字"zurekei"であり、ドメイン名でもあるため、どちらの言語のページから見ても
+// 変わらない自己名としてふさわしい。「ズレ計」はalternateNameとして残す(消す
+// 理由が無い正式な日本語名なので)。og:site_name(ページ単位のメタタグ)や
+// WebSite.name(WebSite自体はJA/ENで@idが別なので言語ごとに変えてよい)は
+// ORG_NAME[lang]のまま(ここでの整理と対象が違う)。
+function orgNode() {
+  return { "@type": "Organization", "@id": ORG_ID, name: ORG_NAME.en, alternateName: ORG_NAME.ja, url: SITE };
 }
 
 // ライセンスは書かない。サイトのどこにも利用条件の記載がなく、ここで勝手に
 // 宣言すると「出典つきで確かめられる」という主旨の逆をやることになる。
 // 利用条件を決めたら license を足すこと。
-function buildJsonLd(key, metric, rows) {
+//
+// EN側の @id は JA側と衝突しないよう /en/chart/<key>#dataset にする(同じ指標でも
+// 別言語の別ページなので、別のDatasetとして参照できる必要がある)。
+function buildJsonLd(key, metric, rows, lang) {
   const years = rows.map((r) => r.year);
-  const url = `${SITE}/chart/${key}`;
+  const url = abs(chartRel(key)[lang]);
   const obj = {
     "@context": "https://schema.org",
     "@type": "Dataset",
     // トップ(index.html)の DataCatalog からこの @id で参照する。
     "@id": `${url}#dataset`,
-    name: metricDatasetName(metric),
-    description: metric.desc,
+    name: metricDatasetName(metric, lang),
+    description: lang === "en" ? metric.descEn : metric.desc,
     url,
     isAccessibleForFree: true,
-    inLanguage: "ja",
+    inLanguage: lang,
     temporalCoverage: `${Math.min(...years)}/${Math.max(...years)}`,
     // @id を持たせて、トップの Organization(index.html) と同一実体だと機械に
     // 分かる形にする。type/name/url も残すのは、このページ単体だけを読んだ
-    // クローラでも自己完結して解釈できるようにするため。
-    creator: { "@type": "Organization", "@id": ORG_ID, name: "ズレ計", url: SITE },
+    // クローラでも自己完結して解釈できるようにするため。name は言語で変えない
+    // (orgNode() のコメント参照 — 同じ@idの実体が2つの矛盾したnameを名乗らない)。
+    creator: orgNode(),
     // カタログ→Dataset の裸の @id 参照だけでは、Google 等の消費側がページ単位
     // でしか処理せず別文書の @id を解決しに行かないため実質不発になる
     // (2026-07-29 に気づいた)。Google の Dataset ドキュメントが明記しているのは
     // Dataset→DataCatalog のこの逆向きの参照で、効くのは実はこちらなので必ず持たせる。
     includedInDataCatalog: { "@id": CATALOG_ID },
-    variableMeasured: [
-      { "@type": "PropertyValue", name: "見通し（当初）", unitText: metric.unit },
-      { "@type": "PropertyValue", name: "実績（確定）", unitText: metric.unit },
-    ],
+    // unitText も R.metricUnit を通す(直書きの metric.unit だとここだけ日本語の
+    // 単位が英語ページのJSON-LDに漏れる、まさに今回直したのと同じ種類の事故)。
+    variableMeasured: lang === "en"
+      ? [
+          { "@type": "PropertyValue", name: "Forecast (initial)", unitText: R.metricUnit(metric, lang) },
+          { "@type": "PropertyValue", name: "Actual (confirmed)", unitText: R.metricUnit(metric, lang) },
+        ]
+      : [
+          { "@type": "PropertyValue", name: "見通し（当初）", unitText: R.metricUnit(metric, lang) },
+          { "@type": "PropertyValue", name: "実績（確定）", unitText: R.metricUnit(metric, lang) },
+        ],
     distribution: [
       {
         "@type": "DataDownload",
@@ -270,9 +368,16 @@ const BRAND_SVG = `<svg class="brand-logo" viewBox="0 0 512 512">
         <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
       </svg>`;
 
-function header() {
+// urls はこのページ自身の JA/EN 対 (トグルの行き先)。ブランドのリンク先は常に
+// トップ(REL.home)で、このページの対とは別物。
+//
+// aria-label はJAの元コードも T の辞書を通さず直書きだった(サイト名+"トップへ"は
+// どのページの.jsにも属さない共通chromeのため)。EN側もそれに揃えて直書きにする
+// (2026-07-29、/en/ページ追加時の新規英文。既存のJA同様ここにしか無い)。
+function header(lang, urls) {
+  const ariaLabel = lang === "en" ? "zurekei home" : "ズレ計 トップへ";
   return `  <header class="site-header">
-    <a class="brand" href="/" aria-label="ズレ計 トップへ">
+    <a class="brand" href="${REL.home[lang]}" aria-label="${ariaLabel}">
       ${BRAND_SVG}
       <div>
         <div class="brand-name">
@@ -284,18 +389,24 @@ function header() {
     </a>
     <div class="header-right">
       <div class="lang-toggle">
-        <button id="lang-ja" class="lang-btn mono">JA</button>
-        <button id="lang-en" class="lang-btn mono">EN</button>
+        <a id="lang-ja" class="lang-btn mono${lang === "ja" ? " active" : ""}" href="${urls.ja}">JA</a>
+        <a id="lang-en" class="lang-btn mono${lang === "en" ? " active" : ""}" href="${urls.en}">EN</a>
       </div>
     </div>
   </header>`;
 }
 
-function footer() {
+// about/contact へのリンクは、JA側は元から .html 付きの root-absolute
+// ("/about.html")なので、そのバイト列は変えない(このファイルの他の変更と同じ
+// 「JAは触らない」制約)。EN側は新規リンクなので REL の規約(拡張子なし)に従う。
+function footer(lang) {
+  const t = lang === "en"
+    ? { src: T.en.footerSrc, about: T.en.footerAbout, contact: T.en.footerContact, aboutHref: REL.about.en, contactHref: REL.contact.en }
+    : { src: T.ja.footerSrc, about: T.ja.footerAbout, contact: T.ja.footerContact, aboutHref: "/about.html", contactHref: "/contact.html" };
   return `  <footer class="site-footer-row">
-    <span id="t-footer-src">src: 内閣府 / 国民経済計算(SNA)</span>
-    <a class="footer-about" id="t-footer-about" href="/about.html">このサイトについて</a>
-    <a class="footer-about" id="t-footer-contact" href="/contact.html">お問い合わせ</a>
+    <span id="t-footer-src">${t.src}</span>
+    <a class="footer-about" id="t-footer-about" href="${t.aboutHref}">${t.about}</a>
+    <a class="footer-about" id="t-footer-contact" href="${t.contactHref}">${t.contact}</a>
   </footer>`;
 }
 
@@ -324,38 +435,50 @@ const NOSCRIPT_STYLE =
   ` .chart-noscript { display: block; }` +
   `</style></noscript>`;
 
-function buildPage(key, metric) {
+// title/meta descriptionはどの.jsのT辞書にも属さない(JAも元からbuild.mjsに
+// 直書き)。EN側もそれに揃えて直書きにする(2026-07-29、/en/ページ追加時の新規
+// 英文)。本文の見出し・説明は metric.titleEn/descEn(chart.jsのMETRICSに既にある
+// 本物の訳)をそのまま使うので、ここで新規に訳しているのは "— zurekei" という
+// サイト名の付け方だけ。
+function buildPage(key, metric, lang) {
   const rows = readRows(metric);
-  const url = `${SITE}/chart/${key}`;
-  const title = `${metric.title} — ズレ計`;
-  const note = metric.note
-    ? `      <p class="chart-note mono" id="chart-note">${escapeHTML(metric.note)}</p>`
+  const urls = chartRel(key);
+  const url = abs(urls[lang]);
+  const t = T[lang];
+  const metricTitle = lang === "ja" ? metric.title : metric.titleEn;
+  const metricDesc = lang === "ja" ? metric.desc : metric.descEn;
+  const title = lang === "ja" ? `${metric.title} — ズレ計` : `${metric.titleEn} — zurekei`;
+  const metricNote = lang === "ja" ? metric.note : metric.noteEn;
+  const note = metricNote
+    ? `      <p class="chart-note mono" id="chart-note">${escapeHTML(metricNote)}</p>`
     : `      <p class="chart-note mono" id="chart-note" hidden></p>`;
-  const archive = metric.archiveNote
-    ? `      <p class="chart-note mono" id="archive-note">${escapeHTML(metric.archiveNote)}</p>`
+  const metricArchiveNote = lang === "ja" ? metric.archiveNote : metric.archiveNoteEn;
+  const archive = metricArchiveNote
+    ? `      <p class="chart-note mono" id="archive-note">${escapeHTML(metricArchiveNote)}</p>`
     : `      <p class="chart-note mono" id="archive-note" hidden></p>`;
 
   // 集計行はグラフと同じ computeGapStats / gapSummaryText で作る
   const stats = R.computeGapStats(rows, "forecastVal", "actualVal", { fromYear: metric.statsFromYear });
-  const summaryText = R.gapSummaryText(stats, metric, "ja");
+  const summaryText = R.gapSummaryText(stats, metric, lang);
   const summary = summaryText
     ? `      <p class="chart-summary mono" id="chart-summary">${escapeHTML(summaryText)}</p>`
     : `      <p class="chart-summary mono" id="chart-summary" hidden></p>`;
 
   return `<!doctype html>
-<html lang="ja">
+<html lang="${lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- このファイルは bin/build.mjs が data/*.csv から生成している。直接編集しない。
      直すのは chart.js の METRICS か data/*.csv のどちらか。 -->
 <title id="page-title">${escapeHTML(title)}</title>
-<meta name="description" content="${escapeHTML(metric.desc)}">
+<meta name="description" content="${escapeHTML(metricDesc)}">
 <link rel="canonical" href="${url}">
-<meta property="og:site_name" content="ズレ計">
+${hreflangTags(urls)}
+<meta property="og:site_name" content="${ORG_NAME[lang]}">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${escapeHTML(title)}">
-<meta property="og:description" content="${escapeHTML(metric.desc)}">
+<meta property="og:description" content="${escapeHTML(metricDesc)}">
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/assets/og.png">
 <meta property="og:image:width" content="2400">
@@ -364,19 +487,19 @@ function buildPage(key, metric) {
 ${assetHead()}
 ${NOSCRIPT_STYLE}
 <script type="application/ld+json">
-${buildJsonLd(key, metric, rows)}
+${buildJsonLd(key, metric, rows, lang)}
 </script>
 </head>
 <body data-metric="${key}">
 <div class="page">
-${header()}
+${header(lang, urls)}
 
-  <a class="chart-back" id="t-back" href="/">← 指標一覧</a>
+  <a class="chart-back" id="t-back" href="${REL.home[lang]}">${escapeHTML(t.back)}</a>
 
   <main>
     <section class="chart-section">
-      <h1 class="chart-title" id="chart-title">${escapeHTML(metric.title)}</h1>
-      <p class="chart-desc" id="chart-desc">${escapeHTML(metric.desc)}</p>
+      <h1 class="chart-title" id="chart-title">${escapeHTML(metricTitle)}</h1>
+      <p class="chart-desc" id="chart-desc">${escapeHTML(metricDesc)}</p>
 ${note}
 
       <div class="chart-wrap">
@@ -384,7 +507,7 @@ ${note}
         <!-- グラフはJSでしか描かない。JSが無いとこの枠が空箱として残り、壊れて
              いるようにしか見えないので、行き先を書いておく。表示の切り替えは
              <head> の <noscript><style> が持つ。 -->
-        <p class="chart-noscript mono">グラフの描画には JavaScript が必要です。数値は下の表にあります。</p>
+        <p class="chart-noscript mono">${escapeHTML(t.chartNoscript)}</p>
       </div>
 
 ${summary}
@@ -398,16 +521,16 @@ ${summary}
         <div class="stat-row">
           <div class="stat-chip">
             <span class="stat-chip-dot stat-chip-dot-forecast"></span>
-            <span class="stat-chip-label" id="t-stat-forecast">見通し</span>
+            <span class="stat-chip-label" id="t-stat-forecast">${escapeHTML(t.forecast)}</span>
             <span class="stat-chip-value" id="v-forecast">—</span>
           </div>
           <div class="stat-chip">
             <span class="stat-chip-dot stat-chip-dot-actual"></span>
-            <span class="stat-chip-label" id="t-stat-actual">実績</span>
+            <span class="stat-chip-label" id="t-stat-actual">${escapeHTML(t.actual)}</span>
             <span class="stat-chip-value" id="v-actual">—</span>
           </div>
           <div class="stat-chip stat-chip-diff">
-            <span class="stat-chip-label" id="t-stat-gap">ズレ</span>
+            <span class="stat-chip-label" id="t-stat-gap">${escapeHTML(t.gap)}</span>
             <span class="stat-chip-value" id="v-diff">—</span>
           </div>
         </div>
@@ -422,14 +545,14 @@ ${archive}
 
     <section class="data-section">
       <details class="data-details">
-        <summary id="t-table-toggle">年度ごとの数値を表で見る（${rows.length}年度分）</summary>
-${buildTable(metric, rows)}
-        <p class="chart-note mono"><span id="t-table-csv">元データ: </span><a href="${metric.csv}">${escapeHTML(metric.csv)}</a></p>
+        <summary id="t-table-toggle">${escapeHTML(t.tableToggle(rows.length))}</summary>
+${buildTable(metric, rows, lang)}
+        <p class="chart-note mono"><span id="t-table-csv">${escapeHTML(t.tableCsvLabel)}</span><a href="${metric.csv}">${escapeHTML(metric.csv)}</a></p>
       </details>
     </section>
   </main>
 
-${footer()}
+${footer(lang)}
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
 <script src="/chart.js?v=${ASSET_V}"></script>
@@ -445,48 +568,82 @@ ${footer()}
 // 持たない(経済指標だけの一覧として作られている)。ここに10件のカタログを
 // 置くと「そのページに実際に載っている内容と対応しない構造化データ」になり
 // スパム扱いされうる。置き場所と理由は buildHomeJsonLd のコメントを参照。
-function buildIndex(keys) {
-  // メタ description と JSON-LD の description を1箇所にする(新しいコピーを
-  // 発明しない)。
-  const desc = "政府の当初見通しと確定した実績を並べた指標の一覧。";
+// ハブの見出し・トップへのリンク・フッターの文言はこのページ固有で、どの.jsの
+// T辞書にも属さない(このページ自体に対応する.jsが無いため)。JA/EN とも元々
+// build.mjsに直書きだった(EN は 2026-07-29 まで data-en 属性としてのみ存在。
+// /en/chart/ を実ファイルにするにあたり、新しい文言を追加で発明せず、既にあった
+// data-en の値をそのまま「そのページの本文」に昇格させた)。
+const HUB_TEXT = {
+  ja: {
+    title: "指標一覧",
+    desc: "政府が年度の初めに置いた見通しと、後から確定した実績を、指標ごとに並べています。",
+    metaDesc: "政府の当初見通しと確定した実績を並べた指標の一覧。",
+    back: "← トップ",
+    footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
+    footerAbout: "このサイトについて",
+    footerContact: "お問い合わせ",
+  },
+  en: {
+    title: "Indicators",
+    desc: "The forecast the government set at the start of each fiscal year, laid alongside the actual figure confirmed later — one page per indicator.",
+    metaDesc: "The government's initial forecast laid alongside the confirmed actual, one page per indicator.",
+    back: "← Home",
+    footerSrc: "src: Cabinet Office of Japan / SNA",
+    footerAbout: "About this site",
+    footerContact: "Contact",
+  },
+};
 
+function buildIndex(keys, lang) {
+  const h = HUB_TEXT[lang];
+  const url = abs(REL.chartHub[lang]);
+  const title = lang === "ja" ? "指標一覧 — ズレ計" : "Indicators — zurekei";
+
+  // JAページは元の data-en 属性をそのまま残す(このページの本体機能とは無関係な
+  // 旧swap方式の名残だが、JA側は「触らない」制約のもとバイト単位で保つ)。EN
+  // ページは data-en を持たない(EN側は本文として直接英語テキストを出す規約)。
   const items = keys
     .map((k) => {
       const m = METRICS[k];
+      const mTitle = lang === "ja" ? m.title : m.titleEn;
+      const mDesc = lang === "ja" ? m.desc : m.descEn;
+      const aAttr = lang === "ja" ? dual(m.titleEn) : "";
+      const spanAttr = lang === "ja" ? dual(m.descEn) : "";
       return `        <li>
-          <a href="/chart/${k}" data-en="${escapeHTML(m.titleEn)}">${escapeHTML(m.title)}</a>
-          <span class="hub-desc" data-en="${escapeHTML(m.descEn)}">${escapeHTML(m.desc)}</span>
+          <a href="${chartRel(k)[lang]}"${aAttr}>${escapeHTML(mTitle)}</a>
+          <span class="hub-desc"${spanAttr}>${escapeHTML(mDesc)}</span>
         </li>`;
     })
     .join("\n");
 
   return `<!doctype html>
-<html lang="ja">
+<html lang="${lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- bin/build.mjs が生成している。直接編集しない。 -->
-<title>指標一覧 — ズレ計</title>
-<meta name="description" content="${escapeHTML(desc)}">
-<link rel="canonical" href="${SITE}/chart/">
-<meta property="og:site_name" content="ズレ計">
+<title>${escapeHTML(title)}</title>
+<meta name="description" content="${escapeHTML(h.metaDesc)}">
+<link rel="canonical" href="${url}">
+${hreflangTags(REL.chartHub)}
+<meta property="og:site_name" content="${ORG_NAME[lang]}">
 <meta property="og:type" content="website">
-<meta property="og:title" content="指標一覧 — ズレ計">
-<meta property="og:description" content="${escapeHTML(desc)}">
-<meta property="og:url" content="${SITE}/chart/">
+<meta property="og:title" content="${escapeHTML(title)}">
+<meta property="og:description" content="${escapeHTML(h.metaDesc)}">
+<meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/assets/og.png">
 ${assetHead()}
 </head>
 <body>
 <div class="page">
-${header()}
+${header(lang, REL.chartHub)}
 
-  <a class="chart-back" href="/" data-en="← Home">← トップ</a>
+  <a class="chart-back" href="${REL.home[lang]}"${lang === "ja" ? dual(HUB_TEXT.en.back) : ""}>${escapeHTML(h.back)}</a>
 
   <main>
     <section class="chart-section">
-      <h1 class="chart-title" data-en="Indicators">指標一覧</h1>
-      <p class="chart-desc" data-en="The forecast the government set at the start of each fiscal year, laid alongside the actual figure confirmed later — one page per indicator.">政府が年度の初めに置いた見通しと、後から確定した実績を、指標ごとに並べています。</p>
+      <h1 class="chart-title"${lang === "ja" ? dual(HUB_TEXT.en.title) : ""}>${escapeHTML(h.title)}</h1>
+      <p class="chart-desc"${lang === "ja" ? dual(HUB_TEXT.en.desc) : ""}>${escapeHTML(h.desc)}</p>
       <ul class="hub-list">
 ${items}
       </ul>
@@ -494,9 +651,9 @@ ${items}
   </main>
 
   <footer class="site-footer-row">
-    <span data-en="src: Cabinet Office of Japan / SNA">src: 内閣府 / 国民経済計算(SNA)</span>
-    <a class="footer-about" href="/about.html" data-en="About this site">このサイトについて</a>
-    <a class="footer-about" href="/contact.html" data-en="Contact">お問い合わせ</a>
+    <span${lang === "ja" ? dual(HUB_TEXT.en.footerSrc) : ""}>${escapeHTML(h.footerSrc)}</span>
+    <a class="footer-about" href="${lang === "ja" ? "/about.html" : REL.about.en}"${lang === "ja" ? dual(HUB_TEXT.en.footerAbout) : ""}>${escapeHTML(h.footerAbout)}</a>
+    <a class="footer-about" href="${lang === "ja" ? "/contact.html" : REL.contact.en}"${lang === "ja" ? dual(HUB_TEXT.en.footerContact) : ""}>${escapeHTML(h.footerContact)}</a>
   </footer>
 </div>
 <script>
@@ -505,26 +662,16 @@ ${items}
 (function () {
   var m = new URLSearchParams(location.search).get("m");
   if (!m) return;
-  var link = document.querySelector('.hub-list a[href="/chart/' + m.replace(/[^a-z-]/g, "") + '"]');
+  var link = document.querySelector('.hub-list a[href="${REL.chartHub[lang]}' + m.replace(/[^a-z-]/g, "") + '"]');
   if (link) location.replace(link.getAttribute("href"));
 })();
 
-// 言語トグル。他のページと同じ物がヘッダに載っている以上、押して何も起きない状態で
-// 出さない（/contact で一度その状態を出した）。JA は data-ja に退避して往復させる。
-// 訳は data-en に埋めてあるので、この一覧に固有の辞書は持たない。
-(function () {
-  var els = document.querySelectorAll("[data-en]");
-  els.forEach(function (el) { el.dataset.ja = el.textContent; });
-  function apply(lang) {
-    els.forEach(function (el) { el.textContent = lang === "en" ? el.dataset.en : el.dataset.ja; });
-    document.documentElement.lang = lang;
-    document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
-    document.getElementById("lang-en").classList.toggle("active", lang === "en");
-  }
-  document.getElementById("lang-ja").addEventListener("click", function () { apply("ja"); });
-  document.getElementById("lang-en").addEventListener("click", function () { apply("en"); });
-  apply("ja");
-})();
+// 言語トグルは他ページと同じ実リンク(<a>)。切り替えはブラウザの通常の
+// ナビゲーションに任せるので、クリック自体にJSは要らない(2026-07-29、
+// /en/ページ追加時に、旧来のその場swap方式(data-en/apply(lang))から差し替えた。
+// 以前はここでlocalStorageに選択を書き込んでいたが、読み返す処理がどこにも無い
+// 書くだけの死んだコードだったため2026-07-30に削除。詳細はhome.jsの同じ変更の
+// コメントを参照)。
 </script>
 </body>
 </html>
@@ -545,12 +692,6 @@ function injectRegion(html, name, body, file) {
     throw new Error(`${file} に ${open} … ${close} が見つからない`);
   }
   return html.slice(0, i + open.length) + body + html.slice(j);
-}
-
-// JA を本文に、EN を data-en に置く。入れ替えは各ページの applyTableI18n が行う。
-// 訳を辞書ごとビルド側に持たせないのは、文言の出所を .js 側の T 一箇所に保つため。
-function dual(en) {
-  return ` data-en="${escapeHTML(en)}"`;
 }
 
 /* ── 合計特殊出生率 ──────────────────────────────────────── */
@@ -603,16 +744,24 @@ function fertilityGapLines(d, lang) {
   return lines;
 }
 
-function fertilityTable(d) {
+// lang==="ja" は元の出し方(本文=JA、data-en=EN)のまま。lang==="en" は data-en を
+// 持たず、本文に直接EN文字列を置く(/en/ ページ側の規約。他の関数と同じ)。
+function fertilityTable(d, lang = "ja") {
   const head =
-    `            <th scope="col"${dual(FERT.T.en.thYear)}>${escapeHTML(FERT.T.ja.thYear)}</th>\n` +
-    `            <th scope="col"${dual(FERT.T.en.thActual)}>${escapeHTML(FERT.T.ja.thActual)}</th>\n` +
-    d.vintages
-      .map(
-        (v) =>
-          `            <th scope="col"${dual(FERT.vintageLabel(v, "en"))}>${escapeHTML(FERT.vintageLabel(v, "ja"))}</th>`
-      )
-      .join("\n");
+    lang === "ja"
+      ? `            <th scope="col"${dual(FERT.T.en.thYear)}>${escapeHTML(FERT.T.ja.thYear)}</th>\n` +
+        `            <th scope="col"${dual(FERT.T.en.thActual)}>${escapeHTML(FERT.T.ja.thActual)}</th>\n` +
+        d.vintages
+          .map(
+            (v) =>
+              `            <th scope="col"${dual(FERT.vintageLabel(v, "en"))}>${escapeHTML(FERT.vintageLabel(v, "ja"))}</th>`
+          )
+          .join("\n")
+      : `            <th scope="col">${escapeHTML(FERT.T.en.thYear)}</th>\n` +
+        `            <th scope="col">${escapeHTML(FERT.T.en.thActual)}</th>\n` +
+        d.vintages
+          .map((v) => `            <th scope="col">${escapeHTML(FERT.vintageLabel(v, "en"))}</th>`)
+          .join("\n");
 
   const body = d.years
     .map((y) => {
@@ -633,10 +782,15 @@ function fertilityTable(d) {
     })
     .join("\n");
 
+  const caption =
+    lang === "ja"
+      ? `        <caption${dual(FERT.T.en.tableCaption)}>${escapeHTML(FERT.T.ja.tableCaption)}</caption>\n`
+      : `        <caption>${escapeHTML(FERT.T.en.tableCaption)}</caption>\n`;
+
   return (
     `      <div class="data-table-wrap">\n` +
     `      <table class="data-table data-table-wide">\n` +
-    `        <caption${dual(FERT.T.en.tableCaption)}>${escapeHTML(FERT.T.ja.tableCaption)}</caption>\n` +
+    caption +
     `        <thead>\n          <tr>\n${head}\n          </tr>\n        </thead>\n` +
     `        <tbody>\n${body}\n        </tbody>\n` +
     `      </table>\n` +
@@ -644,62 +798,93 @@ function fertilityTable(d) {
   );
 }
 
-function fertilitySection(d) {
+function fertilitySection(d, lang = "ja") {
   const gapJa = fertilityGapLines(d, "ja");
   const gapEn = fertilityGapLines(d, "en");
-  const gaps = gapJa
+  // 出典リンクの文言(「出典」)はどのページの.jsにも属さない語で、元から
+  // build.mjsに直書きだった(JA固定・EN側もこれまで訳が無かった)。EN表示では
+  // fertility.js の sourceActualPrefix と語調を揃えた "Source" を使う
+  // (2026-07-29 新規)。
+  const srcLabel = lang === "ja" ? "出典" : "Source";
+  const gaps = (lang === "ja" ? gapJa : gapEn)
     .map((g, i) => {
       const src = g.url
-        ? ` <a href="${escapeHTML(g.url)}" target="_blank" rel="noopener">出典</a>`
+        ? ` <a href="${escapeHTML(g.url)}" target="_blank" rel="noopener">${srcLabel}</a>`
         : "";
-      return `          <li><span${dual(gapEn[i].text)}>${escapeHTML(g.text)}</span>${src}</li>`;
+      if (lang === "ja") {
+        return `          <li><span${dual(gapEn[i].text)}>${escapeHTML(g.text)}</span>${src}</li>`;
+      }
+      return `          <li><span>${escapeHTML(g.text)}</span>${src}</li>`;
     })
     .join("\n");
+
+  const summary =
+    lang === "ja"
+      ? `<summary${dual(FERT.T.en.tableToggle(d.years.length))}>${escapeHTML(FERT.T.ja.tableToggle(d.years.length))}</summary>`
+      : `<summary>${escapeHTML(FERT.T.en.tableToggle(d.years.length))}</summary>`;
+  const gapHead =
+    lang === "ja"
+      ? `<p class="gap-head mono"${dual(FERT.T.en.gapHead)}>${escapeHTML(FERT.T.ja.gapHead)}</p>`
+      : `<p class="gap-head mono">${escapeHTML(FERT.T.en.gapHead)}</p>`;
+  const roundNote =
+    lang === "ja"
+      ? `<p class="chart-note mono"${dual(FERT.T.en.tableRoundNote)}>${escapeHTML(FERT.T.ja.tableRoundNote)}</p>`
+      : `<p class="chart-note mono">${escapeHTML(FERT.T.en.tableRoundNote)}</p>`;
+  const csvLabel =
+    lang === "ja"
+      ? `<span${dual(FERT.T.en.tableCsvLabel)}>${escapeHTML(FERT.T.ja.tableCsvLabel)}</span>`
+      : `<span>${escapeHTML(FERT.T.en.tableCsvLabel)}</span>`;
 
   return `
   <section class="data-section">
     <details class="data-details">
-      <summary${dual(FERT.T.en.tableToggle(d.years.length))}>${escapeHTML(FERT.T.ja.tableToggle(d.years.length))}</summary>
+      ${summary}
 
-      <p class="gap-head mono"${dual(FERT.T.en.gapHead)}>${escapeHTML(FERT.T.ja.gapHead)}</p>
+      ${gapHead}
       <ul class="gap-list mono">
 ${gaps}
       </ul>
 
-${fertilityTable(d)}
+${fertilityTable(d, lang)}
 
-      <p class="chart-note mono"${dual(FERT.T.en.tableRoundNote)}>${escapeHTML(FERT.T.ja.tableRoundNote)}</p>
-      <p class="chart-note mono"><span${dual(FERT.T.en.tableCsvLabel)}>${escapeHTML(FERT.T.ja.tableCsvLabel)}</span><a href="/data/fertility_forecast.csv">/data/fertility_forecast.csv</a> · <a href="/data/fertility_actual.csv">/data/fertility_actual.csv</a></p>
+      ${roundNote}
+      <p class="chart-note mono">${csvLabel}<a href="/data/fertility_forecast.csv">/data/fertility_forecast.csv</a> · <a href="/data/fertility_actual.csv">/data/fertility_actual.csv</a></p>
     </details>
   </section>
   `;
 }
 
-function fertilityJsonLd(d) {
+function fertilityJsonLd(d, lang = "ja") {
+  const url = abs(REL.fertility[lang]);
   return `
 <script type="application/ld+json">
 ${JSON.stringify(
   {
     "@context": "https://schema.org",
     "@type": "Dataset",
-    "@id": FERTILITY_DATASET.id,
-    name: FERTILITY_DATASET.name,
-    description: FERT.T.ja.desc,
-    url: FERTILITY_DATASET.url,
+    "@id": `${url}#dataset`,
+    name: FERTILITY_DATASET.name[lang],
+    description: FERT.T[lang].desc,
+    url,
     isAccessibleForFree: true,
-    inLanguage: "ja",
+    inLanguage: lang,
     temporalCoverage: `${d.years[0]}/${d.years[d.years.length - 1]}`,
     // @id はトップ(index.html)の Organization と共通。理由は chart 側の
     // buildJsonLd のコメントを参照。
-    creator: { "@type": "Organization", "@id": ORG_ID, name: "ズレ計", url: SITE },
+    creator: orgNode(),
     // トップの card-grid(.card-fallback)に実際にこのページへのリンクがある
     // ので、10件のカタログに含めてよい。理由と裏向き参照の意味は chart 側の
     // buildJsonLd のコメントを参照。
     includedInDataCatalog: { "@id": CATALOG_ID },
-    variableMeasured: [
-      { "@type": "PropertyValue", name: "推計の仮定（中位）", unitText: "合計特殊出生率" },
-      { "@type": "PropertyValue", name: "実績", unitText: "合計特殊出生率" },
-    ],
+    variableMeasured: lang === "en"
+      ? [
+          { "@type": "PropertyValue", name: "Assumption (medium variant)", unitText: "Total fertility rate" },
+          { "@type": "PropertyValue", name: "Actual", unitText: "Total fertility rate" },
+        ]
+      : [
+          { "@type": "PropertyValue", name: "推計の仮定（中位）", unitText: "合計特殊出生率" },
+          { "@type": "PropertyValue", name: "実績", unitText: "合計特殊出生率" },
+        ],
     distribution: [
       { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/fertility_forecast.csv` },
       { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/fertility_actual.csv` },
@@ -715,18 +900,83 @@ ${JSON.stringify(
 function buildFertility() {
   const d = fertilityData();
   let html = read("fertility.html");
-  html = injectRegion(html, "jsonld", fertilityJsonLd(d), "fertility.html");
-  html = injectRegion(html, "table", fertilitySection(d), "fertility.html");
+  html = injectRegion(html, "jsonld", fertilityJsonLd(d, "ja"), "fertility.html");
+  html = injectRegion(html, "table", fertilitySection(d, "ja"), "fertility.html");
   return html;
+}
+
+// /en/fertility.html はJAと違い元ファイルが存在しない(新規)ので injectRegion は
+// 使えない。fertility.html のチャーム(header/back-link/h1等)を翻訳して丸ごと
+// 組み立てる。中身(JSON-LD・数値表)は fertilityJsonLd/fertilitySection の
+// lang="en" 呼び出しをそのまま使う(JAと同じ関数・同じデータ)。
+function buildFertilityEn() {
+  const d = fertilityData();
+  const t = FERT.T.en;
+  const urls = REL.fertility;
+  const url = abs(urls.en);
+  const title = `${t.title} — zurekei`;
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHTML(title)}</title>
+<meta name="description" content="${escapeHTML(t.desc)}">
+<link rel="canonical" href="${url}">
+${hreflangTags(urls)}
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${escapeHTML(title)}">
+<meta property="og:description" content="${escapeHTML(t.desc)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+<noscript><style>.chart-wrap > svg, #fertility-legend, #fertility-source { display: none !important; } .chart-noscript { display: block; }</style></noscript>
+${fertilityJsonLd(d, "en")}</head>
+<body>
+<div class="page">
+${header("en", urls)}
+
+  <a class="chart-back" id="t-back" href="${REL.home.en}">${escapeHTML(t.back)}</a>
+
+  <main>
+    <section class="chart-section">
+      <h1 class="chart-title" id="fert-title">${escapeHTML(t.title)}</h1>
+      <p class="chart-desc" id="fert-desc">${escapeHTML(t.desc)}</p>
+
+      <div class="chart-wrap">
+        <svg id="fertility-chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHTML(t.chartAriaLabel)}"></svg>
+        <p class="chart-noscript mono">${escapeHTML(t.chartNoscript)}</p>
+      </div>
+
+      <div class="fertility-legend" id="fertility-legend"></div>
+
+      <div class="readout-source" id="fertility-source"></div>
+    </section>
+
+${fertilitySection(d, "en")}
+  </main>
+
+  <footer class="site-footer-row">
+    <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
+    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
+    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
+  </footer>
+</div>
+<script src="/csv.js?v=${ASSET_V}"></script>
+<script src="/fertility.js?v=${ASSET_V}"></script>
+</body>
+</html>
+`;
 }
 
 /* ── 見直し条項 ─────────────────────────────────────────── */
 
-// hoan.js はトップレベルで localStorage を読む（言語の記憶）。Node には無いので
-// 代役を置く。値は使わないので null を返すだけでよい。
-const HOAN = loadModule("hoan.js", ["T", "STATUS", "NOTE_LABEL"], {
-  localStorage: { getItem: () => null, setItem: () => {} },
-});
+const HOAN = loadModule("hoan.js", ["T", "STATUS", "NOTE_LABEL"]);
 
 // 並びは hoan.js の sortRows と同じ規則（状況 → 期限）。STATUS も本物を使う。
 function hoanRows() {
@@ -747,13 +997,13 @@ function hoanClause(id) {
   return fs.existsSync(f) ? fs.readFileSync(f, "utf8").trim() : null;
 }
 
-function hoanRowHtml(r) {
-  const t = HOAN.T.ja;
+function hoanRowHtml(r, lang = "ja") {
+  const t = HOAN.T[lang];
   const meta = HOAN.STATUS[r.review_status] || HOAN.STATUS.pending;
   const status = t.status[r.review_status] || t.status.pending;
   const deadline = r.review_deadline || t.noDeadline;
   const yrs = r.review_years ? t.yearsAfter(r.review_years) : t.noDeadlineYears;
-  const noteText = r.enforcement_note ? HOAN.NOTE_LABEL.ja[r.enforcement_note] || r.enforcement_note : "";
+  const noteText = r.enforcement_note ? HOAN.NOTE_LABEL[lang][r.enforcement_note] || r.enforcement_note : "";
   const staged = noteText ? `<span class="hoan-staged mono">${escapeHTML(noteText)}</span>` : "";
   const url = safeUrl(r.source_law_url);
   const src = url
@@ -764,12 +1014,19 @@ function hoanRowHtml(r) {
   // 詳細行は hidden にしない。hidden にすると、JSが動かない相手には「HTMLには
   // あるが決して開けない」状態になる。<details> なら素のHTMLだけで開閉できる。
   // JSが動く場合は hoan.js の render() がこの行ごと差し替えるので、操作感は不変。
+  // 条文原文(clause)・法令名(law_title)・法令番号(law_num)はいずれも一次資料
+  // からの転記そのままなので、EN側でも訳さず常に日本語(lang="en"のページでは
+  // lang="ja" を明示する。詳細は chart 側の buildTable の同種コメントを参照)。
+  // <pre>にだけ付けて.hoan-lawtitle/.hoan-lawnumに付け忘れていた不揃いが
+  // あった(2026-07-30レビュー指摘。日本語のまま残すこと自体は方針どおり
+  // 正しいので、マークだけ揃える)。
+  const clauseLang = lang === "en" ? ` lang="ja"` : "";
   const detail = clause
     ? `      <tr class="hoan-detail hoan-detail-static">
         <td colspan="4">
           <details>
             <summary class="hoan-clause-head mono">${escapeHTML(t.clauseHead)}</summary>
-            <pre class="hoan-clause">${escapeHTML(clause)}</pre>
+            <pre class="hoan-clause"${clauseLang}>${escapeHTML(clause)}</pre>
           </details>
         </td>
       </tr>`
@@ -777,8 +1034,8 @@ function hoanRowHtml(r) {
 
   return `      <tr class="hoan-row hoan-row-static">
         <td class="col-title">
-          <div class="hoan-lawtitle">${escapeHTML(r.law_title)}</div>
-          <div class="hoan-lawnum mono">${escapeHTML(r.law_num)} ${src}</div>
+          <div class="hoan-lawtitle"${clauseLang}>${escapeHTML(r.law_title)}</div>
+          <div class="hoan-lawnum mono"${clauseLang}>${escapeHTML(r.law_num)} ${src}</div>
         </td>
         <td class="col-date mono">${escapeHTML(r.enforcement_date || t.enforceMissing)}${staged}</td>
         <td class="col-date mono">${escapeHTML(deadline)}<div class="hoan-yrs mono">${escapeHTML(yrs)}</div></td>
@@ -787,33 +1044,40 @@ function hoanRowHtml(r) {
 ${detail}`;
 }
 
-function hoanJsonLd(rows) {
+function hoanJsonLd(rows, lang = "ja") {
   const years = rows.map((r) => (r.promulgation_date || "").slice(0, 4)).filter(Boolean).sort();
+  const url = abs(REL.hoan[lang]);
   return `
 <script type="application/ld+json">
 ${JSON.stringify(
   {
     "@context": "https://schema.org",
     "@type": "Dataset",
-    "@id": HOAN_DATASET.id,
-    name: HOAN_DATASET.name,
-    description: HOAN.T.ja.desc,
-    url: HOAN_DATASET.url,
+    "@id": `${url}#dataset`,
+    name: HOAN_DATASET.name[lang],
+    description: HOAN.T[lang].desc,
+    url,
     isAccessibleForFree: true,
-    inLanguage: "ja",
+    inLanguage: lang,
     temporalCoverage: `${years[0]}/${years[years.length - 1]}`,
     // @id はトップ(index.html)の Organization と共通。理由は chart 側の
     // buildJsonLd のコメントを参照。
-    creator: { "@type": "Organization", "@id": ORG_ID, name: "ズレ計", url: SITE },
+    creator: orgNode(),
     // トップに hoan-entry として実際にこのページへのリンクがあるので、10件の
     // カタログに含めてよい。理由と裏向き参照の意味は chart 側の buildJsonLd の
     // コメントを参照。
     includedInDataCatalog: { "@id": CATALOG_ID },
-    variableMeasured: [
-      { "@type": "PropertyValue", name: "施行日" },
-      { "@type": "PropertyValue", name: "見直し期限（施行日＋条項の年数）" },
-      { "@type": "PropertyValue", name: "期限到来の有無" },
-    ],
+    variableMeasured: lang === "en"
+      ? [
+          { "@type": "PropertyValue", name: "Enforcement date" },
+          { "@type": "PropertyValue", name: "Review deadline (enforcement date + clause's N years)" },
+          { "@type": "PropertyValue", name: "Whether the deadline has arrived" },
+        ]
+      : [
+          { "@type": "PropertyValue", name: "施行日" },
+          { "@type": "PropertyValue", name: "見直し期限（施行日＋条項の年数）" },
+          { "@type": "PropertyValue", name: "期限到来の有無" },
+        ],
     distribution: [
       { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/hoan_review.csv` },
     ],
@@ -829,12 +1093,99 @@ function buildHoan() {
   const rows = hoanRows();
   const due = rows.filter((r) => r.review_status === "due").length;
   let html = read("hoan.html");
-  html = injectRegion(html, "jsonld", hoanJsonLd(rows), "hoan.html");
+  html = injectRegion(html, "jsonld", hoanJsonLd(rows, "ja"), "hoan.html");
   // #summary と tbody#rows は、JSが動けば hoan.js が同じ規則で書き直す領域。
   // 静的版はその初期状態（絞り込み無し）にあたる。
   html = injectRegion(html, "summary", escapeHTML(HOAN.T.ja.summary(rows.length, due)), "hoan.html");
-  html = injectRegion(html, "rows", `\n${rows.map(hoanRowHtml).join("\n")}\n    `, "hoan.html");
+  html = injectRegion(html, "rows", `\n${rows.map((r) => hoanRowHtml(r, "ja")).join("\n")}\n    `, "hoan.html");
   return html;
+}
+
+// /en/hoan.html も fertility 同様、元ファイルが無いので丸ごと組み立てる。
+function buildHoanEn() {
+  const rows = hoanRows();
+  const due = rows.filter((r) => r.review_status === "due").length;
+  const t = HOAN.T.en;
+  const urls = REL.hoan;
+  const url = abs(urls.en);
+  const title = `${t.title} — zurekei`;
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHTML(title)}</title>
+<meta name="description" content="${escapeHTML(t.desc)}">
+<link rel="canonical" href="${url}">
+${hreflangTags(urls)}
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${escapeHTML(title)}">
+<meta property="og:description" content="${escapeHTML(t.desc)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+${hoanJsonLd(rows, "en")}</head>
+<body>
+<div class="page">
+${header("en", urls)}
+
+  <a class="chart-back" href="${REL.home.en}" id="t-back">${escapeHTML(t.back)}</a>
+
+  <main>
+    <section class="hoan-head">
+      <h1 class="chart-title" id="t-title">${escapeHTML(t.title)}</h1>
+      <p class="chart-desc" id="t-desc">
+        ${escapeHTML(t.desc)}
+      </p>
+      <p class="hoan-note mono" id="t-note">
+        ${escapeHTML(t.note)}
+      </p>
+    </section>
+
+    <section class="hoan-controls" id="controls" hidden>
+      <div class="hoan-filter" id="status-filter" role="group" aria-label="Filter by status"></div>
+      <div class="hoan-filter-right">
+        <label class="hoan-year-label mono" for="year-filter" id="t-year-label">${escapeHTML(t.yearLabel)}</label>
+        <select id="year-filter" class="hoan-year mono"></select>
+      </div>
+    </section>
+
+    <div class="hoan-summary mono" id="summary">${escapeHTML(t.summary(rows.length, due))}</div>
+
+    <div class="hoan-table-wrap">
+      <table class="hoan-table">
+        <thead>
+          <tr>
+            <th class="col-title" id="t-col-law">${escapeHTML(t.colLaw)}</th>
+            <th class="col-date mono" id="t-col-enact">${escapeHTML(t.colEnact)}</th>
+            <th class="col-date mono" id="t-col-deadline">${escapeHTML(t.colDeadline)}</th>
+            <th class="col-status" id="t-col-status">${escapeHTML(t.colStatus)}</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+${rows.map((r) => hoanRowHtml(r, "en")).join("\n")}
+    </tbody>
+      </table>
+    </div>
+  </main>
+
+  <footer class="site-footer-row">
+    <a class="footer-src" id="t-footer-src" href="https://laws.e-gov.go.jp/" target="_blank" rel="noopener">${escapeHTML(t.footerSrc)}</a>
+    <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
+    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
+    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
+  </footer>
+</div>
+<script src="/csv.js?v=${ASSET_V}"></script>
+<script src="/hoan.js?v=${ASSET_V}"></script>
+</body>
+</html>
+`;
 }
 
 /* ── トップページ(index.html) ───────────────────────────────
@@ -850,20 +1201,30 @@ function buildHoan() {
 // 主体をサイトにする」目的からは片手落ちになる。トップ(index.html)は
 // card-grid(.card-fallback、8指標+fertility)と hoan-entry(hoan)の両方で
 // 実際に10件全てへのリンクを持っており、内容と対応するのでここに移した。
-function buildHomeJsonLd(desc, keys) {
+function buildHomeJsonLd(desc, keys, lang = "ja") {
+  const fertUrl = abs(REL.fertility[lang]);
+  const hoanUrl = abs(REL.hoan[lang]);
   const catalogDatasets = [
     ...keys.map((k) => {
       const m = METRICS[k];
+      const url = abs(chartRel(k)[lang]);
       return {
         "@type": "Dataset",
-        "@id": `${SITE}/chart/${k}#dataset`,
-        name: metricDatasetName(m),
-        url: `${SITE}/chart/${k}`,
+        "@id": `${url}#dataset`,
+        name: metricDatasetName(m, lang),
+        url,
       };
     }),
-    { "@type": "Dataset", "@id": FERTILITY_DATASET.id, name: FERTILITY_DATASET.name, url: FERTILITY_DATASET.url },
-    { "@type": "Dataset", "@id": HOAN_DATASET.id, name: HOAN_DATASET.name, url: HOAN_DATASET.url },
+    { "@type": "Dataset", "@id": `${fertUrl}#dataset`, name: FERTILITY_DATASET.name[lang], url: fertUrl },
+    { "@type": "Dataset", "@id": `${hoanUrl}#dataset`, name: HOAN_DATASET.name[lang], url: hoanUrl },
   ];
+  const catalogName = lang === "en" ? "Indicators" : "指標一覧";
+  // @id 用(末尾スラッシュを含む形。/#website のような結合に使う)と、
+  // url フィールド用(JAは元コードが SITE を裸のまま=末尾スラッシュ無しで
+  // 使っていたので、そのバイト列を変えないためJAだけ据え置く)を分ける。
+  // EN側にJA由来のこの表記ゆれを持ち込む理由は無いので、ENは両方 siteUrl。
+  const siteUrl = abs(REL.home[lang]);
+  const siteUrlField = lang === "en" ? siteUrl : SITE;
   return `<script type="application/ld+json">
 ${JSON.stringify(
   {
@@ -872,26 +1233,43 @@ ${JSON.stringify(
       // Organization は各 Dataset(chart/*.html, fertility.html, hoan.html)の
       // creator/publisher が @id で参照する共通ノード。個人を特定する情報
       // (founder/employee/address/telephone等)は入れない。匿名運営を選択肢
-      // として残しているため。
-      { "@type": "Organization", "@id": ORG_ID, name: "ズレ計", url: SITE },
+      // として残しているため。ja/en 共通(1個体を指すノードなので言語で
+      // 分けない。name/alternateNameの決め方は orgNode() のコメントを参照。
+      // かつてここは name: ORG_NAME[lang] で、このコメントが「言語で分けない」
+      // と書いているのに実装は分けてしまっていた=同じ@idの実体がJAページでは
+      // 「ズレ計」、ENページでは「zurekei」を名乗る矛盾があった
+      // (2026-07-30レビュー指摘)。
+      orgNode(),
       {
         "@type": "WebSite",
-        "@id": `${SITE}/#website`,
-        url: SITE,
-        name: "ズレ計",
+        // JAとENは別URL(別ページ)なので @id も分ける(Dataset側の作法と揃える)。
+        "@id": `${siteUrl}#website`,
+        url: siteUrlField,
+        name: ORG_NAME[lang],
         description: desc,
-        inLanguage: "ja",
+        inLanguage: lang,
         publisher: { "@id": ORG_ID },
       },
       {
         "@type": "DataCatalog",
+        // 言語で分けない(CATALOG_ID固定)。以前はEN側だけ`${siteUrl}#catalog`
+        // (=/en/#catalog)という別の@idを名乗っていたが、Dataset側の
+        // includedInDataCatalogはJA/EN問わず常にCATALOG_IDだけを参照するため
+        // (chart側のbuildJsonLdのコメント参照)、/en/#catalogはどこからも
+        // 参照されない孤立ノードになっていた。かつこのコード自身のコメントが
+        // 「効くのはDataset→DataCatalogの逆参照」と明記している以上、効く側
+        // (Dataset→CATALOG_ID)と揃えるのが設計意図に合う(2026-07-30
+        // レビュー指摘)。name/description/datasetはこのページの言語でよい
+        // (@idが同じでも、各ページが自己完結して説明する分には矛盾しない —
+        // Organizationのnameと違い、カタログの「一覧としての見え方」は
+        // ページの言語に従って当然変わってよい情報のため)。
         "@id": CATALOG_ID,
-        name: "指標一覧",
+        name: catalogName,
         // 新しいコピーを発明せず、トップの meta description をそのまま使う
         // (WebSite と同じ文言でよい。このページ自体が10件へのリンクを持つ
         // ことで内容と対応しているので、カタログ専用の説明文は要らない)。
         description: desc,
-        url: SITE,
+        url: siteUrlField,
         // creator ではなく publisher にしたのは、各 Dataset 側が creator を
         // 名乗っているのに揃えるため(このカタログ自身がデータを作っている
         // わけではなく、束ねて出しているだけ)。
@@ -917,8 +1295,450 @@ function buildHome(keys) {
   const m = html.match(/<meta name="description" content="([^"]*)">/);
   if (!m) throw new Error("index.html の meta description が見つからない(構造が変わった可能性がある)");
   const desc = m[1];
-  html = injectRegion(html, "jsonld", buildHomeJsonLd(desc, keys), "index.html");
+  html = injectRegion(html, "jsonld", buildHomeJsonLd(desc, keys, "ja"), "index.html");
   return html;
+}
+
+// /en/index.html は元ファイルが無いので丸ごと組み立てる(fertility/hoan と同じ
+// 方針)。title/meta description・aria-label は index.html 側もJAの元コードから
+// T辞書を通さず直書きなので、EN側も直書きにする(2026-07-29の新規英文。既存の
+// 判断基準は header() 直上のコメントを参照)。
+function buildHomeEn(keys) {
+  const t = HOME.T.en;
+  const desc = "An instrument that records the government's economic forecasts and the actual figures side by side, every year, with sources.";
+  const title = "zurekei — the gap between government forecasts and actual outcomes";
+  const url = abs(REL.home.en);
+
+  // hero-caption / hero-copy-summary は gdp-nominal の実データが要る。home.js の
+  // main() と同じ計算(readRows は chart.js 側の同名関数と別物で home.js には
+  // 無いため、ここでは chart.js から取り込んだ R.parseCSV/R.toNum で同じ手順を
+  // 踏む。値の出所は data/gdp_forecast.csv 一本で、chart/gdp-nominal ページが
+  // 使っているのと同じCSV・同じ列)。
+  const gdpNominal = METRICS["gdp-nominal"];
+  const gdpRows = readRows(gdpNominal);
+  const years = gdpRows.map((r) => r.year);
+  const heroRange = years.length ? { min: Math.min(...years), max: Math.max(...years) } : null;
+  const heroStats = computeGapStats(gdpRows, "forecastVal", "actualVal", {
+    fromYear: gdpNominal.statsFromYear,
+  });
+  const heroCaption = heroRange ? t.heroCaption(heroRange.min, heroRange.max) : "";
+  const heroSummary = heroStats ? t.heroGapBelow(heroStats.below, heroStats.count) : "";
+
+  const hoanAllRows = hoanRows();
+  const hoanDue = hoanAllRows.filter((r) => r.review_status === "due").length;
+  const hoanNote = t.hoanEntryNote(hoanAllRows.length, hoanDue);
+
+  // JSを実行しないクローラのための素のリンク一覧。JA側の card-fallback と同じ
+  // 最小限の忠実度(名前のみ、数値カードには踏み込まない)。
+  const cardFallback = HOME.INDICATOR_META.map((m) => {
+    const href = m.key === "fertility" ? REL.fertility.en : chartRel(m.key).en;
+    return `    <a class="card-fallback" href="${href}">${escapeHTML(m.nameEn)}</a>`;
+  }).join("\n");
+
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHTML(title)}</title>
+<meta name="description" content="${escapeHTML(desc)}">
+<link rel="canonical" href="${url}">
+${hreflangTags(REL.home)}
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${escapeHTML(title)}">
+<meta property="og:description" content="${escapeHTML(desc)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+${buildHomeJsonLd(desc, keys, "en")}
+</head>
+<body>
+<div class="page">
+  <header class="site-header">
+    <a class="brand" href="${REL.home.en}" aria-label="zurekei home">
+      ${BRAND_SVG}
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag" id="t-tag">${escapeHTML(t.tag)}</div>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <a id="lang-ja" class="lang-btn mono" href="/">JA</a>
+        <a id="lang-en" class="lang-btn mono active" href="/en/">EN</a>
+      </div>
+      <nav class="site-nav">
+        <a class="nav-link nav-current" id="t-nav" href="${REL.home.en}">${escapeHTML(t.nav)}</a>
+        <a class="nav-link" id="t-nav-hoan" href="${REL.hoan.en}">${escapeHTML(t.navHoan)}</a>
+        <a class="nav-link" id="t-nav-data" href="https://github.com/zurekei/site/tree/main/data" target="_blank" rel="noopener">${escapeHTML(t.navData)}</a>
+        <a class="nav-link" id="t-nav-about" href="${REL.about.en}">${escapeHTML(t.navAbout)}</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <svg id="hero-chart" viewBox="0 0 960 340" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHTML(gdpNominal.titleEn)} — government's initial forecast and confirmed actual"></svg>
+    <div class="hero-copy" id="hero-copy">
+      <div class="hero-copy-headline" id="hero-copy-headline">${escapeHTML(t.heroCopy)}</div>
+      <div class="hero-copy-summary mono" id="hero-copy-summary">${escapeHTML(heroSummary)}</div>
+    </div>
+    <div class="hero-caption mono" id="hero-caption">${escapeHTML(heroCaption)}</div>
+  </section>
+
+  <p class="lead" id="t-lead">${escapeHTML(t.lead)}</p>
+
+  <div class="callout">
+    <div class="callout-title" id="t-callout-title">${escapeHTML(t.calloutTitle)}</div>
+    <p class="callout-body" id="t-callout-body">${escapeHTML(t.calloutBody)}</p>
+  </div>
+
+  <div class="indicators-heading">
+    <div class="indicators-label" id="t-indicators-label">${escapeHTML(t.indicatorsLabel)}</div>
+    <div class="indicators-latest" id="t-indicators-latest">${escapeHTML(t.indicatorsLatest)}</div>
+  </div>
+
+  <!-- 中身は home.js が最新年度の数値つきカードに差し替える。素のリンクを置いて
+       あるのは、JSを実行しないクローラにとって、トップから各指標へ辿れる唯一の
+       経路になるため(sitemap.xml だけに頼らない)。JA側と同じ理由・同じ忠実度。 -->
+  <div class="card-grid" id="card-grid">
+${cardFallback}
+  </div>
+
+  <div class="legend-row">
+    <span class="legend-item"><span class="legend-swatch legend-swatch-forecast"></span><span id="t-legend-forecast">${escapeHTML(t.plan)}</span></span>
+    <span class="legend-item"><span class="legend-swatch legend-swatch-actual"></span><span id="t-legend-actual">${escapeHTML(t.actual)}</span></span>
+  </div>
+
+  <a class="hoan-entry" href="${REL.hoan.en}">
+    <div class="hoan-entry-label mono" id="t-hoan-entry-label">${escapeHTML(t.hoanEntryLabel)}</div>
+    <div class="hoan-entry-title" id="t-hoan-entry-title">${escapeHTML(t.hoanEntryTitle)}</div>
+    <div class="hoan-entry-desc" id="t-hoan-entry-desc">${escapeHTML(t.hoanEntryDesc)}</div>
+    <div class="hoan-entry-note mono" id="t-hoan-entry-note">${escapeHTML(hoanNote)}</div>
+    <span class="hoan-entry-arrow mono" aria-hidden="true">→</span>
+  </a>
+
+  <div class="next-update mono" id="t-next-update">${escapeHTML(t.nextUpdate)}</div>
+
+  <footer class="site-footer-row">
+    <a class="footer-src" id="t-footer-src" href="https://www5.cao.go.jp/keizai1/mitoshi/mitoshikako.html" target="_blank" rel="noopener">${escapeHTML(t.src)}</a>
+    <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.correctionsLink)}</a>
+    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.aboutLink)}</a>
+    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.contactLink)}</a>
+  </footer>
+</div>
+<script src="/csv.js?v=${ASSET_V}"></script>
+<script src="/hero.js?v=${ASSET_V}"></script>
+<script src="/home.js?v=${ASSET_V}"></script>
+</body>
+</html>
+`;
+}
+
+// about.html/corrections.html/contact.html はいずれも build.mjs が触ってこなかった
+// 純粋な静的ファイル(各ページの.jsがクライアント側で文言を差し込むだけ)。/en/ 版も
+// 同じ形にする必要は無い(クローラ向けにHTML自身に文言を書き出す方針のため)ので、
+// fertility/hoan/home と同じく丸ごと組み立てる。id 構成は元ファイルの
+// applyI18n()/applyStatic() が触るidと1対1で対応させ、静的な初期表示として
+// そのまま正しい文言が出るようにする。
+
+function buildAboutEn() {
+  const t = ABOUT.T.en;
+  const urls = REL.about;
+  const url = abs(urls.en);
+  const title = `${t.title} — zurekei`;
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHTML(title)}</title>
+<meta name="description" content="${escapeHTML(t.lead)}">
+<link rel="canonical" href="${url}">
+${hreflangTags(urls)}
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${escapeHTML(title)}">
+<meta property="og:description" content="${escapeHTML(t.lead)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+</head>
+<body>
+<div class="page">
+${header("en", urls)}
+
+  <a class="chart-back" id="t-back" href="${REL.home.en}">${escapeHTML(t.back)}</a>
+
+  <main class="about-body">
+    <h1 class="about-title" id="about-title">${escapeHTML(t.title)}</h1>
+
+    <p class="about-lead" id="about-lead">
+      ${escapeHTML(t.lead)}
+    </p>
+
+    <details class="about-more">
+      <summary><span id="about-summary">${escapeHTML(t.summary)}</span></summary>
+
+      <div class="about-more-body">
+        <p id="p-o1">${escapeHTML(t.o1)}</p>
+
+        <p id="p-o2">${escapeHTML(t.o2)}</p>
+
+        <p id="p-o3">${escapeHTML(t.o3)}</p>
+
+        <h2 id="h2-does">${escapeHTML(t.doesTitle)}</h2>
+
+        <p id="p-d1">${escapeHTML(t.d1)}</p>
+
+        <p id="p-d2">${escapeHTML(t.d2)}</p>
+
+        <h2 id="h2-whose">${escapeHTML(t.whoseTitle)}</h2>
+
+        <p id="p-w1">${escapeHTML(t.w1)}</p>
+
+        <p id="p-w2">${escapeHTML(t.w2)}</p>
+
+        <h2 id="h2-goal">${escapeHTML(t.goalTitle)}</h2>
+
+        <p id="p-g1">${escapeHTML(t.g1)}</p>
+      </div>
+    </details>
+
+    <section class="about-contact">
+      <h2 class="about-contact-title" id="contact-title">${escapeHTML(t.contactTitle)}</h2>
+      <p id="contact-lead">${t.contactBody}</p>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="methods-title">${escapeHTML(t.methodsTitle)}</h2>
+
+      <div class="methods-table-wrap">
+        <table class="methods-table">
+          <thead>
+            <tr>
+              <th id="th-indicator">${escapeHTML(t.thIndicator)}</th>
+              <th id="th-forecast">${escapeHTML(t.thForecast)}</th>
+              <th id="th-actual">${escapeHTML(t.thActual)}</th>
+            </tr>
+          </thead>
+          <tbody id="methods-tbody">${ABOUT.renderMethodsRows("en")}</tbody>
+        </table>
+      </div>
+
+      <dl class="methods-notes">
+        <dt id="freq-title">${escapeHTML(t.freqTitle)}</dt>
+        <dd id="freq-body">${escapeHTML(t.freqBody)}</dd>
+
+        <dt id="archive-title">${escapeHTML(t.archiveTitle)}</dt>
+        <dd id="archive-body">${escapeHTML(t.archiveBody)}</dd>
+
+        <dt id="corrections-title">${escapeHTML(t.correctionsTitle)}</dt>
+        <dd id="corrections-body">${t.correctionsBody}</dd>
+
+        <dt id="data-title">${escapeHTML(t.dataTitle)}</dt>
+        <dd id="data-body">${t.dataBody}</dd>
+      </dl>
+    </section>
+  </main>
+
+  <footer class="site-footer-row">
+    <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
+    <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
+    <a class="footer-about" id="t-footer-index" href="${REL.home.en}">${escapeHTML(t.footerIndex)}</a>
+    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
+  </footer>
+</div>
+<script src="/about.js?v=${ASSET_V}"></script>
+</body>
+</html>
+`;
+}
+
+function buildCorrectionsEn() {
+  const t = CORR.T.en;
+  const urls = REL.corrections;
+  const url = abs(urls.en);
+  const title = `${t.title} — zurekei`;
+  // data/corrections.csv は現時点で0件(空データ)。JA版と同じくビルド時点の
+  // 状態をそのまま静的HTMLへ焼く(corrections.js の main() が空配列のときに
+  // 出す文言と同じ)。行が増えたら次回ビルドで自動的に反映される。
+  const rows = parseCSV(fs.readFileSync(path.join(SITE_DIR, "data", "corrections.csv"), "utf8"));
+  const listHtml =
+    rows.length === 0
+      ? `<p class="correction-empty">${escapeHTML(t.empty)}</p>`
+      : rows
+          .slice()
+          .sort((a, b) => b.date.localeCompare(a.date))
+          .map((r) => {
+            const link = safeUrl(r.url)
+              ? `<a class="correction-link" href="${escapeHTML(safeUrl(r.url))}" target="_blank" rel="noopener">${escapeHTML(t.detailLink)}</a>`
+              : "";
+            return `
+    <div class="correction-item">
+      <div class="correction-date mono">${escapeHTML(r.date)}</div>
+      <div class="correction-target">${escapeHTML(r.target)}</div>
+      <div class="correction-diff">
+        <span class="correction-before">${escapeHTML(r.before)}</span>
+        <span class="correction-arrow">→</span>
+        <span class="correction-after">${escapeHTML(r.after)}</span>
+      </div>
+      <div class="correction-reason">${escapeHTML(r.reason)}</div>
+      ${link}
+    </div>`;
+          })
+          .join("");
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHTML(title)}</title>
+<meta name="description" content="${escapeHTML(t.lead)}">
+<link rel="canonical" href="${url}">
+${hreflangTags(urls)}
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${escapeHTML(title)}">
+<meta property="og:description" content="${escapeHTML(t.lead)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+</head>
+<body>
+<div class="page">
+${header("en", urls)}
+
+  <a class="chart-back" id="t-back" href="${REL.home.en}">${escapeHTML(t.back)}</a>
+
+  <main class="about-body">
+    <h1 class="about-title" id="corrections-title">${escapeHTML(t.title)}</h1>
+
+    <p class="about-lead" id="corrections-lead">
+      ${escapeHTML(t.lead)}
+    </p>
+
+    <div id="corrections-list">${listHtml}</div>
+  </main>
+
+  <footer class="site-footer-row">
+    <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
+    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
+    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
+  </footer>
+</div>
+<script src="/csv.js?v=${ASSET_V}"></script>
+<script src="/corrections.js?v=${ASSET_V}"></script>
+</body>
+</html>
+`;
+}
+
+// contact.html の <style> は言語に依存しない共通レイアウトなので、JA版から
+// バイト単位で複製する(発明ではなく転記。文言はここには一切無い)。
+const CONTACT_STYLE = read("contact.html").match(/<style>[\s\S]*?<\/style>/)[0];
+
+function buildContactEn() {
+  const t = CONTACT.T.en;
+  const urls = REL.contact;
+  const url = abs(urls.en);
+  const title = `${t.title} — zurekei`;
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHTML(title)}</title>
+<meta name="description" content="${escapeHTML(t.lead)}">
+<link rel="canonical" href="${url}">
+${hreflangTags(urls)}
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${escapeHTML(title)}">
+<meta property="og:description" content="${escapeHTML(t.lead)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE}/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+${CONTACT_STYLE}
+</head>
+<body>
+<div class="page">
+${header("en", urls)}
+
+  <a class="chart-back" id="t-back" href="${REL.home.en}">${escapeHTML(t.back)}</a>
+
+  <div class="contact-page-wrap">
+    <h1 id="contact-title">${escapeHTML(t.title)}</h1>
+    <p class="lead" id="contact-lead">
+      ${escapeHTML(t.lead)}
+    </p>
+
+    <form id="contactForm">
+      <div class="form-group">
+        <label id="label-name">${escapeHTML(t.labelName)}<span>*</span></label>
+        <input type="text" id="name" placeholder="${escapeHTML(t.phName)}" required>
+      </div>
+
+      <div class="form-group">
+        <label id="label-email">${escapeHTML(t.labelEmail)}<span>*</span></label>
+        <input type="email" id="email" placeholder="${escapeHTML(t.phEmail)}" required>
+      </div>
+
+      <div class="form-group">
+        <label id="label-affiliation">${escapeHTML(t.labelAffiliation)}</label>
+        <input type="text" id="affiliation" placeholder="${escapeHTML(t.phAffiliation)}">
+      </div>
+
+      <div class="form-group">
+        <label id="label-message">${escapeHTML(t.labelMessage)}<span>*</span></label>
+        <textarea id="message" placeholder="${escapeHTML(t.phMessage)}" required></textarea>
+      </div>
+
+      <!-- Site key of the "zurekei-contact" widget. Public by design (it ships to every
+           visitor); the paired Secret Key lives in the Pages project's env vars. Both must
+           come from the SAME widget — a mismatch fails server-side verification. -->
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAAD_Ftl2YrgymWDtM" data-appearance="interaction-only"></div>
+
+      <button type="submit" class="submit-btn" id="submitBtn" data-text="${escapeHTML(t.submit)}">${escapeHTML(t.submit)}</button>
+
+      <div class="form-msg success" id="successMsg">
+        ${escapeHTML(t.success)}
+      </div>
+      <div class="form-msg error" id="errorMsg">
+        ${escapeHTML(t.error)}
+      </div>
+    </form>
+  </div>
+
+  <footer class="site-footer-row">
+    <a class="footer-about" id="t-footer-index" href="${REL.home.en}">${escapeHTML(t.footerIndex)}</a>
+    <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
+    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
+  </footer>
+</div>
+
+<script src="/contact.js?v=${ASSET_V}"></script>
+</body>
+</html>
+`;
 }
 
 /* ── sitemap.xml ─────────────────────────────────────────────
@@ -951,10 +1771,14 @@ function buildHome(keys) {
  *   保守する必要も無くなった(このリポジトリが避けてきた「手書きの対応表」が
  *   ひとつ消える)。
  *
- *   about/corrections/contact はビルダーの生成物ではない(ビルダーが触らない
- *   ページ)ので、この判定は使えない。従来どおり「元になっているファイル群の
+ *   about/corrections/contact の JA版はビルダーの生成物ではない(ビルダーが
+ *   触らないページ)ので、この判定は使えない。従来どおり「元になっているファイル群の
  *   コミット日の最大値」(lastmod()/fileDate())のままでよい。この3ページの
  *   依存表に bin/build.mjs は元から入っていない(触っていないので当然)。
+ *   EN版(en/about.html 等)はJA版と違い buildAboutEn() 等が丸ごと生成する
+ *   正真正銘のビルダー出力なので、こちらは他の生成ページと同じ outputDate() を
+ *   使う(2026-07-30レビュー指摘。以前はEN版もlastmod()を使っておりこの
+ *   コメントの原則自体に反していた)。
  *
  *   ■ 循環しないことの確認
  *   「出力を HEAD と比べる」設計がコミットの前後で安定するかを、実際に
@@ -1034,8 +1858,36 @@ function outputDate(rel, generated) {
   if (outputDateCache.has(rel)) return outputDateCache.get(rel);
   let head = null;
   try {
-    head = execFileSync("git", ["show", `HEAD:${rel}`], { cwd: SITE_DIR, encoding: "utf8" });
-  } catch {
+    // stdio を明示して stderr を pipe にする: 既定のままだと execFileSync は
+    // 失敗時の stderr を e.stderr に積みつつ、このプロセスの stderr にもそのまま
+    // 流してしまう(node の既定動作。試して確認済み)。新規ページでは毎回この
+    // catch を通るのが正常系なので、放っておくと「HEADに無い」だけの
+    // fatal: が指標の数だけ端末に流れ、bin/deploy.sh が警告を読ませる設計を
+    // 壊す(本物の警告が埋もれる)。stdio: ["ignore","pipe","pipe"] にすると、
+    // e.stderr での判別はそのまま保ちつつ端末には出さずに済む。
+    head = execFileSync("git", ["show", `HEAD:${rel}`], {
+      cwd: SITE_DIR,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  } catch (e) {
+    const stderr = e.stderr ? e.stderr.toString() : "";
+    // 黙らせてよいのは「HEADに無い」(=新規ページ、このtry/catch自体が正常に
+    // 処理する経路)のときだけ。git リポジトリでない・オブジェクトが壊れている
+    // 等、他の理由での失敗まで黙らせると、気づけるべき異常ごと握り潰すことに
+    // なる。そのメッセージ以外は stderr をそのまま出し直して投げる。
+    //
+    // git のメッセージは2種類ある(実測して確認済み):
+    //   - "exists on disk, but not in 'HEAD'" … ディスクには既に書かれている
+    //     (このビルドを一度動かした後の再実行、または前回の未コミットな生成物)
+    //   - "does not exist in 'HEAD'" … ディスクにもまだ無い(全く初めてのビルドで、
+    //     このsitemap生成がfs.writeFileSyncより前に走るため。上のファイル冒頭
+    //     コメントの「ビルドの時点で出力ファイルはまだディスクに書かれていない」
+    //     を参照)。どちらも意味は同じ「HEADに無い」なので両方黙らせる。
+    if (!/^fatal: path '.*' (?:exists on disk, but not in|does not exist in) ['"]HEAD['"]/m.test(stderr)) {
+      if (stderr) process.stderr.write(stderr);
+      throw e;
+    }
     head = null; // HEAD に無い = 新規ページ
   }
   let d;
@@ -1074,19 +1926,48 @@ function sitemapEntries(keys, files) {
     priority: "0.9",
     date: genDate(path.join(OUT_DIR, `${k}.html`)),
   }));
+  // EN側は同じ生成物なので、対応する出力ファイル(files に積んである)の日付を
+  // そのまま使う。about/corrections/contact のEN版も同様にgenDate()を使う
+  // (下のstatic配列を参照。JA版だけがビルダーの生成物ではないので別方式)。
+  const enMetricEntries = keys.map((k) => ({
+    loc: `${SITE}/en/chart/${k}`,
+    priority: "0.9",
+    date: genDate(path.join(EN_OUT_DIR, `${k}.html`)),
+  }));
 
   return {
-    home: [{ loc: `${SITE}/`, priority: "1.0", date: genDate(path.join(SITE_DIR, "index.html")) }],
-    hub: [{ loc: `${SITE}/chart/`, priority: "0.8", date: genDate(path.join(OUT_DIR, "index.html")) }],
+    home: [
+      { loc: `${SITE}/`, priority: "1.0", date: genDate(path.join(SITE_DIR, "index.html")) },
+      { loc: `${SITE}/en/`, priority: "1.0", date: genDate(path.join(EN_DIR, "index.html")) },
+    ],
+    hub: [
+      { loc: `${SITE}/chart/`, priority: "0.8", date: genDate(path.join(OUT_DIR, "index.html")) },
+      { loc: `${SITE}/en/chart/`, priority: "0.8", date: genDate(path.join(EN_OUT_DIR, "index.html")) },
+    ],
     metrics: [
       ...metricEntries,
       { loc: `${SITE}/fertility`, priority: "0.9", date: genDate(path.join(SITE_DIR, "fertility.html")) },
       { loc: `${SITE}/hoan`, priority: "0.8", date: genDate(path.join(SITE_DIR, "hoan.html")) },
+      ...enMetricEntries,
+      { loc: `${SITE}/en/fertility`, priority: "0.9", date: genDate(path.join(EN_DIR, "fertility.html")) },
+      { loc: `${SITE}/en/hoan`, priority: "0.8", date: genDate(path.join(EN_DIR, "hoan.html")) },
     ],
     static: [
       { loc: `${SITE}/about`, priority: "0.7", date: lastmod(["about.html", "about.js", "about.md"]) },
       { loc: `${SITE}/corrections`, priority: "0.5", date: lastmod(["corrections.html", "corrections.js", "data/corrections.csv"]) },
       { loc: `${SITE}/contact`, priority: "0.3", date: lastmod(["contact.html", "contact.js"]) },
+      // en/about.html・en/corrections.html・en/contact.html は
+      // buildAboutEn/buildCorrectionsEn/buildContactEn が丸ごと生成する出力
+      // そのもの(chart/fertility/hoan/homeと同じ生成物)なので、他の生成ページと
+      // 同じgenDate()(出力そのものをHEADと比べる)を使う。以前はここも
+      // lastmod()(JA側の入力ファイル群のコミット日)を見ていたが、それだと
+      // このファイル自身が上のコメントで説く「出力そのもので決める」原則に反し、
+      // 英語版のレイアウトだけ変えてもlastmodが動かず(過少申告)、逆にJA版だけ
+      // 直してもEN版のlastmodが動く(過大申告)という2方向のズレを持っていた
+      // (2026-07-30レビュー指摘)。
+      { loc: `${SITE}/en/about`, priority: "0.7", date: genDate(path.join(EN_DIR, "about.html")) },
+      { loc: `${SITE}/en/corrections`, priority: "0.5", date: genDate(path.join(EN_DIR, "corrections.html")) },
+      { loc: `${SITE}/en/contact`, priority: "0.3", date: genDate(path.join(EN_DIR, "contact.html")) },
     ],
   };
 }
@@ -1116,15 +1997,15 @@ function buildSitemap(keys, files) {
   政府の公表日に合わせてデータが更新されることがこのサイトの価値の中心なのに、
   更新されたことを機械に伝える手段が今まで無かったので、ここで足す。
 
-  丸ごと/差し込み生成しているページ(chart 系・fertility・hoan・トップ)の
-  lastmod は「そのページの元になっているファイル群」ではなく「生成された
-  出力そのもの」を見て決めている。生成した文字列を直前のコミット(HEAD)の
-  内容と比べ、違えば今日の日付、同じなら出力ファイル自身の最終コミット日と
-  する。理由は、依存ファイルの対応表に生成器自身を含めていた最初の実装だと、
-  生成器のコメントを直すだけで配信バイトが1つも変わらないのに更新扱いに
-  なってしまうため。about/corrections/contact はビルダーの生成物ではない
-  ページなので、この判定は使わず、従来どおり元ファイル群のコミット日の
-  最大値を使う。
+  丸ごと/差し込み生成しているページ(chart 系・fertility・hoan・トップ・
+  en/about・en/corrections・en/contact)の lastmod は「そのページの元になって
+  いるファイル群」ではなく「生成された出力そのもの」を見て決めている。生成
+  した文字列を直前のコミット(HEAD)の内容と比べ、違えば今日の日付、同じなら
+  出力ファイル自身の最終コミット日とする。理由は、依存ファイルの対応表に
+  生成器自身を含めていた最初の実装だと、生成器のコメントを直すだけで配信
+  バイトが1つも変わらないのに更新扱いになってしまうため。about/corrections/
+  contact の JA版だけはビルダーの生成物ではないページなので、この判定は使わず、
+  従来どおり元ファイル群のコミット日の最大値を使う。
 
   日付は同じ日にビルドしてコミットする限り安定する。日をまたぐと検査(node
   bin/build.mjs のcheckモード)が落ちるが、落ちる方向が安全側(誤った日付が
@@ -1161,11 +2042,134 @@ function crossRefErrors(keys) {
   for (const k of keys) if (!listed.has(k)) errs.push(`sitemap.xml に /chart/${k} が無い`);
   for (const k of listed) if (!keys.includes(k)) errs.push(`sitemap.xml の /chart/${k} は指標として存在しない`);
 
+  const listedEn = new Set([...sitemap.matchAll(/<loc>https:\/\/zurekei\.org\/en\/chart\/([a-z-]+)<\/loc>/g)].map((m) => m[1]));
+  for (const k of keys) if (!listedEn.has(k)) errs.push(`sitemap.xml に /en/chart/${k} が無い`);
+  for (const k of listedEn) if (!keys.includes(k)) errs.push(`sitemap.xml の /en/chart/${k} は指標として存在しない`);
+
   const index = read("index.html");
   const linked = new Set([...index.matchAll(/href="chart\/([a-z-]+)"/g)].map((m) => m[1]));
   for (const k of keys) if (!linked.has(k)) errs.push(`index.html の card-grid に chart/${k} へのリンクが無い`);
   for (const k of linked) if (!keys.includes(k)) errs.push(`index.html の chart/${k} は指標として存在しない`);
 
+  // /en/index.html はビルダーの生成物(buildHomeEn)なので、この検査は本来
+  // 落ちようがない(METRICS/INDICATOR_META とHOME.INDICATOR_METAが食い違わない
+  // 限り)。それでも生成ロジック自体の書き換えに対する安全網として置く。
+  const indexEn = read("en/index.html");
+  const linkedEn = new Set([...indexEn.matchAll(/href="\/en\/chart\/([a-z-]+)"/g)].map((m) => m[1]));
+  for (const k of keys) if (!linkedEn.has(k)) errs.push(`en/index.html の card-grid に /en/chart/${k} へのリンクが無い`);
+  for (const k of linkedEn) if (!keys.includes(k)) errs.push(`en/index.html の /en/chart/${k} は指標として存在しない`);
+
+  return errs;
+}
+
+/* ── idの取りこぼし検査 ────────────────────────────────────────
+ * 「日本語版に要素+idを足し、対応する.jsのapplyI18n()にsetを1行足したのに、
+ * 英語版の生成側に同じidを足し忘れる」という壊れ方は、この検査が無いと
+ * 誰にも拾われない: chart.js/about.js/fertility.js等のapplyI18n()は
+ * nullガード無しの document.getElementById(...).textContent なので、
+ * 存在しないidを引けばTypeErrorでmain()ごと死ぬ。JS自体は有効に読み込まれる
+ * (構文エラーではない)ので<noscript>の案内も出ず、空のSVG箱だけが残る
+ * 壊れ方になる。かつ既存の--checkは「ビルダーの出力とディスクの一致」しか
+ * 見ないので、この種の壊れ方には永久に反応しない(2026-07-30レビュー指摘)。
+ *
+ * 各.jsからgetElementByIdの対象idを正規表現で抜き出し、対応する生成HTML
+ * (filesに積んだ「実際に配信されるバイト列」そのもの)にid="..."が存在するか
+ * 照合する。JA側が生成物ではないページ(about/contact/correctionsのJA)は
+ * ディスク上の手書きファイルをreadする — このid検査に限っては「実際に配信
+ * されている中身」を見たいので、ビルド前のディスクの中身で十分(手書き
+ * ページはbuild.mjsが触らないのでビルドしても変わらない)。
+ */
+function extractGetElementByIdIds(src) {
+  const direct = [...src.matchAll(/getElementById\(\s*["'`]([\w-]+)["'`]\s*\)/g)].map((m) => m[1]);
+  // getElementById の直接呼び出しだけを見ると、この検査はほぼ何も見ない。
+  // 各ページの applyStatic() は set("t-title", t.title) というヘルパー越しに
+  // idを渡しており、リテラルが getElementById(...) の中に現れないため
+  // 上のパターンに1つも掛からない(hoan.js は13個すべてがこの形で、
+  // en/hoan.html から id を消しても検査が通ってしまった)。
+  // 「i18nで差し替える要素のidは t- で始める」というこのサイトの規約に
+  // 乗って、t- で始まる文字列リテラルも対象にする。規約を破ったidは
+  // 拾えないが、その場合は直接 getElementById で引かれる形になるので
+  // 上のパターンが拾う。
+  const tPrefixed = [...src.matchAll(/["'`](t-[\w-]+)["'`]/g)].map((m) => m[1]);
+  return [...new Set([...direct, ...tPrefixed])];
+}
+
+function htmlHasId(html, id) {
+  // id="..." 属性そのものだけを見る(data-*属性名やコメント中の文字列との
+  // 誤マッチを避ける)。
+  return new RegExp(`\\bid="${id}"`).test(html);
+}
+
+function idCoverageErrors() {
+  const errs = [];
+  const targets = [
+    {
+      js: "hero.js",
+      htmls: [
+        { label: "index.html", html: files.get(path.join(SITE_DIR, "index.html")) },
+        { label: "en/index.html", html: files.get(path.join(EN_DIR, "index.html")) },
+      ],
+    },
+    {
+      js: "home.js",
+      htmls: [
+        { label: "index.html", html: files.get(path.join(SITE_DIR, "index.html")) },
+        { label: "en/index.html", html: files.get(path.join(EN_DIR, "index.html")) },
+      ],
+    },
+    {
+      js: "chart.js",
+      htmls: keys.flatMap((k) => [
+        { label: `chart/${k}.html`, html: files.get(path.join(OUT_DIR, `${k}.html`)) },
+        { label: `en/chart/${k}.html`, html: files.get(path.join(EN_OUT_DIR, `${k}.html`)) },
+      ]),
+    },
+    {
+      js: "fertility.js",
+      htmls: [
+        { label: "fertility.html", html: files.get(path.join(SITE_DIR, "fertility.html")) },
+        { label: "en/fertility.html", html: files.get(path.join(EN_DIR, "fertility.html")) },
+      ],
+    },
+    {
+      js: "hoan.js",
+      htmls: [
+        { label: "hoan.html", html: files.get(path.join(SITE_DIR, "hoan.html")) },
+        { label: "en/hoan.html", html: files.get(path.join(EN_DIR, "hoan.html")) },
+      ],
+    },
+    {
+      js: "about.js",
+      htmls: [
+        { label: "about.html", html: read("about.html") },
+        { label: "en/about.html", html: files.get(path.join(EN_DIR, "about.html")) },
+      ],
+    },
+    {
+      js: "contact.js",
+      htmls: [
+        { label: "contact.html", html: read("contact.html") },
+        { label: "en/contact.html", html: files.get(path.join(EN_DIR, "contact.html")) },
+      ],
+    },
+    {
+      js: "corrections.js",
+      htmls: [
+        { label: "corrections.html", html: read("corrections.html") },
+        { label: "en/corrections.html", html: files.get(path.join(EN_DIR, "corrections.html")) },
+      ],
+    },
+  ];
+
+  for (const { js, htmls } of targets) {
+    const ids = extractGetElementByIdIds(read(js));
+    for (const id of ids) {
+      for (const { label, html } of htmls) {
+        if (html === undefined) continue; // このJSと組み合わせが無いページは対象外
+        if (!htmlHasId(html, id)) errs.push(`${label} に ${js} が参照する id="${id}" が無い`);
+      }
+    }
+  }
   return errs;
 }
 
@@ -1175,16 +2179,39 @@ const keys = Object.keys(METRICS);
 // 丸ごと生成する側（chart/）と、既存ファイルに差し込む側（fertility / hoan）を
 // 同じ Map に載せる。中身が最終形として一致すればよいので、扱いは同じでよい。
 const files = new Map();
-for (const k of keys) files.set(path.join(OUT_DIR, `${k}.html`), buildPage(k, METRICS[k]));
-files.set(path.join(OUT_DIR, "index.html"), buildIndex(keys));
+for (const k of keys) files.set(path.join(OUT_DIR, `${k}.html`), buildPage(k, METRICS[k], "ja"));
+files.set(path.join(OUT_DIR, "index.html"), buildIndex(keys, "ja"));
 files.set(path.join(SITE_DIR, "fertility.html"), buildFertility());
 files.set(path.join(SITE_DIR, "hoan.html"), buildHoan());
 files.set(path.join(SITE_DIR, "index.html"), buildHome(keys));
+// /en/ 以下(2026-07-29追加)。JA側と同じ生成器を lang="en" で呼ぶか、元ファイルが
+// 無いページ(home/fertility/hoan/about/corrections/contact)は buildXxxEn() で
+// 丸ごと組み立てる。詳細は各関数の直上コメントを参照。
+for (const k of keys) files.set(path.join(EN_OUT_DIR, `${k}.html`), buildPage(k, METRICS[k], "en"));
+files.set(path.join(EN_OUT_DIR, "index.html"), buildIndex(keys, "en"));
+files.set(path.join(EN_DIR, "fertility.html"), buildFertilityEn());
+files.set(path.join(EN_DIR, "hoan.html"), buildHoanEn());
+files.set(path.join(EN_DIR, "index.html"), buildHomeEn(keys));
+files.set(path.join(EN_DIR, "about.html"), buildAboutEn());
+files.set(path.join(EN_DIR, "corrections.html"), buildCorrectionsEn());
+files.set(path.join(EN_DIR, "contact.html"), buildContactEn());
 // sitemap.xml の lastmod は他の生成ページの「いま生成した文字列」を直接見る
 // (outputDate()。詳細はそのコメントを参照)ので、今度こそ本当に順序が意味を
 // 持つ: files に他の全ページが積み終わったあとで呼ぶ必要がある(このMapに
 // まだ無いパスを buildSitemap が要求したら genDate() が例外で止める)。
 files.set(path.join(SITE_DIR, "sitemap.xml"), buildSitemap(keys, files));
+
+// 指標ディレクトリの余分ファイル(置き土産)検出を chart/ と en/chart/ の両方で
+// 行う共通ヘルパー。
+function findOrphans(dir) {
+  const known = new Set(
+    [...files.keys()].filter((f) => path.dirname(f) === dir).map((f) => path.basename(f))
+  );
+  const orphans = fs.existsSync(dir)
+    ? fs.readdirSync(dir).filter((f) => f.endsWith(".html") && !known.has(f))
+    : [];
+  return { known, orphans };
+}
 
 if (check) {
   const stale = [];
@@ -1198,35 +2225,55 @@ if (check) {
     if (got !== want) stale.push(path.relative(SITE_DIR, f));
   }
   // 生成対象から外れた指標の置き土産も落とす（指標をリネームした時に残る）
-  const chartKnown = new Set(
-    [...files.keys()].filter((f) => path.dirname(f) === OUT_DIR).map((f) => path.basename(f))
-  );
-  const orphans = fs.existsSync(OUT_DIR)
-    ? fs.readdirSync(OUT_DIR).filter((f) => f.endsWith(".html") && !chartKnown.has(f))
-    : [];
+  const { orphans } = findOrphans(OUT_DIR);
+  const { orphans: orphansEn } = findOrphans(EN_OUT_DIR);
 
-  const refs = crossRefErrors(keys);
-  if (stale.length || orphans.length || refs.length) {
+  // crossRefErrors は index.html/en/index.html/sitemap.xml をディスクから
+  // read() する。--check はファイルを一切書かないので、これらのうち一度も
+  // node bin/build.mjs(素の生成モード)を走らせたことがない環境では
+  // en/index.html 等がまだディスクに無くENOENTで落ちる(2026-07-30レビュー
+  // 指摘: 落ちる方向自体は安全側だが、生のスタックトレースだけでは原因が
+  // 分からない)。ここで拾って「先にビルドしろ」と分かる案内に変える。
+  // ENOENT以外(リポジトリが壊れている等)まで握り潰すと本物の異常を隠すので、
+  // それだけは再throwする。
+  let refs;
+  try {
+    refs = crossRefErrors(keys);
+  } catch (e) {
+    if (e && e.code === "ENOENT") {
+      console.error(`✗ ${e.path ? path.relative(SITE_DIR, e.path) : "生成物"} が無い(未ビルド)`);
+      console.error("  先に `node bin/build.mjs` を実行してから --check を使うこと");
+      process.exit(1);
+    }
+    throw e;
+  }
+  // idの取りこぼし(英語版の生成側にidを足し忘れる等)は、生成物が最新でも
+  // sitemap/トップのリンクが揃っていても検出できない別種の壊れ方なので、
+  // stale/orphans/refsとは独立に必ず見る。
+  const idErrs = idCoverageErrors();
+  if (stale.length || orphans.length || orphansEn.length || refs.length || idErrs.length) {
     if (stale.length) console.error(`✗ 生成物が古い: ${stale.join(", ")}`);
     if (orphans.length) console.error(`✗ 余分なファイル: chart/${orphans.join(", chart/")}`);
+    if (orphansEn.length) console.error(`✗ 余分なファイル: en/chart/${orphansEn.join(", en/chart/")}`);
     refs.forEach((e) => console.error(`✗ ${e}`));
-    if (stale.length || orphans.length) console.error("  node bin/build.mjs を実行してからデプロイすること");
+    idErrs.forEach((e) => console.error(`✗ ${e}`));
+    if (stale.length || orphans.length || orphansEn.length) console.error("  node bin/build.mjs を実行してからデプロイすること");
     process.exit(1);
   }
-  console.log(`✓ ${files.size} ページは最新（sitemap / トップのリンクとも一致）`);
+  console.log(`✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応とも一致）`);
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
-  const chartKnown = new Set(
-    [...files.keys()].filter((f) => path.dirname(f) === OUT_DIR).map((f) => path.basename(f))
-  );
-  for (const f of fs.readdirSync(OUT_DIR)) {
-    if (f.endsWith(".html") && !chartKnown.has(f)) fs.unlinkSync(path.join(OUT_DIR, f));
-  }
+  fs.mkdirSync(EN_OUT_DIR, { recursive: true });
+  const { known: chartKnown, orphans } = findOrphans(OUT_DIR);
+  for (const f of orphans) fs.unlinkSync(path.join(OUT_DIR, f));
+  const { known: chartKnownEn, orphans: orphansEn } = findOrphans(EN_OUT_DIR);
+  for (const f of orphansEn) fs.unlinkSync(path.join(EN_OUT_DIR, f));
   for (const [f, html] of files) fs.writeFileSync(f, html);
   console.log(
-    `✓ ${files.size} ページを更新（chart/ ${chartKnown.size} 本 + fertility.html + hoan.html + index.html + sitemap.xml）`
+    `✓ ${files.size} ページを更新（chart/ ${chartKnown.size} 本 + en/chart/ ${chartKnownEn.size} 本 + fertility/hoan/about/corrections/contact(ja+en) + index.html(ja+en) + sitemap.xml）`
   );
   // 生成そのものは成功しても、辿らせる側が欠けていれば索引には出ない。
   // 落ちるほどではないので警告にとどめ、デプロイは --check 側で止める。
   crossRefErrors(keys).forEach((e) => console.warn(`⚠ ${e}`));
+  idCoverageErrors().forEach((e) => console.warn(`⚠ ${e}`));
 }

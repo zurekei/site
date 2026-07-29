@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- このファイルは bin/build.mjs が data/*.csv から生成している。直接編集しない。
+     直すのは chart.js の METRICS か data/*.csv のどちらか。 -->
+<title id="page-title">Current account — zurekei</title>
+<meta name="description" content="The government&#39;s initial forecast laid alongside the confirmed actual.">
+<link rel="canonical" href="https://zurekei.org/en/chart/current-account">
+<link rel="alternate" hreflang="ja" href="https://zurekei.org/chart/current-account">
+<link rel="alternate" hreflang="en" href="https://zurekei.org/en/chart/current-account">
+<link rel="alternate" hreflang="x-default" href="https://zurekei.org/chart/current-account">
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Current account — zurekei">
+<meta property="og:description" content="The government&#39;s initial forecast laid alongside the confirmed actual.">
+<meta property="og:url" content="https://zurekei.org/en/chart/current-account">
+<meta property="og:image" content="https://zurekei.org/assets/og.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=20260731k">
+<noscript><style>.chart-wrap > svg, .controls, .readout, #v-notes, #v-source { display: none !important; } .chart-noscript { display: block; }</style></noscript>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "@id": "https://zurekei.org/en/chart/current-account#dataset",
+  "name": "Current account — government's initial forecast and confirmed actual",
+  "description": "The government's initial forecast laid alongside the confirmed actual.",
+  "url": "https://zurekei.org/en/chart/current-account",
+  "isAccessibleForFree": true,
+  "inLanguage": "en",
+  "temporalCoverage": "2015/2026",
+  "creator": {
+    "@type": "Organization",
+    "@id": "https://zurekei.org/#organization",
+    "name": "zurekei",
+    "alternateName": "ズレ計",
+    "url": "https://zurekei.org"
+  },
+  "includedInDataCatalog": {
+    "@id": "https://zurekei.org/#catalog"
+  },
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "Forecast (initial)",
+      "unitText": "tn yen"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Actual (confirmed)",
+      "unitText": "tn yen"
+    }
+  ],
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/current_account_forecast.csv"
+    }
+  ]
+}
+</script>
+</head>
+<body data-metric="current-account">
+<div class="page">
+  <header class="site-header">
+    <a class="brand" href="/en/" aria-label="zurekei home">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <a id="lang-ja" class="lang-btn mono" href="/chart/current-account">JA</a>
+        <a id="lang-en" class="lang-btn mono active" href="/en/chart/current-account">EN</a>
+      </div>
+    </div>
+  </header>
+
+  <a class="chart-back" id="t-back" href="/en/">← Indicators</a>
+
+  <main>
+    <section class="chart-section">
+      <h1 class="chart-title" id="chart-title">Current account</h1>
+      <p class="chart-desc" id="chart-desc">The government&#39;s initial forecast laid alongside the confirmed actual.</p>
+      <p class="chart-note mono" id="chart-note" hidden></p>
+
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title"></svg>
+        <!-- グラフはJSでしか描かない。JSが無いとこの枠が空箱として残り、壊れて
+             いるようにしか見えないので、行き先を書いておく。表示の切り替えは
+             <head> の <noscript><style> が持つ。 -->
+        <p class="chart-noscript mono">This chart requires JavaScript to draw. The figures are in the table below.</p>
+      </div>
+
+      <p class="chart-summary mono" id="chart-summary">Years actual came in above forecast: 5 / below: 5 / matched the forecast: 1 / mean gap +2.1tn yen / n=11 fiscal years</p>
+
+      <div class="controls">
+        <input type="range" id="year-select" min="0" max="0" value="0" step="1">
+      </div>
+
+      <div class="readout">
+        <div class="readout-year mono" id="year-readout">----</div>
+        <div class="stat-row">
+          <div class="stat-chip">
+            <span class="stat-chip-dot stat-chip-dot-forecast"></span>
+            <span class="stat-chip-label" id="t-stat-forecast">Forecast</span>
+            <span class="stat-chip-value" id="v-forecast">—</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-chip-dot stat-chip-dot-actual"></span>
+            <span class="stat-chip-label" id="t-stat-actual">Actual</span>
+            <span class="stat-chip-value" id="v-actual">—</span>
+          </div>
+          <div class="stat-chip stat-chip-diff">
+            <span class="stat-chip-label" id="t-stat-gap">Gap</span>
+            <span class="stat-chip-value" id="v-diff">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="readout-notes" id="v-notes"></div>
+
+      <div class="readout-source" id="v-source"></div>
+
+      <p class="chart-note mono" id="archive-note" hidden></p>
+    </section>
+
+    <section class="data-section">
+      <details class="data-details">
+        <summary id="t-table-toggle">Show the figures as a table (12 fiscal years)</summary>
+      <div class="data-table-wrap">
+      <table class="data-table">
+        <caption id="t-table-caption">Current account — forecast, actual and gap by fiscal year</caption>
+        <thead>
+          <tr>
+            <th scope="col" id="t-th-year">Fiscal year</th>
+            <th scope="col" id="t-th-forecast">Forecast</th>
+            <th scope="col" id="t-th-actual">Actual</th>
+            <th scope="col" id="t-th-gap">Gap</th>
+            <th scope="col" id="t-th-source">Source</th>
+          </tr>
+        </thead>
+        <tbody>
+      <tr>
+        <th scope="row" class="mono" data-year="2015">FY2015</th>
+        <td class="mono">10.2tn yen</td>
+        <td class="mono">18.3tn yen</td>
+        <td class="mono">+8.1tn yen</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2015/h270212mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/international_policy/reference/balance_of_payments/bp_trend/bpnet/sbp/s-1/6s-1-2.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">財務省「国際収支状況」年度別時系列(BPM6ベース、6s-1-2.csv)の平成27年度(2015年度)経常収支=182957億円→18.3兆円(四捨五入)。同ファイルは改定される場合がある。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2016">FY2016</th>
+        <td class="mono">21.7tn yen</td>
+        <td class="mono">21.7tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2016/h280122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/international_policy/reference/balance_of_payments/bp_trend/bpnet/sbp/s-1/6s-1-2.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">財務省「国際収支状況」年度別時系列(6s-1-2.csv)の平成28年度(2016年度)経常収支=216771億円→21.7兆円(四捨五入)。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2017">FY2017</th>
+        <td class="mono">23.6tn yen</td>
+        <td class="mono">22.4tn yen</td>
+        <td class="mono">-1.2tn yen</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2017/h290120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/international_policy/reference/balance_of_payments/bp_trend/bpnet/sbp/s-1/6s-1-2.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">財務省「国際収支状況」年度別時系列(6s-1-2.csv)の平成29年度(2017年度)経常収支=223995億円→22.4兆円(四捨五入)。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2018">FY2018</th>
+        <td class="mono">22.8tn yen</td>
+        <td class="mono">19.4tn yen</td>
+        <td class="mono">-3.4tn yen</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2018/h300122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/international_policy/reference/balance_of_payments/bp_trend/bpnet/sbp/s-1/6s-1-2.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">財務省「国際収支状況」年度別時系列(6s-1-2.csv)の平成30年度(2018年度)経常収支=193837億円→19.4兆円(四捨五入)。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2019">FY2019</th>
+        <td class="mono">22.3tn yen</td>
+        <td class="mono">18.7tn yen</td>
+        <td class="mono">-3.6tn yen</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2019/h310128mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/international_policy/reference/balance_of_payments/bp_trend/bpnet/sbp/s-1/6s-1-2.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">財務省「国際収支状況」年度別時系列(6s-1-2.csv)の令和元(平成31)年度(2019年度)経常収支=186712億円→18.7兆円(四捨五入)。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2020">FY2020</th>
+        <td class="mono">18.9tn yen</td>
+        <td class="mono">16.9tn yen</td>
+        <td class="mono">-2.0tn yen</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2019/r020120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/international_policy/reference/balance_of_payments/bp_trend/bpnet/sbp/s-1/6s-1-2.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">財務省「国際収支状況」年度別時系列(6s-1-2.csv)の令和2年度(2020年度)経常収支=169343億円→16.9兆円(四捨五入)。新型コロナ影響下の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2021">FY2021</th>
+        <td class="mono">18.3tn yen</td>
+        <td class="mono">20.1tn yen</td>
+        <td class="mono">+1.8tn yen</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2020/r030118mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/international_policy/reference/balance_of_payments/bp_trend/bpnet/sbp/s-1/6s-1-2.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">財務省「国際収支状況」年度別時系列(6s-1-2.csv)の令和3年度(2021年度)経常収支=201220億円→20.1兆円(四捨五入)。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2022">FY2022</th>
+        <td class="mono">15.2tn yen</td>
+        <td class="mono">9.1tn yen</td>
+        <td class="mono">-6.1tn yen</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2021/r040117mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/international_policy/reference/balance_of_payments/bp_trend/bpnet/sbp/s-1/6s-1-2.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">財務省「国際収支状況」年度別時系列(6s-1-2.csv)の令和4年度(2022年度)経常収支=91094億円→9.1兆円(四捨五入)。資源価格高騰・円安による輸入増で貿易赤字が拡大した年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2023">FY2023</th>
+        <td class="mono">7.3tn yen</td>
+        <td class="mono">26.4tn yen</td>
+        <td class="mono">+19.1tn yen</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2022/r050123mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/international_policy/reference/balance_of_payments/bp_trend/bpnet/sbp/s-1/6s-1-2.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">財務省「国際収支状況」年度別時系列(6s-1-2.csv)の令和5年度(2023年度)経常収支=264211億円→26.4兆円(四捨五入)。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2024">FY2024</th>
+        <td class="mono">23.1tn yen</td>
+        <td class="mono">30.0tn yen</td>
+        <td class="mono">+6.9tn yen</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2023/r060126mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/international_policy/reference/balance_of_payments/bp_trend/bpnet/sbp/s-1/6s-1-2.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">財務省「国際収支状況」年度別時系列(6s-1-2.csv)の令和6年度(2024年度)経常収支=300315億円→30.0兆円(四捨五入)。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2025">FY2025</th>
+        <td class="mono">31.0tn yen</td>
+        <td class="mono">34.6tn yen</td>
+        <td class="mono">+3.6tn yen</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2024/r070124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/international_policy/reference/balance_of_payments/bp_trend/bpnet/sbp/s-1/6s-1-2.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">財務省「国際収支状況」年度別時系列(6s-1-2.csv)の令和7年度(2025年度)経常収支=346220億円→34.6兆円(四捨五入)。年度終了(2026年3月)から日が浅く、今後改定される可能性がある速報段階の値。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2026">FY2026</th>
+        <td class="mono">38.4tn yen</td>
+        <td class="mono" data-ph="pending">Actual not yet finalized (fiscal year in progress)</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/r080123mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a></td>
+      </tr>
+        </tbody>
+      </table>
+      </div>
+        <p class="chart-note mono"><span id="t-table-csv">Source data: </span><a href="/data/current_account_forecast.csv">/data/current_account_forecast.csv</a></p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="site-footer-row">
+    <span id="t-footer-src">src: Cabinet Office of Japan / SNA</span>
+    <a class="footer-about" id="t-footer-about" href="/en/about">About this site</a>
+    <a class="footer-about" id="t-footer-contact" href="/en/contact">Contact</a>
+  </footer>
+</div>
+<script src="/csv.js?v=20260731k"></script>
+<script src="/chart.js?v=20260731k"></script>
+</body>
+</html>

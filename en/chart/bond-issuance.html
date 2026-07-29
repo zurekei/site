@@ -1,0 +1,749 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- このファイルは bin/build.mjs が data/*.csv から生成している。直接編集しない。
+     直すのは chart.js の METRICS か data/*.csv のどちらか。 -->
+<title id="page-title">Government bond issuance — zurekei</title>
+<meta name="description" content="The Ministry of Finance&#39;s initial budget plan for bond issuance, laid alongside the actual issuance recorded in the settlement. Bonds tracked in separate categories, such as reconstruction bonds or pension special-issue bonds, are not included, following the classification used in the primary source.">
+<link rel="canonical" href="https://zurekei.org/en/chart/bond-issuance">
+<link rel="alternate" hreflang="ja" href="https://zurekei.org/chart/bond-issuance">
+<link rel="alternate" hreflang="en" href="https://zurekei.org/en/chart/bond-issuance">
+<link rel="alternate" hreflang="x-default" href="https://zurekei.org/chart/bond-issuance">
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Government bond issuance — zurekei">
+<meta property="og:description" content="The Ministry of Finance&#39;s initial budget plan for bond issuance, laid alongside the actual issuance recorded in the settlement. Bonds tracked in separate categories, such as reconstruction bonds or pension special-issue bonds, are not included, following the classification used in the primary source.">
+<meta property="og:url" content="https://zurekei.org/en/chart/bond-issuance">
+<meta property="og:image" content="https://zurekei.org/assets/og.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=20260731k">
+<noscript><style>.chart-wrap > svg, .controls, .readout, #v-notes, #v-source { display: none !important; } .chart-noscript { display: block; }</style></noscript>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "@id": "https://zurekei.org/en/chart/bond-issuance#dataset",
+  "name": "Government bond issuance — government's initial forecast and confirmed actual",
+  "description": "The Ministry of Finance's initial budget plan for bond issuance, laid alongside the actual issuance recorded in the settlement. Bonds tracked in separate categories, such as reconstruction bonds or pension special-issue bonds, are not included, following the classification used in the primary source.",
+  "url": "https://zurekei.org/en/chart/bond-issuance",
+  "isAccessibleForFree": true,
+  "inLanguage": "en",
+  "temporalCoverage": "1947/2026",
+  "creator": {
+    "@type": "Organization",
+    "@id": "https://zurekei.org/#organization",
+    "name": "zurekei",
+    "alternateName": "ズレ計",
+    "url": "https://zurekei.org"
+  },
+  "includedInDataCatalog": {
+    "@id": "https://zurekei.org/#catalog"
+  },
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "Forecast (initial)",
+      "unitText": "tn yen"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "Actual (confirmed)",
+      "unitText": "tn yen"
+    }
+  ],
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/bond_issuance_forecast.csv"
+    }
+  ]
+}
+</script>
+</head>
+<body data-metric="bond-issuance">
+<div class="page">
+  <header class="site-header">
+    <a class="brand" href="/en/" aria-label="zurekei home">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <a id="lang-ja" class="lang-btn mono" href="/chart/bond-issuance">JA</a>
+        <a id="lang-en" class="lang-btn mono active" href="/en/chart/bond-issuance">EN</a>
+      </div>
+    </div>
+  </header>
+
+  <a class="chart-back" id="t-back" href="/en/">← Indicators</a>
+
+  <main>
+    <section class="chart-section">
+      <h1 class="chart-title" id="chart-title">Government bond issuance</h1>
+      <p class="chart-desc" id="chart-desc">The Ministry of Finance&#39;s initial budget plan for bond issuance, laid alongside the actual issuance recorded in the settlement. Bonds tracked in separate categories, such as reconstruction bonds or pension special-issue bonds, are not included, following the classification used in the primary source.</p>
+      <p class="chart-note mono" id="chart-note" hidden></p>
+
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title"></svg>
+        <!-- グラフはJSでしか描かない。JSが無いとこの枠が空箱として残り、壊れて
+             いるようにしか見えないので、行き先を書いておく。表示の切り替えは
+             <head> の <noscript><style> が持つ。 -->
+        <p class="chart-noscript mono">This chart requires JavaScript to draw. The figures are in the table below.</p>
+      </div>
+
+      <p class="chart-summary mono" id="chart-summary">Years the settlement came in above the initial budget: 32 / below: 25 / matched the initial budget: 2 / mean gap +3.1tn yen / n=59 fiscal years (excludes FY1964 and earlier, when no bonds were issued)</p>
+
+      <div class="controls">
+        <input type="range" id="year-select" min="0" max="0" value="0" step="1">
+      </div>
+
+      <div class="readout">
+        <div class="readout-year mono" id="year-readout">----</div>
+        <div class="stat-row">
+          <div class="stat-chip">
+            <span class="stat-chip-dot stat-chip-dot-forecast"></span>
+            <span class="stat-chip-label" id="t-stat-forecast">Forecast</span>
+            <span class="stat-chip-value" id="v-forecast">—</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-chip-dot stat-chip-dot-actual"></span>
+            <span class="stat-chip-label" id="t-stat-actual">Actual</span>
+            <span class="stat-chip-value" id="v-actual">—</span>
+          </div>
+          <div class="stat-chip stat-chip-diff">
+            <span class="stat-chip-label" id="t-stat-gap">Gap</span>
+            <span class="stat-chip-value" id="v-diff">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="readout-notes" id="v-notes"></div>
+
+      <div class="readout-source" id="v-source"></div>
+
+      <p class="chart-note mono" id="archive-note" hidden></p>
+    </section>
+
+    <section class="data-section">
+      <details class="data-details">
+        <summary id="t-table-toggle">Show the figures as a table (80 fiscal years)</summary>
+      <div class="data-table-wrap">
+      <table class="data-table">
+        <caption id="t-table-caption">Government bond issuance — forecast, actual and gap by fiscal year</caption>
+        <thead>
+          <tr>
+            <th scope="col" id="t-th-year">Fiscal year</th>
+            <th scope="col" id="t-th-forecast">Forecast</th>
+            <th scope="col" id="t-th-actual">Actual</th>
+            <th scope="col" id="t-th-gap">Gap</th>
+            <th scope="col" id="t-th-source">Source</th>
+          </tr>
+        </thead>
+        <tbody>
+      <tr>
+        <th scope="row" class="mono" data-year="1947">FY1947</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1948">FY1948</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1949">FY1949</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1950">FY1950</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1951">FY1951</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1952">FY1952</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1953">FY1953</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1954">FY1954</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1955">FY1955</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1956">FY1956</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1957">FY1957</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1958">FY1958</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1959">FY1959</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1960">FY1960</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1961">FY1961</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1962">FY1962</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1963">FY1963</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1964">FY1964</th>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/jgbs/reference/appendix/hakkou02.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1965">FY1965</th>
+        <td class="mono" data-ph="gap">No issuance planned in the initial budget</td>
+        <td class="mono">0.2tn yen</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1966">FY1966</th>
+        <td class="mono">0.7tn yen</td>
+        <td class="mono">0.7tn yen</td>
+        <td class="mono">-0.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1967">FY1967</th>
+        <td class="mono">0.8tn yen</td>
+        <td class="mono">0.7tn yen</td>
+        <td class="mono">-0.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1968">FY1968</th>
+        <td class="mono">0.6tn yen</td>
+        <td class="mono">0.5tn yen</td>
+        <td class="mono">-0.2tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1969">FY1969</th>
+        <td class="mono">0.5tn yen</td>
+        <td class="mono">0.4tn yen</td>
+        <td class="mono">-0.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1970">FY1970</th>
+        <td class="mono">0.4tn yen</td>
+        <td class="mono">0.3tn yen</td>
+        <td class="mono">-0.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1971">FY1971</th>
+        <td class="mono">0.4tn yen</td>
+        <td class="mono">1.2tn yen</td>
+        <td class="mono">+0.8tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1972">FY1972</th>
+        <td class="mono">1.9tn yen</td>
+        <td class="mono">1.9tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1973">FY1973</th>
+        <td class="mono">2.3tn yen</td>
+        <td class="mono">1.8tn yen</td>
+        <td class="mono">-0.6tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1974">FY1974</th>
+        <td class="mono">2.2tn yen</td>
+        <td class="mono">2.2tn yen</td>
+        <td class="mono">0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1975">FY1975</th>
+        <td class="mono">2.0tn yen</td>
+        <td class="mono">5.3tn yen</td>
+        <td class="mono">+3.3tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">特例公債(赤字国債)の発行が再開された年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1976">FY1976</th>
+        <td class="mono">7.3tn yen</td>
+        <td class="mono">7.2tn yen</td>
+        <td class="mono">-0.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1977">FY1977</th>
+        <td class="mono">8.5tn yen</td>
+        <td class="mono">9.6tn yen</td>
+        <td class="mono">+1.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1978">FY1978</th>
+        <td class="mono">11.0tn yen</td>
+        <td class="mono">10.7tn yen</td>
+        <td class="mono">-0.3tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1979">FY1979</th>
+        <td class="mono">15.3tn yen</td>
+        <td class="mono">13.5tn yen</td>
+        <td class="mono">-1.8tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1980">FY1980</th>
+        <td class="mono">14.3tn yen</td>
+        <td class="mono">14.2tn yen</td>
+        <td class="mono">-0.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1981">FY1981</th>
+        <td class="mono">12.3tn yen</td>
+        <td class="mono">12.9tn yen</td>
+        <td class="mono">+0.6tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1982">FY1982</th>
+        <td class="mono">10.4tn yen</td>
+        <td class="mono">14.0tn yen</td>
+        <td class="mono">+3.6tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1983">FY1983</th>
+        <td class="mono">13.3tn yen</td>
+        <td class="mono">13.5tn yen</td>
+        <td class="mono">+0.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1984">FY1984</th>
+        <td class="mono">12.7tn yen</td>
+        <td class="mono">12.8tn yen</td>
+        <td class="mono">+0.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1985">FY1985</th>
+        <td class="mono">11.7tn yen</td>
+        <td class="mono">12.3tn yen</td>
+        <td class="mono">+0.6tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1986">FY1986</th>
+        <td class="mono">10.9tn yen</td>
+        <td class="mono">11.3tn yen</td>
+        <td class="mono">+0.3tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1987">FY1987</th>
+        <td class="mono">10.5tn yen</td>
+        <td class="mono">9.4tn yen</td>
+        <td class="mono">-1.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1988">FY1988</th>
+        <td class="mono">8.8tn yen</td>
+        <td class="mono">7.2tn yen</td>
+        <td class="mono">-1.7tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1989">FY1989</th>
+        <td class="mono">7.1tn yen</td>
+        <td class="mono">6.6tn yen</td>
+        <td class="mono">-0.5tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1990">FY1990</th>
+        <td class="mono">5.6tn yen</td>
+        <td class="mono">6.3tn yen</td>
+        <td class="mono">+0.8tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1991">FY1991</th>
+        <td class="mono">5.3tn yen</td>
+        <td class="mono">6.7tn yen</td>
+        <td class="mono">+1.4tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1992">FY1992</th>
+        <td class="mono">7.3tn yen</td>
+        <td class="mono">9.5tn yen</td>
+        <td class="mono">+2.3tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1993">FY1993</th>
+        <td class="mono">8.1tn yen</td>
+        <td class="mono">16.2tn yen</td>
+        <td class="mono">+8.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">バブル崩壊後の景気後退期の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1994">FY1994</th>
+        <td class="mono">10.5tn yen</td>
+        <td class="mono">13.2tn yen</td>
+        <td class="mono">+2.6tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1995">FY1995</th>
+        <td class="mono">9.7tn yen</td>
+        <td class="mono">18.4tn yen</td>
+        <td class="mono">+8.6tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">阪神・淡路大震災の復興対策が続いた年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1996">FY1996</th>
+        <td class="mono">19.1tn yen</td>
+        <td class="mono">19.9tn yen</td>
+        <td class="mono">+0.7tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1997">FY1997</th>
+        <td class="mono">16.7tn yen</td>
+        <td class="mono">18.5tn yen</td>
+        <td class="mono">+1.8tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1998">FY1998</th>
+        <td class="mono">15.6tn yen</td>
+        <td class="mono">34.0tn yen</td>
+        <td class="mono">+18.4tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">金融機関破綻が相次いだ金融危機の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="1999">FY1999</th>
+        <td class="mono">31.1tn yen</td>
+        <td class="mono">37.5tn yen</td>
+        <td class="mono">+6.5tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2000">FY2000</th>
+        <td class="mono">32.6tn yen</td>
+        <td class="mono">33.0tn yen</td>
+        <td class="mono">+0.4tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2001">FY2001</th>
+        <td class="mono">28.3tn yen</td>
+        <td class="mono">30.0tn yen</td>
+        <td class="mono">+1.7tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2002">FY2002</th>
+        <td class="mono">30.0tn yen</td>
+        <td class="mono">35.0tn yen</td>
+        <td class="mono">+5.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2003">FY2003</th>
+        <td class="mono">36.4tn yen</td>
+        <td class="mono">35.3tn yen</td>
+        <td class="mono">-1.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2004">FY2004</th>
+        <td class="mono">36.6tn yen</td>
+        <td class="mono">35.5tn yen</td>
+        <td class="mono">-1.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2005">FY2005</th>
+        <td class="mono">34.4tn yen</td>
+        <td class="mono">31.3tn yen</td>
+        <td class="mono">-3.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2006">FY2006</th>
+        <td class="mono">30.0tn yen</td>
+        <td class="mono">27.5tn yen</td>
+        <td class="mono">-2.5tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2007">FY2007</th>
+        <td class="mono">25.4tn yen</td>
+        <td class="mono">25.4tn yen</td>
+        <td class="mono">-0.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2008">FY2008</th>
+        <td class="mono">25.3tn yen</td>
+        <td class="mono">33.2tn yen</td>
+        <td class="mono">+7.8tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">リーマンショック年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2009">FY2009</th>
+        <td class="mono">33.3tn yen</td>
+        <td class="mono">52.0tn yen</td>
+        <td class="mono">+18.7tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">リーマンショック後の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2010">FY2010</th>
+        <td class="mono">44.3tn yen</td>
+        <td class="mono">42.3tn yen</td>
+        <td class="mono">-2.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2011">FY2011</th>
+        <td class="mono">44.3tn yen</td>
+        <td class="mono">42.8tn yen</td>
+        <td class="mono">-1.5tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2012">FY2012</th>
+        <td class="mono">44.2tn yen</td>
+        <td class="mono">47.5tn yen</td>
+        <td class="mono">+3.2tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2013">FY2013</th>
+        <td class="mono">42.9tn yen</td>
+        <td class="mono">40.9tn yen</td>
+        <td class="mono">-2.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2014">FY2014</th>
+        <td class="mono">41.3tn yen</td>
+        <td class="mono">38.5tn yen</td>
+        <td class="mono">-2.8tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2015">FY2015</th>
+        <td class="mono">36.9tn yen</td>
+        <td class="mono">34.9tn yen</td>
+        <td class="mono">-1.9tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2016">FY2016</th>
+        <td class="mono">34.4tn yen</td>
+        <td class="mono">38.0tn yen</td>
+        <td class="mono">+3.6tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2017">FY2017</th>
+        <td class="mono">34.4tn yen</td>
+        <td class="mono">33.6tn yen</td>
+        <td class="mono">-0.8tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2018">FY2018</th>
+        <td class="mono">33.7tn yen</td>
+        <td class="mono">34.4tn yen</td>
+        <td class="mono">+0.7tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2019">FY2019</th>
+        <td class="mono">32.7tn yen</td>
+        <td class="mono">36.6tn yen</td>
+        <td class="mono">+3.9tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2020">FY2020</th>
+        <td class="mono">32.6tn yen</td>
+        <td class="mono">108.6tn yen</td>
+        <td class="mono">+76.0tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">新型コロナ影響の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2021">FY2021</th>
+        <td class="mono">43.6tn yen</td>
+        <td class="mono">57.7tn yen</td>
+        <td class="mono">+14.1tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">新型コロナ対応が続いた年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2022">FY2022</th>
+        <td class="mono">36.9tn yen</td>
+        <td class="mono">50.5tn yen</td>
+        <td class="mono">+13.6tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">円安・輸入物価高の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2023">FY2023</th>
+        <td class="mono">35.6tn yen</td>
+        <td class="mono">35.0tn yen</td>
+        <td class="mono">-0.6tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2024">FY2024</th>
+        <td class="mono">35.4tn yen</td>
+        <td class="mono">37.1tn yen</td>
+        <td class="mono">+1.7tn yen</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2025">FY2025</th>
+        <td class="mono">28.6tn yen</td>
+        <td class="mono" data-ph="pending">Actual not yet finalized (fiscal year in progress)</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2026">FY2026</th>
+        <td class="mono">29.6tn yen</td>
+        <td class="mono" data-ph="pending">Actual not yet finalized (fiscal year in progress)</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.mof.go.jp/policy/budget/fiscal_condition/basic_data/202604/sy202604f.pdf" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+      </tr>
+        </tbody>
+      </table>
+      </div>
+        <p class="chart-note mono"><span id="t-table-csv">Source data: </span><a href="/data/bond_issuance_forecast.csv">/data/bond_issuance_forecast.csv</a></p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="site-footer-row">
+    <span id="t-footer-src">src: Cabinet Office of Japan / SNA</span>
+    <a class="footer-about" id="t-footer-about" href="/en/about">About this site</a>
+    <a class="footer-about" id="t-footer-contact" href="/en/contact">Contact</a>
+  </footer>
+</div>
+<script src="/csv.js?v=20260731k"></script>
+<script src="/chart.js?v=20260731k"></script>
+</body>
+</html>

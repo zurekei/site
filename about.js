@@ -116,7 +116,9 @@ function renderMethodsRows(lang) {
 }
 
 function main() {
-  let lang = "ja";
+  // 言語はURL(=生成時に確定したdocument.documentElement.lang)が決める。詳細は
+  // home.js の同じ変更のコメントを参照(2026-07-29、/en/ページ追加時)。
+  let lang = document.documentElement.lang === "en" ? "en" : "ja";
 
   function applyI18n() {
     const t = T[lang];
@@ -159,8 +161,9 @@ function main() {
     document.documentElement.lang = lang;
   }
 
-  document.getElementById("lang-ja").addEventListener("click", () => { lang = "ja"; applyI18n(); });
-  document.getElementById("lang-en").addEventListener("click", () => { lang = "en"; applyI18n(); });
+  // lang-ja/lang-en は他ページの URL への実リンク(<a>)。切り替えはブラウザの通常の
+  // ナビゲーションに任せるので、クリック自体にJSは要らない(home.js の同じ変更の
+  // コメントを参照)。
 
   applyI18n();
 }

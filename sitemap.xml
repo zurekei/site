@@ -16,15 +16,15 @@
   政府の公表日に合わせてデータが更新されることがこのサイトの価値の中心なのに、
   更新されたことを機械に伝える手段が今まで無かったので、ここで足す。
 
-  丸ごと/差し込み生成しているページ(chart 系・fertility・hoan・トップ)の
-  lastmod は「そのページの元になっているファイル群」ではなく「生成された
-  出力そのもの」を見て決めている。生成した文字列を直前のコミット(HEAD)の
-  内容と比べ、違えば今日の日付、同じなら出力ファイル自身の最終コミット日と
-  する。理由は、依存ファイルの対応表に生成器自身を含めていた最初の実装だと、
-  生成器のコメントを直すだけで配信バイトが1つも変わらないのに更新扱いに
-  なってしまうため。about/corrections/contact はビルダーの生成物ではない
-  ページなので、この判定は使わず、従来どおり元ファイル群のコミット日の
-  最大値を使う。
+  丸ごと/差し込み生成しているページ(chart 系・fertility・hoan・トップ・
+  en/about・en/corrections・en/contact)の lastmod は「そのページの元になって
+  いるファイル群」ではなく「生成された出力そのもの」を見て決めている。生成
+  した文字列を直前のコミット(HEAD)の内容と比べ、違えば今日の日付、同じなら
+  出力ファイル自身の最終コミット日とする。理由は、依存ファイルの対応表に
+  生成器自身を含めていた最初の実装だと、生成器のコメントを直すだけで配信
+  バイトが1つも変わらないのに更新扱いになってしまうため。about/corrections/
+  contact の JA版だけはビルダーの生成物ではないページなので、この判定は使わず、
+  従来どおり元ファイル群のコミット日の最大値を使う。
 
   日付は同じ日にビルドしてコミットする限り安定する。日をまたぐと検査(node
   bin/build.mjs のcheckモード)が落ちるが、落ちる方向が安全側(誤った日付が
@@ -39,8 +39,10 @@
 -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://zurekei.org/</loc><lastmod>2026-07-29</lastmod><priority>1.0</priority></url>
+  <url><loc>https://zurekei.org/en/</loc><lastmod>2026-07-29</lastmod><priority>1.0</priority></url>
 
   <url><loc>https://zurekei.org/chart/</loc><lastmod>2026-07-29</lastmod><priority>0.8</priority></url>
+  <url><loc>https://zurekei.org/en/chart/</loc><lastmod>2026-07-29</lastmod><priority>0.8</priority></url>
 
   <url><loc>https://zurekei.org/chart/gdp-real</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/chart/gdp-nominal</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
@@ -52,8 +54,21 @@
   <url><loc>https://zurekei.org/chart/cpi</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/fertility</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/hoan</loc><lastmod>2026-07-29</lastmod><priority>0.8</priority></url>
+  <url><loc>https://zurekei.org/en/chart/gdp-real</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/chart/gdp-nominal</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/chart/unemployment</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/chart/current-account</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/chart/tax-revenue</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/chart/bond-issuance</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/chart/jgb-total</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/chart/cpi</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/fertility</loc><lastmod>2026-07-29</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/hoan</loc><lastmod>2026-07-29</lastmod><priority>0.8</priority></url>
 
   <url><loc>https://zurekei.org/about</loc><lastmod>2026-07-29</lastmod><priority>0.7</priority></url>
   <url><loc>https://zurekei.org/corrections</loc><lastmod>2026-07-29</lastmod><priority>0.5</priority></url>
   <url><loc>https://zurekei.org/contact</loc><lastmod>2026-07-29</lastmod><priority>0.3</priority></url>
+  <url><loc>https://zurekei.org/en/about</loc><lastmod>2026-07-29</lastmod><priority>0.7</priority></url>
+  <url><loc>https://zurekei.org/en/corrections</loc><lastmod>2026-07-29</lastmod><priority>0.5</priority></url>
+  <url><loc>https://zurekei.org/en/contact</loc><lastmod>2026-07-29</lastmod><priority>0.3</priority></url>
 </urlset>

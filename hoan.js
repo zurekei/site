@@ -1,6 +1,10 @@
 // 法案タブ: 見直し条項の期限テーブル。data/hoan_review.csv を読み、期限順に描画する。
 // 条文原文は data/hoan_clauses/{law_id}.txt をクリック時に遅延取得する。
-// 言語(ja/en)は localStorage "zurekei-lang" で index ページと共有する。
+// 言語(ja/en)は document.documentElement.lang(=URL)で決める。かつてこのコメントは
+// 「localStorage "zurekei-lang" で index ページと共有する」と書いていたが、実際には
+// このファイルはlocalStorageをどこからも読んでおらず(下のlang-ja/lang-enクリック時に
+// 書くだけ)、共有は実装されたことが無かった。実在しない機能を説明するコメントだった
+// ので2026-07-30に書き直した。
 
 // cls / order は言語に依存しないためここに、表示ラベルは T 側に置く。
 const STATUS = {
@@ -91,7 +95,12 @@ const T = {
 let ROWS = [];
 let activeStatus = "all";
 let activeYear = "all";
-let lang = localStorage.getItem("zurekei-lang") === "en" ? "en" : "ja";
+// 言語はURL(=生成時に確定したdocument.documentElement.lang)が決める。詳細は
+// home.js の同じ変更のコメントを参照(2026-07-29、/en/ページ追加時)。代入は
+// main() の中でだけ行う(loadModule はトップレベルで document 等のブラウザAPIに
+// 触れないことを前提にしているため。宣言だけをここに残すのは、tr() 等の他の
+// 関数がこの変数をクロージャで参照する構造を変えずに済ませるため)。
+let lang;
 const clauseCache = {};
 
 function tr() {
@@ -264,16 +273,12 @@ function applyAll() {
   render();
 }
 
-function setLang(l) {
-  lang = l;
-  localStorage.setItem("zurekei-lang", l);
-  applyAll();
-}
-
 async function main() {
+  lang = document.documentElement.lang === "en" ? "en" : "ja";
   ROWS = await loadCSV("data/hoan_review.csv");
-  document.getElementById("lang-ja").addEventListener("click", () => setLang("ja"));
-  document.getElementById("lang-en").addEventListener("click", () => setLang("en"));
+  // lang-ja/lang-en は他ページの URL への実リンク(<a>)。切り替えはブラウザの通常の
+  // ナビゲーションに任せるので、クリック自体にJSは要らない(home.js の同じ変更の
+  // コメントを参照)。
   // 年フィルタの change リスナは要素が使い回されるため一度だけ張る
   document.getElementById("year-filter").addEventListener("change", (e) => {
     activeYear = e.target.value;

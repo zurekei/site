@@ -1,21 +1,21 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- このファイルは bin/build.mjs が data/*.csv から生成している。直接編集しない。
      直すのは chart.js の METRICS か data/*.csv のどちらか。 -->
-<title id="page-title">完全失業率 — ズレ計</title>
-<meta name="description" content="政府の当初見通しと、確定した実績を並べたもの。">
-<link rel="canonical" href="https://zurekei.org/chart/unemployment">
+<title id="page-title">Unemployment rate — zurekei</title>
+<meta name="description" content="The government&#39;s initial forecast laid alongside the confirmed actual.">
+<link rel="canonical" href="https://zurekei.org/en/chart/unemployment">
 <link rel="alternate" hreflang="ja" href="https://zurekei.org/chart/unemployment">
 <link rel="alternate" hreflang="en" href="https://zurekei.org/en/chart/unemployment">
 <link rel="alternate" hreflang="x-default" href="https://zurekei.org/chart/unemployment">
-<meta property="og:site_name" content="ズレ計">
+<meta property="og:site_name" content="zurekei">
 <meta property="og:type" content="website">
-<meta property="og:title" content="完全失業率 — ズレ計">
-<meta property="og:description" content="政府の当初見通しと、確定した実績を並べたもの。">
-<meta property="og:url" content="https://zurekei.org/chart/unemployment">
+<meta property="og:title" content="Unemployment rate — zurekei">
+<meta property="og:description" content="The government&#39;s initial forecast laid alongside the confirmed actual.">
+<meta property="og:url" content="https://zurekei.org/en/chart/unemployment">
 <meta property="og:image" content="https://zurekei.org/assets/og.png">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
@@ -27,12 +27,12 @@
 {
   "@context": "https://schema.org",
   "@type": "Dataset",
-  "@id": "https://zurekei.org/chart/unemployment#dataset",
-  "name": "完全失業率｜政府の当初見通しと実績",
-  "description": "政府の当初見通しと、確定した実績を並べたもの。",
-  "url": "https://zurekei.org/chart/unemployment",
+  "@id": "https://zurekei.org/en/chart/unemployment#dataset",
+  "name": "Unemployment rate — government's initial forecast and confirmed actual",
+  "description": "The government's initial forecast laid alongside the confirmed actual.",
+  "url": "https://zurekei.org/en/chart/unemployment",
   "isAccessibleForFree": true,
-  "inLanguage": "ja",
+  "inLanguage": "en",
   "temporalCoverage": "1998/2026",
   "creator": {
     "@type": "Organization",
@@ -47,12 +47,12 @@
   "variableMeasured": [
     {
       "@type": "PropertyValue",
-      "name": "見通し（当初）",
+      "name": "Forecast (initial)",
       "unitText": "%"
     },
     {
       "@type": "PropertyValue",
-      "name": "実績（確定）",
+      "name": "Actual (confirmed)",
       "unitText": "%"
     }
   ],
@@ -69,7 +69,7 @@
 <body data-metric="unemployment">
 <div class="page">
   <header class="site-header">
-    <a class="brand" href="/" aria-label="ズレ計 トップへ">
+    <a class="brand" href="/en/" aria-label="zurekei home">
       <svg class="brand-logo" viewBox="0 0 512 512">
         <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
         <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
@@ -89,18 +89,18 @@
     </a>
     <div class="header-right">
       <div class="lang-toggle">
-        <a id="lang-ja" class="lang-btn mono active" href="/chart/unemployment">JA</a>
-        <a id="lang-en" class="lang-btn mono" href="/en/chart/unemployment">EN</a>
+        <a id="lang-ja" class="lang-btn mono" href="/chart/unemployment">JA</a>
+        <a id="lang-en" class="lang-btn mono active" href="/en/chart/unemployment">EN</a>
       </div>
     </div>
   </header>
 
-  <a class="chart-back" id="t-back" href="/">← 指標一覧</a>
+  <a class="chart-back" id="t-back" href="/en/">← Indicators</a>
 
   <main>
     <section class="chart-section">
-      <h1 class="chart-title" id="chart-title">完全失業率</h1>
-      <p class="chart-desc" id="chart-desc">政府の当初見通しと、確定した実績を並べたもの。</p>
+      <h1 class="chart-title" id="chart-title">Unemployment rate</h1>
+      <p class="chart-desc" id="chart-desc">The government&#39;s initial forecast laid alongside the confirmed actual.</p>
       <p class="chart-note mono" id="chart-note" hidden></p>
 
       <div class="chart-wrap">
@@ -108,10 +108,10 @@
         <!-- グラフはJSでしか描かない。JSが無いとこの枠が空箱として残り、壊れて
              いるようにしか見えないので、行き先を書いておく。表示の切り替えは
              <head> の <noscript><style> が持つ。 -->
-        <p class="chart-noscript mono">グラフの描画には JavaScript が必要です。数値は下の表にあります。</p>
+        <p class="chart-noscript mono">This chart requires JavaScript to draw. The figures are in the table below.</p>
       </div>
 
-      <p class="chart-summary mono" id="chart-summary">実績が見通しを上回った年 9回 / 下回った年 12回 / 見通しどおり 5回 / 平均のズレ ±0.0pt / 対象26年度分</p>
+      <p class="chart-summary mono" id="chart-summary">Years actual came in above forecast: 9 / below: 12 / matched the forecast: 5 / mean gap ±0.0pt / n=26 fiscal years</p>
 
       <div class="controls">
         <input type="range" id="year-select" min="0" max="0" value="0" step="1">
@@ -122,16 +122,16 @@
         <div class="stat-row">
           <div class="stat-chip">
             <span class="stat-chip-dot stat-chip-dot-forecast"></span>
-            <span class="stat-chip-label" id="t-stat-forecast">見通し</span>
+            <span class="stat-chip-label" id="t-stat-forecast">Forecast</span>
             <span class="stat-chip-value" id="v-forecast">—</span>
           </div>
           <div class="stat-chip">
             <span class="stat-chip-dot stat-chip-dot-actual"></span>
-            <span class="stat-chip-label" id="t-stat-actual">実績</span>
+            <span class="stat-chip-label" id="t-stat-actual">Actual</span>
             <span class="stat-chip-value" id="v-actual">—</span>
           </div>
           <div class="stat-chip stat-chip-diff">
-            <span class="stat-chip-label" id="t-stat-gap">ズレ</span>
+            <span class="stat-chip-label" id="t-stat-gap">Gap</span>
             <span class="stat-chip-value" id="v-diff">—</span>
           </div>
         </div>
@@ -146,263 +146,263 @@
 
     <section class="data-section">
       <details class="data-details">
-        <summary id="t-table-toggle">年度ごとの数値を表で見る（29年度分）</summary>
+        <summary id="t-table-toggle">Show the figures as a table (29 fiscal years)</summary>
       <div class="data-table-wrap">
       <table class="data-table">
-        <caption id="t-table-caption">完全失業率｜年度ごとの見通し・実績・ズレ</caption>
+        <caption id="t-table-caption">Unemployment rate — forecast, actual and gap by fiscal year</caption>
         <thead>
           <tr>
-            <th scope="col" id="t-th-year">年度</th>
-            <th scope="col" id="t-th-forecast">見通し</th>
-            <th scope="col" id="t-th-actual">実績</th>
-            <th scope="col" id="t-th-gap">ズレ</th>
-            <th scope="col" id="t-th-source">出典</th>
+            <th scope="col" id="t-th-year">Fiscal year</th>
+            <th scope="col" id="t-th-forecast">Forecast</th>
+            <th scope="col" id="t-th-actual">Actual</th>
+            <th scope="col" id="t-th-gap">Gap</th>
+            <th scope="col" id="t-th-source">Source</th>
           </tr>
         </thead>
         <tbody>
       <tr>
-        <th scope="row" class="mono" data-year="1998">1998年度</th>
-        <td class="mono" data-ph="gap">データ未収集</td>
+        <th scope="row" class="mono" data-year="1998">FY1998</th>
+        <td class="mono" data-ph="gap">Data not yet collected</td>
         <td class="mono">4.3%</td>
         <td class="mono">—</td>
-        <td class="data-table-src"><a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">内閣府「平成10年度の経済見通しと経済運営の基本的態度」(https://www5.cao.go.jp/keizai1/mitoshi/1998/19980119mitoshi.html)本文および別添の主要経済指標表(労働・雇用)には完全失業率の項目自体が無く、見通し値を確認できなかったため空欄。実績値は総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の1998年度(平成10年度)欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="1999">1999年度</th>
-        <td class="mono" data-ph="gap">データ未収集</td>
+        <th scope="row" class="mono" data-year="1999">FY1999</th>
+        <td class="mono" data-ph="gap">Data not yet collected</td>
         <td class="mono">4.7%</td>
         <td class="mono">—</td>
-        <td class="data-table-src"><a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">内閣府「平成11年度の経済見通しと経済運営の基本的態度」(https://www5.cao.go.jp/keizai1/mitoshi/1999/19990118b-mitoshi.html)本文に完全失業率の記載はなく、別添の主要経済指標表は画像(gif)形式でテキスト抽出・数値確認ができなかったため見通し値は空欄。実績値は総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の1999年度(平成11年度)欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2000">2000年度</th>
+        <th scope="row" class="mono" data-year="2000">FY2000</th>
         <td class="mono">4.5%</td>
         <td class="mono">4.7%</td>
         <td class="mono">+0.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2000/h120128mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2000/h120128mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2000年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2001">2001年度</th>
+        <th scope="row" class="mono" data-year="2001">FY2001</th>
         <td class="mono">4.5%</td>
         <td class="mono">5.2%</td>
         <td class="mono">+0.7pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2001/0131b-mitoshi.html" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2001/0131b-mitoshi.html" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2001年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2002">2002年度</th>
+        <th scope="row" class="mono" data-year="2002">FY2002</th>
         <td class="mono">5.6%</td>
         <td class="mono">5.4%</td>
         <td class="mono">-0.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2002/0125mitoshi.html" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2002/0125mitoshi.html" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2002年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2003">2003年度</th>
+        <th scope="row" class="mono" data-year="2003">FY2003</th>
         <td class="mono">5.6%</td>
         <td class="mono">5.1%</td>
         <td class="mono">-0.5pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2003/h150124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2003/h150124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2003年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2004">2004年度</th>
+        <th scope="row" class="mono" data-year="2004">FY2004</th>
         <td class="mono">5.1%</td>
         <td class="mono">4.6%</td>
         <td class="mono">-0.5pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2004/h160119mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2004/h160119mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2004年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2005">2005年度</th>
+        <th scope="row" class="mono" data-year="2005">FY2005</th>
         <td class="mono">4.6%</td>
         <td class="mono">4.3%</td>
         <td class="mono">-0.3pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2005/h170121mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2005/h170121mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2005年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2006">2006年度</th>
+        <th scope="row" class="mono" data-year="2006">FY2006</th>
         <td class="mono">4.1%</td>
         <td class="mono">4.1%</td>
         <td class="mono">0.0pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2006/h180120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2006/h180120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2006年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2007">2007年度</th>
+        <th scope="row" class="mono" data-year="2007">FY2007</th>
         <td class="mono">4.0%</td>
         <td class="mono">3.8%</td>
         <td class="mono">-0.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2007/h190125mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2007/h190125mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2007年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2008">2008年度</th>
+        <th scope="row" class="mono" data-year="2008">FY2008</th>
         <td class="mono">3.8%</td>
         <td class="mono">4.1%</td>
         <td class="mono">+0.3pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2008/h200118mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2008/h200118mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">リーマンショック年度。総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2008年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2009">2009年度</th>
+        <th scope="row" class="mono" data-year="2009">FY2009</th>
         <td class="mono">4.7%</td>
         <td class="mono">5.2%</td>
         <td class="mono">+0.5pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2009/0119mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2009/0119mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2009年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2010">2010年度</th>
+        <th scope="row" class="mono" data-year="2010">FY2010</th>
         <td class="mono">5.3%</td>
         <td class="mono">4.9%</td>
         <td class="mono">-0.4pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2010/h220122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2010/h220122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2010年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2011">2011年度</th>
+        <th scope="row" class="mono" data-year="2011">FY2011</th>
         <td class="mono">4.7%</td>
         <td class="mono">4.5%</td>
         <td class="mono">-0.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2011/h230124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2011/h230124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">東日本大震災年度。総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2011年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2012">2012年度</th>
+        <th scope="row" class="mono" data-year="2012">FY2012</th>
         <td class="mono">4.3%</td>
         <td class="mono">4.3%</td>
         <td class="mono">0.0pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2012/h240124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2012/h240124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2012年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2013">2013年度</th>
+        <th scope="row" class="mono" data-year="2013">FY2013</th>
         <td class="mono">3.9%</td>
         <td class="mono">3.9%</td>
         <td class="mono">0.0pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2013/h250228mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2013/h250228mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2013年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2014">2014年度</th>
+        <th scope="row" class="mono" data-year="2014">FY2014</th>
         <td class="mono">3.7%</td>
         <td class="mono">3.5%</td>
         <td class="mono">-0.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2014/h260124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2014/h260124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">消費税率8%引き上げ年度。総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2014年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2015">2015年度</th>
+        <th scope="row" class="mono" data-year="2015">FY2015</th>
         <td class="mono">3.5%</td>
         <td class="mono">3.3%</td>
         <td class="mono">-0.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2015/h270212mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2015/h270212mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2015年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2016">2016年度</th>
+        <th scope="row" class="mono" data-year="2016">FY2016</th>
         <td class="mono">3.2%</td>
         <td class="mono">3.0%</td>
         <td class="mono">-0.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2016/h280122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2016/h280122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2016年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2017">2017年度</th>
+        <th scope="row" class="mono" data-year="2017">FY2017</th>
         <td class="mono">2.9%</td>
         <td class="mono">2.7%</td>
         <td class="mono">-0.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2017/h290120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2017/h290120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2017年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2018">2018年度</th>
+        <th scope="row" class="mono" data-year="2018">FY2018</th>
         <td class="mono">2.7%</td>
         <td class="mono">2.4%</td>
         <td class="mono">-0.3pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2018/h300122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2018/h300122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2018年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2019">2019年度</th>
+        <th scope="row" class="mono" data-year="2019">FY2019</th>
         <td class="mono">2.3%</td>
         <td class="mono">2.3%</td>
         <td class="mono">0.0pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2019/h310128mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2019/h310128mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">消費税率10%引き上げ・新型コロナ発生初期年度。総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2019年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2020">2020年度</th>
+        <th scope="row" class="mono" data-year="2020">FY2020</th>
         <td class="mono">2.3%</td>
         <td class="mono">2.9%</td>
         <td class="mono">+0.6pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2019/r020120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2019/r020120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">新型コロナ影響の年度。総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2020年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2021">2021年度</th>
+        <th scope="row" class="mono" data-year="2021">FY2021</th>
         <td class="mono">2.7%</td>
         <td class="mono">2.8%</td>
         <td class="mono">+0.1pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2020/r030118mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2020/r030118mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2021年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2022">2022年度</th>
+        <th scope="row" class="mono" data-year="2022">FY2022</th>
         <td class="mono">2.4%</td>
         <td class="mono">2.6%</td>
         <td class="mono">+0.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2021/r040117mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2021/r040117mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2022年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2023">2023年度</th>
+        <th scope="row" class="mono" data-year="2023">FY2023</th>
         <td class="mono">2.4%</td>
         <td class="mono">2.6%</td>
         <td class="mono">+0.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2022/r050123mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2022/r050123mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2023年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2024">2024年度</th>
+        <th scope="row" class="mono" data-year="2024">FY2024</th>
         <td class="mono">2.5%</td>
         <td class="mono">2.5%</td>
         <td class="mono">0.0pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2023/r060126mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2023/r060126mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">本年次推計に収録された最新（現時点で最終）確定年度。総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2024年度欄より。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2025">2025年度</th>
+        <th scope="row" class="mono" data-year="2025">FY2025</th>
         <td class="mono">2.4%</td>
         <td class="mono">2.6%</td>
         <td class="mono">+0.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2024/r070124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2024/r070124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000040104500&amp;fileKind=0" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
       <tr class="data-table-note"><td colspan="5" lang="ja">総務省統計局「労働力調査 長期時系列表(年度平均結果)」表2-2の2025年度欄より(2025年度は2026年4月28日更新の速報値ベース。将来的に確報値へ改定される可能性あり)。</td></tr>
       <tr>
-        <th scope="row" class="mono" data-year="2026">2026年度</th>
+        <th scope="row" class="mono" data-year="2026">FY2026</th>
         <td class="mono">2.4%</td>
-        <td class="mono" data-ph="pending">実績未確定(年度未終了)</td>
+        <td class="mono" data-ph="pending">Actual not yet finalized (fiscal year in progress)</td>
         <td class="mono">—</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/r080123mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/r080123mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a></td>
       </tr>
         </tbody>
       </table>
       </div>
-        <p class="chart-note mono"><span id="t-table-csv">元データ: </span><a href="/data/unemployment_forecast.csv">/data/unemployment_forecast.csv</a></p>
+        <p class="chart-note mono"><span id="t-table-csv">Source data: </span><a href="/data/unemployment_forecast.csv">/data/unemployment_forecast.csv</a></p>
       </details>
     </section>
   </main>
 
   <footer class="site-footer-row">
-    <span id="t-footer-src">src: 内閣府 / 国民経済計算(SNA)</span>
-    <a class="footer-about" id="t-footer-about" href="/about.html">このサイトについて</a>
-    <a class="footer-about" id="t-footer-contact" href="/contact.html">お問い合わせ</a>
+    <span id="t-footer-src">src: Cabinet Office of Japan / SNA</span>
+    <a class="footer-about" id="t-footer-about" href="/en/about">About this site</a>
+    <a class="footer-about" id="t-footer-contact" href="/en/contact">Contact</a>
   </footer>
 </div>
 <script src="/csv.js?v=20260731k"></script>

@@ -7,6 +7,38 @@
   const svg = document.getElementById("hero-chart");
   if (!svg) return;
 
+  // 他の全 .js と同じ規約: 言語は document.documentElement.lang(ビルド時に
+  // ページごとに ja/en が確定している)で決める。かつてここだけ言語を見ておらず、
+  // 英語ページでも常に日本語の aria-label・端ラベルを書き込んでいた
+  // (2026-07-30 レビュー指摘で修正)。
+  //
+  // 訳文は home.js の T.en と同じ語(heroCaption/plan/actual)を値として再利用する
+  // (新規に訳を作らない)。ただし home.js の T を実行時に直接参照することは
+  // できない: index.html の <script> は csv.js → hero.js → home.js の順で読まれ、
+  // hero.js の本体(この await の先)が走る頃には home.js がまだ評価されておらず
+  // T が存在しない可能性がある。加えて、この2つはクラシックscriptとして同じ
+  // ページのトップレベル字句スコープを共有するため、home.js 側と同じ変数名
+  // `T` をここで宣言すると home.js の `const T` 宣言と衝突しSyntaxErrorで
+  // 両方とも止まる。なので値だけを独立した名前で複製する(chart.js冒頭の
+  // 「nameEn は home.js の INDICATOR_META.nameEn と手で揃える」注記と同種の
+  // 割り切り)。変えるときは両方揃えること。
+  const lang = document.documentElement.lang === "en" ? "en" : "ja";
+  const HERO_STR = {
+    ja: {
+      ariaLabel: (min, max) => `名目GDP成長率 — 政府の当初見通しと実績 ${min}–${max}年度`,
+      forecast: "見通し",
+      actual: "実績",
+    },
+    en: {
+      // home.js T.en.heroCaption と同一の文言(hero-caption の下のキャプションと
+      // 同じ文)。
+      ariaLabel: (min, max) => `Nominal GDP growth — initial forecast vs actual, FY${min}–${max}`,
+      // home.js T.en.plan / T.en.actual と同一の語。
+      forecast: "Forecast",
+      actual: "Actual",
+    },
+  }[lang];
+
   const SVG_NS = "http://www.w3.org/2000/svg";
   const W = 960;
   const H = 340;
@@ -64,7 +96,7 @@
     return segments.map((seg) => `M ${seg.map((r) => `${x(r.year)},${y(r[valKey])}`).join(" L ")}`).join(" ");
   }
 
-  svg.setAttribute("aria-label", `名目GDP成長率 — 政府の当初見通しと実績 ${xMin}–${xMax}年度`);
+  svg.setAttribute("aria-label", HERO_STR.ariaLabel(xMin, xMax));
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -150,7 +182,7 @@
     opacity: reduceMotion ? 1 : 0,
   });
   forecastLabel.id = "hero-label-forecast";
-  forecastLabel.textContent = "見通し";
+  forecastLabel.textContent = HERO_STR.forecast;
   svg.appendChild(forecastLabel);
 
   const lastActual = actualPts[actualPts.length - 1];
@@ -161,7 +193,7 @@
     opacity: reduceMotion ? 1 : 0,
   });
   actualLabel.id = "hero-label-actual";
-  actualLabel.textContent = "実績";
+  actualLabel.textContent = HERO_STR.actual;
   svg.appendChild(actualLabel);
 
   if (reduceMotion) return;

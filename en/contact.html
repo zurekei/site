@@ -1,26 +1,23 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>お問い合わせ — ズレ計</title>
-<meta name="description" content="ズレ計へのご質問・ご指摘・データ修正提案はこちらから。">
-<!-- Canonical is the extension-less URL: /x.html 308-redirects to /x, so the two
-     spellings are the same page. Without this, aggregators that key on URL (はてなブックマーク)
-     count them as separate entries and split the bookmark total. -->
-<link rel="canonical" href="https://zurekei.org/contact">
+<title>Contact — zurekei</title>
+<meta name="description" content="Questions about this site, corrections to the data, and proposed revisions to forecast or actual figures all go here.">
+<link rel="canonical" href="https://zurekei.org/en/contact">
 <link rel="alternate" hreflang="ja" href="https://zurekei.org/contact">
 <link rel="alternate" hreflang="en" href="https://zurekei.org/en/contact">
 <link rel="alternate" hreflang="x-default" href="https://zurekei.org/contact">
-<meta property="og:site_name" content="ズレ計">
+<meta property="og:site_name" content="zurekei">
 <meta property="og:type" content="website">
-<meta property="og:title" content="お問い合わせ — ズレ計">
-<meta property="og:description" content="ズレ計へのご質問・ご指摘・データ修正提案はこちらから。">
-<meta property="og:url" content="https://zurekei.org/contact">
+<meta property="og:title" content="Contact — zurekei">
+<meta property="og:description" content="Questions about this site, corrections to the data, and proposed revisions to forecast or actual figures all go here.">
+<meta property="og:url" content="https://zurekei.org/en/contact">
 <meta property="og:image" content="https://zurekei.org/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=20260731k">
+<link rel="stylesheet" href="/style.css?v=20260731k">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
   .contact-page-wrap {
@@ -148,7 +145,7 @@
 <body>
 <div class="page">
   <header class="site-header">
-    <a class="brand" href="index.html" aria-label="ズレ計 トップへ">
+    <a class="brand" href="/en/" aria-label="zurekei home">
       <svg class="brand-logo" viewBox="0 0 512 512">
         <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
         <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
@@ -168,39 +165,39 @@
     </a>
     <div class="header-right">
       <div class="lang-toggle">
-        <a id="lang-ja" class="lang-btn mono active" href="/contact">JA</a>
-        <a id="lang-en" class="lang-btn mono" href="/en/contact">EN</a>
+        <a id="lang-ja" class="lang-btn mono" href="/contact">JA</a>
+        <a id="lang-en" class="lang-btn mono active" href="/en/contact">EN</a>
       </div>
     </div>
   </header>
 
-  <a class="chart-back" id="t-back" href="index.html">← 指標一覧</a>
+  <a class="chart-back" id="t-back" href="/en/">← Indicators</a>
 
   <div class="contact-page-wrap">
-    <h1 id="contact-title">お問い合わせ</h1>
+    <h1 id="contact-title">Contact</h1>
     <p class="lead" id="contact-lead">
-      ズレ計についてのご質問、データの誤りご指摘、見通し値・実績値の修正提案などはこちらから。
+      Questions about this site, corrections to the data, and proposed revisions to forecast or actual figures all go here.
     </p>
 
     <form id="contactForm">
       <div class="form-group">
-        <label id="label-name">お名前<span>*</span></label>
-        <input type="text" id="name" placeholder="例：山田 太郎" required>
+        <label id="label-name">Name<span>*</span></label>
+        <input type="text" id="name" placeholder="e.g. Taro Yamada" required>
       </div>
 
       <div class="form-group">
-        <label id="label-email">メールアドレス<span>*</span></label>
+        <label id="label-email">Email<span>*</span></label>
         <input type="email" id="email" placeholder="example@email.com" required>
       </div>
 
       <div class="form-group">
-        <label id="label-affiliation">所属・肩書</label>
-        <input type="text" id="affiliation" placeholder="例：○○大学 経済学部（任意）">
+        <label id="label-affiliation">Affiliation or title</label>
+        <input type="text" id="affiliation" placeholder="e.g. University of Tokyo, Faculty of Economics (optional)">
       </div>
 
       <div class="form-group">
-        <label id="label-message">お問い合わせ内容<span>*</span></label>
-        <textarea id="message" placeholder="ご質問・ご指摘をご記入ください" required></textarea>
+        <label id="label-message">Message<span>*</span></label>
+        <textarea id="message" placeholder="Your question or correction" required></textarea>
       </div>
 
       <!-- Site key of the "zurekei-contact" widget. Public by design (it ships to every
@@ -208,24 +205,24 @@
            come from the SAME widget — a mismatch fails server-side verification. -->
       <div class="cf-turnstile" data-sitekey="0x4AAAAAAD_Ftl2YrgymWDtM" data-appearance="interaction-only"></div>
 
-      <button type="submit" class="submit-btn" id="submitBtn" data-text="送信する">送信する</button>
+      <button type="submit" class="submit-btn" id="submitBtn" data-text="Send">Send</button>
 
       <div class="form-msg success" id="successMsg">
-        ✓ お問い合わせを受け付けました。ご返信までお待たせする場合がございます。
+        ✓ Your message has been received. A reply may take some time.
       </div>
       <div class="form-msg error" id="errorMsg">
-        × 送信に失敗しました。時間をおいて再度お試しください。
+        × Sending failed. Please try again later.
       </div>
     </form>
   </div>
 
   <footer class="site-footer-row">
-    <a class="footer-about" id="t-footer-index" href="index.html">指標一覧へ</a>
-    <a class="footer-about" id="t-footer-corrections" href="corrections.html">訂正履歴</a>
-    <a class="footer-about" id="t-footer-about" href="about.html">このサイトについて</a>
+    <a class="footer-about" id="t-footer-index" href="/en/">Indicators</a>
+    <a class="footer-about" id="t-footer-corrections" href="/en/corrections">Corrections</a>
+    <a class="footer-about" id="t-footer-about" href="/en/about">About this site</a>
   </footer>
 </div>
 
-<script src="contact.js?v=20260731k"></script>
+<script src="/contact.js?v=20260731k"></script>
 </body>
 </html>
