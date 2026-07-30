@@ -159,10 +159,10 @@
         <a id="lang-en" class="lang-btn mono" href="/en/">EN</a>
       </div>
       <nav class="site-nav">
-        <a class="nav-link nav-current" id="t-nav" href="index.html"></a>
-        <a class="nav-link" id="t-nav-hoan" href="hoan.html">法案</a>
-        <a class="nav-link" id="t-nav-data" href="https://github.com/zurekei/site/tree/main/data" target="_blank" rel="noopener"></a>
-        <a class="nav-link" id="t-nav-about" href="about.html"></a>
+        <a class="nav-link nav-current" id="t-nav" href="index.html">[指標]</a>
+        <a class="nav-link" id="t-nav-hoan" href="hoan.html">[法案]</a>
+        <a class="nav-link" id="t-nav-data" href="https://github.com/zurekei/site/tree/main/data" target="_blank" rel="noopener">[データ]</a>
+        <a class="nav-link" id="t-nav-about" href="about.html">[about]</a>
       </nav>
     </div>
   </header>
@@ -170,22 +170,23 @@
   <section class="hero">
     <svg id="hero-chart" viewBox="0 0 960 340" preserveAspectRatio="xMidYMid meet" role="img" aria-label="名目GDP成長率 — 政府の当初見通しと実績"></svg>
     <div class="hero-copy" id="hero-copy">
-      <div class="hero-copy-headline" id="hero-copy-headline"></div>
-      <div class="hero-copy-summary mono" id="hero-copy-summary"></div>
+      <div class="hero-copy-headline" id="hero-copy-headline">見通しと実績のズレを、
+記録し続ける。</div>
+      <div class="hero-copy-summary mono" id="hero-copy-summary">名目GDP成長率: 43年度中、実績が見通しを下回った年 29回</div>
     </div>
-    <div class="hero-caption mono" id="hero-caption"></div>
+    <div class="hero-caption mono" id="hero-caption">名目GDP成長率 — 当初見通しと実績 1980–2026年度</div>
   </section>
 
-  <p class="lead" id="t-lead"></p>
+  <p class="lead" id="t-lead">政府は各年度のはじめに経済の「見通し」を示し、約一年後に「実績」が確定する。ズレ計は、その二つを並べて時系列で記録するだけの場所。</p>
 
   <div class="callout">
-    <div class="callout-title" id="t-callout-title"></div>
-    <p class="callout-body" id="t-callout-body"></p>
+    <div class="callout-title" id="t-callout-title">ズレの読み方</div>
+    <p class="callout-body" id="t-callout-body">ズレは「実績 − 見通し」の差であり、良し悪しの評価ではない。景気変動・災害・資源価格・政策変更など、見通しの前提が外れると生じる。プラスは実績が見通しを上回ったこと、マイナスは下回ったことを意味する。</p>
   </div>
 
   <div class="indicators-heading">
-    <div class="indicators-label" id="t-indicators-label"></div>
-    <div class="indicators-latest" id="t-indicators-latest"></div>
+    <div class="indicators-label" id="t-indicators-label">指標一覧 · 9</div>
+    <div class="indicators-latest" id="t-indicators-latest">確定した直近年度 / 見通し vs 実績</div>
   </div>
 
   <!-- 中身は home.js が最新年度の数値つきカードに差し替える。素のリンクを置いて
@@ -205,24 +206,24 @@
   </div>
 
   <div class="legend-row">
-    <span class="legend-item"><span class="legend-swatch legend-swatch-forecast"></span><span id="t-legend-forecast"></span></span>
-    <span class="legend-item"><span class="legend-swatch legend-swatch-actual"></span><span id="t-legend-actual"></span></span>
+    <span class="legend-item"><span class="legend-swatch legend-swatch-forecast"></span><span id="t-legend-forecast">見通し</span></span>
+    <span class="legend-item"><span class="legend-swatch legend-swatch-actual"></span><span id="t-legend-actual">実績</span></span>
   </div>
 
   <a class="hoan-entry" href="hoan.html">
     <div class="hoan-entry-label mono" id="t-hoan-entry-label">別の計器</div>
     <div class="hoan-entry-title" id="t-hoan-entry-title">法律の見直し条項 — 期限と検討状況</div>
     <div class="hoan-entry-desc" id="t-hoan-entry-desc">附則の「施行後◯年を目途に検討」という見直し条項を、施行日から算出した期限順に並べる。</div>
-    <div class="hoan-entry-note mono" id="t-hoan-entry-note"></div>
+    <div class="hoan-entry-note mono" id="t-hoan-entry-note">49件中、期限到来・未確認 7件</div>
     <span class="hoan-entry-arrow mono" aria-hidden="true">→</span>
   </a>
 
-  <div class="next-update mono" id="t-next-update"></div>
+  <div class="next-update mono" id="t-next-update">次回更新予定: 2026年12月頃(令和7年度 国民経済計算年次推計・令和9年度予算案)</div>
 
   <footer class="site-footer-row">
-    <a class="footer-src" id="t-footer-src" href="https://www5.cao.go.jp/keizai1/mitoshi/mitoshikako.html" target="_blank" rel="noopener"></a>
-    <a class="footer-about" id="t-footer-corrections" href="corrections.html"></a>
-    <a class="footer-about" id="t-footer-about" href="about.html"></a>
+    <a class="footer-src" id="t-footer-src" href="https://www5.cao.go.jp/keizai1/mitoshi/mitoshikako.html" target="_blank" rel="noopener">src: 内閣府 / 国民経済計算(SNA)</a>
+    <a class="footer-about" id="t-footer-corrections" href="corrections.html">訂正履歴</a>
+    <a class="footer-about" id="t-footer-about" href="about.html">このサイトについて</a>
     <a class="footer-about" id="t-footer-contact" href="contact.html">お問い合わせ</a>
   </footer>
 </div>

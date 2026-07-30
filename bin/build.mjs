@@ -173,7 +173,7 @@ const HOME = loadModule("home.js", [
 HOME.INDICATOR_META.forEach((m) => HOME.metaUnit(m, "en"));
 const ABOUT = loadModule("about.js", ["T", "METHODS_ROWS", "renderMethodsRows"]);
 const CONTACT = loadModule("contact.js", ["T"]);
-const CORR = loadModule("corrections.js", ["T"]);
+const CORR = loadModule("corrections.js", ["T", "renderEntry"]);
 
 /* ── データ ───────────────────────────────────────────────── */
 
@@ -699,6 +699,70 @@ function injectRegion(html, name, body, file) {
     throw new Error(`${file} に ${open} … ${close} が見つからない`);
   }
   return html.slice(0, i + open.length) + body + html.slice(j);
+}
+
+/* ── id指定での中身の置き換え ─────────────────────────────────
+ * injectRegion は <!-- BUILD:名前 --> のマーカーが要る(fertility/hoan/
+ * index.htmlのJSON-LDのように、機械の持ち物にする領域をあらかじめ手で
+ * 区切っておける場合の道具)。id="..." を持つ既存の葉要素(home.jsが
+ * textContentで埋めているものなど)にはマーカーを新設せず、id自体を
+ * 目印にして中身だけを置き換える。
+ *
+ * findElementBounds() は fillText()(書く側、task1)と locateElement()
+ * (読む側、task2のドリフト検査)の両方から使う共通の下請け。「id="..."を
+ * 含む開始タグ〜対応する終了タグ」の境界を、ネストを考慮せず単純に
+ * 探すだけ(対象はどれも中に同名タグの入れ子を持たない葉要素なので、
+ * 開始タグの直後から次に現れる </タグ名> を対応する終了タグとみなして
+ * 差し支えない)。
+ */
+function findElementBounds(html, id) {
+  const idAttr = `id="${id}"`;
+  const idIdx = html.indexOf(idAttr);
+  if (idIdx < 0) return null;
+  const tagStart = html.lastIndexOf("<", idIdx);
+  if (tagStart < 0) return null;
+  const tagNameMatch = html.slice(tagStart).match(/^<([a-zA-Z][\w-]*)/);
+  if (!tagNameMatch) return null;
+  const tagName = tagNameMatch[1];
+  const openEnd = html.indexOf(">", idIdx);
+  if (openEnd < 0) return null;
+  const contentStart = openEnd + 1;
+  const closeTag = `</${tagName}>`;
+  const closeStart = html.indexOf(closeTag, contentStart);
+  if (closeStart < 0) return null;
+  return { contentStart, closeStart };
+}
+
+// 冪等な置き換え(何度ビルドしても同じ結果になる = 追記ではなく置換)。
+// 見つからなければ injectRegion と同じ思想で throw する(構造が変わったのに
+// 黙って通さない)。既存の中身にタグらしき文字(< か >)が入っていたら、
+// 「葉要素の中身をtextContentで丸ごと差し替える」という前提そのものが
+// 崩れているサインなので、ここも throw で止める(このヘルパの対象は
+// home.jsがtextContent代入している要素だけを想定しており、innerHTML代入
+// (contact.js の label-* 等)やネスト構造を持つ要素は対象外)。
+function fillText(html, id, text, file) {
+  const bounds = findElementBounds(html, id);
+  if (!bounds) {
+    throw new Error(`${file} に id="${id}" を持つ要素(開始タグ〜対応する終了タグ)が見つからない(構造が変わった可能性がある)`);
+  }
+  const { contentStart, closeStart } = bounds;
+  const existing = html.slice(contentStart, closeStart);
+  if (/[<>]/.test(existing)) {
+    throw new Error(
+      `${file} の id="${id}" の中身に既にタグらしき文字(<>)が含まれている。fillText は葉要素(textContent代入)専用なのでここで止める: ${JSON.stringify(existing)}`
+    );
+  }
+  return html.slice(0, contentStart) + escapeHTML(text) + html.slice(closeStart);
+}
+
+// 読み取り専用版(task2のドリフト検査用)。fillText と違い書き込まないので、
+// 中身にタグが含まれていても構わない(about.js等はinnerHTMLで<a>入りの文言を
+// 差し込むページもあるため)。見つからなければ null を返す — 呼び出し側の
+// idCoverageErrors() が「idが無いこと自体」を別に検出しているので、ここでは
+// 存在しないidを二重にエラー化しない。
+function locateElement(html, id) {
+  const bounds = findElementBounds(html, id);
+  return bounds ? html.slice(bounds.contentStart, bounds.closeStart) : null;
 }
 
 /* ── 合計特殊出生率 ──────────────────────────────────────── */
@@ -1304,31 +1368,19 @@ ${JSON.stringify(
 </script>`;
 }
 
-function buildHome(keys) {
-  let html = read("index.html");
-  // 新しいコピーを発明せず、既存の <meta name="description"> をそのまま使う。
-  const m = html.match(/<meta name="description" content="([^"]*)">/);
-  if (!m) throw new Error("index.html の meta description が見つからない(構造が変わった可能性がある)");
-  const desc = m[1];
-  html = injectRegion(html, "jsonld", buildHomeJsonLd(desc, keys, "ja"), "index.html");
-  return html;
-}
-
-// /en/index.html は元ファイルが無いので丸ごと組み立てる(fertility/hoan と同じ
-// 方針)。title/meta description・aria-label は index.html 側もJAの元コードから
-// T辞書を通さず直書きなので、EN側も直書きにする(2026-07-29の新規英文。既存の
-// 判断基準は header() 直上のコメントを参照)。
-function buildHomeEn(keys) {
-  const t = HOME.T.en;
-  const desc = "An instrument that records the government's economic forecasts and the actual figures side by side, every year, with sources.";
-  const title = "zurekei — the gap between government forecasts and actual outcomes";
-  const url = abs(REL.home.en);
-
-  // hero-caption / hero-copy-summary は gdp-nominal の実データが要る。home.js の
-  // main() と同じ計算(readRows は chart.js 側の同名関数と別物で home.js には
-  // 無いため、ここでは chart.js から取り込んだ R.parseCSV/R.toNum で同じ手順を
-  // 踏む。値の出所は data/gdp_forecast.csv 一本で、chart/gdp-nominal ページが
-  // 使っているのと同じCSV・同じ列)。
+// hero-caption / hero-copy-summary / t-hoan-entry-note の3つは、gdp-nominal と
+// hoan_review.csv の実データが要る動的な文言。home.js の main() と同じ計算
+// (readRows は chart.js 側の同名関数と別物で home.js には無いため、ここでは
+// chart.js から取り込んだ R.parseCSV/R.toNum で同じ手順を踏む。値の出所は
+// data/gdp_forecast.csv 一本で、chart/gdp-nominal ページが使っているのと同じ
+// CSV・同じ列)。
+//
+// JA(buildHome)とEN(buildHomeEn)の両方がこの3つを必要とするが、計算をそれぞれに
+// 書き写すと「写しを作らない」というこのファイル全体の方針に反する(いつか
+// 片方だけ直して数字がズレる)。t(HOME.T.ja または HOME.T.en)を受け取り、
+// 文言の組み立て自体は home.js 本物の関数(t.heroCaption/t.heroGapBelow/
+// t.hoanEntryNote)にそのまま委ねる、共有の1箇所にする。
+function homeDynamicText(t) {
   const gdpNominal = METRICS["gdp-nominal"];
   const gdpRows = readRows(gdpNominal);
   const years = gdpRows.map((r) => r.year);
@@ -1342,6 +1394,86 @@ function buildHomeEn(keys) {
   const hoanAllRows = hoanRows();
   const hoanDue = hoanAllRows.filter((r) => r.review_status === "due").length;
   const hoanNote = t.hoanEntryNote(hoanAllRows.length, hoanDue);
+
+  return { heroCaption, heroSummary, hoanNote };
+}
+
+// index.html は元から手書きの静的ページで、home.js の applyI18n() が実行時に
+// document.getElementById(id).textContent = t.<key> の形で21個の文言を、CSV
+// 由来の動的3個(上のhomeDynamicText)を加えた24個を書き込んでいる。JSを
+// 実行しないクローラにはこの24個が一度も見えない(トップページ全体が
+// ほぼ無文に見える)ため、ここでT.jaを唯一の原本として静的HTMLへ焼く。
+// 対応はhome.jsのapplyI18n()からそのまま写している(発明しない)。
+//
+// (id, key)の組で持つ(以前は(id, (t) => t.key)という関数のペアだったが、
+// それだと下のhomeFillsCoverageErrors()がhome.js側から静的に抜き出した
+// (id, key)の組と機械的に突き合わせられない——関数を文字列化して比較するのは
+// 脆い)。値はどれもtの単純なプロパティで計算を挟まないため、キー名だけで
+// 表現しても表現力を失わない。
+const HOME_FILLS = [
+  ["t-tag", "tag"],
+  ["t-nav", "nav"],
+  ["t-nav-hoan", "navHoan"],
+  ["t-nav-data", "navData"],
+  ["t-nav-about", "navAbout"],
+  ["t-lead", "lead"],
+  ["t-callout-title", "calloutTitle"],
+  ["t-callout-body", "calloutBody"],
+  ["t-indicators-label", "indicatorsLabel"],
+  ["t-indicators-latest", "indicatorsLatest"],
+  ["t-legend-forecast", "plan"],
+  ["t-legend-actual", "actual"],
+  ["t-hoan-entry-label", "hoanEntryLabel"],
+  ["t-hoan-entry-title", "hoanEntryTitle"],
+  ["t-hoan-entry-desc", "hoanEntryDesc"],
+  ["t-next-update", "nextUpdate"],
+  ["hero-copy-headline", "heroCopy"],
+  ["t-footer-src", "src"],
+  ["t-footer-corrections", "correctionsLink"],
+  ["t-footer-about", "aboutLink"],
+  ["t-footer-contact", "contactLink"],
+];
+
+// CSV由来の動的3件。t.<key>の単純代入ではなく関数呼び出し(t.heroCaption(...)
+// 等)でhome.js側から埋められるため、HOME_FILLSにもextractStaticAssignments()の
+// 抽出結果にも入らない(下のhomeFillsCoverageErrors()参照)。黙って差分から
+// 漏らさないよう、ここに明示しておく。buildHome()/buildHomeEn()はこの3件を
+// homeDynamicText()経由で別途fillTextしている。
+const HOME_DYNAMIC_EXCLUDED = ["hero-caption", "hero-copy-summary", "t-hoan-entry-note"];
+
+function buildHome(keys) {
+  let html = read("index.html");
+  // 新しいコピーを発明せず、既存の <meta name="description"> をそのまま使う。
+  const m = html.match(/<meta name="description" content="([^"]*)">/);
+  if (!m) throw new Error("index.html の meta description が見つからない(構造が変わった可能性がある)");
+  const desc = m[1];
+  html = injectRegion(html, "jsonld", buildHomeJsonLd(desc, keys, "ja"), "index.html");
+
+  const t = HOME.T.ja;
+  for (const [id, key] of HOME_FILLS) html = fillText(html, id, t[key], "index.html");
+  // heroCopyは"見通しと実績のズレを、\n記録し続ける。"のように生の改行を含む。
+  // <br>に変換しない(EN側のbuildHomeEnと同じくCSSのwhite-space: pre-lineが
+  // 改行の見た目を作る側なので、ここは escapeHTML(t.heroCopy) をそのまま置くだけでよい)。
+  const { heroCaption, heroSummary, hoanNote } = homeDynamicText(t);
+  html = fillText(html, "hero-caption", heroCaption, "index.html");
+  html = fillText(html, "hero-copy-summary", heroSummary, "index.html");
+  html = fillText(html, "t-hoan-entry-note", hoanNote, "index.html");
+
+  return html;
+}
+
+// /en/index.html は元ファイルが無いので丸ごと組み立てる(fertility/hoan と同じ
+// 方針)。title/meta description・aria-label は index.html 側もJAの元コードから
+// T辞書を通さず直書きなので、EN側も直書きにする(2026-07-29の新規英文。既存の
+// 判断基準は header() 直上のコメントを参照)。
+function buildHomeEn(keys) {
+  const t = HOME.T.en;
+  const desc = "An instrument that records the government's economic forecasts and the actual figures side by side, every year, with sources.";
+  const title = "zurekei — the gap between government forecasts and actual outcomes";
+  const url = abs(REL.home.en);
+
+  const gdpNominal = METRICS["gdp-nominal"]; // hero SVGのaria-label(titleEn)に使うのでこの参照だけ残す
+  const { heroCaption, heroSummary, hoanNote } = homeDynamicText(t);
 
   // JSを実行しないクローラのための素のリンク一覧。JA側の card-fallback と同じ
   // 最小限の忠実度(名前のみ、数値カードには踏み込まない)。
@@ -1457,9 +1589,12 @@ ${cardFallback}
 `;
 }
 
-// about.html/corrections.html/contact.html はいずれも build.mjs が触ってこなかった
-// 純粋な静的ファイル(各ページの.jsがクライアント側で文言を差し込むだけ)。/en/ 版も
-// 同じ形にする必要は無い(クローラ向けにHTML自身に文言を書き出す方針のため)ので、
+// about.html/contact.html はいずれも build.mjs が触ってこなかった純粋な静的
+// ファイル(各ページの.jsがクライアント側で文言を差し込むだけ)。corrections.html
+// も元はこの2つと同じ純粋な静的ファイルだったが、#corrections-list だけは
+// 2026-07-30にBUILD:listマーカーで機械の持ち物にした(理由はbuildCorrections()
+// 直上のコメントを参照)。/en/ 版はこの違いに関わらずどの3ページも同じ形にする
+// 必要は無い(クローラ向けにHTML自身に文言を書き出す方針のため)ので、
 // fertility/hoan/home と同じく丸ごと組み立てる。id 構成は元ファイルの
 // applyI18n()/applyStatic() が触るidと1対1で対応させ、静的な初期表示として
 // そのまま正しい文言が出るようにする。
@@ -1584,6 +1719,68 @@ ${header("en", urls)}
 `;
 }
 
+// data/corrections.csv を読む。fertility/hoan の hoanRows() 等と同じく、
+// read()(SITE_DIR相対)経由に揃える(以前はここだけ fs.readFileSync +
+// path.join(SITE_DIR, …) を直書きしていた名残り)。
+function correctionsRows() {
+  return parseCSV(read("data/corrections.csv"));
+}
+
+// #corrections-list の中身(内側のHTMLのみ、外側のdivは呼び出し側が持つ)。
+// corrections.js の main() が実行時に list.innerHTML へ書き込む規則
+// (0件なら空状態の一文、1件以上あれば日付降順でrenderEntry()を並べる)と
+// 完全に同じ規則をここに1箇所だけ持つ。JA(buildCorrections)・EN
+// (buildCorrectionsEn)の両方から呼ぶ — renderEntry相当のマークアップを
+// 言語ごとに書き写すと、いつか片方だけ直して食い違う(このファイル全体の
+// 方針)。hoanRowHtml() が JA/EN 共有なのと同じ形。
+//
+// 各行のマークアップは corrections.js の renderEntry() を loadModule() 経由で
+// 取り込んだ本物(CORR.renderEntry)をそのまま呼ぶ。以前はここに renderEntry と
+// バイト同一の写しを直書きしていたが、この関数だけ他の.js(chart.js の
+// buildTable、hoan.js の hoanRowHtml 等)と違って写しになっており、
+// renderEntry が変わるとビルド側が黙ってズレる上に #corrections-list は
+// handwrittenJaDriftErrors() の対象外(このファイルの直下のコメント参照)
+// なので誰も気づけない状態だった(2026-07-30レビュー指摘)。ABOUT.renderMethodsRows
+// を loadModule 経由で呼んでいるのと同じ形に揃えた。
+//
+// 0件のときの空状態の一文(<p class="correction-empty">…</p>)だけは、
+// corrections.js の main() の rows.length === 0 分岐にべた書きで埋まっており
+// loadModule 越しに関数として取り出せる形になっていないため、ここは写しとして
+// 残す(対応させている行: corrections.js の main() 内、
+// `list.innerHTML = ...T[lang].empty...` の1行)。
+//
+// hoan.html の #summary/#rows に付けたのと同じ注記: ここはJSが動けば
+// corrections.js が同じ規則で書き直す領域で、静的版はその初期状態
+// (=ビルド時点の data/corrections.csv を全件・日付降順でそのまま出す。
+// このページに絞り込みUIは無いので「初期状態」がそのまま「唯一の状態」)
+// にあたる。
+function correctionsListHtml(rows, lang) {
+  const t = CORR.T[lang];
+  if (rows.length === 0) {
+    return `<p class="correction-empty">${escapeHTML(t.empty)}</p>`;
+  }
+  return rows
+    .slice()
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .map((r) => CORR.renderEntry(r, lang))
+    .join("");
+}
+
+// corrections.html(JA)は about/contact と違い、#corrections-list だけは
+// BUILD:list マーカーで機械の持ち物にする(fertility/hoanと同じ理由: 訂正が
+// 1件でも記録された瞬間、JSを実行しないクローラにはJA版の訂正履歴だけが
+// 空に見えてしまうため。2026-07-30に追加)。他のid(title/lead/footer等)は
+// これまでどおり手書きのままで、handwrittenJaDriftErrors() がT.jaとの
+// 食い違いを検査する(#corrections-list はcorrections.jsが t.<key> の
+// 単純代入ではなくrenderEntry()で組み立てるため、その検査の対象には
+// 元々入っていない。ここをビルダーの持ち物にしても検査対象は変わらない)。
+function buildCorrections() {
+  const rows = correctionsRows();
+  let html = read("corrections.html");
+  html = injectRegion(html, "list", correctionsListHtml(rows, "ja"), "corrections.html");
+  return html;
+}
+
 function buildCorrectionsEn() {
   const t = CORR.T.en;
   const urls = REL.corrections;
@@ -1592,31 +1789,8 @@ function buildCorrectionsEn() {
   // data/corrections.csv は現時点で0件(空データ)。JA版と同じくビルド時点の
   // 状態をそのまま静的HTMLへ焼く(corrections.js の main() が空配列のときに
   // 出す文言と同じ)。行が増えたら次回ビルドで自動的に反映される。
-  const rows = parseCSV(fs.readFileSync(path.join(SITE_DIR, "data", "corrections.csv"), "utf8"));
-  const listHtml =
-    rows.length === 0
-      ? `<p class="correction-empty">${escapeHTML(t.empty)}</p>`
-      : rows
-          .slice()
-          .sort((a, b) => b.date.localeCompare(a.date))
-          .map((r) => {
-            const link = safeUrl(r.url)
-              ? `<a class="correction-link" href="${escapeHTML(safeUrl(r.url))}" target="_blank" rel="noopener">${escapeHTML(t.detailLink)}</a>`
-              : "";
-            return `
-    <div class="correction-item">
-      <div class="correction-date mono">${escapeHTML(r.date)}</div>
-      <div class="correction-target">${escapeHTML(r.target)}</div>
-      <div class="correction-diff">
-        <span class="correction-before">${escapeHTML(r.before)}</span>
-        <span class="correction-arrow">→</span>
-        <span class="correction-after">${escapeHTML(r.after)}</span>
-      </div>
-      <div class="correction-reason">${escapeHTML(r.reason)}</div>
-      ${link}
-    </div>`;
-          })
-          .join("");
+  const rows = correctionsRows();
+  const listHtml = correctionsListHtml(rows, "en");
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -1779,8 +1953,8 @@ ${header("en", urls)}
  *
  *   直したのは判定対象そのもの: 「入力ファイル群」ではなく「生成された出力」
  *   を見る。丸ごと/差し込み生成しているページ(chart/*.html, fertility.html,
- *   hoan.html, index.html)は、いま生成した文字列を git show HEAD:<path> の
- *   内容と比べ、
+ *   hoan.html, corrections.html, index.html)は、いま生成した文字列を
+ *   git show HEAD:<path> の内容と比べ、
  *     - 違う(=このビルドでバイトが変わった) → 今日の日付
  *     - 同じ → その出力ファイル自身の git log -1 --format=%cs
  *     - HEAD に無い(新規ページ) → 今日の日付
@@ -1789,10 +1963,17 @@ ${header("en", urls)}
  *   保守する必要も無くなった(このリポジトリが避けてきた「手書きの対応表」が
  *   ひとつ消える)。
  *
- *   about/corrections/contact の JA版はビルダーの生成物ではない(ビルダーが
- *   触らないページ)ので、この判定は使えない。従来どおり「元になっているファイル群の
- *   コミット日の最大値」(lastmod()/fileDate())のままでよい。この3ページの
+ *   about/contact の JA版はビルダーの生成物ではない(ビルダーが触らない
+ *   ページ)ので、この判定は使えない。従来どおり「元になっているファイル群の
+ *   コミット日の最大値」(lastmod()/fileDate())のままでよい。この2ページの
  *   依存表に bin/build.mjs は元から入っていない(触っていないので当然)。
+ *   corrections.html は元はこの2つと同じ純粋な静的ファイルだったが、
+ *   #corrections-list だけは(訂正が1件でも記録された瞬間、JSを実行しない
+ *   クローラにはJA版の訂正履歴だけが空に見えてしまうのを防ぐため)2026-07-30に
+ *   BUILD:list マーカーで機械の持ち物にした。#corrections-list 以外(title/
+ *   lead/footer等)はいまも手書きのままだが、ページ全体としては「生成された
+ *   出力」を持つようになったので、この3ページの中では corrections.html だけが
+ *   fertility/hoan と同じ outputDate() を使う(sitemapEntries() を参照)。
  *   EN版(en/about.html 等)はJA版と違い buildAboutEn() 等が丸ごと生成する
  *   正真正銘のビルダー出力なので、こちらは他の生成ページと同じ outputDate() を
  *   使う(2026-07-30レビュー指摘。以前はEN版もlastmod()を使っておりこの
@@ -1842,7 +2023,9 @@ const DIRTY_PATHS = (() => {
 const TODAY = new Intl.DateTimeFormat("sv-SE").format(new Date());
 const fileDateCache = new Map();
 
-// 「入力ファイル群」から日付を決める(生成物ではない about/corrections/contact 用)。
+// 「入力ファイル群」から日付を決める(生成物ではない about/contact 用。
+// corrections.html は2026-07-30以降 outputDate() 側を使う。理由は上のファイル
+// 冒頭コメントの「lastmod は入力ファイル群ではなく出力そのもので決める」節を参照)。
 function fileDate(rel) {
   if (fileDateCache.has(rel)) return fileDateCache.get(rel);
   let d;
@@ -1946,7 +2129,9 @@ function sitemapEntries(keys, files) {
   }));
   // EN側は同じ生成物なので、対応する出力ファイル(files に積んである)の日付を
   // そのまま使う。about/corrections/contact のEN版も同様にgenDate()を使う
-  // (下のstatic配列を参照。JA版だけがビルダーの生成物ではないので別方式)。
+  // (下のstatic配列を参照。about/contactはJA版だけがビルダーの生成物ではないので
+  // 別方式。corrections.htmlはJA版も2026-07-30からgenDate()を使う——詳細は
+  // static配列のcorrections直上のコメントを参照)。
   const enMetricEntries = keys.map((k) => ({
     loc: `${SITE}/en/chart/${k}`,
     priority: "0.9",
@@ -1972,7 +2157,14 @@ function sitemapEntries(keys, files) {
     ],
     static: [
       { loc: `${SITE}/about`, priority: "0.7", date: lastmod(["about.html", "about.js", "about.md"]) },
-      { loc: `${SITE}/corrections`, priority: "0.5", date: lastmod(["corrections.html", "corrections.js", "data/corrections.csv"]) },
+      // corrections.html(JA)はabout.html/contact.htmlと違い、#corrections-listだけは
+      // 2026-07-30からbuild.mjsの生成物(BUILD:listマーカー)になっている。「生成物は
+      // 出力そのもので決める」という上のファイル冒頭コメントの原則どおりgenDate()を
+      // 使う(以前は入力ファイル群のコミット日=lastmod()を見ており、そのままだと
+      // corrections.jsのコメントを1行直しただけでもlastmodが動く=過大申告になって
+      // いた。逆に#corrections-listの中身だけが変わってもcorrections.htmlのコミット日は
+      // 動かないので、入力方式のままなら過少申告にもなり得た。2026-07-30レビュー指摘)。
+      { loc: `${SITE}/corrections`, priority: "0.5", date: genDate(path.join(SITE_DIR, "corrections.html")) },
       { loc: `${SITE}/contact`, priority: "0.3", date: lastmod(["contact.html", "contact.js"]) },
       // en/about.html・en/corrections.html・en/contact.html は
       // buildAboutEn/buildCorrectionsEn/buildContactEn が丸ごと生成する出力
@@ -2015,15 +2207,17 @@ function buildSitemap(keys, files) {
   政府の公表日に合わせてデータが更新されることがこのサイトの価値の中心なのに、
   更新されたことを機械に伝える手段が今まで無かったので、ここで足す。
 
-  丸ごと/差し込み生成しているページ(chart 系・fertility・hoan・トップ・
-  en/about・en/corrections・en/contact)の lastmod は「そのページの元になって
-  いるファイル群」ではなく「生成された出力そのもの」を見て決めている。生成
-  した文字列を直前のコミット(HEAD)の内容と比べ、違えば今日の日付、同じなら
+  丸ごと/差し込み生成しているページ(chart 系・fertility・hoan・corrections・
+  トップ・en/about・en/corrections・en/contact)の lastmod は「そのページの
+  元になっているファイル群」ではなく「生成された出力そのもの」を見て決めている。
+  生成した文字列を直前のコミット(HEAD)の内容と比べ、違えば今日の日付、同じなら
   出力ファイル自身の最終コミット日とする。理由は、依存ファイルの対応表に
   生成器自身を含めていた最初の実装だと、生成器のコメントを直すだけで配信
-  バイトが1つも変わらないのに更新扱いになってしまうため。about/corrections/
-  contact の JA版だけはビルダーの生成物ではないページなので、この判定は使わず、
-  従来どおり元ファイル群のコミット日の最大値を使う。
+  バイトが1つも変わらないのに更新扱いになってしまうため。about/contact の
+  JA版だけはビルダーの生成物ではないページなので、この判定は使わず、従来どおり
+  元ファイル群のコミット日の最大値を使う(corrections.htmlのJA版は
+  #corrections-listだけを機械の持ち物にした2026-07-30以降、他の生成ページと
+  同じ判定を使う)。
 
   日付は同じ日にビルドしてコミットする限り安定する。日をまたぐと検査(node
   bin/build.mjs のcheckモード)が落ちるが、落ちる方向が安全側(誤った日付が
@@ -2092,10 +2286,14 @@ function crossRefErrors(keys) {
  *
  * 各.jsからgetElementByIdの対象idを正規表現で抜き出し、対応する生成HTML
  * (filesに積んだ「実際に配信されるバイト列」そのもの)にid="..."が存在するか
- * 照合する。JA側が生成物ではないページ(about/contact/correctionsのJA)は
- * ディスク上の手書きファイルをreadする — このid検査に限っては「実際に配信
- * されている中身」を見たいので、ビルド前のディスクの中身で十分(手書き
- * ページはbuild.mjsが触らないのでビルドしても変わらない)。
+ * 照合する。JA側が生成物ではないページ(about/contactのJA)はディスク上の
+ * 手書きファイルをreadする — このid検査に限っては「実際に配信されている中身」を
+ * 見たいので、ビルド前のディスクの中身で十分(about.html/contact.htmlは
+ * build.mjsが触らないのでビルドしても変わらない)。corrections.htmlのJA版も
+ * 同じくreadでディスクから読む。こちらは#corrections-listの中身自体は
+ * 2026-07-30以降build.mjsが書き換えるが、この検査が見ているのは
+ * id="corrections-list"という外枠のidの存在だけで、その外枠はbuild.mjsが
+ * 触らない領域にあるので、ビルド前のディスクの中身のままで支障ない。
  */
 function extractGetElementByIdIds(src) {
   const direct = [...src.matchAll(/getElementById\(\s*["'`]([\w-]+)["'`]\s*\)/g)].map((m) => m[1]);
@@ -2191,6 +2389,201 @@ function idCoverageErrors() {
   return errs;
 }
 
+/* ── 手書きJAページ(about/corrections/contact)のドリフト検査 ─────────────
+ * about.html / contact.html の JA版は、buildAboutEn() 直前のコメントのとおり
+ * build.mjs が触らない純粋な手書きファイル。corrections.html のJA版も
+ * #corrections-list(2026-07-30にBUILD:listマーカーで機械の持ち物にした領域。
+ * 詳細はbuildCorrections()直上のコメントを参照)以外は同じく手書きのまま。
+ * この3ページとも、対応する *.js が実行時に
+ * document.getElementById(id).textContent/innerHTML = t.<key> の形で文言を
+ * 上書きする。この非対称のせいで、T.ja側だけ直して静的HTMLを直し忘れても、
+ * ブラウザ(JSが動く側)では正しい文言が上書き表示されるので誰も気づけない。
+ * 実際にabout.jsのT.jaだけ直してabout.htmlが古いまま残り、「運営は一個人
+ * です。」がJSを実行しないクローラに一度も見えていなかった事故が起きた
+ * (about-lead以下は2026-07-29に手直し済み)。idCoverageErrors()は「idが
+ * 存在するか」しか見ておらず、この「idはあるが中身が古い」壊れ方には反応しない。
+ *
+ * 素朴な全文字列一致では駄目(以前プロトタイプで試して、実体参照や改行の
+ * 入れ方の違いで誤検出しうることが分かっている): id単位で、その要素の
+ * 中身と、対応するT.jaの値をtextContent/innerHTMLそれぞれの規則どおりに
+ * 変換した値を個別に突き合わせる。
+ */
+
+// 各.jsから「id と、それに書き込まれる t.<key>」の対応を静的に読み取る。
+// 実際に3ファイルを読んで確認した代入の形は次の3種類:
+//   1) document.getElementById("id").textContent = t.key;  (about.js に多数)
+//   2) document.getElementById("id").innerHTML   = t.key;  (about.js の一部)
+//   3) set("id", t.key);  … contact.js/corrections.js が定義する
+//      textContent専用ヘルパー経由(そのままgetElementByIdだけを正規表現で
+//      探すとこの形は1件も拾えない。idCoverageErrors()のextractGetElementByIdIds
+//      が「t-で始まるidは文字列リテラルからも拾う」のと同じ理由の対処)。
+//      ヘルパーの定義自体を実際に読んで確認した上で、その定義文字列が
+//      ファイル中に無ければ拾わない(ヘルパーの中身が変わったら黙って
+//      誤読しないための最小限のガード)。
+//   4) document.getElementById("id").innerHTML = `${t.key}<固定マークアップ>`;
+//      … contact.js の label-name/label-email/label-message。必須項目の
+//      "*" を付けるためだけにinnerHTMLを使っており、t.key の後ろに続く
+//      静的な文字列(例: "<span>*</span>")も比較対象に含める。
+function extractStaticAssignments(src) {
+  const items = [];
+  for (const m of src.matchAll(
+    /document\.getElementById\(\s*["'`]([\w-]+)["'`]\s*\)\.(textContent|innerHTML)\s*=\s*t\.(\w+)\s*;/g
+  )) {
+    items.push({ id: m[1], prop: m[2], key: m[3], suffix: "" });
+  }
+  const SET_HELPER = 'const set = (id, text) => { document.getElementById(id).textContent = text; };';
+  if (src.includes(SET_HELPER)) {
+    for (const m of src.matchAll(/\bset\(\s*["'`]([\w-]+)["'`]\s*,\s*t\.(\w+)\s*\)/g)) {
+      items.push({ id: m[1], prop: "textContent", key: m[2], suffix: "" });
+    }
+  } else if (/\bset\(/.test(src)) {
+    // set(...) の呼び出しが実在するのに SET_HELPER の定義文字列と一致しない。
+    // 一致しなければ上のif節は静かに何もせず、set()経由の代入がまるごと検査から
+    // 消える(実測: SET_HELPERの定義に改行を1つ入れて再フォーマットしただけで、
+    // corrections.jsは6件全部・contact.jsは12件中8件が0件に無言で落ちた。
+    // 2026-07-30レビュー指摘)。
+    //
+    // これはこのリポジトリの pre-push フックが一度実際に事故にした壊れ方と
+    // 同型: リモートの先端SHAが手元に無いとき、走査範囲を決める
+    // `git rev-list "$remote_sha..$local_sha"` が失敗して空文字列になり、
+    // その失敗を誰も見ていなかったせいで「範囲が空 = チェック対象0件」を
+    // 「問題なし」と区別できず、コミットメッセージの検査を一度も走らせずに
+    // exit 0 していた(fail open)。ここも同じ形の罠になりうる: ヘルパーの
+    // 形が変わって抽出が0件になっても、"0件"と"元々対象が無い"を区別しない
+    // 限り検査は黙って通ってしまう。ヘルパーの誤読(=違う形のコードを誤って
+    // 正しいと判定すること)は防げているが、「壊れたら黙って通る」検査は
+    // 検査が無いより悪い、というのがこのリポジトリの基準なので、ここは
+    // 例外を投げて fail closed にする(正規表現をヘルパーの現在の書き方に
+    // 追随させて直すまでビルドを止める)。
+    throw new Error(
+      "extractStaticAssignments: set(...) の呼び出しがあるのに SET_HELPER の定義文字列と一致しない(ヘルパーの形が変わった可能性が高い。正規表現をヘルパーの現在の書き方に追随させること)"
+    );
+  }
+  for (const m of src.matchAll(
+    /document\.getElementById\(\s*["'`]([\w-]+)["'`]\s*\)\.innerHTML\s*=\s*`\$\{t\.(\w+)\}([^`$]*)`\s*;/g
+  )) {
+    items.push({ id: m[1], prop: "innerHTML", key: m[2], suffix: m[3] });
+  }
+  return items;
+}
+
+function handwrittenJaDriftErrors() {
+  const errs = [];
+  const targets = [
+    {
+      file: "about.html",
+      js: "about.js",
+      T: ABOUT.T.ja,
+      html: read("about.html"),
+      // methods-tbody は `.innerHTML = renderMethodsRows(lang);` という関数呼び
+      // 出しで、上のextractStaticAssignments()が拾う「t.<key>」の形にならない
+      // (renderMethodsRows自体はMETHODS_ROWSという別の一覧を見る、about.js内の
+      // 別の原本)。ここだけ写しを作らずABOUT.renderMethodsRows(loadModuleで
+      // 取り込み済みの本物の関数)をそのまま呼んで比較する。この特例で実際に
+      // ドリフトを1件検出した(hakkou01.pdf/hakkou02.pdfの参照が about.html 側
+      // にだけ残っていた。詳細はこの検査を追加したコミットの説明を参照)。
+      // markup:true の意味は下のコメント(タグ間の空白の扱い)を参照。
+      extra: [{ id: "methods-tbody", prop: "innerHTML", raw: ABOUT.renderMethodsRows("ja"), markup: true }],
+    },
+    { file: "corrections.html", js: "corrections.js", T: CORR.T.ja, html: read("corrections.html"), extra: [] },
+    { file: "contact.html", js: "contact.js", T: CONTACT.T.ja, html: read("contact.html"), extra: [] },
+  ];
+
+  // タグとタグの間だけにある空白(手書きHTML側の改行・インデント)を畳む。
+  // renderMethodsRows() 等の関数が組み立てる<tr><td>…のような構造的マーク
+  // アップは空白を一切挟まないので、手で整形して読みやすくしてある側とは
+  // タグの間の空白だけが違う。文中のテキストとタグの間([日本語]<a>のような
+  // 隣接)には元々空白が無いので、ここで畳んでも中身(文字そのもの)は一切
+  // 変えない。t.<key>の単純な代入(拡張子extra以外)には使わない — あちらは
+  // 地の文なので、空白1つでも実在する食い違いになりうる。
+  const collapseMarkupWhitespace = (s) => s.replace(/>\s+</g, "><");
+
+  for (const { file, js, T, html, extra } of targets) {
+    const rawAssigns = extractStaticAssignments(read(js));
+    // 3ファイルとも実際には最低6件の直接代入がある(corrections.js/contact.jsは
+    // set()経由、about.jsはdocument.getElementById().textContent/innerHTML経由)。
+    // 0件は「正規表現が現実に追いつけなくなった」以外の意味を持たない ——
+    // まっとうな編集で件数自体は変わりうるので「必ずN件」という決め打ちにはせず、
+    // 「0件だけを異常とみなす」線で fail closed にする(pre-pushフックの事故
+    // ——走査範囲が空になったのを誰も見ておらず、コミットメッセージ検査を
+    // 一度も走らせずexit 0していた——と同型。詳細は上のSET_HELPER直後の
+    // コメントを参照)。
+    if (rawAssigns.length === 0) {
+      throw new Error(
+        `${js} から extractStaticAssignments() が1件も抽出できなかった(0件はありえない。正規表現がヘルパーの現在の書き方に追いついていない可能性が高い)`
+      );
+    }
+    const assigns = rawAssigns.map(({ id, prop, key, suffix }) => {
+      if (T[key] === undefined) throw new Error(`${js} が参照する t.${key} が T.ja に無い(構造が変わった可能性がある)`);
+      return { id, prop, raw: T[key] + suffix, markup: false };
+    });
+    for (const { id, prop, raw, markup } of [...assigns, ...extra]) {
+      // idそのものが無いケースはidCoverageErrors()が既に検出するので、ここでは
+      // 二重にエラー化せず黙ってスキップする(そちらのエラーメッセージだけで
+      // 「idを足し忘れた」ことは分かる)。
+      let actual = locateElement(html, id);
+      if (actual === null) continue;
+      let expected = prop === "textContent" ? escapeHTML(raw) : raw;
+      // 前後の空白(手書きHTMLのインデント・改行)は正規化してよいが、中身の
+      // 正規化はしない(全角/半角・句読点の違いなどをここで飲み込むと、この
+      // 検査自体が事故を見逃す側になる)。
+      actual = actual.trim();
+      expected = expected.trim();
+      if (markup) {
+        actual = collapseMarkupWhitespace(actual);
+        expected = collapseMarkupWhitespace(expected);
+      }
+      if (actual !== expected) {
+        errs.push(`${file} の id="${id}"(${prop})が ${js} の T.ja と食い違っている`);
+      }
+    }
+  }
+  return errs;
+}
+
+/* ── HOME_FILLS ↔ home.js の対応検査 ─────────────────────────────
+ * HOME_FILLS は home.js の applyI18n() にある21件の直接代入(id, t.<key>)の
+ * 手書きの写し(このファイル1401行目付近のコメント参照)。home.js に代入を
+ * 1行足して HOME_FILLS に足し忘れると、次のどの検査も反応しない:
+ *   - idCoverageErrors() は通る(idはHTML側に存在する。足りないのはHOME_FILLS
+ *     側の対応であって、id自体の欠落ではない)
+ *   - stale検査は通る(生成物と実ファイルは一致している——足し忘れた文言は
+ *     単に生成されないだけで、生成物自体は「その状態で最新」になる)
+ *   - handwrittenJaDriftErrors() は通る(index.htmlはそもそもこの検査の
+ *     対象外——about/corrections/contactのJA版だけを見る検査のため)
+ * → 検出手段ゼロで、index.htmlに空要素が再発する。これは修正2(手書きJA
+ * ページのドリフト検査)がまさに殺そうとした壊れ方そのものが、今回追加した
+ * HOME_FILLSという新しい写しの中で再発している状態(2026-07-30レビュー指摘)。
+ *
+ * home.js の applyI18n() にある21件の直接代入は、いずれも
+ * extractStaticAssignments() のパターン1
+ * (document.getElementById("id").textContent = t.key;)と完全に一致する形を
+ * しているので、home.js を読んでこの検査を新たに書ける。HOME_FILLS の
+ * (id, key) の組と双方向で突き合わせ、どちらかにしか無い組をエラーにする。
+ */
+function homeFillsCoverageErrors() {
+  const errs = [];
+  const fromJs = new Map(extractStaticAssignments(read("home.js")).map(({ id, key }) => [id, key]));
+  const fromFills = new Map(HOME_FILLS.map(([id, key]) => [id, key]));
+
+  for (const [id, key] of fromJs) {
+    if (HOME_DYNAMIC_EXCLUDED.includes(id)) continue; // 通常ここには来ない(関数呼び出しはパターン1に掛からないため)。念のための防御。
+    if (!fromFills.has(id)) {
+      errs.push(`home.js の applyI18n() が id="${id}" に t.${key} を代入しているが、HOME_FILLS に対応する組が無い`);
+    } else if (fromFills.get(id) !== key) {
+      errs.push(
+        `home.js の applyI18n() は id="${id}" に t.${key} を代入しているが、HOME_FILLS は t.${fromFills.get(id)} を書いている`
+      );
+    }
+  }
+  for (const [id, key] of fromFills) {
+    if (!fromJs.has(id)) {
+      errs.push(`HOME_FILLS の id="${id}"(t.${key})に対応する代入が home.js の applyI18n() に無い`);
+    }
+  }
+  return errs;
+}
+
 const check = process.argv.includes("--check");
 const keys = Object.keys(METRICS);
 
@@ -2201,6 +2594,7 @@ for (const k of keys) files.set(path.join(OUT_DIR, `${k}.html`), buildPage(k, ME
 files.set(path.join(OUT_DIR, "index.html"), buildIndex(keys, "ja"));
 files.set(path.join(SITE_DIR, "fertility.html"), buildFertility());
 files.set(path.join(SITE_DIR, "hoan.html"), buildHoan());
+files.set(path.join(SITE_DIR, "corrections.html"), buildCorrections());
 files.set(path.join(SITE_DIR, "index.html"), buildHome(keys));
 // /en/ 以下(2026-07-29追加)。JA側と同じ生成器を lang="en" で呼ぶか、元ファイルが
 // 無いページ(home/fertility/hoan/about/corrections/contact)は buildXxxEn() で
@@ -2269,16 +2663,34 @@ if (check) {
   // sitemap/トップのリンクが揃っていても検出できない別種の壊れ方なので、
   // stale/orphans/refsとは独立に必ず見る。
   const idErrs = idCoverageErrors();
-  if (stale.length || orphans.length || orphansEn.length || refs.length || idErrs.length) {
+  // 手書きJAページ(about/corrections/contact)のドリフトも同様に独立(生成物が
+  // 最新でも、そもそも生成対象外のページの壊れ方なので stale 側には出ない)。
+  const driftErrs = handwrittenJaDriftErrors();
+  // HOME_FILLS↔home.jsの対応も同様に独立(index.htmlはhandwrittenJaDriftErrors()
+  // の対象外なので、そちらでは拾えない壊れ方)。
+  const homeFillsErrs = homeFillsCoverageErrors();
+  if (
+    stale.length ||
+    orphans.length ||
+    orphansEn.length ||
+    refs.length ||
+    idErrs.length ||
+    driftErrs.length ||
+    homeFillsErrs.length
+  ) {
     if (stale.length) console.error(`✗ 生成物が古い: ${stale.join(", ")}`);
     if (orphans.length) console.error(`✗ 余分なファイル: chart/${orphans.join(", chart/")}`);
     if (orphansEn.length) console.error(`✗ 余分なファイル: en/chart/${orphansEn.join(", en/chart/")}`);
     refs.forEach((e) => console.error(`✗ ${e}`));
     idErrs.forEach((e) => console.error(`✗ ${e}`));
+    driftErrs.forEach((e) => console.error(`✗ ${e}`));
+    homeFillsErrs.forEach((e) => console.error(`✗ ${e}`));
     if (stale.length || orphans.length || orphansEn.length) console.error("  node bin/build.mjs を実行してからデプロイすること");
     process.exit(1);
   }
-  console.log(`✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応とも一致）`);
+  console.log(
+    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応とも一致）`
+  );
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
   fs.mkdirSync(EN_OUT_DIR, { recursive: true });
@@ -2294,4 +2706,6 @@ if (check) {
   // 落ちるほどではないので警告にとどめ、デプロイは --check 側で止める。
   crossRefErrors(keys).forEach((e) => console.warn(`⚠ ${e}`));
   idCoverageErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  handwrittenJaDriftErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  homeFillsCoverageErrors().forEach((e) => console.warn(`⚠ ${e}`));
 }
