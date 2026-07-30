@@ -1,17 +1,23 @@
 #!/usr/bin/env bash
-# assets/og.png(ja) と assets/og-en.png(en) を og.html から焼き直す。
+# assets/og*.png(汎用2枚 + 指標8種×2言語の16枚 = 計18枚)を og.html から焼き直す。
 #
 # 何をするか:
 #   1. リポジトリルートをドキュメントルートにローカルHTTPサーバを一時的に立てる
-#   2. ヘッドレスChromeで og.html?shot(ja) と og.html?shot&lang=en(en) をそれぞれ
-#      1200x630・DPR2でスクリーンショットし、2400x1260のPNGとして書き出す
-#   3. 書き出したPNGのサイズと、同じChrome実行で取った--dump-domの中身を
+#   2. `node bin/build.mjs --og-list` から「焼くべきカード一覧」と「入力ファイル
+#      一覧」をTSVで受け取る(この2つの集合の唯一の出所はbin/build.mjs側。
+#      og.sh は自分でMETRICSやCSVパスの一覧を持たない。詳細は
+#      bin/build.mjsのOG_CARDS/OG_INPUT_RELS直上コメントを参照)
+#   3. ヘッドレスChromeで各カードのURL(og.html?<query>)を1200x630・DPR2で
+#      スクリーンショットし、2400x1260のPNGとして書き出す
+#   4. 書き出したPNGのサイズと、同じChrome実行で取った--dump-domの中身を
 #      検証してから所定の場所へ置く(検証前の一時ファイルに書き、通ってから
 #      mvするので、失敗時に既存の正しいassets/og*.pngを上書きすることもない)
-#   4. 入力ファイル群(CSV・og.html・csv.js・style.css)のsha256を
-#      assets/og.inputs.json(スタンプ)へ書く。node bin/build.mjs --check の
-#      陳腐化検査はこのスタンプを見て「焼き直し忘れ」を検出する(詳細は
-#      bin/build.mjs の ogStalenessErrors() 直上コメントを参照)
+#   5. 入力ファイル群(chart.js・全指標CSV・og.html・csv.js・style.css)の
+#      sha256を assets/og.inputs.json(スタンプ)へ書く。node bin/build.mjs
+#      --check の陳腐化検査はこのスタンプを見て「焼き直し忘れ」を検出する
+#      (詳細は bin/build.mjs の ogStalenessErrors() 直上コメントを参照)。
+#      ハッシュは**焼き始める前**に固定し、全カードが成功したあとに書く
+#      (write_stamp直上コメントのTOCTOU対策を参照)。
 #
 # ■ verify_size が実際に保証すること・しないこと(正直に書く)
 #   verify_sizeが見ているのは --window-size と force-device-scale-factor
@@ -20,30 +26,31 @@
 #   場合・Chromeがエラーページを表示した場合、いずれも寸法自体は2400x1260の
 #   まま出てくるので、verify_sizeだけでは検出できない。実際に守れるのは
 #   「Chromeがファイルを書けなかった」「DPR指定が効かなかった」の類だけ。
+#   **PNGが途中で切れている場合も検出できない**(sipsは先頭のIHDRだけで
+#   寸法を答えるため、切り詰めたファイルでも2400x1260と返す。実測で確認)。
+#   これは png_complete() が末尾のIENDチャンクで別に見る。
 #   中身の検証は下のverify_dom()が別に行う(--dump-domでDOMを取り、フッタの
-#   年度ラベルと実績線のパスが描けているかを見る)。それでも**フォントの
-#   フォールバック表示(指定フォントが読めず代替書体で描かれる)はどちらの
-#   機械的検査でも捕まらない**。ここは焼いた画像を目で見て確認するしかない。
+#   年度ラベルと見通し線・実績線のパスが「データの実態どおりに」描けているかを
+#   見る)。それでも**フォントのフォールバック表示(指定フォントが読めず
+#   代替書体で描かれる)や、y軸ラベルのはみ出し(og.htmlのPAD.left見積もりは
+#   実測ではない)はどちらの機械的検査でも捕まらない**。ここは焼いた画像を
+#   目で見て確認するしかない。
 #
 # 使い方:
 #   bin/og.sh
 #
-# data/gdp_forecast.csv や og.html を直しても、このスクリプトで焼き直すまでは
-# 配信中のOGP画像が古いまま(実際にFY1980〜1997の見通しを収集した後もこれを
-# 忘れ、破線が1998年からしか無い古い画像が公開され続けていたことがある)。
+# data/*.csv や og.html を直しても、このスクリプトで焼き直すまでは配信中の
+# OGP画像が古いまま(実際にFY1980〜1997の見通しを収集した後もこれを忘れ、
+# 破線が1998年からしか無い古い画像が公開され続けていたことがある)。
 # node bin/build.mjs --check がこの焼き直し忘れを検出する(詳細はそちらの
 # コメントを参照)。
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-
-# node bin/build.mjs の OG_INPUT_RELS と同じ集合を指す(片方だけ増減すると
-# --check が「スタンプの記録パスが一致しない」で機械的に気づく)。
-INPUT_RELS=(data/gdp_forecast.csv og.html csv.js style.css)
 STAMP_REL="assets/og.inputs.json"
 
-for cmd in python3 sips curl; do
+for cmd in python3 sips curl node; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     echo "エラー: $cmd が必要です(未インストール)。" >&2
     exit 1
@@ -55,15 +62,145 @@ if [[ ! -x "$CHROME" ]]; then
   exit 1
 fi
 
-# フッタの年度ラベルが「data/gdp_forecast.csvの最小年度から始まっているか」を
-# verify_domで機械的に見るための期待値。og.html側もCSVのxMinから導いている
-# (ハードコードしていない)ので、ここも同じくCSVから計算する。
-MIN_YEAR="$(python3 -c '
-import csv, sys
-with open(sys.argv[1], newline="") as f:
-    years = [int(row["fiscal_year"]) for row in csv.DictReader(f) if row.get("fiscal_year")]
-print(min(years))
-' "$ROOT/data/gdp_forecast.csv")"
+# site/ 配下に一時ファイルを置かない(デプロイ対象に混入する事故が過去にある。
+# bin/deploy.sh の「なぜリポジトリの外に置くのか」参照)。mktemp は既定で
+# システムの一時領域を使うので、ここでは何も指定しない。
+# cleanup対象になる一時ファイル/プロセスをここでまとめて宣言し、trapを
+# スクリプトの早い段階で仕掛ける(以前はSRV_PID起動直前でtrapしていたが、
+# それより前段(--og-listの読み出し)で使う一時ファイルもここに含めたため、
+# その一時ファイルが作られるより前にtrapが効いている必要がある)。
+SRV_PID=""
+OG_LIST=""
+STAMP_TMP=""
+cleanup() {
+  if [[ -n "$SRV_PID" ]]; then
+    kill "$SRV_PID" 2>/dev/null || true
+    wait "$SRV_PID" 2>/dev/null || true
+  fi
+  [[ -n "$OG_LIST" ]] && rm -f "$OG_LIST"
+  [[ -n "$STAMP_TMP" ]] && rm -f "$STAMP_TMP"
+}
+trap cleanup EXIT
+
+# 焼くべきカード一覧と入力ファイル一覧を `node bin/build.mjs --og-list` から
+# 受け取る。og.sh 側にMETRICSやCSVパスの手書きコピーを持たない(以前は
+# INPUT_RELS をここに手書きし、「bin/build.mjs の OG_INPUT_RELS と同じ集合を
+# 指す(片方だけ増減すると--checkが気づく)」という運用だったが、2026-07-30
+# にそもそも1箇所にする設計へ変えた: --og-list はビルド側で全ページを一度
+# メモリ生成してから返す作りなので実行に多少かかるが、ここで1回呼ぶだけで
+# 済むので許容する)。
+#
+# ■ プロセス置換ではなく一時ファイルへ書き出してから読む(2026-07-30、C)
+#   以前は `done < <(node "$ROOT/bin/build.mjs" --og-list)` というプロセス
+#   置換で読んでいた。**プロセス置換の中のコマンドの終了コードは`set -e`では
+#   拾えない**(bashの既知の仕様。置換全体はパイプの読み出し側の終了コードで
+#   評価される)。当時は非空ガードしかなく、--og-listの出力が途中で切れた
+#   場合(INPUT行が先頭にまとまって出る形式なので、切れるのはカード行側)、
+#   一部のカードだけ焼いて**スタンプは全入力のハッシュで書く**という壊れ方を
+#   しえた。焼かれなかったカードが古いまま`--check`が緑になり配信される。
+#   過去のpre-pushフックの事故(`$(...)`の失敗を誰も見ずにexit 0していた)と
+#   同型の穴だったため、`node ... --og-list > "$OG_LIST"` とリダイレクトで
+#   一時ファイルへ書いてから読む形に変えた。これなら`set -e`がnodeの終了
+#   コードを直接見る。
+#   さらに --og-list 側(bin/build.mjs)が出力の末尾にENDセンチネルを付ける
+#   ようになった(件数付き)。ここでは最終行がENDであること・実際に読めた
+#   INPUT/CARDの件数がENDの宣言と一致することを確かめ、食い違えば止まる。
+#   これで「センチネルより後ろが切れている」だけでなく「センチネル自体は
+#   出たがその手前が切れている」ような部分出力も閉じられる。
+#
+#   出力形式(bin/build.mjsの--og-list直上コメントと対で):
+#     INPUT\t<相対パス>
+#     CARD\t<query>\t<出力先相対パス>\t<期待最小年度>\t<hasForecast:0/1>\t<hasActual:0/1>
+#     END\t<INPUT件数>\t<CARD件数>
+#
+# ■ 知らない行はエラーにする(2026-07-30、D)
+#   以前は "INPUT" 以外の行を無条件にカード扱いしていた。誰かがbin/build.mjs
+#   の`--og-list`分岐より前(トップレベル)にデバッグの`console.log`を1行足す
+#   だけで、その行がカードとして扱われ、タブを含まない行なら出力先が空に
+#   なって `mv "$tmp_png" "$ROOT/"` でsite/直下にPNGが置かれ、次のデプロイで
+#   配信されかねなかった(期待最小年度も空になるためフッタ検査(a)も退化して
+#   どのフッタでも通ってしまう)。1列目が INPUT/CARD/END のいずれでもなければ
+#   ここでエラーにする(「知らない行=カード」というフォールバックを無くす)。
+#   カード行の形式(出力先が assets/og*.png の形・期待最小年度が数字のみ・
+#   hasForecast/hasActualが0/1のみ)も併せて検証する(構造で塞ぐのと形式で
+#   塞ぐのは別の網なので両方入れる)。
+OG_LIST="$(mktemp)"
+node "$ROOT/bin/build.mjs" --og-list > "$OG_LIST"
+
+INPUT_RELS=()
+CARD_QUERIES=()
+CARD_OUTS=()
+CARD_MIN_YEARS=()
+CARD_HAS_FORECAST=()
+CARD_HAS_ACTUAL=()
+input_count=0
+card_count=0
+end_seen=0
+end_line_no=0
+line_no=0
+while IFS=$'\t' read -r col1 col2 col3 col4 col5 col6; do
+  line_no=$((line_no + 1))
+  [[ -z "$col1" ]] && continue
+  case "$col1" in
+    INPUT)
+      INPUT_RELS+=("$col2")
+      input_count=$((input_count + 1))
+      ;;
+    CARD)
+      # col2=query col3=出力先 col4=期待最小年度 col5=hasForecast col6=hasActual
+      if [[ ! "$col3" =~ ^assets/og[A-Za-z0-9._-]*\.png$ ]]; then
+        echo "エラー: --og-list のCARD行の出力先が assets/og*.png の形でない(out=$col3)。" >&2
+        exit 1
+      fi
+      if [[ ! "$col4" =~ ^[0-9]+$ ]]; then
+        echo "エラー: --og-list のCARD行の期待最小年度が数字でない(min_year=$col4, out=$col3)。" >&2
+        exit 1
+      fi
+      if [[ "$col5" != "0" && "$col5" != "1" ]]; then
+        echo "エラー: --og-list のCARD行のhasForecastが0/1でない(値=$col5, out=$col3)。" >&2
+        exit 1
+      fi
+      if [[ "$col6" != "0" && "$col6" != "1" ]]; then
+        echo "エラー: --og-list のCARD行のhasActualが0/1でない(値=$col6, out=$col3)。" >&2
+        exit 1
+      fi
+      CARD_QUERIES+=("$col2")
+      CARD_OUTS+=("$col3")
+      CARD_MIN_YEARS+=("$col4")
+      CARD_HAS_FORECAST+=("$col5")
+      CARD_HAS_ACTUAL+=("$col6")
+      card_count=$((card_count + 1))
+      ;;
+    END)
+      end_seen=1
+      end_line_no=$line_no
+      if [[ "$col2" != "$input_count" || "$col3" != "$card_count" ]]; then
+        echo "エラー: --og-list のENDが宣言する件数(INPUT=$col2, CARD=$col3)が実際に読めた件数(INPUT=$input_count, CARD=$card_count)と一致しない(出力が途中で切れた可能性)。" >&2
+        exit 1
+      fi
+      ;;
+    *)
+      echo "エラー: --og-list に未知の行種別($col1)。CARD行のつもりならbin/build.mjs側にCARD接頭辞の付け忘れがある可能性。" >&2
+      exit 1
+      ;;
+  esac
+done < "$OG_LIST"
+rm -f "$OG_LIST"
+OG_LIST=""
+
+if [[ "$end_seen" -ne 1 ]]; then
+  echo "エラー: --og-list の出力にENDセンチネルが無い(出力が途中で切れた可能性)。" >&2
+  exit 1
+fi
+if [[ "$end_line_no" -ne "$line_no" ]]; then
+  echo "エラー: --og-list のENDセンチネルが最終行でない(END行のあとにも行がある)。" >&2
+  exit 1
+fi
+
+if [[ ${#CARD_OUTS[@]} -eq 0 || ${#INPUT_RELS[@]} -eq 0 ]]; then
+  echo "エラー: node bin/build.mjs --og-list の出力が空(または不完全)でした。" >&2
+  exit 1
+fi
 
 # 他の常用サービスと衝突しにくい範囲から、空いているポートを1つ選ぶ。
 # 「使用中かどうか」は実際に接続を試みて判定する(lsof等の追加ツールを
@@ -81,18 +218,6 @@ if [[ -z "$PORT" ]]; then
   echo "エラー: 候補ポート(8917/8927/8937/8947/8957)がすべて使用中でした。" >&2
   exit 1
 fi
-
-# site/ 配下に一時ファイルを置かない(デプロイ対象に混入する事故が過去にある。
-# bin/deploy.sh の「なぜリポジトリの外に置くのか」参照)。mktemp は既定で
-# システムの一時領域を使うので、ここでは何も指定しない。
-SRV_PID=""
-cleanup() {
-  if [[ -n "$SRV_PID" ]]; then
-    kill "$SRV_PID" 2>/dev/null || true
-    wait "$SRV_PID" 2>/dev/null || true
-  fi
-}
-trap cleanup EXIT
 
 python3 -m http.server "$PORT" --bind 127.0.0.1 --directory "$ROOT" >/dev/null 2>&1 &
 SRV_PID=$!
@@ -119,6 +244,40 @@ if [[ -z "$READY" ]]; then
   exit 1
 fi
 
+# PNGが最後まで書けているか。PNGの仕様上ファイルは必ずIENDチャンクで終わる
+# ので、末尾12バイトに "IEND" があれば書き込みは完了している。
+#
+# なぜこれが要るか: **`sips` は途中で切れたPNGでも寸法を正しく答える**
+# (IHDRはファイルの先頭にあるため)。実測で、正常な画像の先頭40000バイトだけを
+# 切り出したファイルに対し `sips -g pixelWidth/pixelHeight` は 2400x1260 を
+# 返して終了コード0だった。つまり verify_size は切り詰めを検出できない。
+# 下の待ち合わせが「出力が完成したらChromeを強制終了する」方式である以上、
+# 完成の判定を誤れば半分だけ描かれた画像がそのまま配信物になるので、
+# ここは寸法とは別に必ず見る(2026-07-30に追加)。
+png_complete() {
+  local f="$1"
+  [[ -s "$f" ]] || return 1
+  tail -c 12 "$f" 2>/dev/null | LC_ALL=C grep -aq "IEND"
+}
+
+# --dump-dom の出力が最後まで書けているか。png_complete()と対称の考え方:
+# `--dump-dom`が書くのはHTML文字列なので、`</html>`で終わっていれば書き込みは
+# 完結している(2026-07-30追加、E)。
+#
+# なぜこれが要るか: 待ち合わせは以前 `[[ -s "$tmp_dom" ]]`(1バイト以上あるか)
+# しか見ていなかった。PNG→DOMの順に書くChrome実行では、PNG完成・DOM書き出し
+# 途中の瞬間に(png_completeとtmp_domの非空判定が両方たまたま真になり)
+# `kill -9`が入りうる。結果は偽の赤(verify_domがフッタや線のパターンに
+# マッチせず落ちる)なので配信事故には直結しないが、頻繁に誤爆する検査は
+# 人を素の`npx wrangler`のような検査を経ない経路に逃がしかねないため、
+# このリポジトリでは「安全性の問題」として扱い、png_complete()と同じ形の
+# 待ち合わせ+検査を対で用意した。
+dom_complete() {
+  local f="$1"
+  [[ -s "$f" ]] || return 1
+  tail -c 200 "$f" 2>/dev/null | LC_ALL=C grep -aq "</html>"
+}
+
 verify_size() {
   local f="$1"
   local w h
@@ -133,35 +292,81 @@ verify_size() {
 
 # --dump-dom で取ったDOMの中身を見て、絵として壊れていないかを機械的に
 # 確かめる(verify_sizeは寸法しか見ないため、これとは別枠で必要)。
-#   (a) フッタの年度ラベルが「${MIN_YEAR}–」で始まっているか
-#       (CSVのfetch失敗でrowsが空になると、og.htmlのfooterRange()は
-#       呼ばれるがxMin/xMaxがNaN・Infinity等になり、この形にならない)
-#   (b) 実績線(line-actual)のpath要素にd="M <数字>…という実データが
-#       入っているか(rowsが空だとd=""になり、線が1本も引かれない)
+#   (a) フッタの年度ラベルが「${min_year}–」を含むか(汎用カードは
+#       「指標名 ${min_year}–…」、指標カードは「${min_year}–…」そのものと
+#       文言の形が違うが、どちらも"${min_year}–"を含む点は共通なので
+#       同じパターンで両対応できる)。
+#       min_year は `node bin/build.mjs --og-list` の4列目(カードごとの
+#       期待最小年度)から受け取る。bash側にCSVパスや列名を持たず、
+#       chart.js の METRICS が唯一の出所であるべきという方針に合わせている。
+#       なお、CSVのfetchがrejectする経路(og.htmlのloadCSVが失敗する場合)は
+#       footerRange()/footerRangeMetric()自体が呼ばれず、置き文字列
+#       (「…」)のまま残る。xMin/xMaxがNaN/Infinityになって呼ばれた結果
+#       壊れた文字列が出る、という経路ではない(2026-07-30、H-3で記述を
+#       実態に合わせた)。どちらの経路でもこの検査(a)は落ちるので実害は無い。
+#   (b) 見通し線(line-forecast)・実績線(line-actual)のpath要素それぞれに
+#       ついて、そのカードにその系列のデータが実際にあるか(hasForecast/
+#       hasActual、`--og-list`の5・6列目)に応じてd属性の形を見る:
+#         - データがある(1) → d="M <数字>… という実データが入っていることを
+#           要求する(以前からある検査)
+#         - データが無い(0) → その`class=`を持つ要素自体は存在し、かつ
+#           d="M <数字>…になっていないことを要求する
+#       2026-07-30(A)で追加。以前は実績線に対して「d="M <数字>を無条件に
+#       要求する」という検査だけだったため、見通しだけ先に収集して実績値が
+#       1つも無い指標をMETRICSに足すと、og.htmlは空のd=""を描き、この検査が
+#       必ず落ちてbin/og.shが完走できなくなる(スタンプが書けず--checkも
+#       赤のまま=時刻比較方式で踏んだのと同型のデッドロック)欠陥があった。
+#       また検査が実績線しか見ていなかったため、forecastColの列名タイポ等で
+#       見通し線が全滅しても検査は全部通り、実績線だけのカードが静かに
+#       配信されうる欠陥もあった。データの実態どおりの線を要求する形にして
+#       両方を塞いだ。
 # ここで捕まえられないもの(正直に書く): 指定フォントの読み込みに失敗して
 # 代替書体にフォールバックした場合。DOM構造やテキスト自体は正しいままなので
-# 機械的には検出できず、目視確認に頼るしかない。
+# 機械的には検出できず、目視確認に頼るしかない。同様にy軸ラベルの幅の
+# 見積もり(og.htmlのPAD.left)がはみ出しているかどうかも、DOMのテキスト
+# 自体は正しいので機械検査では捕まらず、目視確認に頼るしかない。
 verify_dom() {
-  local dom="$1" query="$2"
+  local dom="$1" query="$2" min_year="$3" has_forecast="$4" has_actual="$5"
   if [[ ! -s "$dom" ]]; then
     echo "エラー: --dump-domの出力が空です(query=$query)。Chromeがページを読めていない可能性。" >&2
     exit 1
   fi
-  if ! grep -q "id=\"og-footer-range\">[^<]*${MIN_YEAR}–" "$dom"; then
-    echo "エラー: フッタの年度ラベルが期待どおりでない(${MIN_YEAR}– を含まない、query=$query)。" >&2
+  if ! grep -q "id=\"og-footer-range\">[^<]*${min_year}–" "$dom"; then
+    echo "エラー: フッタの年度ラベルが期待どおりでない(${min_year}– を含まない、query=$query)。" >&2
     echo "  CSVのfetch失敗やJSエラーの可能性があります。" >&2
     exit 1
   fi
-  if ! grep -Eq 'class="line-actual"[^>]*d="M [0-9]' "$dom"; then
-    echo "エラー: 実績線(line-actual)にデータが描かれていません(query=$query)。" >&2
-    echo "  CSVのfetch失敗の可能性があります。" >&2
-    exit 1
+  verify_line "$dom" "line-forecast" "$has_forecast" "$query"
+  verify_line "$dom" "line-actual" "$has_actual" "$query"
+}
+
+# verify_dom(b) の実体。class ("line-forecast"/"line-actual") が持つ
+# d属性が、そのカードのデータ有無(want_data、0/1)と整合しているかを見る。
+verify_line() {
+  local dom="$1" class="$2" want_data="$3" query="$4"
+  if [[ "$want_data" == "1" ]]; then
+    if ! grep -Eq "class=\"${class}\"[^>]*d=\"M [0-9]" "$dom"; then
+      echo "エラー: ${class}にデータが描かれていません(query=$query)。" >&2
+      echo "  CSVのfetch失敗や列名(forecastCol/actualCol)の食い違いの可能性があります。" >&2
+      exit 1
+    fi
+  else
+    if ! grep -Eq "class=\"${class}\"" "$dom"; then
+      echo "エラー: ${class}のpath要素自体がDOMに無い(query=$query)。og.htmlがd=\"\"でも常に両方のpath要素をappendする前提が崩れている可能性。" >&2
+      exit 1
+    fi
+    if grep -Eq "class=\"${class}\"[^>]*d=\"M [0-9]" "$dom"; then
+      echo "エラー: データが無いはずの${class}にd=\"M <数字>…が描かれています(query=$query)。" >&2
+      echo "  --og-listのhasForecast/hasActualとog.html側の実際の描画が食い違っています(データやCSV列名の食い違いの可能性)。" >&2
+      exit 1
+    fi
   fi
 }
 
-# $1: og.html に渡すクエリ文字列(shot / shot&lang=en) $2: 書き出し先の最終パス
+# $1: og.html に渡すクエリ文字列 $2: 書き出し先の最終パス(絶対) $3: 期待最小年度
+# $4: hasForecast(0/1) $5: hasActual(0/1)
 shoot() {
-  local query="$1" out="$2"
+  local query="$1" out="$2" min_year="$3" has_forecast="$4" has_actual="$5"
   local udir wdir tmp_png tmp_dom
   udir="$(mktemp -d)"
   wdir="$(mktemp -d)"
@@ -186,16 +391,34 @@ shoot() {
   # 書き出されるが、Chrome(headless=new)のプロセスがそのあと自分で終了せず
   # 居座ることが実機で確認できている(GoogleUpdater等の裏プロセスを連れて
   # 残り続ける)。ファイルはこの時点で既に完成しているので、プロセスの自然
-  # 終了を待たず一定秒数で強制終了して先へ進む。10秒の予算に対して25秒待てば
-  # 十分な余裕がある。
-  local waited=0
+  # 終了を待たず出力の完成を確認でき次第、強制終了して先へ進む。
+  #
+  # 以前は固定25秒待ってから`kill -9`していた(10秒の予算に対して25秒待てば
+  # 十分な余裕がある、という判断)。焼く枚数が2枚から18枚に増えたことで
+  # 固定待ちでは所要時間が7分半になり現実的でなくなったため、2026-07-30に
+  # 「出力ファイルの完成を0.2秒ごとにポーリングし、揃ったら即kill」する方式へ
+  # 変えた。25秒の上限は保険として残す。
+  #
+  # 完成の判定は png_complete()(末尾のIENDチャンク)と dom_complete()
+  # (末尾の</html>)で行う。**「バイト数が直前のポーリングと同じなら完成」
+  # という判定にはしない**: 書き込みが一瞬停まった隙に2回続けて同じサイズを
+  # 読むと、途中で切れたファイルを完成とみなしてChromeを殺してしまう。
+  # そして`sips`は切り詰めたPNGでも寸法を正しく答えるため(png_complete直上
+  # のコメント参照)、後段のverify_sizeもverify_domもそれを通してしまう。
+  # IEND/`</html>`の有無なら「完成したか」を推測ではなく事実として判定できる
+  # ので、この経路自体が存在しない。
+  local waited_ms=0
   while kill -0 "$cpid" 2>/dev/null; do
-    if (( waited >= 25 )); then
+    if png_complete "$tmp_png" && dom_complete "$tmp_dom"; then
       kill -9 "$cpid" 2>/dev/null || true
       break
     fi
-    sleep 1
-    waited=$((waited + 1))
+    if (( waited_ms >= 25000 )); then
+      kill -9 "$cpid" 2>/dev/null || true
+      break
+    fi
+    sleep 0.2
+    waited_ms=$((waited_ms + 200))
   done
   wait "$cpid" 2>/dev/null || true
 
@@ -205,8 +428,24 @@ shoot() {
     rm -rf "$wdir"
     exit 1
   fi
+  # 25秒の上限で諦めた場合(=完成を確認できないまま強制終了した場合)は
+  # ここで止まる。上の待ち合わせと同じ判定を検査としても置いておく:
+  # 待ち合わせ側は「いつ殺すか」を決めるためのもので、通ってきた出力が
+  # 完成しているかどうかはfail-closedに別途確かめる必要がある。
+  if ! png_complete "$tmp_png"; then
+    echo "エラー: PNGが途中で切れています(末尾にIENDチャンクが無い、query=$query)。" >&2
+    echo "  Chromeの書き出しが完了する前に打ち切られた可能性があります。" >&2
+    rm -rf "$wdir"
+    exit 1
+  fi
+  if ! dom_complete "$tmp_dom"; then
+    echo "エラー: --dump-domの出力が途中で切れています(末尾に</html>が無い、query=$query)。" >&2
+    echo "  Chromeの書き出しが完了する前に打ち切られた可能性があります。" >&2
+    rm -rf "$wdir"
+    exit 1
+  fi
   verify_size "$tmp_png"
-  verify_dom "$tmp_dom" "$query"
+  verify_dom "$tmp_dom" "$query" "$min_year" "$has_forecast" "$has_actual"
   mv "$tmp_png" "$out"
   rm -rf "$wdir"
   echo "✓ $out を書き出しました。"
@@ -218,8 +457,17 @@ shoot() {
 # site/配下に置くため配信される(このファイルもwrangler pages deployの対象)が、
 # 中身はパスとsha256ハッシュの対応表だけで秘密は一切含まない。承知の上で
 # 置いている旨をJSON自身にもコメント相当のフィールドとして残す。
-write_stamp() {
-  python3 - "$ROOT" "$ROOT/$STAMP_REL" "${INPUT_RELS[@]}" <<'PYEOF'
+#
+# ■ TOCTOU対策: ハッシュは焼き始める前に計算し、成功後に配置する(2026-07-30、G)
+#   以前は18枚焼き終わったあとに入力ファイルのハッシュを計算していた。
+#   bin/og.shの実行中(約1分)にchart.jsやCSVを編集すると、「古い内容で
+#   焼いた画像 + 新しい内容のハッシュ」でスタンプが書かれ、`--check`が
+#   緑のまま古いカードが残り続けるTOCTOU(検査から使用までの間の変化)が
+#   起きえた。焼き始める前にハッシュを一時ファイル(STAMP_TMP)へ書いて
+#   固定し、全カードが成功したあとにそれを最終位置へ`mv`する形に変えた。
+compute_stamp() {
+  local out_tmp="$1"
+  python3 - "$ROOT" "$out_tmp" "${INPUT_RELS[@]}" <<'PYEOF'
 import hashlib
 import json
 import os
@@ -235,11 +483,16 @@ for rel in rels:
 
 data = {
     "_comment": (
-        "bin/og.sh が assets/og.png・assets/og-en.png を焼くたびに書き直す。"
-        "node bin/build.mjs --check の陳腐化検査(ogStalenessErrors)が、"
-        "ここに記録したsha256といまの入力ファイルの実ハッシュを突き合わせて"
-        "焼き直し忘れを検出する。このファイルはsite/配下にあるため配信されるが、"
-        "パスとハッシュの対応表だけで秘密は含まない(承知の上で置いている)。"
+        "bin/og.sh が assets/og*.png(汎用2枚+指標8種×2言語の計18枚)を焼く"
+        "たびに書き直す。node bin/build.mjs --check の陳腐化検査"
+        "(ogStalenessErrors)が、ここに記録したsha256といまの入力ファイルの"
+        "実ハッシュを突き合わせて焼き直し忘れを検出する。入力ファイルの一覧"
+        "(chart.js・METRICSの全指標CSV・og.html・csv.js・style.css)は"
+        "node bin/build.mjs --og-list が唯一の出所で、ここに手書きのコピーは"
+        "持たない。このファイルはsite/配下にあるため配信されるが、パスと"
+        "ハッシュの対応表だけで秘密は含まない(承知の上で置いている)。"
+        "ハッシュは焼き始める前に計算し固定したもの(TOCTOU対策。"
+        "bin/og.shのcompute_stamp直上コメント参照)。"
     ),
     "inputs": inputs,
 }
@@ -247,9 +500,16 @@ with open(out, "w") as f:
     json.dump(data, f, indent=2, ensure_ascii=False, sort_keys=True)
     f.write("\n")
 PYEOF
-  echo "✓ $ROOT/$STAMP_REL を更新しました。"
 }
 
-shoot "shot" "$ROOT/assets/og.png"
-shoot "shot&lang=en" "$ROOT/assets/og-en.png"
-write_stamp
+STAMP_TMP="$(mktemp)"
+compute_stamp "$STAMP_TMP"
+
+for i in "${!CARD_OUTS[@]}"; do
+  shoot "${CARD_QUERIES[$i]}" "$ROOT/${CARD_OUTS[$i]}" "${CARD_MIN_YEARS[$i]}" \
+    "${CARD_HAS_FORECAST[$i]}" "${CARD_HAS_ACTUAL[$i]}"
+done
+
+mv "$STAMP_TMP" "$ROOT/$STAMP_REL"
+STAMP_TMP=""
+echo "✓ $ROOT/$STAMP_REL を更新しました。"

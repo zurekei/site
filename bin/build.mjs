@@ -148,6 +148,20 @@ const R = loadModule("chart.js", [
 
 const { METRICS, T, escapeHTML, safeUrl, toNum, parseCSV, computeGapStats } = R;
 
+// 指標ごとのOGP画像は og-<key>.png / og-<key>-en.png(buildPageのogImage参照)。
+// カード名の衝突チェックは OG_CARDS の出力先パス一意性チェックとして下に
+// ある(OG_CARDSがここではまだ定義されていないため、実際のthrowはそちら)。
+// 以前はここに `if ("en" in METRICS) throw ...` という1行だけがあったが、
+// 守れていたのは "en" という1キーの衝突だけだった。METRICSにキーX と
+// キーX-enが併存すると、Xの英語カードとX-enの日本語カードがどちらも
+// og-X-en.pngになり、後に焼いた方が前を黙って上書きする穴が残っていた
+// (ogFileErrors()はexpectedをSetで作るため重複が消えて検出しない)。
+// 2026-07-30、列挙(="en"というキー名を名指しする)から構造(=出力先パスの
+// 重複を機械的に見る)へ変えた。理由: 列挙は「気づいた衝突パターンを1つずつ
+// 塞ぐ」やり方で、次に別の衝突パターン(X/X-en以外の組み合わせ)が出るたびに
+// また1行足す必要がある。出力先パスの一意性という構造そのものを見れば、
+// "en"キーも含めどんな組み合わせの衝突も自動的に捕まる。
+
 // JA を本文に、EN を data-en に置く（/en/ 生成前からある fertility.html / chart/index.html
 // の既存の二言語表現方式）。入れ替えは各ページの applyTableI18n 等が行う。訳を辞書ごと
 // ビルド側に持たせないのは、文言の出所を .js 側の T 一箇所に保つため。
@@ -464,9 +478,10 @@ function buildPage(key, metric, lang) {
   const archive = metricArchiveNote
     ? `      <p class="chart-note mono" id="archive-note">${escapeHTML(metricArchiveNote)}</p>`
     : `      <p class="chart-note mono" id="archive-note" hidden></p>`;
-  // OGP画像はja/enで別ファイル(og.html?lang=enで焼いたog-en.png)。JAページは
-  // 従来どおりog.png。
-  const ogImage = lang === "ja" ? "og.png" : "og-en.png";
+  // OGP画像は指標ごとに専用のカード(2026-07-30、og.html?m=<key>で焼く)。
+  // ja: og-<key>.png / en: og-<key>-en.png。/chart(指標一覧)・トップ等の
+  // 汎用ページは対象外(そちらは buildIndex 等で従来どおり og.png/og-en.png)。
+  const ogImage = lang === "ja" ? `og-${key}.png` : `og-${key}-en.png`;
 
   // 集計行はグラフと同じ computeGapStats / gapSummaryText で作る
   const stats = R.computeGapStats(rows, "forecastVal", "actualVal", { fromYear: metric.statsFromYear });
@@ -2640,7 +2655,6 @@ function homeFillsCoverageErrors() {
  *   効かない。
  *
  * ■ 入力の集合(時刻比較では入れられなかったものも入れられるようになった)
- *   - data/gdp_forecast.csv
  *   - og.html
  *   - csv.js … og.htmlが loadCSV/toNum をここから読んでいるのに、時刻比較
  *     版では対象外だった(style.cssと同種の見落とし。2026-07-30レビュー指摘)
@@ -2651,6 +2665,20 @@ function homeFillsCoverageErrors() {
  *     2026-07-30に対象へ加えた。** 「style.cssは既知の穴」という記述は
  *     この変更で解消したので消してある(このファイルの履歴として残すのは
  *     この段落自体)。
+ *   - chart.js … 2026-07-30、指標ごとのOGカード対応でog.htmlがchart.jsの
+ *     METRICSをfetchして読むようになったため追加。**ファイル全体のハッシュ
+ *     を取る(カードが実際に使うフィールドだけを見る形にはしない)。**
+ *     chart.jsはnote/desc/archiveNoteといったカードに出ない長い文章も
+ *     抱えているので、その1文字を直すだけでも18枚の焼き直しが要求される
+ *     (1分ほど)。これは承知の上での選択: 「カードが使うフィールドだけ」を
+ *     列挙する方式にすると、og.htmlが将来別のフィールドを使い始めたときに
+ *     その列挙を更新し忘れる=検査が黙って効かなくなる穴が生まれる。
+ *     ファイル全体のハッシュにはその穴が構造的に存在しない。焼き直しの
+ *     1分と、穴の可能性を天秤にかけて前者を取っている(この判断を将来
+ *     「最適化」で覆さないこと)。
+ *   - METRICSの全指標が使うCSV(重複除去)… 同じ理由で、指標カードが実際に
+ *     読むCSVすべて。data/gdp_forecast.csvを手書きで固定していた旧版と違い、
+ *     METRICSから機械的に導くので指標を足せば自動で対象に入る。
  *
  * ■ それでもエラーにする(fail-openにしない)ケース
  *   - スタンプファイル(assets/og.inputs.json)が無い、またはJSONとして
@@ -2667,17 +2695,129 @@ function homeFillsCoverageErrors() {
  *     では検出できない。og.html自体の変更(フォント指定行の変更等)は
  *     捕まるが、フォント配信側の障害は捕まらない。目視確認に頼る
  *   - ヘッドレスChrome自体のバージョン差によるレンダリングの微差
- *   - assets/og.png / assets/og-en.png を bin/og.sh を経由せず直接
- *     上書き・削除した場合(スタンプの記録内容とは無関係に発生するため、
- *     この検査の対象外。生成物ではなく人間が置く画像である以上、
- *     ここまでは面倒を見ない)
+ *   - assets/og*.png(18枚)を bin/og.sh を経由せず直接上書きした場合の
+ *     「中身」の正しさ(スタンプの記録内容とは無関係に発生するため、この
+ *     検査の対象外。生成物ではなく人間が置く画像である以上、ここまでは
+ *     面倒を見ない)。ただしファイルの過不足(18枚のうち何かが無い・
+ *     余分にある)はこの検査とは別に ogFileErrors() が見る(下記参照)
  */
 
-// og.htmlの描画に効く入力ファイル一覧(SITE_DIR相対)。bin/og.sh側の
-// INPUT_RELS と同じ集合を指す(片方だけ増減するとこの検査が
-// 「スタンプの記録パスが一致しない」で機械的に気づく)。
-const OG_INPUT_RELS = ["data/gdp_forecast.csv", "og.html", "csv.js", "style.css"];
+// og.htmlの描画に効く入力ファイル一覧(SITE_DIR相対)。2026-07-30、指標ごとの
+// OGカード対応で og.html が chart.js の METRICS を読み込むようになったため、
+// chart.js 自身と METRICS が使う全指標のCSV(重複除去)を追加した。手書きの
+// リストにはしない: METRICS から機械的に導くので、指標を足せば自動でここにも
+// 入る(足し忘れて陳腐化検査が効かなくなる、という穴を構造的に塞ぐ)。
+// bin/og.sh は自分で同じ集合を持たず、`node bin/build.mjs --og-list` の
+// INPUT行からこの配列をそのまま受け取る(片方だけ増減する事故がそもそも
+// 起きない。以前は bin/og.sh 側に手書きの INPUT_RELS があり「片方だけ増減
+// すると検査が気づく」という設計だったが、2026-07-30に「そもそも1箇所にする」
+// 設計へ変えた)。
+const OG_INPUT_RELS = [
+  "og.html",
+  "csv.js",
+  "style.css",
+  "chart.js",
+  ...new Set(Object.values(METRICS).map((m) => m.csv.replace(/^\//, ""))),
+];
 const OG_STAMP_REL = "assets/og.inputs.json";
+
+// og.htmlが焼くべきOGカード全部(汎用2枚+指標8種×2言語=18枚)。
+// query は og.html に渡すクエリ文字列(`shot`を含む)、out は assets/ 以下の
+// 出力先相対パス、minYear はそのカードの年度レンジ最小値の期待値
+// (og.html側の「見通し列か実績列に値がある行の最小fiscal_year」と同じ規則。
+// 規則がずれると bin/og.sh の verify_dom が誤爆するので、ここは readRows() を
+// 経由して og.html と同じデータから導く)。汎用2枚は gdp-real の値を使う
+// (og.htmlの?mなし=実質GDP固定という仕様に合わせる)。
+//
+// hasForecast/hasActual(2026-07-30追加): そのカードの見通し列/実績列に
+// 実際に値のある行が1つでもあるか(1/0)。bin/og.sh の verify_dom が「実績線
+// (line-actual)には無条件にd="M <数字>を要求する」という決め打ちだったため、
+// 見通しだけ先に収集して実績値が1つも無い指標を METRICS に足すと、
+// verify_dom が永久に赤くなり bin/og.sh が完走できなくなる欠陥があった
+// (og.shが完走しないとスタンプが書けず--checkも赤のまま=このリポジトリが
+// 過去に撤回した時刻比較方式と同型のデッドロック)。加えて検査が実績線しか
+// 見ていなかったため、forecastColの列名タイポ等で見通し線が全滅しても
+// 検査は素通りしていた。「そのカードに見通し/実績のデータが実際にあるか」を
+// ビルド側(データを知っている側)から渡し、bin/og.sh側は「データの実態
+// どおりの線になっているか」(データが無いはずの線には無条件にd="M...も
+// 要求しない代わりに、d="M...が描かれていたら誤検出として落とす)を見る形に
+// 変えた。minYearと同じくreadRows()経由で導くので、年度レンジの判定規則
+// (?mの有無に応じたCSV・列名の決め方)とずれない。
+function metricLineInfo(metric) {
+  const rows = readRows(metric);
+  const domain = rows.filter((r) => r.forecastVal !== null || r.actualVal !== null);
+  return {
+    minYear: Math.min(...domain.map((r) => r.year)),
+    hasForecast: rows.some((r) => r.forecastVal !== null) ? 1 : 0,
+    hasActual: rows.some((r) => r.actualVal !== null) ? 1 : 0,
+  };
+}
+const OG_CARDS = (() => {
+  // ここではまだ後段の `const keys` が初期化されていない(TDZ)ため、
+  // Object.keys(METRICS) を直接使う(値は同じもの)。
+  const generic = metricLineInfo(METRICS["gdp-real"]);
+  const cards = [
+    { query: "shot", out: "assets/og.png", ...generic },
+    { query: "shot&lang=en", out: "assets/og-en.png", ...generic },
+  ];
+  for (const k of Object.keys(METRICS)) {
+    const info = metricLineInfo(METRICS[k]);
+    cards.push({ query: `shot&m=${k}`, out: `assets/og-${k}.png`, ...info });
+    cards.push({ query: `shot&m=${k}&lang=en`, out: `assets/og-${k}-en.png`, ...info });
+  }
+  return cards;
+})();
+
+// カード名の衝突検査(2026-07-30、B): 以前は `if ("en" in METRICS) throw` と
+// いう列挙(気づいた1パターンだけを名指しする)方式だったが、キーX とX-enの
+// 併存のような別の衝突パターンを見逃す。OG_CARDSの出力先パス(out)が重複して
+// いないかを機械的に見る構造的なチェックに置き換えた。"en"というキー名も
+// これで自動的に捕まる(og-en.pngという出力先を持つのが2件になるため)。
+// 衝突すると片方が後に焼いた方に黙って上書きされ、18枚焼いたつもりで実際は
+// 17枚(1枚は別指標の絵)という事故になるため、検出したら列挙せずに止める。
+{
+  const outs = OG_CARDS.map((c) => c.out);
+  const seen = new Set();
+  const dupes = new Set();
+  for (const o of outs) {
+    if (seen.has(o)) dupes.add(o);
+    seen.add(o);
+  }
+  if (dupes.size) {
+    throw new Error(
+      `OGカードの出力先パスが衝突している: ${[...dupes].sort().join(", ")}` +
+        `(METRICSの複数のキーが同じ og-<key>[-en].png を指している)`
+    );
+  }
+}
+
+// assets/ 配下の og*.png が「焼くべき18枚」の集合とちょうど一致するかを見る
+// (findOrphansがchart/に対してやっているのと同じ趣旨)。指標を消したときに
+// 古いカードが配信され続ける事故や、bin/og.shを経ずに置かれた置き土産
+// (og-zzz.pngのような)を検出する。zurekei_icon_512.pngはassets/の外にある
+// ため、この走査には最初から入らない。
+function ogFileErrors() {
+  const assetsDir = path.join(SITE_DIR, "assets");
+  const expected = new Set(OG_CARDS.map((c) => path.basename(c.out)));
+  let actual;
+  try {
+    actual = fs.readdirSync(assetsDir).filter((f) => /^og.*\.png$/.test(f));
+  } catch (e) {
+    return [`OGP画像検査: assets/ が読めない(${e.message})`];
+  }
+  const orphans = actual.filter((f) => !expected.has(f)).sort();
+  const missing = [...expected].filter((f) => !actual.includes(f)).sort();
+  const errs = [];
+  if (orphans.length) {
+    errs.push(
+      `OGP画像: assets/ に余分なファイル: ${orphans.join(", ")}(指標を消した置き土産か、bin/og.shを経ずに置かれた可能性)`
+    );
+  }
+  if (missing.length) {
+    errs.push(`OGP画像: assets/ に無いファイル: ${missing.join(", ")}。bin/og.sh で焼くこと`);
+  }
+  return errs;
+}
 
 function sha256OfFile(absPath) {
   return createHash("sha256").update(fs.readFileSync(absPath)).digest("hex");
@@ -2776,6 +2916,44 @@ function findOrphans(dir) {
   return { known, orphans };
 }
 
+// --og-list: bin/og.sh が焼くべきカード一覧(と、その入力ファイル一覧)を
+// 標準出力へTSVで返す。bin/og.sh 側に同じ集合を手書きで持たせない(1箇所に
+// する)ための唯一の受け渡し経路。ここは --check の分岐(if (check) 直前)と
+// あえて並べて置いている: このスクリプトはトップレベルで全ページを
+// メモリ上に生成してから初めて --check/--og-list を分岐する作りなので、
+// --og-list だけを先に処理して抜けるという最適化はしていない(無駄に
+// フルビルドが走るが、掛かる時間は誤差なので許容する)。
+// 出力形式(2026-07-30、C・Dで改定。各行の1列目が種別の接頭辞):
+//   INPUT\t<相対パス>
+//     … OG_INPUT_RELSの各要素(先頭で全行出す)
+//   CARD\t<query>\t<出力先相対パス>\t<期待最小年度>\t<hasForecast:0/1>\t<hasActual:0/1>
+//     … OG_CARDSの各カード
+//   END\t<INPUT行の件数>\t<CARD行の件数>
+//     … 最終行のセンチネル
+// 以前はカード行に接頭辞が無く、"INPUT"以外の行を無条件にカード扱いして
+// いた(D)。誰かがこの分岐より前にデバッグの console.log を1行足すだけで
+// その行がカードとして扱われ、タブを含まない行ならbin/og.sh側で出力先が
+// 空になり `mv "$tmp_png" "$ROOT/"` で site/ 直下にPNGが置かれ次のデプロイで
+// 配信されかねなかった。"CARD" という接頭辞を明示し、bin/og.sh側は
+// INPUT/CARD/ENDのいずれでもない行が来たらエラーで止まるようにした
+// (「知らない行=カード」というフォールバックを無くす)。
+// 末尾のENDセンチネルは、プロセス置換(bin/og.shが以前使っていた
+// `done < <(node ...)`)の終了コードをset -eが拾えない問題(C)への対策。
+// bin/og.sh側は一時ファイルへリダイレクトしてnodeの終了コードを見るように
+// 変えた上で、さらに「最終行がENDであること」「実際に読めた行数が宣言された
+// 件数と一致すること」を確かめることで、部分出力(リストが途中で切れた場合)
+// も検出できるようにしている。
+if (process.argv.includes("--og-list")) {
+  const lines = [];
+  for (const rel of OG_INPUT_RELS) lines.push(`INPUT\t${rel}`);
+  for (const c of OG_CARDS) {
+    lines.push(`CARD\t${c.query}\t${c.out}\t${c.minYear}\t${c.hasForecast}\t${c.hasActual}`);
+  }
+  lines.push(`END\t${OG_INPUT_RELS.length}\t${OG_CARDS.length}`);
+  process.stdout.write(lines.join("\n") + "\n");
+  process.exit(0);
+}
+
 if (check) {
   const stale = [];
   for (const [f, want] of files) {
@@ -2823,6 +3001,10 @@ if (check) {
   // OGP画像の陳腐化は生成物ではないog.htmlが起点なので、上のどの検査とも
   // 独立に必ず見る(stale/orphans/refs/id/drift/homeFillsのいずれにも掛からない)。
   const ogErrs = ogStalenessErrors();
+  // assets/のog*.pngが「焼くべき18枚」とちょうど一致するかも同様に独立
+  // (ogStalenessErrorsは入力ファイルのハッシュしか見ておらず、出力側の
+  // 過不足はここでしか捕まえられない)。
+  const ogFileErrs = ogFileErrors();
   if (
     stale.length ||
     orphans.length ||
@@ -2831,7 +3013,8 @@ if (check) {
     idErrs.length ||
     driftErrs.length ||
     homeFillsErrs.length ||
-    ogErrs.length
+    ogErrs.length ||
+    ogFileErrs.length
   ) {
     if (stale.length) console.error(`✗ 生成物が古い: ${stale.join(", ")}`);
     if (orphans.length) console.error(`✗ 余分なファイル: chart/${orphans.join(", chart/")}`);
@@ -2841,11 +3024,12 @@ if (check) {
     driftErrs.forEach((e) => console.error(`✗ ${e}`));
     homeFillsErrs.forEach((e) => console.error(`✗ ${e}`));
     ogErrs.forEach((e) => console.error(`✗ ${e}`));
+    ogFileErrs.forEach((e) => console.error(`✗ ${e}`));
     if (stale.length || orphans.length || orphansEn.length) console.error("  node bin/build.mjs を実行してからデプロイすること");
     process.exit(1);
   }
   console.log(
-    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとも一致）`
+    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足とも一致）`
   );
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -2865,4 +3049,5 @@ if (check) {
   handwrittenJaDriftErrors().forEach((e) => console.warn(`⚠ ${e}`));
   homeFillsCoverageErrors().forEach((e) => console.warn(`⚠ ${e}`));
   ogStalenessErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  ogFileErrors().forEach((e) => console.warn(`⚠ ${e}`));
 }

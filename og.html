@@ -3,11 +3,19 @@
 <head>
 <meta charset="utf-8">
 <title>OGP画像生成用 — ズレ計</title>
-<!-- assets/og.png(ja) / assets/og-en.png(en) の生成元ページ。1200x630の枠を
-     実データ(gdp_forecast.csv)から描画し、ヘッドレスChromeでスクリーンショット
-     してOGP画像にする。サイト本体からはリンクしない。
+<!-- assets/og*.png(汎用2枚 + 指標8種×2言語の16枚 = 計18枚)の生成元ページ。
+     1200x630の枠を実データ(og.htmlがfetchするCSV。?mの有無で対象が変わる。
+     下記参照)から描画し、ヘッドレスChromeでスクリーンショットしてOGP画像に
+     する。サイト本体からはリンクしない。
      ?lang=en を付けると英語カードを描く(既定はja)。?shot と併用する場合は
-     ?shot&lang=en のように両方付ける。2枚とも bin/og.sh で一括して焼き直す。 -->
+     ?shot&lang=en のように両方付ける。
+     ?m=<chart.jsのMETRICSキー> を付けると、その指標専用のカード(タイトル・
+     年度レンジ・CSV・単位・y軸すべてがその指標のもの)を描く。省略時は
+     従来どおり実質GDPの汎用カード(?mなし=gdp_forecast.csvのforecast_real/
+     actual_real固定)。?m に METRICS に無いキーを渡すと明示的にthrowして
+     壊れる(黙って汎用カードにフォールバックしない)。
+     汎用2枚+指標8種×2言語=計18枚を bin/og.sh で一括して焼き直す
+     (2026-07-30、1指標1枚だった旧構成から18枚体制・複数CSVに拡張)。 -->
 <link rel="stylesheet" href="style.css?v=20260731l">
 <style>
   html, body { background: #888; }
@@ -106,7 +114,15 @@
     <div class="og-legend">
       <span class="og-legend-item"><span class="og-legend-swatch og-legend-swatch-forecast"></span><span id="og-legend-forecast">見通し</span></span>
       <span class="og-legend-item"><span class="og-legend-swatch og-legend-swatch-actual"></span><span id="og-legend-actual">実績</span></span>
-      <span id="og-footer-range">実質GDP成長率 1980–2025年度</span>
+      <!-- JSが必ず上書きする場所。以前はここに「実質GDP成長率 1980–2025年度」と
+           完成形そっくりの文字列を置いていたが、2026-07-30に「…」へ変えた。
+           bin/og.sh の verify_dom はフッタが「<期待最小年度>–」を含むかを見て
+           JSの失敗を検出しているのに、この置き文字列が "1980–" を含むため、
+           期待最小年度が1980のカード(実質/名目GDP・消費者物価)ではJSが完全に
+           失敗しても検査(a)が通ってしまっていた(実績線の検査(b)が別に落ちるので
+           全体としては止まっていたが、検査が1本死んでいるのは検査が無いのと
+           同じ)。置き文字列を完成形に似せない、が唯一の直し方。 -->
+      <span id="og-footer-range">…</span>
     </div>
     <div class="og-domain">zurekei.org</div>
   </div>
@@ -130,7 +146,13 @@ const OG_TEXT = {
     titleSmall: "予測値・実績値・出典を毎年並べて記録する",
     legendForecast: "見通し",
     legendActual: "実績",
+    // ?m なし(汎用カード)のフッタ: 指標名+年度レンジ(従来どおり)。
     footerRange: (min, max) => `実質GDP成長率 ${min}–${max}年度`,
+    // ?m あり(指標カード)のフッタ: 年度レンジのみ。タイトル(#og-title-main)が
+    // 既にその指標名を名乗っているので、フッタでは繰り返さない
+    // (フッタが系列名を名乗るのは「タイトルが名乗っていないとき」だけ、という
+    // 使い分け。2026-07-30、指標カード対応時に追加)。
+    footerRangeMetric: (min, max) => `${min}–${max}年度`,
   },
   en: {
     brandMain: "zurekei",
@@ -140,21 +162,27 @@ const OG_TEXT = {
     legendForecast: "Forecast",
     legendActual: "Actual",
     footerRange: (min, max) => `Real GDP growth, FY${min}–${max}`,
+    footerRangeMetric: (min, max) => `FY${min}–${max}`,
   },
 };
 
-const LANG = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ja";
+const params = new URLSearchParams(location.search);
+const LANG = params.get("lang") === "en" ? "en" : "ja";
 const T = OG_TEXT[LANG];
 document.documentElement.lang = LANG;
 document.getElementById("og-brand-main").textContent = T.brandMain;
 document.getElementById("og-brand-slash").textContent = T.brandSlash;
-document.getElementById("og-title-main").textContent = T.titleMain;
+// #og-title-main は?mの有無で中身が変わる(汎用タグライン or 指標名)ため、
+// main()内でmetricが確定してから設定する。#og-title-small(小見出し)は
+// ?mに関わらず常に同じ汎用タグラインなのでここで確定させてよい。
 document.getElementById("og-title-small").textContent = T.titleSmall;
 document.getElementById("og-legend-forecast").textContent = T.legendForecast;
 document.getElementById("og-legend-actual").textContent = T.legendActual;
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const W = 1088, H = 400;
+// left は指標ごとの軸ラベル幅に応じてmain()内で広げる(estimateLabelWidth
+// 参照)。ここでの52はその下限で、%表示の汎用カードはこの下限をそのまま採る。
 const PAD = { top: 16, right: 20, bottom: 30, left: 52 };
 
 function el(tag, attrs) {
@@ -163,24 +191,169 @@ function el(tag, attrs) {
   return e;
 }
 
+// og.html は home.js 等を読み込まない独立ページで、指標定義(METRICS)を持つ
+// chart.js を <script src> では読み込めない(chart.jsの末尾のmain()はDOMを
+// 触る独立ページ用の初期化コードで、ここではそれを実行してほしくない)。
+// bin/build.mjs の loadModule() が使っている手をブラウザ側でも使う:
+// ソースをfetchし、末尾のmain();を剥がしてからnew Functionで評価する。
+// chart.jsのトップレベルが定義だけで副作用が無い(main()を剥がした残りが
+// DOMを触らない)ことに依存している。ただし bin/build.mjs の loadModule() と
+// 「同じ契約」ではなく、こちらの方が**より強い契約**に依存している
+// (2026-07-30、H-2で「同じ」という不正確な記述を訂正): bin/build.mjs の
+// loadModule() は評価前に csv.js のソース(CSV_SRC)を前置しているため、
+// chart.jsのトップレベルがcsv.jsのシンボル(parseCSV等)に触れても動く。
+// og.htmlのこのnew Functionはcsv.js無しで評価するため、chart.jsのトップ
+// レベルがcsv.jsのシンボルに触れる形へ変わると、bin/build.mjs側は動き
+// 続ける一方でこちら側だけが壊れる。fail-closed(壊れれば焼きが即座に
+// エラーで止まる)なので危険ではないが、契約の強さが違う点は正確に書いて
+// おく。new Functionの中で評価するため、chart.jsが持つトップレベルの
+// const T / SVG_NS / PADはその関数のローカルスコープに閉じ、og.html側の
+// 同名の定義(上のOG_TEXT用のT・SVG_NS・PAD)とは衝突しない。
+async function loadChartModule() {
+  // ?v=のキャッシュバスターは付けない(2026-07-30、I: 以前はstyle.css?v=/
+  // csv.js?v=と揃えてASSET_Vという定数を持っていたが、焼きに対しては何も
+  // 効いていなかった。bin/og.shの焼きは毎回新規プロファイル(--user-data-dir
+  // を都度mktemp -dで作る)でキャッシュが無く、かつローカルのpython
+  // HTTPサーバはクエリ文字列を無視して同じファイルを返すため。効くのは
+  // 人間がブラウザでog.htmlを開いてデバッグするときだけで、それも
+  // style.css?v=/csv.js?v=と手で揃える3箇所目になるのに揃いを守る検査は
+  // 何も無く形骸化していた。次にここを見た人が「他の?v=と揃っていない」と
+  // 誤解して足し直さないよう、このコメントを残す)。
+  const src = await (await fetch("chart.js")).text();
+  const stripped = src.replace(/\bmain\(\);\s*$/, "");
+  if (stripped === src) {
+    throw new Error("chart.js の末尾に main(); が見つからない(構造が変わった可能性がある)");
+  }
+  return new Function(`${stripped}\nreturn { METRICS, metricUnit };`)();
+}
+
+// 文字数からラベル幅を見積もる(実測ではない)。.axis-labelはIBM Plex Mono
+// (等幅、15pxなら1文字9px)。CJK(兆円など)は等幅フォントに字が無く全角
+// フォントへフォールバックするので約15px。よって
+// 幅 ≒ ASCII文字数×9 + 非ASCII文字数×15。見積もりなので、焼いた画像は
+// 必ず目視ではみ出しを確認すること(ここは機械では担保しない)。
+//
+// ■ 2026-07-30に判明した事実(コメントのみ修正・描画は変えない):
+//   上の「15pxなら」という前提は<text>要素のfont-size属性(下のel()呼び出し
+//   で"font-size": 15としている箇所)の値だが、実際にはstyle.cssの
+//   `.axis-label { font-size: 11px }`(style.css:695)がSVGのpresentation
+//   attributeであるfont-size="15"にCSSの仕様どおり勝つ(presentation
+//   attributeは作者スタイルより弱い)。ヘッドレスChromeでcomputed 11pxで
+//   あることを実測で確認済み。つまりこの見積もりは実態の約1.6倍で、
+//   常にはみ出し方向に対して安全側に外れている(だから目視で問題が出て
+//   いなかった)。font-size="15"という属性自体は今回の変更以前から
+//   死んだ指定(効いていない指定)で、値は変えていない(見た目が変わるため。
+//   直すかどうかの判断は別途人間がする)。
+//   危険なのは将来: 誰かが.axis-labelの11px指定を消す、または属性どおり
+//   15pxが効くようにすると、見積もりはちょうど実寸になり、余白は
+//   maxTickWidth + 12 に対しラベル右端が PAD.left - 10 なので実質2pxしか
+//   残らない。11px指定を消す・属性どおり15pxを効かせるといった変更を
+//   するときは、この見積もり式と余白を見直すこと。
+function estimateLabelWidth(text) {
+  let w = 0;
+  for (const ch of text) w += /[\x00-\x7f]/.test(ch) ? 9 : 15;
+  return w;
+}
+
+// {1, 2, 5}×10^n の梯子を小さい方から試し、[yMin, yMax] に入る目盛の本数が
+// 8本以下になった最初のものを刻み幅として採る。base×10^exp が step。
+// base/expを別途返すのは、ラベルの小数桁数(tickLabel参照)を丸め誤差なく
+// 決めるため(stepだけからだと10進の桁数が浮動小数の表現で崩れうる)。
+function niceStep(yMin, yMax) {
+  const bases = [1, 2, 5];
+  for (let exp = -8; exp <= 12; exp++) {
+    for (const base of bases) {
+      const step = base * Math.pow(10, exp);
+      const kMin = Math.ceil(yMin / step - 1e-9);
+      const kMax = Math.floor(yMax / step + 1e-9);
+      const count = kMax - kMin + 1;
+      if (count >= 1 && count <= 8) return { kMin, kMax, base, exp };
+    }
+  }
+  throw new Error("y軸の目盛刻み幅を決められなかった(定義域が異常な可能性がある)");
+}
+
+// k×base×10^exp を文字列化する。decimalsをbase/expから丸め誤差なく決め、
+// toFixedしてからNumberに戻すことで、"0%"が"-0%"や
+// "2.0000000000000004%"になるのを防ぐ(Number→toStringの往復は-0を"0"に
+// 正規化する)。
+function tickLabel(k, base, exp) {
+  const decimals = Math.max(0, -exp);
+  const v = Number((k * base * Math.pow(10, exp)).toFixed(decimals));
+  return v.toString();
+}
+
 async function main() {
-  const rows = (await loadCSV("data/gdp_forecast.csv"))
+  const m = params.get("m");
+  let metric = null;
+  let metricUnitFn = null;
+  if (m) {
+    const mod = await loadChartModule();
+    metric = mod.METRICS[m];
+    // METRICSに無いキーは黙って汎用カードへフォールバックしない
+    // (フォールバックすると「焼けたのに中身が違う」が静かに通ってしまう)。
+    if (!metric) throw new Error(`?m=${m} は chart.js の METRICS に無い指標キー`);
+    metricUnitFn = mod.metricUnit;
+  }
+
+  document.getElementById("og-title-main").textContent = metric
+    ? (LANG === "ja" ? metric.title : metric.titleEn)
+    : T.titleMain;
+
+  // CSVパスとforecast/actual列名: ?mなしは従来どおり実質GDP固定。?mありは
+  // chart.jsのMETRICSが持つ定義をそのまま使う(定義の複製をog.html側に
+  // 作らない)。metric.csvは"/data/..."というルート絶対パス。og.html自身も
+  // リポジトリルート直下にあり、bin/og.shが立てるローカルサーバの
+  // ドキュメントルートもリポジトリルートなので、絶対パスのままfetchしても
+  // (先頭の/を落として相対にしても)同じファイルに解決する。ここでは
+  // chart.js側の書式(絶対パス)をそのまま使う: パスの変換ロジックをog.html側に
+  // 新設せずに済み、chart.js側の書式が変わってもここが追随できるため。
+  const csvPath = metric ? metric.csv : "data/gdp_forecast.csv";
+  const forecastCol = metric ? metric.forecastCol : "forecast_real";
+  const actualCol = metric ? metric.actualCol : "actual_real";
+
+  const rows = (await loadCSV(csvPath))
     .map((r) => ({
       year: Number(r.fiscal_year),
-      f: toNum(r.forecast_real),
-      a: toNum(r.actual_real),
+      f: toNum(r[forecastCol]),
+      a: toNum(r[actualCol]),
     }))
     .sort((x, y) => x.year - y.year);
 
-  const years = rows.map((r) => r.year);
-  const xMin = Math.min(...years), xMax = Math.max(...years);
-  // フッタの年度ラベルはCSVの実データ範囲から導く(以前は1980–2025年度と
-  // ハードコードしており、CSVの範囲が1980–2026に伸びた後もこの画像だけ古い
-  // 表示のまま取り残されていた)。
-  document.getElementById("og-footer-range").textContent = T.footerRange(xMin, xMax);
+  // x軸(年度)の定義域は「見通し列か実績列のどちらかに値がある行」だけから
+  // 取る(全行の年度からではない)。data/gdp_forecast.csvは実質・名目で1つの
+  // CSVを共有しているので、たとえば翌年度の行が実質だけ埋まった状態で
+  // 追加されると、名目のカードだけ右端に空白の1年が伸びてしまう。
+  // 2026-07-30時点では全8指標で「全行」と「値のある行」の年度範囲が一致して
+  // いるため、この変更で既存の汎用2枚(og.png/og-en.png)は変わらない
+  // (将来ずれたときに、これが意図した差分だと分かるようにこの事実を残す)。
+  const domainRows = rows.filter((r) => r.f !== null || r.a !== null);
+  const domainYears = domainRows.map((r) => r.year);
+  const xMin = Math.min(...domainYears), xMax = Math.max(...domainYears);
+  // フッタの年度ラベル: ?mなし(汎用カード)は指標名+年度レンジ(従来どおり)。
+  // ?mあり(指標カード)は年度レンジのみ(OG_TEXTのfooterRangeMetricコメント
+  // 参照)。
+  document.getElementById("og-footer-range").textContent = metric
+    ? T.footerRangeMetric(xMin, xMax)
+    : T.footerRange(xMin, xMax);
+
+  // y軸の定義域は従来どおり: 値の最大最小に10%のパディングを加え、0を含める。
+  // ここは変更しない。
   const vals = rows.flatMap((r) => [r.f, r.a]).filter((v) => v !== null);
   const yPad = (Math.max(...vals) - Math.min(...vals)) * 0.1;
   const yMin = Math.min(...vals, 0) - yPad, yMax = Math.max(...vals, 0) + yPad;
+
+  const { kMin, kMax, base, exp } = niceStep(yMin, yMax);
+  const unit = metric ? metricUnitFn(metric, LANG) : "%";
+  // 目盛ラベルの最大幅を見積もり、はみ出さないようPAD.leftを広げる。
+  // Math.max(..., 52)の下限があるため、%指標(ラベルが短い)では従来の52が
+  // そのまま採られ既存2枚のPNGは変わらない。見積もりであって実測ではない点は
+  // estimateLabelWidth直上のコメントのとおり。
+  let maxTickWidth = 0;
+  for (let k = kMin; k <= kMax; k++) {
+    maxTickWidth = Math.max(maxTickWidth, estimateLabelWidth(tickLabel(k, base, exp) + unit));
+  }
+  PAD.left = Math.max(52, maxTickWidth + 12);
 
   const x = (yr) => PAD.left + ((yr - xMin) / (xMax - xMin)) * (W - PAD.left - PAD.right);
   const y = (v) => PAD.top + (H - PAD.top - PAD.bottom) * (1 - (v - yMin) / (yMax - yMin));
@@ -190,14 +363,24 @@ async function main() {
   svg.appendChild(el("line", { class: "zero-line", x1: PAD.left, x2: W - PAD.right, y1: y(0), y2: y(0) }));
   for (let yr = xMin; yr <= xMax; yr += 5) {
     svg.appendChild(el("line", { class: "axis-line", x1: x(yr), x2: x(yr), y1: PAD.top, y2: H - PAD.bottom }));
+    // font-size="15"はstyle.cssの.axis-label{font-size:11px}に上書きされ実際には
+    // 効いていない(estimateLabelWidth直上コメント参照)。値は変えない。
     const t = el("text", { class: "axis-label", x: x(yr), y: H - PAD.bottom + 22, "text-anchor": "middle", "font-size": 15 });
     t.textContent = yr;
     svg.appendChild(t);
   }
-  for (let v = -4; v <= 6; v += 2) {
+  // 従来の `for (let v = -4; v <= 6; v += 2)` (実質GDP専用・2刻み・%決め打ち)
+  // を、上のniceStep()が決めたkMin/kMax/base/expに載せ替えた。税収(23〜84兆円)
+  // や国債発行総額(23〜257兆円)では-4〜6の2刻みが破綻するため、2026-07-30に
+  // 一般化した。ゼロ線は従来どおりこことは別に1本だけ引く(上のzero-line)。
+  for (let k = kMin; k <= kMax; k++) {
+    const label = tickLabel(k, base, exp);
+    const v = Number(label);
     if (v !== 0) svg.appendChild(el("line", { class: "grid-line-y", x1: PAD.left, x2: W - PAD.right, y1: y(v), y2: y(v) }));
+    // font-size="15"はstyle.cssの.axis-label{font-size:11px}に上書きされ実際には
+    // 効いていない(estimateLabelWidth直上コメント参照)。値は変えない。
     const t = el("text", { class: "axis-label", x: PAD.left - 10, y: y(v) + 5, "text-anchor": "end", "font-size": 15 });
-    t.textContent = v + "%";
+    t.textContent = label + unit;
     svg.appendChild(t);
   }
 
