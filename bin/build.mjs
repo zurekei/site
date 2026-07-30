@@ -2966,6 +2966,342 @@ function ogStalenessErrors() {
   return errs;
 }
 
+/* ── data/*.csv のスキーマ検査(2026-07-30) ───────────────────────────
+ * csv.js の toNum() は空文字だけを null にし、空でない非数値セル
+ * (転記ミスの "1.49x934" のような打ち間違い・全角数字・単位の混入)には
+ * NaN を返す。呼び出し側のフィルタは大半が `!== null` なので NaN は素通り
+ * し、Math.min/Math.max 経由でy軸の定義域が非数になり、1セル汚れるだけで
+ * 線が1本も描かれないページ・カードができる。dec6075 でOGカードの経路
+ * (og.html の renderFertility()・bin/build.mjs の fertilityCardInfo()・
+ * bin/og.sh の verify_dom)にはこれを塞ぐ網を入れたが、/chart 系や
+ * /fertility のページ自体には数値セルの検査がどこにも無く、転記ミス1文字で
+ * 線が消えたページが配信されても --check は緑のままだった。ここでその穴を
+ * 塞ぐ。
+ *
+ * ■ なぜ toNum() 自体を直さない(throwさせる)のか
+ *   ブラウザ側で throw させると、1セルの転記ミスで訪問者に真っ白なページが
+ *   出る(現に扇/実績線が1本も描かれない状態を toNum() が静かに許している
+ *   から今まで気づかれなかった、というだけで、throwに変えれば直るという
+ *   話ではなく被害の種類が変わるだけ)。デプロイゲート(--check)で人間が
+ *   気づける形で止めるほうが、訪問者に一切影響を出さずに同じ穴を塞げる。
+ *   toNum() の挙動そのものは変えない。
+ *
+ * ■ なぜ列の型を「宣言」するのか(自動判別にしない理由)
+ *   「その列に数値セルが1つでもあれば数値列とみなす」ようなヒューリス
+ *   ティックだと、notes のような自由記述の列にたまたま年号だけを書いた行が
+ *   混ざると数値列と誤認され、他の(文章が入っている)行が全部エラーになる。
+ *   正当なデータで恒久的に赤くなる検査は、このリポジトリでは「安全性の
+ *   欠陥」として扱う: bin/deploy.sh が --check をデプロイゲートにしている
+ *   ため、赤が固定すると人が素の `npx wrangler pages deploy` に逃げ、
+ *   機密ファイル混入スキャンを迂回する(過去に実際にAPIトークンを公開した
+ *   事故がある)。列名→種別の対応を明示宣言しておけば、赤くなるのは
+ *   「本当に壊れたデータ」か「分類し忘れた新しい列」のどちらかだけになり、
+ *   どちらも人間がすぐ直せる。
+ *
+ * 種別は2つだけ:
+ *   "number" — 空でないセルは DECIMAL_RE(厳密な10進表記)に当てはまる必要がある。
+ *              **Number.isFinite(Number(cell)) では緩すぎる**(0x10が16、1e5が
+ *              100000として通ってしまう)。理由はDECIMAL_RE直上のコメント参照
+ *   "text"   — 中身を検査しない(URL・日付文字列・漢数字の法令番号・自由記述等)
+ * この2つ以外の値を書いた場合(タイポ)は checkColumnKinds でエラーにする
+ * (`!== "number"` で判定しているだけだと、"numer" と書いた列が黙って
+ * text 扱いになり検査から外れる=宣言した気になっているぶん危ない)。
+ *
+ * 列名の接頭辞(forecast_ / actual_)だけで機械的に分類すると間違う実例が
+ * 実際にある: gdp_forecast.csv の actual_basis / forecast_basis は
+ * forecast_ / actual_ という接頭辞を持つが、中身は基準年の呼称等のテキスト
+ * (2015base-ref / gnp 等)であって数値ではない。
+ */
+const CSV_COLUMNS = {
+  "bond_issuance_forecast.csv": {
+    fiscal_year: "number",
+    forecast_tn: "number",
+    actual_tn: "number",
+    forecast_source_url: "text",
+    actual_source_url: "text",
+    notes: "text",
+  },
+  // データ行0のヘッダのみのファイル。行が無くても列の分類は要る
+  // (--check がここで誤爆しないことは実行結果自体が確認になる)。
+  "corrections.csv": {
+    date: "text",
+    target: "text",
+    before: "text",
+    after: "text",
+    reason: "text",
+    url: "text",
+  },
+  "cpi_forecast.csv": {
+    fiscal_year: "number",
+    forecast_cpi: "number",
+    actual_cpi: "number",
+    forecast_source_url: "text",
+    actual_source_url: "text",
+    notes: "text",
+  },
+  "current_account_forecast.csv": {
+    fiscal_year: "number",
+    forecast_tn: "number",
+    actual_tn: "number",
+    forecast_source_url: "text",
+    actual_source_url: "text",
+    notes: "text",
+  },
+  "fertility_actual.csv": {
+    year: "number",
+    actual_tfr: "number",
+    source_url: "text",
+    notes: "text",
+  },
+  "fertility_forecast.csv": {
+    vintage_year: "number",
+    target_year: "number",
+    assumed_tfr_mid: "number",
+    assumed_tfr_high: "number",
+    assumed_tfr_low: "number",
+    forecast_source_url: "text",
+    forecast_published_date: "text", // ISO日付文字列
+    notes: "text",
+  },
+  "gdp_forecast.csv": {
+    fiscal_year: "number",
+    forecast_real: "number",
+    forecast_nominal: "number",
+    actual_real: "number",
+    actual_nominal: "number",
+    forecast_source_url: "text",
+    forecast_published_date: "text", // ISO日付文字列
+    actual_source_url: "text",
+    notes: "text",
+    // 接頭辞は forecast_ / actual_ と同じ形だが、中身は基準年の呼称
+    // (2015base-ref/2020base-final/空、gnp/gdp)であって数値ではない。
+    // 上のコメント参照: 接頭辞だけで機械的に分類すると誤る実例そのもの。
+    actual_basis: "text",
+    forecast_basis: "text",
+  },
+  "gdp_vintages.csv": {
+    fiscal_year: "number",
+    real_1990base: "number",
+    real_1995base: "number",
+    real_2000base: "number",
+    real_2005base_ref: "number",
+    real_2011base_ref: "number",
+    real_2015base_ref: "number",
+    nominal_1990base: "number",
+    nominal_1995base: "number",
+    nominal_2000base: "number",
+    nominal_2005base_ref: "number",
+    nominal_2011base_ref: "number",
+    nominal_2015base_ref: "number",
+  },
+  "hoan_review.csv": {
+    law_id: "text", // 例: 504AC1000000078 (英字混じりの法令ID)
+    law_title: "text",
+    law_num: "text", // 漢数字の法律番号(例: 令和四年法律第七十八号)
+    promulgation_date: "text", // ISO日付文字列
+    enforcement_date: "text", // ISO日付文字列
+    enforcement_note: "text",
+    review_years: "number", // 実測: 2/3/5/7/10 または空
+    review_deadline: "text", // ISO日付文字列
+    review_status: "text",
+    status_note: "text",
+    source_law_url: "text",
+    last_checked: "text", // ISO日付文字列
+  },
+  "jgb_total_issuance_forecast.csv": {
+    fiscal_year: "number",
+    forecast_tn: "number",
+    actual_tn: "number",
+    forecast_source_url: "text",
+    actual_source_url: "text",
+    notes: "text",
+  },
+  "tax_revenue_forecast.csv": {
+    fiscal_year: "number",
+    forecast_tn: "number",
+    actual_tn: "number",
+    forecast_source_url: "text",
+    actual_source_url: "text",
+    notes: "text",
+  },
+  "unemployment_forecast.csv": {
+    fiscal_year: "number",
+    forecast_rate: "number",
+    actual_rate: "number",
+    forecast_source_url: "text",
+    actual_source_url: "text",
+    notes: "text",
+  },
+};
+
+// 数値セルが満たすべき形。**`Number.isFinite(Number(cell))` では緩すぎる**ので
+// 正規表現で見る(2026-07-30)。`Number()` は `0x10` を16、`1e5` を100000、
+// `+1.5` や前後に空白のある `" 1.5"` もそのまま受け取るため、そういうセルは
+// 「数値として読める」ことになり検査を素通りする。実データの意味からすると
+// どれも転記ミスの兆候であって、黙って別の値として読まれるほうが危ない
+// (`0x10` が16として集計に入るのが最悪の形)。
+//
+// 厳しくして誤爆しないことは実測で確認済み: 現行の全12CSVの数値セル3153件は
+// **全件がこの形に当てはまる**(2026-07-30計測)。マイナスは許す(実質成長率など
+// 負の値が正当に存在する)。将来この形に当てはまらない正当な値が出てきた場合、
+// エラーメッセージが値をそのまま出すので何を緩めればよいかが分かる
+// (直せない恒久的な赤にはならない)。
+const DECIMAL_RE = /^-?(0|[1-9][0-9]*)(\.[0-9]+)?$/;
+
+function csvSchemaErrors() {
+  const errs = [];
+  const dataDir = path.join(SITE_DIR, "data");
+  const declaredFiles = Object.keys(CSV_COLUMNS).sort();
+  let actualFiles;
+  try {
+    // data/ には hoan_clauses/(ディレクトリ)や README.md もあるが、対象は
+    // CSVのみ。**再帰で走査し、拡張子は大文字小文字を区別しない**
+    // (2026-07-30に修正)。以前は `readdirSync(dataDir)` の非再帰かつ
+    // `endsWith(".csv")` だったため、`data/EXTRA.CSV`(ExcelやNumbersが
+    // 付けがちな大文字拡張子)と `data/hoan_clauses/stray.csv`(サブフォルダ
+    // に置いた下書き)が**検査対象にすらならず、非数値セルを含んだまま
+    // --check が完全に緑になった**(実測で確認)。`wrangler pages deploy .` は
+    // 指定ディレクトリを丸ごとアップロードするので、検査されないCSVが
+    // そのまま公開される。「git管理外＝公開したくないものが同じ罠にかかる」
+    // という既往事故と同型の死角だった。
+    // 見つけたパスは data/ からの相対パス(サブディレクトリなら
+    // "hoan_clauses/stray.csv")で表す。CSV_COLUMNSのキーは直下のファイル名
+    // なので、サブディレクトリのCSVは自動的に「未宣言」として弾かれる。
+    const walk = (dir, prefix) =>
+      fs.readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
+        d.isDirectory()
+          ? walk(path.join(dir, d.name), `${prefix}${d.name}/`)
+          : /\.csv$/i.test(d.name)
+            ? [`${prefix}${d.name}`]
+            : []
+      );
+    actualFiles = walk(dataDir, "").sort();
+  } catch (e) {
+    return [`CSVスキーマ検査: data/ が読めない(${e.message})`];
+  }
+  const declaredSet = new Set(declaredFiles);
+  const actualSet = new Set(actualFiles);
+
+  // 宣言の値そのものの検証(fail-closed。2026-07-30に追加)。
+  // 下の数値検査は `columns[h] !== "number"` で分岐しているだけなので、
+  // 種別に "numer" や "Number" のようなタイポを書くとその列は**エラーも
+  // 警告も出さずに数値検査から外れる**。列名の一致だけを見る網羅性検査は
+  // 通ってしまうので、気づく機会がどこにも無い(「宣言した気になっている」
+  // ぶん、検査が無いより悪い)。
+  for (const [f, cols] of Object.entries(CSV_COLUMNS)) {
+    for (const [col, kind] of Object.entries(cols)) {
+      if (kind !== "number" && kind !== "text") {
+        errs.push(
+          `CSVスキーマ: CSV_COLUMNS[${f}] の列 "${col}" の種別が "number"/"text" でない(値: ${JSON.stringify(kind)})`
+        );
+      }
+    }
+  }
+
+  // 網羅性(fail-closed): 新しいCSVを足して分類し忘れる穴と、宣言だけ残って
+  // 実ファイルが無くなる穴の両方を見る。
+  for (const f of actualFiles) {
+    if (!declaredSet.has(f)) {
+      errs.push(`CSVスキーマ: data/${f} が CSV_COLUMNS に宣言されていない(列の型を分類すること)`);
+    }
+  }
+  for (const f of declaredFiles) {
+    if (!actualSet.has(f)) {
+      errs.push(`CSVスキーマ: CSV_COLUMNS[${f}] の宣言があるが data/${f} が無い`);
+    }
+  }
+
+  for (const f of actualFiles) {
+    if (!declaredSet.has(f)) continue; // 未宣言は上で既に報告済み
+    const columns = CSV_COLUMNS[f];
+    const declaredCols = new Set(Object.keys(columns));
+    const abs = path.join(dataDir, f);
+    const text = fs.readFileSync(abs, "utf8");
+    // parseCSV(csv.js)と同じ規則で分解する(素の split。クォート非対応)。
+    const lines = text.trim().replace(/\r\n/g, "\n").split("\n");
+    // trim() が先頭から落とした行数。行番号の報告をこの分だけ補正する
+    // (2026-07-30に修正)。先頭に空行があると、報告する行番号が実ファイルより
+    // その分だけ小さくなり、「何行目を直せばいいか」が食い違っていた(実測で
+    // 確認: 物理6行目を汚して「5行目」と報告された)。parseCSVも同じtrimを
+    // するので解釈自体は一致しており、ズレるのは診断メッセージだけ。
+    const leadingBlank = text.replace(/\r\n/g, "\n").split("\n").findIndex((l) => l.trim() !== "");
+    const lineOffset = leadingBlank > 0 ? leadingBlank : 0;
+    const header = lines[0].split(",");
+    const headerSet = new Set(header);
+
+    let headerMismatch = false;
+    // 列名の重複(2026-07-30に追加)。**これが無いと汚染データが正規の手順で
+    // 緑のまま配信される**: csv.jsのparseCSVは
+    // `headers.forEach((h, i) => (row[h] = cells[i] ?? ""))` なので**最後の
+    // 出現が勝ち**、重複した列の値が本来の列を丸ごと上書きする。ところが
+    // 下の網羅性検査は集合(Set)で見るため重複が潰れて「未分類」にも
+    // 「宣言にあるがヘッダに無い」にも掛からず、列数検査は重複込みの
+    // header.lengthを基準にするので行側も整合し、数値検査も各位置を個別に
+    // 見るだけなので正しい10進値なら通る。実測では、ヘッダ末尾に既存の
+    // forecast_tn をもう1つ足して全行に 999.9 を付けると、スキーマ検査の
+    // 指摘は0件のまま chart/tax-revenue.html に 999.9 が48箇所焼き込まれた。
+    // 「列を1本足すつもりで既存の列名を複製してしまう」という、ヘッダ1行の
+    // ありふれた編集ミスで起きる。
+    const seenCols = new Set();
+    for (const h of header) {
+      if (seenCols.has(h)) {
+        headerMismatch = true;
+        errs.push(
+          `CSVスキーマ: data/${f} のヘッダに列 "${h}" が複数回ある。` +
+            `csv.jsのparseCSVは後の出現が勝つため、この列の値が静かに置き換わる`
+        );
+      }
+      seenCols.add(h);
+    }
+    for (const h of header) {
+      if (!declaredCols.has(h)) {
+        headerMismatch = true;
+        errs.push(`CSVスキーマ: data/${f} の列 "${h}" が CSV_COLUMNS[${f}] に分類されていない`);
+      }
+    }
+    for (const c of declaredCols) {
+      if (!headerSet.has(c)) {
+        headerMismatch = true;
+        errs.push(
+          `CSVスキーマ: CSV_COLUMNS[${f}] に列 "${c}" の宣言があるがヘッダに無い(列名の変更/削除の見直し漏れ)`
+        );
+      }
+    }
+    // ヘッダの集合が宣言とズレている間は、何列目が何の列かが定まらないため
+    // 行単位の検査(列数・数値セル)をしても紛らわしいだけ。次のファイルへ。
+    if (headerMismatch) continue;
+
+    // parseCSV は素の line.split(",") で、引用符もエスケープも扱わない。
+    // 値にカンマが1個入るだけで以降の列が全部ズレる(notesに読点代わりの
+    // カンマを書いた瞬間に静かに壊れる)ため、ヘッダの列数との一致を見る。
+    lines.slice(1).forEach((line, i) => {
+      // 1行目はヘッダなので+2。lineOffsetはtrimが先頭から落とした空行の数
+      // (上のlineOffset直上コメント参照)。
+      const rowNum = lineOffset + i + 2;
+      const cells = line.split(",");
+      if (cells.length !== header.length) {
+        errs.push(
+          `CSVスキーマ: data/${f}:${rowNum}行目 の列数が${cells.length}(ヘッダは${header.length}列)。` +
+            `カンマの混入か欠落の可能性`
+        );
+        return; // 列がズレている行の数値検査は意味を持たないので飛ばす
+      }
+      header.forEach((h, idx) => {
+        if (columns[h] !== "number") return;
+        const cell = cells[idx];
+        if (cell === "") return; // 空セルは許容(csv.jsのtoNum()と同じ扱い)
+        if (!DECIMAL_RE.test(cell)) {
+          errs.push(
+            `CSVスキーマ: data/${f}:${rowNum}行目 の列"${h}"が数値として読めない(値: "${cell}")`
+          );
+        }
+      });
+    });
+  }
+
+  return errs;
+}
+
 const check = process.argv.includes("--check");
 const keys = Object.keys(METRICS);
 
@@ -3099,6 +3435,9 @@ if (check) {
   // (ogStalenessErrorsは入力ファイルのハッシュしか見ておらず、出力側の
   // 過不足はここでしか捕まえられない)。
   const ogFileErrs = ogFileErrors();
+  // CSVスキーマ(列の型宣言・宣言の網羅性・行の列数・数値セル)も他のどの検査
+  // とも独立(生成物にもOGP画像にも関わらない、data/*.csvそのものの壊れ方)。
+  const csvSchemaErrs = csvSchemaErrors();
   if (
     stale.length ||
     orphans.length ||
@@ -3108,7 +3447,8 @@ if (check) {
     driftErrs.length ||
     homeFillsErrs.length ||
     ogErrs.length ||
-    ogFileErrs.length
+    ogFileErrs.length ||
+    csvSchemaErrs.length
   ) {
     if (stale.length) console.error(`✗ 生成物が古い: ${stale.join(", ")}`);
     if (orphans.length) console.error(`✗ 余分なファイル: chart/${orphans.join(", chart/")}`);
@@ -3119,11 +3459,12 @@ if (check) {
     homeFillsErrs.forEach((e) => console.error(`✗ ${e}`));
     ogErrs.forEach((e) => console.error(`✗ ${e}`));
     ogFileErrs.forEach((e) => console.error(`✗ ${e}`));
+    csvSchemaErrs.forEach((e) => console.error(`✗ ${e}`));
     if (stale.length || orphans.length || orphansEn.length) console.error("  node bin/build.mjs を実行してからデプロイすること");
     process.exit(1);
   }
   console.log(
-    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足とも一致）`
+    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル)とも一致）`
   );
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -3144,4 +3485,5 @@ if (check) {
   homeFillsCoverageErrors().forEach((e) => console.warn(`⚠ ${e}`));
   ogStalenessErrors().forEach((e) => console.warn(`⚠ ${e}`));
   ogFileErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  csvSchemaErrors().forEach((e) => console.warn(`⚠ ${e}`));
 }
