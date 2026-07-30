@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <title>OGP画像生成用 — ズレ計</title>
-<!-- assets/og*.png(汎用2枚 + 指標8種×2言語の16枚 = 計18枚)の生成元ページ。
+<!-- assets/og*.png(汎用2枚 + 指標8種×2言語の16枚 + 出生率専用2言語2枚 = 計20枚)の
+     生成元ページ。
      1200x630の枠を実データ(og.htmlがfetchするCSV。?mの有無で対象が変わる。
      下記参照)から描画し、ヘッドレスChromeでスクリーンショットしてOGP画像に
      する。サイト本体からはリンクしない。
@@ -12,10 +13,15 @@
      ?m=<chart.jsのMETRICSキー> を付けると、その指標専用のカード(タイトル・
      年度レンジ・CSV・単位・y軸すべてがその指標のもの)を描く。省略時は
      従来どおり実質GDPの汎用カード(?mなし=gdp_forecast.csvのforecast_real/
-     actual_real固定)。?m に METRICS に無いキーを渡すと明示的にthrowして
+     actual_real固定)。?m=fertility は予約値で、chart.jsのMETRICSを一切引かず
+     (fertility.jsも読み込まない。理由はbin/build.mjsのOG_INPUT_RELS直上コメント
+     参照)、歴代の推計(版ごと)を重ねた扇+実績という指標カードとは別系統の描画
+     (renderFertility()。main()内でMETRICSを引くより前に分岐する)になる。
+     ?m に METRICS にも無く fertility でもないキーを渡すと明示的にthrowして
      壊れる(黙って汎用カードにフォールバックしない)。
-     汎用2枚+指標8種×2言語=計18枚を bin/og.sh で一括して焼き直す
-     (2026-07-30、1指標1枚だった旧構成から18枚体制・複数CSVに拡張)。 -->
+     汎用2枚+指標8種×2言語+出生率2言語=計20枚を bin/og.sh で一括して焼き直す
+     (2026-07-30、1指標1枚だった旧構成から18枚体制・複数CSVに拡張した後、
+     同日中に出生率専用カードを足して20枚体制へ)。 -->
 <link rel="stylesheet" href="style.css?v=20260731l">
 <style>
   html, body { background: #888; }
@@ -153,6 +159,20 @@ const OG_TEXT = {
     // (フッタが系列名を名乗るのは「タイトルが名乗っていないとき」だけ、という
     // 使い分け。2026-07-30、指標カード対応時に追加)。
     footerRangeMetric: (min, max) => `${min}–${max}年度`,
+    // ?m=fertility 用(2026-07-30追加)。fertility.jsのT.titleは「合計特殊出生率
+    // — 歴代推計 vs 実績」だが、26pxの右寄せ枠に入れると特に英語版
+    // ("Total fertility rate — successive projections vs actual")が折り返す
+    // 危険が高いため、指標カードがmetric.title(短い形)を使っているのに揃えて
+    // 短い形にする。
+    titleFertility: "合計特殊出生率",
+    // 出生率は「年度」ではなく暦年(CSVはfiscal_yearではなくyear/target_year)。
+    // 上のfooterRangeMetricの「…年度」表記をそのまま流用すると、暦年しか
+    // 持たない出生率カードに実在しない「年度」を書いてしまい内容として
+    // 間違う。専用の関数を持つことで年度と暦年を書き分ける。
+    footerRangeFertility: (min, max) => `${min}–${max}年`,
+    // 扇(歴代推計)の凡例文言。nはvintage_yearの異なる値の個数(データから導く。
+    // ハードコードしない。renderFertility()参照)。
+    legendFertility: (n) => `歴代${n}版の推計`,
   },
   en: {
     brandMain: "zurekei",
@@ -163,6 +183,10 @@ const OG_TEXT = {
     legendActual: "Actual",
     footerRange: (min, max) => `Real GDP growth, FY${min}–${max}`,
     footerRangeMetric: (min, max) => `FY${min}–${max}`,
+    titleFertility: "Total fertility rate",
+    // 年度接頭辞(FY)を付けない。上のjaのfooterRangeFertilityコメントと同じ理由。
+    footerRangeFertility: (min, max) => `${min}–${max}`,
+    legendFertility: (n) => `${n} successive projections`,
   },
 };
 
@@ -283,16 +307,181 @@ function tickLabel(k, base, exp) {
   return v.toString();
 }
 
+// 出生率カード(?m=fertility)専用の描画経路。指標カード(?m=<METRICSキー>)とは
+// データ・軸・凡例のすべてが違う(歴代の推計(版ごと)を重ねた扇+実績 vs 見通し1本+
+// 実績1本)ため、main()がchart.jsのMETRICSを引くより前に完全に別関数へ振り
+// 分ける(2026-07-30追加)。fertility.jsのmain()を参考にしているが、カードに
+// 要らないもの(版ラベルとその衝突回避・アニメーション・単点の丸・表・出典行)は
+// 持ち込まない。
+async function renderFertility() {
+  const [forecastRaw, actualRaw] = await Promise.all([
+    loadCSV("data/fertility_forecast.csv"),
+    loadCSV("data/fertility_actual.csv"),
+  ]);
+
+  // 空でない非数値セル(転記ミスの `1.49x934`・全角数字・単位の混入など)は
+  // csv.jsのtoNum()がnullではなく**NaNを返す**。`!== null` のフィルタはNaNを
+  // 素通しし、1個混ざるだけでMath.min/Math.max経由でy軸の定義域がNaNになり、
+  // 扇と実績線の**全pathのy座標が非数になって1本も描かれない**。
+  // (ここに壊れたd属性の実例を文字列として書かないこと。--dump-domは
+  //  <script>の中身もDOMとして吐くため、bin/og.shのNaN検査が自分のコメントに
+  //  マッチして全カードで誤爆する。2026-07-30に実際に踏んだ。)
+  // bin/og.shのd属性NaN検査でも捕まえるが、そちらは「どこかにNaNがある」しか
+  // 言えないので、読み込み時にどの列かを名指しして止める(2026-07-30追加。
+  // bin/build.mjsのfertilityCardInfo()も同じ規則で弾く。両側が同じ規則で
+  // 「黙って捨てる」ことにすると、今度は本数が両側で揃ってしまい
+  // 「1本欠けた扇」が静かに通るので、捨てずに必ず投げる)。
+  const reqNum = (raw, where) => {
+    const v = Number(raw);
+    if (!Number.isFinite(v)) throw new Error(`${where}: 数値として読めない(${JSON.stringify(raw)})。CSVの転記ミスの可能性`);
+    return v;
+  };
+  const optNum = (raw, where) => {
+    const v = toNum(raw);
+    if (v !== null && !Number.isFinite(v)) {
+      throw new Error(`${where}: 空でないのに数値として読めない(${JSON.stringify(raw)})。CSVの転記ミスの可能性`);
+    }
+    return v;
+  };
+
+  const FC = "data/fertility_forecast.csv";
+  const AC = "data/fertility_actual.csv";
+  const forecastRows = forecastRaw
+    .map((r) => ({
+      vintageYear: reqNum(r.vintage_year, `${FC} vintage_year`),
+      targetYear: reqNum(r.target_year, `${FC} target_year`),
+      mid: optNum(r.assumed_tfr_mid, `${FC} assumed_tfr_mid`),
+    }))
+    .filter((r) => r.mid !== null);
+
+  const actualRows = actualRaw
+    .map((r) => ({ year: reqNum(r.year, `${AC} year`), tfr: optNum(r.actual_tfr, `${AC} actual_tfr`) }))
+    .filter((r) => r.tfr !== null)
+    .sort((a, b) => a.year - b.year);
+
+  const vintages = [...new Set(forecastRows.map((r) => r.vintageYear))].sort((a, b) => a - b);
+  const byVintage = vintages.map((vy) => ({
+    vintageYear: vy,
+    rows: forecastRows.filter((r) => r.vintageYear === vy).sort((a, b) => a.targetYear - b.targetYear),
+  }));
+
+  document.getElementById("og-title-main").textContent = T.titleFertility;
+
+  // x軸の定義域: 推計のtarget_year・実績のyearの両方を含めた最小〜最大
+  // (fertility.jsのallYearsと同じ規則)。bin/build.mjsのfertilityCardInfo()も
+  // 同じ規則でminYearを導くので、ここでずれるとbin/og.shのverify_domが誤爆する。
+  const allYears = forecastRows.map((r) => r.targetYear).concat(actualRows.map((r) => r.year));
+  const xMin = Math.min(...allYears), xMax = Math.max(...allYears);
+  // フッタ: 出生率は「年度」ではなく暦年(CSVはyear/target_year。fiscal_yearでは
+  // ない)。指標カード用のfooterRangeMetric(「…年度」/「FY…」)を流用すると、
+  // 暦年しか持たない出生率カードに実在しない「年度」を書いてしまい内容として
+  // 間違う。専用のfooterRangeFertility(「…年」/年度接頭辞なし)を使う。
+  document.getElementById("og-footer-range").textContent = T.footerRangeFertility(xMin, xMax);
+
+  // y軸の定義域: fertility.jsと同じ規則(最小値に1を含める・上下に8%パディング)。
+  // og.html本体の指標カード用パディング(10%・0を含める)とは意図的に違う規則
+  // なので、niceStep()等の一般化ロジックには乗せない。
+  const allValues = forecastRows.map((r) => r.mid).concat(actualRows.map((r) => r.tfr));
+  const yMinRaw = Math.min(...allValues, 1);
+  const yMaxRaw = Math.max(...allValues);
+  const yPad = (yMaxRaw - yMinRaw) * 0.08 || 0.1;
+  const yMin = Math.max(0, yMinRaw - yPad), yMax = yMaxRaw + yPad;
+
+  const x = (yr) => PAD.left + ((yr - xMin) / (xMax - xMin)) * (W - PAD.left - PAD.right);
+  const y = (v) => PAD.top + (H - PAD.top - PAD.bottom) * (1 - (v - yMin) / (yMax - yMin));
+
+  const svg = document.getElementById("og-svg");
+
+  // x軸目盛: 10年刻み(fertility.jsと同じ)。指標カードの5年刻みとは違う。
+  for (let yr = Math.ceil(xMin / 10) * 10; yr <= xMax; yr += 10) {
+    svg.appendChild(el("line", { class: "axis-line", x1: x(yr), x2: x(yr), y1: PAD.top, y2: H - PAD.bottom }));
+    // font-size="15"は他のog.htmlのaxis-labelと同様、style.cssの
+    // .axis-label{font-size:11px}に上書きされ実際には効いていない
+    // (estimateLabelWidth直上コメント参照)。
+    const t = el("text", { class: "axis-label", x: x(yr), y: H - PAD.bottom + 22, "text-anchor": "middle", "font-size": 15 });
+    t.textContent = yr;
+    svg.appendChild(t);
+  }
+
+  // y軸目盛: 0.2刻み・toFixed(1)(fertility.jsと同じ)。出生率は無単位なので
+  // 指標カードのような単位の接尾辞は付けない。
+  const yStep = 0.2;
+  for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) {
+    const yy = y(v);
+    svg.appendChild(el("line", { class: "grid-line-y", x1: PAD.left, x2: W - PAD.right, y1: yy, y2: yy }));
+    const t = el("text", { class: "axis-label", x: PAD.left - 10, y: yy + 5, "text-anchor": "end", "font-size": 15 });
+    t.textContent = v.toFixed(1);
+    svg.appendChild(t);
+  }
+
+  // 実データがある年だけを、連続する年の並びごとに区切って結ぶ(欠測を直線で
+  // 橋渡ししない)。fertility.jsのbuildSegments/pathFromSegmentsと同じ規則。
+  function segPath(rows, yearKey, valKey) {
+    const segs = [];
+    let cur = [];
+    rows.forEach((r) => {
+      if (cur.length && r[yearKey] - cur[cur.length - 1][yearKey] > 1) { segs.push(cur); cur = []; }
+      cur.push(r);
+    });
+    if (cur.length) segs.push(cur);
+    return segs.map((s) => "M " + s.map((r) => `${x(r[yearKey])},${y(r[valKey])}`).join(" L ")).join(" ");
+  }
+
+  // 版ごとの推計線: line-forecast-vintage(fertility.html/style.cssと同じ
+  // クラス)。style.cssの#fertility-chart .line-forecast-vintageという太さの
+  // 上書きはid違い(og.htmlのsvgはid="og-svg")のためここには効かず、既定
+  // (stroke-width:1.25)がそのまま使われる。不透明度はfertility.jsの
+  // opacityFor()と同じ規則(0.2+idx/(版数-1)*0.4。古い版ほど薄い。値の
+  // 善し悪しではなく「いつの推計か」を表すという意図なので変えない)。
+  byVintage.forEach(({ rows }, idx) => {
+    const span = vintages.length - 1 || 1;
+    const opacity = 0.2 + (idx / span) * 0.4;
+    const p = el("path", { class: "line-forecast-vintage", d: segPath(rows, "targetYear", "mid") });
+    p.setAttribute("opacity", opacity.toFixed(2));
+    svg.appendChild(p);
+  });
+
+  // 実績線: line-actual(指標カードと同じクラス)。太めに描くのも同じ
+  // (stroke-width=3)。
+  const ap = el("path", { class: "line-actual", d: segPath(actualRows, "year", "tfr") });
+  ap.setAttribute("stroke-width", 3);
+  svg.appendChild(ap);
+
+  // 凡例: 指標カードの2項目(見通し/実績)とは中身が違う。扇は1本の「見通し」
+  // ではなく歴代の推計(版ごと)なので、#og-legend-forecast側だけをこの分岐でのみ
+  // 差し替える(#og-legend-actualはテキスト・スウォッチとも指標カードと同じで
+  // よいため触らない)。スウォッチはfertility.htmlの凡例と同じ
+  // .legend-swatch-vintage(実線・amber)に差し替え、テキストは
+  // 「歴代N版の推計」にする(Nはvintage_yearの異なる値の個数からデータで
+  // 導く。ハードコードしない)。この差し替えはこのfertility分岐でしか実行
+  // されないため、指標カード・汎用カードの凡例(#og-legend-forecastの既定
+  // markup)は1バイトも変わらない。
+  const forecastLabel = document.getElementById("og-legend-forecast");
+  const forecastSwatch = forecastLabel.previousElementSibling;
+  forecastSwatch.classList.remove("og-legend-swatch-forecast");
+  forecastSwatch.classList.add("legend-swatch-vintage");
+  forecastLabel.textContent = T.legendFertility(vintages.length);
+}
+
 async function main() {
   const m = params.get("m");
+  // ?m=fertility は予約値: chart.jsのMETRICSを引く前にここで分岐する。
+  // METRICSに"fertility"というキーが将来足された場合は、下のOG_CARDSの
+  // 出力先パス一意性検査がassets/og-fertility.pngの衝突として捕まえる
+  // (2026-07-30、bin/build.mjsで実際に確認済み。壊し試験8参照)。
+  if (m === "fertility") {
+    await renderFertility();
+    return;
+  }
   let metric = null;
   let metricUnitFn = null;
   if (m) {
     const mod = await loadChartModule();
     metric = mod.METRICS[m];
-    // METRICSに無いキーは黙って汎用カードへフォールバックしない
-    // (フォールバックすると「焼けたのに中身が違う」が静かに通ってしまう)。
-    if (!metric) throw new Error(`?m=${m} は chart.js の METRICS に無い指標キー`);
+    // METRICSに無く、fertility でもないキーは黙って汎用カードへフォール
+    // バックしない(フォールバックすると「焼けたのに中身が違う」が静かに
+    // 通ってしまう)。
+    if (!metric) throw new Error(`?m=${m} は chart.js の METRICS に無い指標キー(?m=fertility も受け付けるが、それでもない)`);
     metricUnitFn = mod.metricUnit;
   }
 

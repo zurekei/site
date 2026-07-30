@@ -1,16 +1,18 @@
 {
-  "_comment": "bin/og.sh が assets/og*.png(汎用2枚+指標8種×2言語の計18枚)を焼くたびに書き直す。node bin/build.mjs --check の陳腐化検査(ogStalenessErrors)が、ここに記録したsha256といまの入力ファイルの実ハッシュを突き合わせて焼き直し忘れを検出する。入力ファイルの一覧(chart.js・METRICSの全指標CSV・og.html・csv.js・style.css)はnode bin/build.mjs --og-list が唯一の出所で、ここに手書きのコピーは持たない。このファイルはsite/配下にあるため配信されるが、パスとハッシュの対応表だけで秘密は含まない(承知の上で置いている)。ハッシュは焼き始める前に計算し固定したもの(TOCTOU対策。bin/og.shのcompute_stamp直上コメント参照)。",
+  "_comment": "bin/og.sh が assets/og*.png(汎用2枚+指標8種×2言語+出生率2言語の計20枚)を焼くたびに書き直す。node bin/build.mjs --check の陳腐化検査(ogStalenessErrors)が、ここに記録したsha256といまの入力ファイルの実ハッシュを突き合わせて焼き直し忘れを検出する。入力ファイルの一覧(chart.js・METRICSの全指標CSV・出生率カード用のdata/fertility_*.csv2本・og.html・csv.js・style.css)はnode bin/build.mjs --og-list が唯一の出所で、ここに手書きのコピーは持たない。このファイルはsite/配下にあるため配信されるが、パスとハッシュの対応表だけで秘密は含まない(承知の上で置いている)。ハッシュは焼き始める前に計算し固定したもの(TOCTOU対策。bin/og.shのcompute_stamp直上コメント参照)。",
   "inputs": {
     "chart.js": "sha256:a3c23b0e88276393ac7eaf434d32f9b23095dd0fa212103576acf39b39136d45",
     "csv.js": "sha256:030aed502fef6f2483d05197fcb1fb504aad49bc7ff7f1d7e413328de2b9c6d8",
     "data/bond_issuance_forecast.csv": "sha256:45732100bf2a5b20db3bd3e61140ff36c918244eaab875d0fbb779cbd60a4f21",
     "data/cpi_forecast.csv": "sha256:45c4aba3fc25631b64e1848f9e28f04a7bea24838920e5deb8734caedb3ac5e4",
     "data/current_account_forecast.csv": "sha256:c87c9c373a0620db0afb3e31d0d2106d335e787b950f7152feca935ac75eeec7",
+    "data/fertility_actual.csv": "sha256:d198efc08e256be85e39d2a9c50441b07c9042fca981af4f62564f99049ca7c5",
+    "data/fertility_forecast.csv": "sha256:ca5655414ce1d636d1d155912c7b3c10ac70187e5aa6339449f1fd3821906b56",
     "data/gdp_forecast.csv": "sha256:a5e9917b3af319ea7e87003e1a47501dbbe2fb15ee37f7bc681a5cba3dc2be33",
     "data/jgb_total_issuance_forecast.csv": "sha256:d689e26708553a8cd1b4c0e0da73c1c40be4d376fe1e559a640c6d09bcd5504a",
     "data/tax_revenue_forecast.csv": "sha256:af66f6666bff6ccb2c0bb1860020f112f98582493c85c7749a994f93729dd2f5",
     "data/unemployment_forecast.csv": "sha256:4f6e183f5b23aac8a25dc2f05f3f6f5b7120e37a68f1c30f80f14efa2cc1a57f",
-    "og.html": "sha256:ce951a6d0bc25a7ced9f7f04fcb6329b9907f3c0ba5a5f1ece42f574f2e47197",
+    "og.html": "sha256:2b3d91dd435091ebebba90fcaae45eade390a0602c91fe783bae9374f227355e",
     "style.css": "sha256:a5b3d22c54b32463fb80f93823764f5549fe55e320f908e784ae7cb00a9905ef"
   }
 }

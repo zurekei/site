@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# assets/og*.png(汎用2枚 + 指標8種×2言語の16枚 = 計18枚)を og.html から焼き直す。
+# assets/og*.png(汎用2枚 + 指標8種×2言語の16枚 + 出生率専用2言語2枚 = 計20枚、
+# 2026-07-30に出生率2枚を追加)を og.html から焼き直す。
 #
 # 何をするか:
 #   1. リポジトリルートをドキュメントルートにローカルHTTPサーバを一時的に立てる
@@ -12,8 +13,8 @@
 #   4. 書き出したPNGのサイズと、同じChrome実行で取った--dump-domの中身を
 #      検証してから所定の場所へ置く(検証前の一時ファイルに書き、通ってから
 #      mvするので、失敗時に既存の正しいassets/og*.pngを上書きすることもない)
-#   5. 入力ファイル群(chart.js・全指標CSV・og.html・csv.js・style.css)の
-#      sha256を assets/og.inputs.json(スタンプ)へ書く。node bin/build.mjs
+#   5. 入力ファイル群(chart.js・全指標CSV・出生率CSV2本・og.html・csv.js・
+#      style.css)のsha256を assets/og.inputs.json(スタンプ)へ書く。node bin/build.mjs
 #      --check の陳腐化検査はこのスタンプを見て「焼き直し忘れ」を検出する
 #      (詳細は bin/build.mjs の ogStalenessErrors() 直上コメントを参照)。
 #      ハッシュは**焼き始める前**に固定し、全カードが成功したあとに書く
@@ -79,6 +80,22 @@ cleanup() {
   fi
   [[ -n "$OG_LIST" ]] && rm -f "$OG_LIST"
   [[ -n "$STAMP_TMP" ]] && rm -f "$STAMP_TMP"
+  # 正常終了時、ここに来る時点でOG_LISTもSTAMP_TMPも既に""に戻っている
+  # (それぞれ読み終わった・所定の場所へmvし終えた直後にリセットしている)ため、
+  # 直前の `[[ -n "$STAMP_TMP" ]] && rm -f ...` は条件が偽のまま連鎖して
+  # 関数の戻り値が1になる。**この関数の失敗を`set -e`(48行)が拾う**ため、
+  # 無指定だと全カード成功・スタンプ更新も成功しているのに `bin/og.sh` が
+  # exit 1で終わる欠陥があった(2026-07-30発見・出生率カード追加時に気づいた。
+  # fertility対応そのものとは無関係の既存バグ)。明示的にreturn 0で閉じる。
+  #
+  # 機構の注記(2026-07-30に実測で確かめ直した): 「EXITトラップの戻り値が
+  # スクリプトの終了コードにそのまま反映される」という説明を最初ここに書いたが、
+  # **これは誤り**。同じcleanupを持つスクリプトから`set -e`だけ外すと正常終了は
+  # exit 0になる(bash 3.2.57で確認)。起きているのは`set -e`が「トラップとして
+  # 呼ばれたcleanupの失敗」を拾うことで、この違いは将来`set -e`の扱いを
+  # 変える判断のときに効くので直しておく。`return 0`という対処自体は
+  # どちらの機構でも正しい(正常時0・`exit 1`経路は1のまま。これも実測済み)。
+  return 0
 }
 trap cleanup EXIT
 
@@ -108,10 +125,16 @@ trap cleanup EXIT
 #   これで「センチネルより後ろが切れている」だけでなく「センチネル自体は
 #   出たがその手前が切れている」ような部分出力も閉じられる。
 #
-#   出力形式(bin/build.mjsの--og-list直上コメントと対で):
+#   出力形式(bin/build.mjsの--og-list直上コメントと対で。2026-07-30、
+#   出生率カード対応でtype/vintageCountの2列を追加):
 #     INPUT\t<相対パス>
-#     CARD\t<query>\t<出力先相対パス>\t<期待最小年度>\t<hasForecast:0/1>\t<hasActual:0/1>
+#     CARD\t<query>\t<出力先相対パス>\t<期待最小年度>\t<hasForecast:0/1>\t<hasActual:0/1>\t<type>\t<vintageCount>
 #     END\t<INPUT件数>\t<CARD件数>
+#   type は "metric"(汎用2枚+指標8種×2言語)か "fertility"(出生率2言語)。
+#   verify_dom はこれで検査内容を分岐する(下記参照)。未知のtypeが来たら
+#   エラーで止める(fail-closed。「知らない行=カード」のフォールバックを
+#   無くしたのと同じ趣旨)。vintageCount は type="fertility" のときだけ意味を
+#   持つ(扇の本数の期待値)。type="metric" では常に0で未使用。
 #
 # ■ 知らない行はエラーにする(2026-07-30、D)
 #   以前は "INPUT" 以外の行を無条件にカード扱いしていた。誰かがbin/build.mjs
@@ -122,8 +145,9 @@ trap cleanup EXIT
 #   どのフッタでも通ってしまう)。1列目が INPUT/CARD/END のいずれでもなければ
 #   ここでエラーにする(「知らない行=カード」というフォールバックを無くす)。
 #   カード行の形式(出力先が assets/og*.png の形・期待最小年度が数字のみ・
-#   hasForecast/hasActualが0/1のみ)も併せて検証する(構造で塞ぐのと形式で
-#   塞ぐのは別の網なので両方入れる)。
+#   hasForecast/hasActualが0/1のみ・typeがmetric/fertilityのみ・vintageCountが
+#   数字のみ)も併せて検証する(構造で塞ぐのと形式で塞ぐのは別の網なので
+#   両方入れる)。
 OG_LIST="$(mktemp)"
 node "$ROOT/bin/build.mjs" --og-list > "$OG_LIST"
 
@@ -133,12 +157,14 @@ CARD_OUTS=()
 CARD_MIN_YEARS=()
 CARD_HAS_FORECAST=()
 CARD_HAS_ACTUAL=()
+CARD_TYPES=()
+CARD_VINTAGE_COUNTS=()
 input_count=0
 card_count=0
 end_seen=0
 end_line_no=0
 line_no=0
-while IFS=$'\t' read -r col1 col2 col3 col4 col5 col6; do
+while IFS=$'\t' read -r col1 col2 col3 col4 col5 col6 col7 col8; do
   line_no=$((line_no + 1))
   [[ -z "$col1" ]] && continue
   case "$col1" in
@@ -148,6 +174,7 @@ while IFS=$'\t' read -r col1 col2 col3 col4 col5 col6; do
       ;;
     CARD)
       # col2=query col3=出力先 col4=期待最小年度 col5=hasForecast col6=hasActual
+      # col7=type(metric/fertility) col8=vintageCount(fertilityのみ意味を持つ)
       if [[ ! "$col3" =~ ^assets/og[A-Za-z0-9._-]*\.png$ ]]; then
         echo "エラー: --og-list のCARD行の出力先が assets/og*.png の形でない(out=$col3)。" >&2
         exit 1
@@ -164,11 +191,21 @@ while IFS=$'\t' read -r col1 col2 col3 col4 col5 col6; do
         echo "エラー: --og-list のCARD行のhasActualが0/1でない(値=$col6, out=$col3)。" >&2
         exit 1
       fi
+      if [[ "$col7" != "metric" && "$col7" != "fertility" ]]; then
+        echo "エラー: --og-list のCARD行のtypeがmetric/fertilityのいずれでもない(値=$col7, out=$col3)。bin/build.mjs側にtypeの付け忘れ・タイポがある可能性。" >&2
+        exit 1
+      fi
+      if [[ ! "$col8" =~ ^[0-9]+$ ]]; then
+        echo "エラー: --og-list のCARD行のvintageCountが数字でない(値=$col8, out=$col3)。" >&2
+        exit 1
+      fi
       CARD_QUERIES+=("$col2")
       CARD_OUTS+=("$col3")
       CARD_MIN_YEARS+=("$col4")
       CARD_HAS_FORECAST+=("$col5")
       CARD_HAS_ACTUAL+=("$col6")
+      CARD_TYPES+=("$col7")
+      CARD_VINTAGE_COUNTS+=("$col8")
       card_count=$((card_count + 1))
       ;;
     END)
@@ -291,22 +328,25 @@ verify_size() {
 }
 
 # --dump-dom で取ったDOMの中身を見て、絵として壊れていないかを機械的に
-# 確かめる(verify_sizeは寸法しか見ないため、これとは別枠で必要)。
+# 確かめる(verify_sizeは寸法しか見ないため、これとは別枠で必要)。typeで
+# 検査内容を分岐する(2026-07-30、出生率カード対応で追加):
 #   (a) フッタの年度ラベルが「${min_year}–」を含むか(汎用カードは
-#       「指標名 ${min_year}–…」、指標カードは「${min_year}–…」そのものと
-#       文言の形が違うが、どちらも"${min_year}–"を含む点は共通なので
-#       同じパターンで両対応できる)。
+#       「指標名 ${min_year}–…」、指標カードは「${min_year}–…」そのもの、
+#       出生率カードは「${min_year}–…年」と文言の形がそれぞれ違うが、
+#       どれも"${min_year}–"を含む点は共通なので同じパターンで全対応できる)。
+#       これはtypeによらず常に見る。
 #       min_year は `node bin/build.mjs --og-list` の4列目(カードごとの
 #       期待最小年度)から受け取る。bash側にCSVパスや列名を持たず、
-#       chart.js の METRICS が唯一の出所であるべきという方針に合わせている。
-#       なお、CSVのfetchがrejectする経路(og.htmlのloadCSVが失敗する場合)は
-#       footerRange()/footerRangeMetric()自体が呼ばれず、置き文字列
-#       (「…」)のまま残る。xMin/xMaxがNaN/Infinityになって呼ばれた結果
-#       壊れた文字列が出る、という経路ではない(2026-07-30、H-3で記述を
+#       chart.js の METRICS(またはfertility用の専用CSV)が唯一の出所である
+#       べきという方針に合わせている。なお、CSVのfetchがrejectする経路
+#       (og.htmlのloadCSVが失敗する場合)はfooterRange()系関数自体が呼ばれず、
+#       置き文字列(「…」)のまま残る。xMin/xMaxがNaN/Infinityになって呼ばれた
+#       結果壊れた文字列が出る、という経路ではない(2026-07-30、H-3で記述を
 #       実態に合わせた)。どちらの経路でもこの検査(a)は落ちるので実害は無い。
-#   (b) 見通し線(line-forecast)・実績線(line-actual)のpath要素それぞれに
-#       ついて、そのカードにその系列のデータが実際にあるか(hasForecast/
-#       hasActual、`--og-list`の5・6列目)に応じてd属性の形を見る:
+#   (b) type="metric" のとき: 見通し線(line-forecast)・実績線(line-actual)の
+#       path要素それぞれについて、そのカードにその系列のデータが実際にある
+#       か(hasForecast/hasActual、`--og-list`の5・6列目)に応じてd属性の形を
+#       見る:
 #         - データがある(1) → d="M <数字>… という実データが入っていることを
 #           要求する(以前からある検査)
 #         - データが無い(0) → その`class=`を持つ要素自体は存在し、かつ
@@ -320,13 +360,20 @@ verify_size() {
 #       見通し線が全滅しても検査は全部通り、実績線だけのカードが静かに
 #       配信されうる欠陥もあった。データの実態どおりの線を要求する形にして
 #       両方を塞いだ。
+#   (c) type="fertility" のとき: 出生率カードには line-forecast が存在しない
+#       (og.htmlのrenderFertility()はこの要素を一切appendしない別系統の
+#       描画なので、metricの(b)のように「要素はあるがd=""」を要求すると
+#       誤爆する)。代わりに実績線(line-actual)にデータが入っていることと、
+#       扇の線(line-forecast-vintage)がvintageCount(`--og-list`の8列目)本
+#       ちょうどデータ付きで描かれていることを見る(verify_fan、2026-07-30
+#       追加)。1本でも欠けたら、あるいは余分に描かれても落ちる。
 # ここで捕まえられないもの(正直に書く): 指定フォントの読み込みに失敗して
 # 代替書体にフォールバックした場合。DOM構造やテキスト自体は正しいままなので
 # 機械的には検出できず、目視確認に頼るしかない。同様にy軸ラベルの幅の
 # 見積もり(og.htmlのPAD.left)がはみ出しているかどうかも、DOMのテキスト
 # 自体は正しいので機械検査では捕まらず、目視確認に頼るしかない。
 verify_dom() {
-  local dom="$1" query="$2" min_year="$3" has_forecast="$4" has_actual="$5"
+  local dom="$1" query="$2" min_year="$3" has_forecast="$4" has_actual="$5" type="$6" vintage_count="$7"
   if [[ ! -s "$dom" ]]; then
     echo "エラー: --dump-domの出力が空です(query=$query)。Chromeがページを読めていない可能性。" >&2
     exit 1
@@ -336,8 +383,58 @@ verify_dom() {
     echo "  CSVのfetch失敗やJSエラーの可能性があります。" >&2
     exit 1
   fi
-  verify_line "$dom" "line-forecast" "$has_forecast" "$query"
-  verify_line "$dom" "line-actual" "$has_actual" "$query"
+  # (a-2) d属性にNaNが混ざっていないか(typeによらず全カードで見る。
+  # 2026-07-30追加)。
+  #
+  # なぜ本数や「d="M <数字>」の検査だけでは足りないのか: csv.jsのtoNum()は
+  # 空文字だけをnullにし、**空でない非数値セル(転記ミスの `1.49x934`、全角
+  # 数字、単位の混入など)にはNaNを返す**。呼び出し側のフィルタは
+  # `!== null` なのでNaNは素通りし、Math.min/Math.maxを1個汚染するだけで
+  # y軸の定義域がNaNになり、**扇7本と実績線の全pathが
+  # d="M 176,NaN L …NaN…" になって画面には1本も描かれない**。それでも
+  #   - フッタ検査(a)はx定義域が無傷なので通る
+  #   - verify_fan/verify_lineのパターンは `d="M [0-9]` で**最初のx座標しか
+  #     見ない**ので、7本ちょうど数えて通る
+  #   - bin/build.mjsのfertilityCardInfo()も同じ `!== null` フィルタで数えるため
+  #     vintageCountは7のままで、両側が自己整合的に「正常」と答える
+  # という具合に、**真っ白なカードが全機械検査を通過してデプロイされる**。
+  # データの転記ミスはこのサイトで最もありそうな壊れ方なので、
+  # 「1本でも描き漏れたら落ちる」という検査の触れ込みがそこで効かないのは
+  # 設計の穴として塞ぐ(2026-07-30にog.htmlを実際に汚して再現を確認した)。
+  # og.html/bin/build.mjs側もNumber.isFiniteで弾くようにしたが(そちらは
+  # 「そもそもNaNを作らない」対策)、ここはDOMという最終成果物の側で見る
+  # 独立した網として置く。指標カード側の `L x,NaN` の途中混入も同時に塞げる。
+  #
+  # パターンを**タグの中の属性値**に限定している(`<要素名 …属性="…NaN…"`)。
+  # `d="[^"]*NaN` のような素朴なパターンでは駄目で、**--dump-domは<script>の
+  # 中身もDOMとして吐く**ため、og.html側のJSコメントに壊れたd属性の実例を
+  # 文字列として書いた瞬間に全カードで誤爆する(2026-07-30に実際に踏んだ。
+  # og.htmlのrenderFertility側にも「実例を書くな」と注記した)。属性値に
+  # 限定したのは、d属性以外(グリッド線のy1/y2、ラベルのx/y)もy軸の定義域が
+  # 非数になれば同時に汚染されるので、そちらも一緒に捕まえるためでもある。
+  if grep -Eq '<[a-z]+[^>]*="[^"]*NaN' "$dom"; then
+    echo "エラー: SVG要素の属性値にNaNが混ざっています(query=$query)。" >&2
+    echo "  CSVに空でない非数値セル(転記ミス・全角数字・単位の混入など)がある可能性があります。" >&2
+    echo "  該当箇所: $(grep -Eo '<[a-z]+[^>]*="[^"]*NaN[^"]*"' "$dom" | head -1 | cut -c1-120)" >&2
+    exit 1
+  fi
+  case "$type" in
+    metric)
+      verify_line "$dom" "line-forecast" "$has_forecast" "$query"
+      verify_line "$dom" "line-actual" "$has_actual" "$query"
+      ;;
+    fertility)
+      verify_line "$dom" "line-actual" "$has_actual" "$query"
+      verify_fan "$dom" "$vintage_count" "$query"
+      ;;
+    *)
+      # --og-list読み込み時点(上のwhileループ)でmetric/fertility以外は
+      # 既に弾いているので、ここに来るのはverify_domの呼び出し側自体に
+      # バグがある場合のみ。fail-closedの最終防波堤として残す。
+      echo "エラー: verify_domに未知のtype($type)が渡された(query=$query)。呼び出し側のバグの可能性。" >&2
+      exit 1
+      ;;
+  esac
 }
 
 # verify_dom(b) の実体。class ("line-forecast"/"line-actual") が持つ
@@ -363,10 +460,38 @@ verify_line() {
   fi
 }
 
+# verify_dom(c) の実体。出生率カード専用: line-forecast-vintage クラスを
+# 持つpath要素のうち、実際にデータ(d="M <数字>…)が入っているものの本数を
+# 数え、期待本数(want_count、--og-listの8列目=vintage_yearの異なる値の
+# 個数)とちょうど一致するかを見る。grep -o は一致1件につき1行を出力する
+# ので、wc -l がそのまま本数になる(2026-07-30追加)。
+verify_fan() {
+  local dom="$1" want_count="$2" query="$3"
+  local actual_count
+  # `|| true` は grep の「0件マッチ=終了コード1」だけを握り潰すためのもので、
+  # 本数の値そのものは wc の出力で確定している(2026-07-30追加)。これが無いと
+  # `set -euo pipefail` 下でパイプライン全体が1になり、**代入文の失敗として
+  # errexit が即座にスクリプトを殺す**ため、下の比較にも「本数が期待と違う」
+  # というメッセージにも一切到達せず無言でexit 1になる。実測で確認した。
+  # 影響は2つあり、どちらも都合が悪い:
+  #   - 扇が全滅した(0本)という**この検査が最も捕まえたいケース**でだけ
+  #     診断が出ない(1本欠けの6本なら出る、という一貫しない挙動になる)
+  #   - data/fertility_forecast.csv が正当に空でvintageCount=0のとき、
+  #     0==0で通るべきところが代入時点で死ぬのでbin/og.shが永久に完走できず、
+  #     スタンプが書けず--checkが赤のまま=デプロイゲートが開かない
+  actual_count="$(grep -Eo 'class="line-forecast-vintage"[^>]*d="M [0-9][^"]*"' "$dom" | wc -l | tr -d ' ')" || true
+  if [[ "$actual_count" != "$want_count" ]]; then
+    echo "エラー: 扇の線(line-forecast-vintage)の本数が期待と違う(期待=$want_count, 実際=$actual_count, query=$query)。" >&2
+    echo "  data/fertility_forecast.csvのvintage_yearの種類数とog.htmlのrenderFertility()の描画が食い違っている可能性があります。" >&2
+    exit 1
+  fi
+}
+
 # $1: og.html に渡すクエリ文字列 $2: 書き出し先の最終パス(絶対) $3: 期待最小年度
-# $4: hasForecast(0/1) $5: hasActual(0/1)
+# $4: hasForecast(0/1) $5: hasActual(0/1) $6: type(metric/fertility)
+# $7: vintageCount(fertilityのみ意味を持つ)
 shoot() {
-  local query="$1" out="$2" min_year="$3" has_forecast="$4" has_actual="$5"
+  local query="$1" out="$2" min_year="$3" has_forecast="$4" has_actual="$5" type="$6" vintage_count="$7"
   local udir wdir tmp_png tmp_dom
   udir="$(mktemp -d)"
   wdir="$(mktemp -d)"
@@ -394,7 +519,7 @@ shoot() {
   # 終了を待たず出力の完成を確認でき次第、強制終了して先へ進む。
   #
   # 以前は固定25秒待ってから`kill -9`していた(10秒の予算に対して25秒待てば
-  # 十分な余裕がある、という判断)。焼く枚数が2枚から18枚に増えたことで
+  # 十分な余裕がある、という判断)。焼く枚数が2枚から18枚、さらに20枚に増えたことで
   # 固定待ちでは所要時間が7分半になり現実的でなくなったため、2026-07-30に
   # 「出力ファイルの完成を0.2秒ごとにポーリングし、揃ったら即kill」する方式へ
   # 変えた。25秒の上限は保険として残す。
@@ -445,7 +570,7 @@ shoot() {
     exit 1
   fi
   verify_size "$tmp_png"
-  verify_dom "$tmp_dom" "$query" "$min_year" "$has_forecast" "$has_actual"
+  verify_dom "$tmp_dom" "$query" "$min_year" "$has_forecast" "$has_actual" "$type" "$vintage_count"
   mv "$tmp_png" "$out"
   rm -rf "$wdir"
   echo "✓ $out を書き出しました。"
@@ -459,7 +584,7 @@ shoot() {
 # 置いている旨をJSON自身にもコメント相当のフィールドとして残す。
 #
 # ■ TOCTOU対策: ハッシュは焼き始める前に計算し、成功後に配置する(2026-07-30、G)
-#   以前は18枚焼き終わったあとに入力ファイルのハッシュを計算していた。
+#   以前は(18枚だった当時)焼き終わったあとに入力ファイルのハッシュを計算していた。
 #   bin/og.shの実行中(約1分)にchart.jsやCSVを編集すると、「古い内容で
 #   焼いた画像 + 新しい内容のハッシュ」でスタンプが書かれ、`--check`が
 #   緑のまま古いカードが残り続けるTOCTOU(検査から使用までの間の変化)が
@@ -483,11 +608,12 @@ for rel in rels:
 
 data = {
     "_comment": (
-        "bin/og.sh が assets/og*.png(汎用2枚+指標8種×2言語の計18枚)を焼く"
+        "bin/og.sh が assets/og*.png(汎用2枚+指標8種×2言語+出生率2言語の計20枚)を焼く"
         "たびに書き直す。node bin/build.mjs --check の陳腐化検査"
         "(ogStalenessErrors)が、ここに記録したsha256といまの入力ファイルの"
         "実ハッシュを突き合わせて焼き直し忘れを検出する。入力ファイルの一覧"
-        "(chart.js・METRICSの全指標CSV・og.html・csv.js・style.css)は"
+        "(chart.js・METRICSの全指標CSV・出生率カード用のdata/fertility_*.csv"
+        "2本・og.html・csv.js・style.css)は"
         "node bin/build.mjs --og-list が唯一の出所で、ここに手書きのコピーは"
         "持たない。このファイルはsite/配下にあるため配信されるが、パスと"
         "ハッシュの対応表だけで秘密は含まない(承知の上で置いている)。"
@@ -507,7 +633,7 @@ compute_stamp "$STAMP_TMP"
 
 for i in "${!CARD_OUTS[@]}"; do
   shoot "${CARD_QUERIES[$i]}" "$ROOT/${CARD_OUTS[$i]}" "${CARD_MIN_YEARS[$i]}" \
-    "${CARD_HAS_FORECAST[$i]}" "${CARD_HAS_ACTUAL[$i]}"
+    "${CARD_HAS_FORECAST[$i]}" "${CARD_HAS_ACTUAL[$i]}" "${CARD_TYPES[$i]}" "${CARD_VINTAGE_COUNTS[$i]}"
 done
 
 mv "$STAMP_TMP" "$ROOT/$STAMP_REL"
