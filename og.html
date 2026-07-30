@@ -3,8 +3,11 @@
 <head>
 <meta charset="utf-8">
 <title>OGP画像生成用 — ズレ計</title>
-<!-- assets/og.png の生成元ページ。1200x630の枠を実データ(gdp_forecast.csv)から描画し、
-     スクリーンショットしてOGP画像にする。サイト本体からはリンクしない。 -->
+<!-- assets/og.png(ja) / assets/og-en.png(en) の生成元ページ。1200x630の枠を
+     実データ(gdp_forecast.csv)から描画し、ヘッドレスChromeでスクリーンショット
+     してOGP画像にする。サイト本体からはリンクしない。
+     ?lang=en を付けると英語カードを描く(既定はja)。?shot と併用する場合は
+     ?shot&lang=en のように両方付ける。2枚とも bin/og.sh で一括して焼き直す。 -->
 <link rel="stylesheet" href="style.css?v=20260731l">
 <style>
   html, body { background: #888; }
@@ -87,13 +90,13 @@
         <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
       </svg>
       <div>
-        <div class="og-brand-name">ズレ計<span class="og-brand-slash">zurekei ~/</span></div>
+        <div class="og-brand-name"><span id="og-brand-main">ズレ計</span><span class="og-brand-slash" id="og-brand-slash">zurekei ~/</span></div>
         <div class="og-brand-tag">FORECAST × ACTUAL</div>
       </div>
     </div>
     <div class="og-title">
-      政府経済見通し × 実績
-      <small>予測値・実績値・出典を毎年並べて記録する</small>
+      <span id="og-title-main">政府経済見通し × 実績</span>
+      <small id="og-title-small">予測値・実績値・出典を毎年並べて記録する</small>
     </div>
   </div>
   <div class="og-chart">
@@ -101,9 +104,9 @@
   </div>
   <div class="og-footer">
     <div class="og-legend">
-      <span class="og-legend-item"><span class="og-legend-swatch og-legend-swatch-forecast"></span>見通し</span>
-      <span class="og-legend-item"><span class="og-legend-swatch og-legend-swatch-actual"></span>実績</span>
-      <span>実質GDP成長率 1980–2025年度</span>
+      <span class="og-legend-item"><span class="og-legend-swatch og-legend-swatch-forecast"></span><span id="og-legend-forecast">見通し</span></span>
+      <span class="og-legend-item"><span class="og-legend-swatch og-legend-swatch-actual"></span><span id="og-legend-actual">実績</span></span>
+      <span id="og-footer-range">実質GDP成長率 1980–2025年度</span>
     </div>
     <div class="og-domain">zurekei.org</div>
   </div>
@@ -111,6 +114,45 @@
 <script src="csv.js?v=20260731l"></script>
 <script>
 if (location.search.includes("shot")) document.body.classList.add("shot");
+
+// このページは home.js 等を読み込まない独立ページ(スクリーンショット専用の
+// 描画道具であってサイト本体の配信物ではない)ため、T辞書を共有する経路が無い。
+// OG_TEXT[LANG].legendForecast/legendActual は home.js の T.en.plan/T.en.actual と
+// 同じ文字列だが、あえてここにローカルで持つ: og.html は「人間が焼き直すための道具」であり、
+// 焼いた画像を目で見た瞬間にズレていれば気づける(自動で配信されるHTMLの文言と
+// 違い、ズレたまま静かに公開され続ける経路が無い)。このリポジトリは辞書の
+// 複製を嫌うが、ここはその例外として意図的に許容している。
+const OG_TEXT = {
+  ja: {
+    brandMain: "ズレ計",
+    brandSlash: "zurekei ~/",
+    titleMain: "政府経済見通し × 実績",
+    titleSmall: "予測値・実績値・出典を毎年並べて記録する",
+    legendForecast: "見通し",
+    legendActual: "実績",
+    footerRange: (min, max) => `実質GDP成長率 ${min}–${max}年度`,
+  },
+  en: {
+    brandMain: "zurekei",
+    brandSlash: "~/",
+    titleMain: "Government forecasts × actual outcomes",
+    titleSmall: "Forecasts, actuals, and sources — recorded side by side, every year.",
+    legendForecast: "Forecast",
+    legendActual: "Actual",
+    footerRange: (min, max) => `Real GDP growth, FY${min}–${max}`,
+  },
+};
+
+const LANG = new URLSearchParams(location.search).get("lang") === "en" ? "en" : "ja";
+const T = OG_TEXT[LANG];
+document.documentElement.lang = LANG;
+document.getElementById("og-brand-main").textContent = T.brandMain;
+document.getElementById("og-brand-slash").textContent = T.brandSlash;
+document.getElementById("og-title-main").textContent = T.titleMain;
+document.getElementById("og-title-small").textContent = T.titleSmall;
+document.getElementById("og-legend-forecast").textContent = T.legendForecast;
+document.getElementById("og-legend-actual").textContent = T.legendActual;
+
 const SVG_NS = "http://www.w3.org/2000/svg";
 const W = 1088, H = 400;
 const PAD = { top: 16, right: 20, bottom: 30, left: 52 };
@@ -132,6 +174,10 @@ async function main() {
 
   const years = rows.map((r) => r.year);
   const xMin = Math.min(...years), xMax = Math.max(...years);
+  // フッタの年度ラベルはCSVの実データ範囲から導く(以前は1980–2025年度と
+  // ハードコードしており、CSVの範囲が1980–2026に伸びた後もこの画像だけ古い
+  // 表示のまま取り残されていた)。
+  document.getElementById("og-footer-range").textContent = T.footerRange(xMin, xMax);
   const vals = rows.flatMap((r) => [r.f, r.a]).filter((v) => v !== null);
   const yPad = (Math.max(...vals) - Math.min(...vals)) * 0.1;
   const yMin = Math.min(...vals, 0) - yPad, yMax = Math.max(...vals, 0) + yPad;
@@ -142,7 +188,7 @@ async function main() {
   const svg = document.getElementById("og-svg");
 
   svg.appendChild(el("line", { class: "zero-line", x1: PAD.left, x2: W - PAD.right, y1: y(0), y2: y(0) }));
-  for (let yr = 1980; yr <= xMax; yr += 5) {
+  for (let yr = xMin; yr <= xMax; yr += 5) {
     svg.appendChild(el("line", { class: "axis-line", x1: x(yr), x2: x(yr), y1: PAD.top, y2: H - PAD.bottom }));
     const t = el("text", { class: "axis-label", x: x(yr), y: H - PAD.bottom + 22, "text-anchor": "middle", "font-size": 15 });
     t.textContent = yr;

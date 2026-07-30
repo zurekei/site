@@ -39,6 +39,7 @@ import path from "node:path";
 import vm from "node:vm";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const SITE_DIR = path.join(HERE, "..");
@@ -463,6 +464,9 @@ function buildPage(key, metric, lang) {
   const archive = metricArchiveNote
     ? `      <p class="chart-note mono" id="archive-note">${escapeHTML(metricArchiveNote)}</p>`
     : `      <p class="chart-note mono" id="archive-note" hidden></p>`;
+  // OGP画像はja/enで別ファイル(og.html?lang=enで焼いたog-en.png)。JAページは
+  // 従来どおりog.png。
+  const ogImage = lang === "ja" ? "og.png" : "og-en.png";
 
   // 集計行はグラフと同じ computeGapStats / gapSummaryText で作る
   const stats = R.computeGapStats(rows, "forecastVal", "actualVal", { fromYear: metric.statsFromYear });
@@ -487,7 +491,7 @@ ${hreflangTags(urls)}
 <meta property="og:title" content="${escapeHTML(title)}">
 <meta property="og:description" content="${escapeHTML(metricDesc)}">
 <meta property="og:url" content="${url}">
-<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image" content="${SITE}/assets/${ogImage}">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
@@ -605,6 +609,8 @@ function buildIndex(keys, lang) {
   const h = HUB_TEXT[lang];
   const url = abs(REL.chartHub[lang]);
   const title = lang === "ja" ? "指標一覧 — ズレ計" : "Indicators — zurekei";
+  // OGP画像はja/enで別ファイル。JAはog.png、ENはog-en.png(og.html?lang=enで焼く)。
+  const ogImage = lang === "ja" ? "og.png" : "og-en.png";
 
   // JAページは元の data-en 属性をそのまま残す(このページの本体機能とは無関係な
   // 旧swap方式の名残だが、JA側は「触らない」制約のもとバイト単位で保つ)。EN
@@ -638,7 +644,7 @@ ${hreflangTags(REL.chartHub)}
 <meta property="og:title" content="${escapeHTML(title)}">
 <meta property="og:description" content="${escapeHTML(h.metaDesc)}">
 <meta property="og:url" content="${url}">
-<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image" content="${SITE}/assets/${ogImage}">
 ${assetHead()}
 </head>
 <body>
@@ -1001,7 +1007,7 @@ ${hreflangTags(urls)}
 <meta property="og:title" content="${escapeHTML(title)}">
 <meta property="og:description" content="${escapeHTML(t.desc)}">
 <meta property="og:url" content="${url}">
-<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image" content="${SITE}/assets/og-en.png">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
@@ -1200,7 +1206,7 @@ ${hreflangTags(urls)}
 <meta property="og:title" content="${escapeHTML(title)}">
 <meta property="og:description" content="${escapeHTML(t.desc)}">
 <meta property="og:url" content="${url}">
-<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image" content="${SITE}/assets/og-en.png">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
@@ -1496,7 +1502,7 @@ ${hreflangTags(REL.home)}
 <meta property="og:title" content="${escapeHTML(title)}">
 <meta property="og:description" content="${escapeHTML(desc)}">
 <meta property="og:url" content="${url}">
-<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image" content="${SITE}/assets/og-en.png">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
@@ -1618,7 +1624,7 @@ ${hreflangTags(urls)}
 <meta property="og:title" content="${escapeHTML(title)}">
 <meta property="og:description" content="${escapeHTML(t.lead)}">
 <meta property="og:url" content="${url}">
-<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image" content="${SITE}/assets/og-en.png">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
@@ -1805,7 +1811,7 @@ ${hreflangTags(urls)}
 <meta property="og:title" content="${escapeHTML(title)}">
 <meta property="og:description" content="${escapeHTML(t.lead)}">
 <meta property="og:url" content="${url}">
-<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image" content="${SITE}/assets/og-en.png">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
@@ -1864,7 +1870,7 @@ ${hreflangTags(urls)}
 <meta property="og:title" content="${escapeHTML(title)}">
 <meta property="og:description" content="${escapeHTML(t.lead)}">
 <meta property="og:url" content="${url}">
-<meta property="og:image" content="${SITE}/assets/og.png">
+<meta property="og:image" content="${SITE}/assets/og-en.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/style.css?v=${ASSET_V}">
@@ -2584,6 +2590,151 @@ function homeFillsCoverageErrors() {
   return errs;
 }
 
+/* ── OGP画像(assets/og.png・assets/og-en.png)の陳腐化検査 ─────────────
+ * og.html はサイト本体からリンクされない独立ページで、bin/build.mjs の
+ * 生成物ではない(人間が bin/og.sh でヘッドレスChromeのスクリーンショットと
+ * して焼く道具)。そのため他のページと違い「いま生成した文字列とディスクを
+ * 比較する」stale 検査には乗らない。実際、FY1980〜1997の見通しを収集した
+ * 後もこの焼き直しを忘れ、破線が1998年からしか無い古い画像がしばらく公開
+ * され続けていたことがある(2026-07-30に発覚)。同じ穴を塞ぐため、「画像の
+ * 元になる入力が、画像そのものより後に変わっていないか」を機械的に見る。
+ *
+ * ■ 時刻比較(git日時 / mtime)ではなく入力の内容ハッシュで判定する
+ *   最初の実装は「4パスの実効的な最終更新時刻を比べ、ソース側が新しければ
+ *   エラー」という時刻比較だった(git のコミット日時 → 未コミットは fs の
+ *   mtime、という二段構え)。これには実際に踏むデッドロックがあった
+ *   (2026-07-30レビュー指摘・実測で再現):
+ *     1. 絵に一切影響しない変更(例: data/gdp_forecast.csv の notes列だけ
+ *        直す。og.htmlはfiscal_year/forecast_real/actual_realしか読まない
+ *        ので絵は変わらない)をコミットする
+ *     2. ソースのコミット日時が画像より新しくなり `--check` が発火する
+ *     3. 指示どおり `bin/og.sh` で焼き直す → 焼き直しはバイト単位で決定的
+ *        なので PNG は前回と完全に同一になる
+ *     4. 画像ファイルの中身が1バイトも変わらないので git 上は非dirty
+ *        (コミットする差分が無い)→ mtimeも更新されない経路がある
+ *        (touchしない限り) → コミット日時は古いまま → 永久にエラーのまま
+ *        脱出できない
+ *   これは `bin/deploy.sh` がこの `--check` をデプロイの門番にしている
+ *   ことと組み合わさると特に悪い: 詰まった人が取りがちな回避策は
+ *   「`bin/deploy.sh` を使わず素の `npx wrangler pages deploy` を直に叩く」で、
+ *   これは秘密ファイル混入チェックを丸ごと迂回する経路としてこのリポジトリで
+ *   明確に禁止されている(deploy.sh 冒頭のコメント参照)。うるさい検査の
+ *   代償が安全側(秘密ファイルの誤配信)に出るのでは本末転倒。
+ *
+ *   時刻比較にはさらに偽陰性もある: 画像を焼いてコミットしたあとCSVを追加
+ *   編集し、焼き直しを忘れたまま `git commit --amend` で同じコミットに
+ *   同乗させると、全パスの %ct が揃って `>` 比較を素通りし、古い画像が出る
+ *   (rebase/squashでも同様)。`cp -p`/`rsync -a`/同期フォルダ経由でmtimeが
+ *   保存されたままCSVだけ変わる経路も同じ穴を踏む。
+ *
+ *   直したのは「入力の中身そのもの」をハッシュで見る方式への切り替え:
+ *   `bin/og.sh` が焼くたびに、入力ファイル群のsha256を `assets/og.inputs.json`
+ *   (スタンプファイル)へ書く。`--check` は「いまの入力のハッシュ」と
+ *   「スタンプに記録されたハッシュ」を比較するだけで、gitのコミット日時も
+ *   ファイルのmtimeも一切見ない(DIRTY_PATHSへの依存も外れた)。これで上の
+ *   デッドロックは起きない: 絵に影響しない変更でも入力のハッシュは変わる
+ *   →検査が発火→`bin/og.sh`で焼き直す→PNGはバイト同一でも
+ *   `og.inputs.json`の中身(記録されたハッシュ)は新しい入力のハッシュに
+ *   更新される→そのスタンプはコミットできる(中身が変わっているので)→
+ *   赤から出られる。amendやmtime保存も、見ているのが内容そのものなので
+ *   効かない。
+ *
+ * ■ 入力の集合(時刻比較では入れられなかったものも入れられるようになった)
+ *   - data/gdp_forecast.csv
+ *   - og.html
+ *   - csv.js … og.htmlが loadCSV/toNum をここから読んでいるのに、時刻比較
+ *     版では対象外だった(style.cssと同種の見落とし。2026-07-30レビュー指摘)
+ *   - style.css … og.htmlが変数(--bg, --navy 等)を参照しており、変われば
+ *     絵が変わりうる。**時刻比較版では「CSSを触るたび発火して形骸化する」
+ *     という理由で対象外にしていたが、ハッシュ方式では発火しても
+ *     `bin/og.sh` を1回回せば必ず解消するので、対象外にする理由が無くなり
+ *     2026-07-30に対象へ加えた。** 「style.cssは既知の穴」という記述は
+ *     この変更で解消したので消してある(このファイルの履歴として残すのは
+ *     この段落自体)。
+ *
+ * ■ それでもエラーにする(fail-openにしない)ケース
+ *   - スタンプファイル(assets/og.inputs.json)が無い、またはJSONとして
+ *     壊れている
+ *   - スタンプに記録されているパスの集合が、いまの入力パス一覧
+ *     (SOURCESの内容)と一致しない(入力を増減したのにbin/og.shを
+ *     一度も回していない状態)
+ *   - 入力ファイル自体が読めない(fs.readFileSyncが失敗)
+ *   いずれも「判定できないので黙って通す」という経路は用意していない。
+ *
+ * ■ この検査で捕まえられないもの(正直に書く)
+ *   - Google Fontsなど外部から読むフォントの中身。フォントの読み込み失敗や
+ *     フォールバック表示は入力ファイルの中身に現れないため、ハッシュ比較
+ *     では検出できない。og.html自体の変更(フォント指定行の変更等)は
+ *     捕まるが、フォント配信側の障害は捕まらない。目視確認に頼る
+ *   - ヘッドレスChrome自体のバージョン差によるレンダリングの微差
+ *   - assets/og.png / assets/og-en.png を bin/og.sh を経由せず直接
+ *     上書き・削除した場合(スタンプの記録内容とは無関係に発生するため、
+ *     この検査の対象外。生成物ではなく人間が置く画像である以上、
+ *     ここまでは面倒を見ない)
+ */
+
+// og.htmlの描画に効く入力ファイル一覧(SITE_DIR相対)。bin/og.sh側の
+// INPUT_RELS と同じ集合を指す(片方だけ増減するとこの検査が
+// 「スタンプの記録パスが一致しない」で機械的に気づく)。
+const OG_INPUT_RELS = ["data/gdp_forecast.csv", "og.html", "csv.js", "style.css"];
+const OG_STAMP_REL = "assets/og.inputs.json";
+
+function sha256OfFile(absPath) {
+  return createHash("sha256").update(fs.readFileSync(absPath)).digest("hex");
+}
+
+function ogStalenessErrors() {
+  const errs = [];
+
+  // いまの入力の実ハッシュ
+  const current = {};
+  for (const rel of OG_INPUT_RELS) {
+    try {
+      current[rel] = sha256OfFile(path.join(SITE_DIR, rel));
+    } catch (e) {
+      errs.push(`OGP陳腐化検査: 入力 ${rel} が読めない(${e.message})`);
+    }
+  }
+  if (errs.length) return errs;
+
+  // スタンプファイル(bin/og.shが焼くたびに書く記録)
+  const stampAbs = path.join(SITE_DIR, OG_STAMP_REL);
+  let stamp;
+  try {
+    stamp = JSON.parse(fs.readFileSync(stampAbs, "utf8"));
+  } catch (e) {
+    return [
+      `OGP陳腐化検査: ${OG_STAMP_REL} が無いか壊れている(${e.message})。bin/og.sh で焼き直すこと`,
+    ];
+  }
+  const recorded = stamp && stamp.inputs;
+  if (!recorded || typeof recorded !== "object") {
+    return [`OGP陳腐化検査: ${OG_STAMP_REL} に inputs が無い。bin/og.sh で焼き直すこと`];
+  }
+
+  // スタンプが記録しているパス集合と、いまのOG_INPUT_RELSが完全に一致する
+  // ことを先に見る。入力を増減したのにbin/og.shを一度も回していないと
+  // ここで気づける(片方だけの比較では検出できない壊れ方)。
+  const recordedKeys = Object.keys(recorded).sort();
+  const currentKeys = [...OG_INPUT_RELS].sort();
+  if (JSON.stringify(recordedKeys) !== JSON.stringify(currentKeys)) {
+    return [
+      `OGP陳腐化検査: ${OG_STAMP_REL} が記録している入力パス(${recordedKeys.join(", ")})が` +
+        `いまの入力(${currentKeys.join(", ")})と一致しない。bin/og.sh で焼き直すこと`,
+    ];
+  }
+
+  for (const rel of OG_INPUT_RELS) {
+    const want = `sha256:${current[rel]}`;
+    if (recorded[rel] !== want) {
+      errs.push(
+        `OGP画像が古い可能性: ${rel} の内容がスタンプ(${OG_STAMP_REL})記録時から変わっている。bin/og.sh で焼き直すこと`
+      );
+    }
+  }
+  return errs;
+}
+
 const check = process.argv.includes("--check");
 const keys = Object.keys(METRICS);
 
@@ -2669,6 +2820,9 @@ if (check) {
   // HOME_FILLS↔home.jsの対応も同様に独立(index.htmlはhandwrittenJaDriftErrors()
   // の対象外なので、そちらでは拾えない壊れ方)。
   const homeFillsErrs = homeFillsCoverageErrors();
+  // OGP画像の陳腐化は生成物ではないog.htmlが起点なので、上のどの検査とも
+  // 独立に必ず見る(stale/orphans/refs/id/drift/homeFillsのいずれにも掛からない)。
+  const ogErrs = ogStalenessErrors();
   if (
     stale.length ||
     orphans.length ||
@@ -2676,7 +2830,8 @@ if (check) {
     refs.length ||
     idErrs.length ||
     driftErrs.length ||
-    homeFillsErrs.length
+    homeFillsErrs.length ||
+    ogErrs.length
   ) {
     if (stale.length) console.error(`✗ 生成物が古い: ${stale.join(", ")}`);
     if (orphans.length) console.error(`✗ 余分なファイル: chart/${orphans.join(", chart/")}`);
@@ -2685,11 +2840,12 @@ if (check) {
     idErrs.forEach((e) => console.error(`✗ ${e}`));
     driftErrs.forEach((e) => console.error(`✗ ${e}`));
     homeFillsErrs.forEach((e) => console.error(`✗ ${e}`));
+    ogErrs.forEach((e) => console.error(`✗ ${e}`));
     if (stale.length || orphans.length || orphansEn.length) console.error("  node bin/build.mjs を実行してからデプロイすること");
     process.exit(1);
   }
   console.log(
-    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応とも一致）`
+    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとも一致）`
   );
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -2708,4 +2864,5 @@ if (check) {
   idCoverageErrors().forEach((e) => console.warn(`⚠ ${e}`));
   handwrittenJaDriftErrors().forEach((e) => console.warn(`⚠ ${e}`));
   homeFillsCoverageErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  ogStalenessErrors().forEach((e) => console.warn(`⚠ ${e}`));
 }

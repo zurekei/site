@@ -1,0 +1,9 @@
+{
+  "_comment": "bin/og.sh が assets/og.png・assets/og-en.png を焼くたびに書き直す。node bin/build.mjs --check の陳腐化検査(ogStalenessErrors)が、ここに記録したsha256といまの入力ファイルの実ハッシュを突き合わせて焼き直し忘れを検出する。このファイルはsite/配下にあるため配信されるが、パスとハッシュの対応表だけで秘密は含まない(承知の上で置いている)。",
+  "inputs": {
+    "csv.js": "sha256:030aed502fef6f2483d05197fcb1fb504aad49bc7ff7f1d7e413328de2b9c6d8",
+    "data/gdp_forecast.csv": "sha256:a5e9917b3af319ea7e87003e1a47501dbbe2fb15ee37f7bc681a5cba3dc2be33",
+    "og.html": "sha256:f4ee16b08b19bfd20dcf27c9ea84836d813c8995d1cb576673865454b11c53a4",
+    "style.css": "sha256:a5b3d22c54b32463fb80f93823764f5549fe55e320f908e784ae7cb00a9905ef"
+  }
+}
