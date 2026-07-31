@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>引用のしかた — ズレ計</title>
+<meta name="description" content="ズレ計のデータと本文の引用方法、ライセンス、データファイルの直リンク。">
+<!-- Canonical is the extension-less URL: /x.html 308-redirects to /x, so the two
+     spellings are the same page. Without this, aggregators that key on URL (はてなブックマーク)
+     count them as separate entries and split the bookmark total. -->
+<link rel="canonical" href="https://zurekei.org/cite">
+<link rel="alternate" hreflang="ja" href="https://zurekei.org/cite">
+<link rel="alternate" hreflang="en" href="https://zurekei.org/en/cite">
+<link rel="alternate" hreflang="x-default" href="https://zurekei.org/cite">
+<meta property="og:site_name" content="ズレ計">
+<meta property="og:type" content="website">
+<meta property="og:title" content="引用のしかた — ズレ計">
+<meta property="og:description" content="ズレ計のデータと本文の引用方法、ライセンス、データファイルの直リンク。">
+<meta property="og:url" content="https://zurekei.org/cite">
+<meta property="og:image" content="https://zurekei.org/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="style.css?v=20260731m">
+<style>
+  /* このページだけの装飾。contact.html と同じく、1ページしか使わないCSSを
+     style.css に足して全ページの読み込みを太らせない方針。既存クラス
+     (about-body/about-title/about-lead/about-methods/methods-table/
+     methods-notes)で表現できる部分はそちらを再利用し、ここで足すのは
+     「引用文字列をコピーしやすい箱として見せる」ための最小限のスタイルだけ。 */
+  .cite-page-wrap p {
+    max-width: 760px;
+    margin: 0 0 1rem;
+    font-size: 0.94rem;
+    line-height: 1.9;
+    color: var(--desc);
+  }
+
+  .cite-page-wrap p:last-child { margin-bottom: 0; }
+
+  .cite-page-wrap a { color: var(--navy); text-decoration: underline; }
+  .cite-page-wrap a:hover { opacity: 0.7; }
+
+  .cite-code {
+    display: block;
+    background: var(--line-soft);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--ink);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .cite-example-note {
+    margin: 0.5rem 0 0 !important;
+    font-size: 0.78rem !important;
+    color: var(--muted) !important;
+  }
+
+  .cite-license-list {
+    max-width: 760px;
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+
+  .cite-license-list li {
+    font-size: 0.94rem;
+    line-height: 1.9;
+    color: var(--desc);
+    margin-bottom: 0.5rem;
+  }
+
+  .cite-license-list li:last-child { margin-bottom: 0; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="ズレ計 トップへ">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <a id="lang-ja" class="lang-btn mono active" href="/cite">JA</a>
+        <a id="lang-en" class="lang-btn mono" href="/en/cite">EN</a>
+      </div>
+    </div>
+  </header>
+
+  <a class="chart-back" id="t-back" href="index.html">← 指標一覧</a>
+
+  <main class="about-body cite-page-wrap">
+    <h1 class="about-title" id="cite-title">引用のしかた</h1>
+
+    <p class="about-lead" id="cite-lead">
+      このサイトのデータと本文は、出典を示せば自由に使えます（CC BY 4.0）。事前の連絡や許諾は要りません。
+    </p>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-primary">まず一次資料を</h2>
+      <p id="primary-p1">このサイトの数値は、すべて政府の公表資料からの転記です。各ページの表には、行ごとに出典のURLとページ番号が入っています。数値そのものを引くときは、できるだけ一次資料を当たってください。転記には誤りが混じりえます（見つかったものは消さずに<a href="/corrections">訂正履歴</a>に記録しています）。</p>
+      <p id="primary-p2">ズレ計を引くのが適しているのは、数値そのものよりも、見通しと実績の対応づけ・並べ方・その期間の記録のほうです。</p>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-format">引用の書き方</h2>
+      <p id="format-intro">3つの粒度を、そのままコピーして使える形で示します。</p>
+
+      <dl class="methods-notes">
+        <dt id="example-site-label">サイト全体</dt>
+        <dd><code class="mono cite-code" id="example-site">ズレ計『政府経済見通しと実績のズレ』https://zurekei.org（参照 YYYY-MM-DD）</code></dd>
+
+        <dt id="example-page-label">個別のページ</dt>
+        <dd><code class="mono cite-code" id="example-page">ズレ計「一般会計税収」https://zurekei.org/chart/tax-revenue（参照 YYYY-MM-DD）</code></dd>
+
+        <dt id="example-data-label">データを直接</dt>
+        <dd><code class="mono cite-code" id="example-data">ズレ計 tax_revenue_forecast.csv https://zurekei.org/data/tax_revenue_forecast.csv（参照 YYYY-MM-DD）</code></dd>
+      </dl>
+      <p class="cite-example-note" id="example-note">YYYY-MM-DDの部分は、実際にご覧になった日付（例: 2026-07-31）に置き換えてください。</p>
+
+      <p id="date-note">参照日は必ず書いてください。このサイトは政府の公表に合わせて年に数回更新され、確報が出れば過去の行も書き換わります。参照日が無いと、見た数値がどの確定段階のものか後から特定できません。</p>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-data">データの直リンク</h2>
+      <p id="data-intro">data/ 以下で公開しているCSVファイルへの直リンクです。列の意味は<a href="/data/README.md" target="_blank" rel="noopener">data/README.md</a>を参照してください。</p>
+
+      <div class="methods-table-wrap">
+        <table class="methods-table">
+          <thead>
+            <tr>
+              <th id="th-file">ファイル</th>
+              <th id="th-content">内容</th>
+              <th id="th-page">対応ページ</th>
+            </tr>
+          </thead>
+          <tbody id="cite-data-tbody">
+            <tr><th><a href="/data/gdp_forecast.csv">gdp_forecast.csv</a></th><td>実質GDP成長率・名目GDP成長率の見通しと実績</td><td><a href="/chart/gdp-real">/chart/gdp-real</a>・<a href="/chart/gdp-nominal">/chart/gdp-nominal</a></td></tr>
+            <tr><th><a href="/data/gdp_vintages.csv">gdp_vintages.csv</a></th><td>実質GDP・名目GDPの基準改定ヴィンテージ（背景の改定幅表示に使用）</td><td><a href="/chart/gdp-real">/chart/gdp-real</a>・<a href="/chart/gdp-nominal">/chart/gdp-nominal</a></td></tr>
+            <tr><th><a href="/data/cpi_forecast.csv">cpi_forecast.csv</a></th><td>消費者物価指数の見通しと実績</td><td><a href="/chart/cpi">/chart/cpi</a></td></tr>
+            <tr><th><a href="/data/unemployment_forecast.csv">unemployment_forecast.csv</a></th><td>完全失業率の見通しと実績</td><td><a href="/chart/unemployment">/chart/unemployment</a></td></tr>
+            <tr><th><a href="/data/current_account_forecast.csv">current_account_forecast.csv</a></th><td>経常収支の見通しと実績</td><td><a href="/chart/current-account">/chart/current-account</a></td></tr>
+            <tr><th><a href="/data/tax_revenue_forecast.csv">tax_revenue_forecast.csv</a></th><td>一般会計税収の見通しと実績</td><td><a href="/chart/tax-revenue">/chart/tax-revenue</a></td></tr>
+            <tr><th><a href="/data/bond_issuance_forecast.csv">bond_issuance_forecast.csv</a></th><td>国債発行額（一般会計）の見通しと実績</td><td><a href="/chart/bond-issuance">/chart/bond-issuance</a></td></tr>
+            <tr><th><a href="/data/jgb_total_issuance_forecast.csv">jgb_total_issuance_forecast.csv</a></th><td>国債発行総額の見通しと実績</td><td><a href="/chart/jgb-total">/chart/jgb-total</a></td></tr>
+            <tr><th><a href="/data/fertility_forecast.csv">fertility_forecast.csv</a></th><td>合計特殊出生率の歴代推計（仮定）</td><td><a href="/fertility">/fertility</a></td></tr>
+            <tr><th><a href="/data/fertility_actual.csv">fertility_actual.csv</a></th><td>合計特殊出生率の実績</td><td><a href="/fertility">/fertility</a></td></tr>
+            <tr><th><a href="/data/hoan_review.csv">hoan_review.csv</a></th><td>法律の見直し条項の検討状況</td><td><a href="/hoan">/hoan</a></td></tr>
+            <tr><th><a href="/data/corrections.csv">corrections.csv</a></th><td>訂正履歴</td><td><a href="/corrections">/corrections</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-license">ライセンスの内訳</h2>
+      <p id="license-intro">このサイトのライセンスの内訳は次のとおりです。詳細は<a href="/about">このサイトについて</a>のライセンス節、<a href="https://zurekei.org/LICENSE" target="_blank" rel="noopener">LICENSE</a>・<a href="https://zurekei.org/LICENSE-DATA" target="_blank" rel="noopener">LICENSE-DATA</a>・<a href="https://zurekei.org/NOTICE" target="_blank" rel="noopener">NOTICE</a>を参照してください。</p>
+      <ul class="cite-license-list" id="cite-license-list"><li>サイトが作った部分（指標の選定と並べ方、注記、見直し条項の検討状況の分類、出典URLの対応づけ、本文など）: <a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a></li><li>個々の数値: 事実であり著作権の対象ではないため、CC BYの対象に含めていません</li><li><a href="/hoan">見直し条項</a>ページの条文原文: 著作権法13条により著作権の対象外です</li><li>コード: <a href="https://zurekei.org/LICENSE" target="_blank" rel="noopener">MIT</a></li><li>引用元の一次資料（政府刊行物・PDF等）の権利: 各公表元にあります</li><li>表示は「ズレ計 (https://zurekei.org)」のように</li></ul>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-urls">URLは壊しません</h2>
+      <p id="urls-p1">正規のURLは拡張子なしの形です（例: /chart/tax-revenue）。</p>
+      <p id="urls-p2">/chart?m=... の旧形式はJavaScriptで転送されますが、引用にはこちらではなく正規のURLを使ってください。転送はJavaScriptによるものなので、JavaScriptを実行しないクローラやSNSのプレビューはたどれず、指標一覧ページに着いてしまいます。</p>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-errors">誤りを見つけたら</h2>
+      <p id="errors-p1">データや本文の誤りに気づいたら<a href="/contact">お問い合わせフォーム</a>からご連絡ください。訂正は値を消さずに<a href="/corrections">訂正履歴</a>に記録します。</p>
+    </section>
+  </main>
+
+  <footer class="site-footer-row">
+    <a class="footer-about" id="t-footer-index" href="index.html">指標一覧へ</a>
+    <a class="footer-about" id="t-footer-corrections" href="corrections.html">訂正履歴</a>
+    <a class="footer-about" id="t-footer-about" href="about.html">このサイトについて</a>
+  </footer>
+</div>
+
+<script src="cite.js?v=20260731m"></script>
+</body>
+</html>

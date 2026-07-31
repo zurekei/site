@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How to cite — zurekei</title>
+<meta name="description" content="How to cite zurekei's data and text, the license breakdown, and direct links to the data files.">
+<link rel="canonical" href="https://zurekei.org/en/cite">
+<link rel="alternate" hreflang="ja" href="https://zurekei.org/cite">
+<link rel="alternate" hreflang="en" href="https://zurekei.org/en/cite">
+<link rel="alternate" hreflang="x-default" href="https://zurekei.org/cite">
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="How to cite — zurekei">
+<meta property="og:description" content="How to cite zurekei's data and text, the license breakdown, and direct links to the data files.">
+<meta property="og:url" content="https://zurekei.org/en/cite">
+<meta property="og:image" content="https://zurekei.org/assets/og-en.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=20260731m">
+<style>
+  /* このページだけの装飾。contact.html と同じく、1ページしか使わないCSSを
+     style.css に足して全ページの読み込みを太らせない方針。既存クラス
+     (about-body/about-title/about-lead/about-methods/methods-table/
+     methods-notes)で表現できる部分はそちらを再利用し、ここで足すのは
+     「引用文字列をコピーしやすい箱として見せる」ための最小限のスタイルだけ。 */
+  .cite-page-wrap p {
+    max-width: 760px;
+    margin: 0 0 1rem;
+    font-size: 0.94rem;
+    line-height: 1.9;
+    color: var(--desc);
+  }
+
+  .cite-page-wrap p:last-child { margin-bottom: 0; }
+
+  .cite-page-wrap a { color: var(--navy); text-decoration: underline; }
+  .cite-page-wrap a:hover { opacity: 0.7; }
+
+  .cite-code {
+    display: block;
+    background: var(--line-soft);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--ink);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .cite-example-note {
+    margin: 0.5rem 0 0 !important;
+    font-size: 0.78rem !important;
+    color: var(--muted) !important;
+  }
+
+  .cite-license-list {
+    max-width: 760px;
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+
+  .cite-license-list li {
+    font-size: 0.94rem;
+    line-height: 1.9;
+    color: var(--desc);
+    margin-bottom: 0.5rem;
+  }
+
+  .cite-license-list li:last-child { margin-bottom: 0; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="site-header">
+    <a class="brand" href="/en/" aria-label="zurekei home">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <a id="lang-ja" class="lang-btn mono" href="/cite">JA</a>
+        <a id="lang-en" class="lang-btn mono active" href="/en/cite">EN</a>
+      </div>
+    </div>
+  </header>
+
+  <a class="chart-back" id="t-back" href="/en/">← Indicators</a>
+
+  <main class="about-body cite-page-wrap">
+    <h1 class="about-title" id="cite-title">How to cite</h1>
+
+    <p class="about-lead" id="cite-lead">
+      The data and text on this site are free to use with attribution (CC BY 4.0). No advance notice or permission is required.
+    </p>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-primary">Check the primary source first</h2>
+      <p id="primary-p1">Every figure on this site is transcribed from a government publication. Each page’s table carries a source URL and page number for every row. When citing a figure itself, please go to the primary source where possible. Transcription errors can happen — any we find are recorded, not deleted, in the <a href="/en/corrections">corrections log</a>.</p>
+      <p id="primary-p2">What zurekei is best cited for isn&#39;t the bare figures so much as the pairing of forecast and actual, how they&#39;re laid out, and the ongoing record over time.</p>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-format">How to cite</h2>
+      <p id="format-intro">Three levels of granularity, each in a form you can copy directly.</p>
+
+      <dl class="methods-notes">
+        <dt id="example-site-label">The site as a whole</dt>
+        <dd><code class="mono cite-code" id="example-site">Zurekei, &quot;The gap between government forecasts and actual outcomes,&quot; https://zurekei.org/en/ (accessed YYYY-MM-DD)</code></dd>
+
+        <dt id="example-page-label">A single page</dt>
+        <dd><code class="mono cite-code" id="example-page">Zurekei, &quot;Tax revenue,&quot; https://zurekei.org/en/chart/tax-revenue (accessed YYYY-MM-DD)</code></dd>
+
+        <dt id="example-data-label">The data directly</dt>
+        <dd><code class="mono cite-code" id="example-data">Zurekei, tax_revenue_forecast.csv, https://zurekei.org/data/tax_revenue_forecast.csv (accessed YYYY-MM-DD)</code></dd>
+      </dl>
+      <p class="cite-example-note" id="example-note">Replace YYYY-MM-DD above with the date you actually viewed the page (e.g. 2026-07-31).</p>
+
+      <p id="date-note">Please always include the access date. This site is updated a few times a year to match government releases, and once a final figure is published, past rows get rewritten. Without an access date, there&#39;s no way to later tell which finalization stage the figure you saw belonged to.</p>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-data">Data files, linked directly</h2>
+      <p id="data-intro">Direct links to the CSV files published under data/. See <a href="https://zurekei.org/data/README.md" target="_blank" rel="noopener">data/README.md</a> for what each column means.</p>
+
+      <div class="methods-table-wrap">
+        <table class="methods-table">
+          <thead>
+            <tr>
+              <th id="th-file">File</th>
+              <th id="th-content">Contents</th>
+              <th id="th-page">Page</th>
+            </tr>
+          </thead>
+          <tbody id="cite-data-tbody"><tr><th><a href="/data/gdp_forecast.csv">gdp_forecast.csv</a></th><td>Real and nominal GDP growth — forecast and actual</td><td><a href="/en/chart/gdp-real">/en/chart/gdp-real</a>, <a href="/en/chart/gdp-nominal">/en/chart/gdp-nominal</a></td></tr><tr><th><a href="/data/gdp_vintages.csv">gdp_vintages.csv</a></th><td>Real/nominal GDP revision vintages by base year (used for the revision-range band)</td><td><a href="/en/chart/gdp-real">/en/chart/gdp-real</a>, <a href="/en/chart/gdp-nominal">/en/chart/gdp-nominal</a></td></tr><tr><th><a href="/data/cpi_forecast.csv">cpi_forecast.csv</a></th><td>Consumer price index — forecast and actual</td><td><a href="/en/chart/cpi">/en/chart/cpi</a></td></tr><tr><th><a href="/data/unemployment_forecast.csv">unemployment_forecast.csv</a></th><td>Unemployment rate — forecast and actual</td><td><a href="/en/chart/unemployment">/en/chart/unemployment</a></td></tr><tr><th><a href="/data/current_account_forecast.csv">current_account_forecast.csv</a></th><td>Current account — forecast and actual</td><td><a href="/en/chart/current-account">/en/chart/current-account</a></td></tr><tr><th><a href="/data/tax_revenue_forecast.csv">tax_revenue_forecast.csv</a></th><td>Tax revenue (general account) — forecast and actual</td><td><a href="/en/chart/tax-revenue">/en/chart/tax-revenue</a></td></tr><tr><th><a href="/data/bond_issuance_forecast.csv">bond_issuance_forecast.csv</a></th><td>Government bond issuance — forecast and actual</td><td><a href="/en/chart/bond-issuance">/en/chart/bond-issuance</a></td></tr><tr><th><a href="/data/jgb_total_issuance_forecast.csv">jgb_total_issuance_forecast.csv</a></th><td>Total JGB issuance — forecast and actual</td><td><a href="/en/chart/jgb-total">/en/chart/jgb-total</a></td></tr><tr><th><a href="/data/fertility_forecast.csv">fertility_forecast.csv</a></th><td>Total fertility rate — successive projection assumptions</td><td><a href="/en/fertility">/en/fertility</a></td></tr><tr><th><a href="/data/fertility_actual.csv">fertility_actual.csv</a></th><td>Total fertility rate — actual</td><td><a href="/en/fertility">/en/fertility</a></td></tr><tr><th><a href="/data/hoan_review.csv">hoan_review.csv</a></th><td>Statutory review clauses — status</td><td><a href="/en/hoan">/en/hoan</a></td></tr><tr><th><a href="/data/corrections.csv">corrections.csv</a></th><td>Corrections log</td><td><a href="/en/corrections">/en/corrections</a></td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-license">License, broken down</h2>
+      <p id="license-intro">Here is the licensing breakdown for this site. For more detail, see the license section on <a href="/en/about">About this site</a>, or <a href="https://zurekei.org/LICENSE" target="_blank" rel="noopener">LICENSE</a>, <a href="https://zurekei.org/LICENSE-DATA" target="_blank" rel="noopener">LICENSE-DATA</a>, and <a href="https://zurekei.org/NOTICE" target="_blank" rel="noopener">NOTICE</a>.</p>
+      <ul class="cite-license-list" id="cite-license-list"><li>The part this site made (such as which indicators were picked and how they’re laid out, the annotations and the classification of each review clause’s status, the mapping from each figure to its source URL, the prose): <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></li><li>The individual figures: facts, not subject to copyright, so not covered by CC BY here</li><li>The statutory text on the <a href="/en/hoan">review clauses</a> page: not copyrightable to begin with, under Article 13 of Japan’s Copyright Act</li><li>The code: <a href="https://zurekei.org/LICENSE" target="_blank" rel="noopener">MIT</a></li><li>Rights to the primary sources cited (government publications, PDFs, etc.): belong to whoever published them</li><li>An example attribution: “zurekei (https://zurekei.org)”</li></ul>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-urls">URLs don&#39;t break</h2>
+      <p id="urls-p1">The canonical URL is the extension-less form (e.g. /en/chart/tax-revenue).</p>
+      <p id="urls-p2">The old /chart?m=... form still redirects via JavaScript, but please cite the canonical URL instead. Because the redirect runs in JavaScript, crawlers and social-media link previews that don&#39;t execute it land on the indicator list page instead.</p>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-errors">Found an error?</h2>
+      <p id="errors-p1">If you spot an error in the data or the text, please get in touch via the <a href="/en/contact">contact form</a>. Corrections are recorded, not deleted, in the <a href="/en/corrections">corrections log</a>.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer-row">
+    <a class="footer-about" id="t-footer-index" href="/en/">Indicators</a>
+    <a class="footer-about" id="t-footer-corrections" href="/en/corrections">Corrections</a>
+    <a class="footer-about" id="t-footer-about" href="/en/about">About this site</a>
+  </footer>
+</div>
+
+<script src="/cite.js?v=20260731m"></script>
+</body>
+</html>

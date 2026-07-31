@@ -95,6 +95,7 @@ const REL = {
   about: { ja: "/about", en: "/en/about" },
   corrections: { ja: "/corrections", en: "/en/corrections" },
   contact: { ja: "/contact", en: "/en/contact" },
+  cite: { ja: "/cite", en: "/en/cite" },
 };
 const chartRel = (key) => ({ ja: `/chart/${key}`, en: `/en/chart/${key}` });
 const abs = (rel) => `${SITE}${rel}`;
@@ -109,7 +110,7 @@ function hreflangTags(pair) {
 }
 
 // style.css / chart.js のキャッシュバスター。ページ側の ?v= と揃える。
-const ASSET_V = "20260731l";
+const ASSET_V = "20260731m";
 
 const read = (f) => fs.readFileSync(path.join(SITE_DIR, f), "utf8");
 
@@ -189,6 +190,9 @@ HOME.INDICATOR_META.forEach((m) => HOME.metaUnit(m, "en"));
 const ABOUT = loadModule("about.js", ["T", "METHODS_ROWS", "renderMethodsRows"]);
 const CONTACT = loadModule("contact.js", ["T"]);
 const CORR = loadModule("corrections.js", ["T", "renderEntry"]);
+// 「引用のしかた」ページ。renderDataRows は about.js の renderMethodsRows と同じ
+// 理由(データ直リンク表の行を写しにしない)で本物を取り込む。
+const CITE = loadModule("cite.js", ["T", "renderDataRows", "DATA_FILES"]);
 
 /* ── データ ───────────────────────────────────────────────── */
 
@@ -573,7 +577,7 @@ ${archive}
       <details class="data-details">
         <summary id="t-table-toggle">${escapeHTML(t.tableToggle(rows.length))}</summary>
 ${buildTable(metric, rows, lang)}
-        <p class="chart-note mono"><span id="t-table-csv">${escapeHTML(t.tableCsvLabel)}</span><a href="${metric.csv}">${escapeHTML(metric.csv)}</a></p>
+        <p class="chart-note mono"><span id="t-table-csv">${escapeHTML(t.tableCsvLabel)}</span><a href="${metric.csv}">${escapeHTML(metric.csv)}</a> · <a id="t-cite-link" href="${REL.cite[lang]}">${escapeHTML(t.citeLinkText)}</a></p>
       </details>
     </section>
   </main>
@@ -926,6 +930,14 @@ function fertilitySection(d, lang = "ja") {
     lang === "ja"
       ? `<span${dual(FERT.T.en.tableCsvLabel)}>${escapeHTML(FERT.T.ja.tableCsvLabel)}</span>`
       : `<span>${escapeHTML(FERT.T.en.tableCsvLabel)}</span>`;
+  // 「引用のしかた」への導線。文言は chart.js の T(citeLinkText)をそのまま使う
+  // (写しを作らない。この T は build.mjs 冒頭で `const { T } = R` として既に
+  // chart.js から取り込み済み)。chart/*.html の同じ導線(buildPage)と1箇所に
+  // 揃えている。
+  const citeLink =
+    lang === "ja"
+      ? `<a href="${REL.cite.ja}"${dual(T.en.citeLinkText)}>${escapeHTML(T.ja.citeLinkText)}</a>`
+      : `<a href="${REL.cite.en}">${escapeHTML(T.en.citeLinkText)}</a>`;
 
   return `
   <section class="data-section">
@@ -940,7 +952,7 @@ ${gaps}
 ${fertilityTable(d, lang)}
 
       ${roundNote}
-      <p class="chart-note mono">${csvLabel}<a href="/data/fertility_forecast.csv">/data/fertility_forecast.csv</a> · <a href="/data/fertility_actual.csv">/data/fertility_actual.csv</a></p>
+      <p class="chart-note mono">${csvLabel}<a href="/data/fertility_forecast.csv">/data/fertility_forecast.csv</a> · <a href="/data/fertility_actual.csv">/data/fertility_actual.csv</a> · ${citeLink}</p>
     </details>
   </section>
   `;
@@ -1305,6 +1317,20 @@ ${rows.map((r) => hoanRowHtml(r, "en")).join("\n")}
 function buildHomeJsonLd(desc, keys, lang = "ja") {
   const fertUrl = abs(REL.fertility[lang]);
   const hoanUrl = abs(REL.hoan[lang]);
+  // 各 Dataset は description/creator を省略しない。@id が個別ページ側
+  // (chart/*.html・fertility.html・hoan.html)の Dataset と同一なので、JSON-LDの
+  // 仕様上は同一ノードとして統合されてよく、かつては省略形(name/url/license
+  // のみ)で済ませていた。しかしGoogleのリッチリザルト検証は文書単位でしか
+  // 読まず、@idをまたいで別ページの定義を合成しない。そのため、このページ
+  // 単体では「description・creatorの無いDataset」に見え、2026-07-31の
+  // Search Console URL検査で実際に「10件の無効なアイテム」(descriptionは
+  // 重大なエラー、creatorは任意)として検出された。1ページで完結する必要が
+  // あるため、ここでも各指標ページと同じ description を(METRICS/FERT.T/HOAN.T
+  // という本物の出所から、写しを作らず)フルで持たせる。creator は個別ページ
+  // 側と違い orgNode() をベタ書きしない: このページの @graph には既に
+  // Organization ノード(ORG_ID)自身が載っており、同一文書内の @id 参照は
+  // JSON-LDとして正しい。すぐ下の DataCatalog.publisher も同じ参照形なので、
+  // それに揃える(省略形に戻さないこと)。
   const catalogDatasets = [
     ...keys.map((k) => {
       const m = METRICS[k];
@@ -1313,12 +1339,30 @@ function buildHomeJsonLd(desc, keys, lang = "ja") {
         "@type": "Dataset",
         "@id": `${url}#dataset`,
         name: metricDatasetName(m, lang),
+        description: lang === "en" ? m.descEn : m.desc,
         url,
         license: CC_BY_4,
+        creator: { "@id": ORG_ID },
       };
     }),
-    { "@type": "Dataset", "@id": `${fertUrl}#dataset`, name: FERTILITY_DATASET.name[lang], url: fertUrl, license: CC_BY_4 },
-    { "@type": "Dataset", "@id": `${hoanUrl}#dataset`, name: HOAN_DATASET.name[lang], url: hoanUrl, license: CC_BY_4 },
+    {
+      "@type": "Dataset",
+      "@id": `${fertUrl}#dataset`,
+      name: FERTILITY_DATASET.name[lang],
+      description: FERT.T[lang].desc,
+      url: fertUrl,
+      license: CC_BY_4,
+      creator: { "@id": ORG_ID },
+    },
+    {
+      "@type": "Dataset",
+      "@id": `${hoanUrl}#dataset`,
+      name: HOAN_DATASET.name[lang],
+      description: HOAN.T[lang].desc,
+      url: hoanUrl,
+      license: CC_BY_4,
+      creator: { "@id": ORG_ID },
+    },
   ];
   const catalogName = lang === "en" ? "Indicators" : "指標一覧";
   // @id 用(末尾スラッシュを含む形。/#website のような結合に使う)と、
@@ -1869,6 +1913,10 @@ ${header("en", urls)}
 // バイト単位で複製する(発明ではなく転記。文言はここには一切無い)。
 const CONTACT_STYLE = read("contact.html").match(/<style>[\s\S]*?<\/style>/)[0];
 
+// cite.html の <style> も同じ理由(言語に依存しないページ固有CSSの転記)で
+// JA版からバイト単位で複製する。
+const CITE_STYLE = read("cite.html").match(/<style>[\s\S]*?<\/style>/)[0];
+
 function buildContactEn() {
   const t = CONTACT.T.en;
   const urls = REL.contact;
@@ -1952,6 +2000,123 @@ ${header("en", urls)}
 </div>
 
 <script src="/contact.js?v=${ASSET_V}"></script>
+</body>
+</html>
+`;
+}
+
+// /en/cite.html は about/corrections/contact と同じく、JA版(cite.html、
+// build.mjsが触らない純粋な手書きファイル)に対応する元ファイルが無いので
+// 丸ごと組み立てる。中身(セクション見出し・本文・データ直リンク表)は
+// CITE.T.en / CITE.renderDataRows("en") をそのまま使う(表とページで文言が
+// 食い違う事故を起こさないため、他の生成関数と同じ理由)。
+function buildCiteEn() {
+  const t = CITE.T.en;
+  const urls = REL.cite;
+  const url = abs(urls.en);
+  const title = `${t.title} — zurekei`;
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHTML(title)}</title>
+<meta name="description" content="How to cite zurekei's data and text, the license breakdown, and direct links to the data files.">
+<link rel="canonical" href="${url}">
+${hreflangTags(urls)}
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${escapeHTML(title)}">
+<meta property="og:description" content="How to cite zurekei's data and text, the license breakdown, and direct links to the data files.">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE}/assets/og-en.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+${CITE_STYLE}
+</head>
+<body>
+<div class="page">
+${header("en", urls)}
+
+  <a class="chart-back" id="t-back" href="${REL.home.en}">${escapeHTML(t.back)}</a>
+
+  <main class="about-body cite-page-wrap">
+    <h1 class="about-title" id="cite-title">${escapeHTML(t.title)}</h1>
+
+    <p class="about-lead" id="cite-lead">
+      ${escapeHTML(t.lead)}
+    </p>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-primary">${escapeHTML(t.h2Primary)}</h2>
+      <p id="primary-p1">${t.primaryP1}</p>
+      <p id="primary-p2">${escapeHTML(t.primaryP2)}</p>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-format">${escapeHTML(t.h2Format)}</h2>
+      <p id="format-intro">${escapeHTML(t.formatIntro)}</p>
+
+      <dl class="methods-notes">
+        <dt id="example-site-label">${escapeHTML(t.exampleSiteLabel)}</dt>
+        <dd><code class="mono cite-code" id="example-site">${escapeHTML(t.exampleSite)}</code></dd>
+
+        <dt id="example-page-label">${escapeHTML(t.examplePageLabel)}</dt>
+        <dd><code class="mono cite-code" id="example-page">${escapeHTML(t.examplePage)}</code></dd>
+
+        <dt id="example-data-label">${escapeHTML(t.exampleDataLabel)}</dt>
+        <dd><code class="mono cite-code" id="example-data">${escapeHTML(t.exampleData)}</code></dd>
+      </dl>
+      <p class="cite-example-note" id="example-note">${escapeHTML(t.exampleNote)}</p>
+
+      <p id="date-note">${escapeHTML(t.dateNote)}</p>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-data">${escapeHTML(t.h2Data)}</h2>
+      <p id="data-intro">${t.dataIntro}</p>
+
+      <div class="methods-table-wrap">
+        <table class="methods-table">
+          <thead>
+            <tr>
+              <th id="th-file">${escapeHTML(t.thFile)}</th>
+              <th id="th-content">${escapeHTML(t.thContent)}</th>
+              <th id="th-page">${escapeHTML(t.thPage)}</th>
+            </tr>
+          </thead>
+          <tbody id="cite-data-tbody">${CITE.renderDataRows("en")}</tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-license">${escapeHTML(t.h2License)}</h2>
+      <p id="license-intro">${t.licenseIntro}</p>
+      <ul class="cite-license-list" id="cite-license-list">${t.licenseList}</ul>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-urls">${escapeHTML(t.h2Urls)}</h2>
+      <p id="urls-p1">${escapeHTML(t.urlsP1)}</p>
+      <p id="urls-p2">${escapeHTML(t.urlsP2)}</p>
+    </section>
+
+    <section class="about-methods">
+      <h2 class="about-methods-title" id="h2-errors">${escapeHTML(t.h2Errors)}</h2>
+      <p id="errors-p1">${t.errorsP1}</p>
+    </section>
+  </main>
+
+  <footer class="site-footer-row">
+    <a class="footer-about" id="t-footer-index" href="${REL.home.en}">${escapeHTML(t.footerIndex)}</a>
+    <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
+    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
+  </footer>
+</div>
+
+<script src="/cite.js?v=${ASSET_V}"></script>
 </body>
 </html>
 `;
@@ -2190,6 +2355,11 @@ function sitemapEntries(keys, files) {
       // 動かないので、入力方式のままなら過少申告にもなり得た。2026-07-30レビュー指摘)。
       { loc: `${SITE}/corrections`, priority: "0.5", date: genDate(path.join(SITE_DIR, "corrections.html")) },
       { loc: `${SITE}/contact`, priority: "0.3", date: lastmod(["contact.html", "contact.js"]) },
+      // cite.html(JA)は about.html/contact.html と同じくビルダーが触らない
+      // 純粋な手書きファイルなので、この2ページと同じ lastmod()(入力ファイル群の
+      // コミット日の最大値)を使う。優先度は contact と同じ 0.3(データページ
+      // 本体ではなく利用者向けの補助ページという位置づけ)。
+      { loc: `${SITE}/cite`, priority: "0.3", date: lastmod(["cite.html", "cite.js"]) },
       // en/about.html・en/corrections.html・en/contact.html は
       // buildAboutEn/buildCorrectionsEn/buildContactEn が丸ごと生成する出力
       // そのもの(chart/fertility/hoan/homeと同じ生成物)なので、他の生成ページと
@@ -2202,6 +2372,9 @@ function sitemapEntries(keys, files) {
       { loc: `${SITE}/en/about`, priority: "0.7", date: genDate(path.join(EN_DIR, "about.html")) },
       { loc: `${SITE}/en/corrections`, priority: "0.5", date: genDate(path.join(EN_DIR, "corrections.html")) },
       { loc: `${SITE}/en/contact`, priority: "0.3", date: genDate(path.join(EN_DIR, "contact.html")) },
+      // en/cite.html は buildCiteEn() が丸ごと生成する出力そのものなので、他の
+      // 生成ページと同じ genDate() を使う(en/about.html等と同じ理由)。
+      { loc: `${SITE}/en/cite`, priority: "0.3", date: genDate(path.join(EN_DIR, "cite.html")) },
     ],
   };
 }
@@ -2399,6 +2572,13 @@ function idCoverageErrors() {
         { label: "en/corrections.html", html: files.get(path.join(EN_DIR, "corrections.html")) },
       ],
     },
+    {
+      js: "cite.js",
+      htmls: [
+        { label: "cite.html", html: read("cite.html") },
+        { label: "en/cite.html", html: files.get(path.join(EN_DIR, "cite.html")) },
+      ],
+    },
   ];
 
   for (const { js, htmls } of targets) {
@@ -2511,6 +2691,17 @@ function handwrittenJaDriftErrors() {
     },
     { file: "corrections.html", js: "corrections.js", T: CORR.T.ja, html: read("corrections.html"), extra: [] },
     { file: "contact.html", js: "contact.js", T: CONTACT.T.ja, html: read("contact.html"), extra: [] },
+    {
+      file: "cite.html",
+      js: "cite.js",
+      T: CITE.T.ja,
+      html: read("cite.html"),
+      // #cite-data-tbody は about.html の #methods-tbody と同じ理由(cite.jsの
+      // renderDataRows()が組み立てる<tr><td>…はt.<key>の単純代入の形にならない)
+      // でここに特例として持つ。写しを作らずCITE.renderDataRows(loadModule経由の
+      // 本物)をそのまま呼ぶ。
+      extra: [{ id: "cite-data-tbody", prop: "innerHTML", raw: CITE.renderDataRows("ja"), markup: true }],
+    },
   ];
 
   // タグとタグの間だけにある空白(手書きHTML側の改行・インデント)を畳む。
@@ -3302,6 +3493,45 @@ function csvSchemaErrors() {
   return errs;
 }
 
+/* ── /cite の「データの直リンク」表とCSV_COLUMNSの同期(2026-07-31) ──────
+ * cite.js の DATA_FILES(利用者に見せる「公開データはこれで全部」という
+ * 一覧)は、これまで CSV_COLUMNS(このファイルの data/*.csv 網羅表、既に
+ * --check で「宣言もれ / 宣言だけあって実ファイルが無い」を見ている)と
+ * 一切突き合わせていなかった。data/ にCSVを1本足して CSV_COLUMNS にも
+ * 宣言すれば --check は緑のまま通るのに、DATA_FILES に足し忘れると
+ * /cite の表だけが黙って古いまま残る(利用者に「これが公開データの全部
+ * です」と見せている表が実態とズレる)。CSV_COLUMNS を新設したときに
+ * ちょうど塞いだはずの「足して宣言し忘れる穴」が、1層上(利用者向けの
+ * 一覧)で再発している形なので、ここで塞ぐ。
+ *
+ * cite.js 側に写しは作らない。DATA_FILES は cite.js が唯一の出所で、
+ * ここでは loadModule() で取り込んだ CITE.DATA_FILES をそのまま見る
+ * (chart.js の METRICS 等、他の一覧をビルド側に複製しないのと同じ方針)。
+ * 差分は両方向を見る: DATA_FILES にあって CSV_COLUMNS に無い(消えた
+ * ファイルの行が表に残っている)側も、CSV_COLUMNS にあって DATA_FILES に
+ * 無い(新しいファイルの行が表に無い)側も、どちらか片方だけでは穴が残る。
+ */
+function citeDataFilesErrors() {
+  const errs = [];
+  const declared = new Set(Object.keys(CSV_COLUMNS));
+  const listed = new Set(CITE.DATA_FILES.map((d) => d.file));
+  for (const f of listed) {
+    if (!declared.has(f)) {
+      errs.push(
+        `cite.js: DATA_FILES に "${f}" があるが CSV_COLUMNS に無い(data/に存在しないファイルの可能性。DATA_FILES から該当行を消すか、CSV_COLUMNSの宣言漏れを直すこと)`
+      );
+    }
+  }
+  for (const f of declared) {
+    if (!listed.has(f)) {
+      errs.push(
+        `cite.js: CSV_COLUMNS[${f}] が data/ にあるのに DATA_FILES に無い(/cite の「データの直リンク」表に行を追加すること)`
+      );
+    }
+  }
+  return errs;
+}
+
 const check = process.argv.includes("--check");
 const keys = Object.keys(METRICS);
 
@@ -3325,6 +3555,7 @@ files.set(path.join(EN_DIR, "index.html"), buildHomeEn(keys));
 files.set(path.join(EN_DIR, "about.html"), buildAboutEn());
 files.set(path.join(EN_DIR, "corrections.html"), buildCorrectionsEn());
 files.set(path.join(EN_DIR, "contact.html"), buildContactEn());
+files.set(path.join(EN_DIR, "cite.html"), buildCiteEn());
 // sitemap.xml の lastmod は他の生成ページの「いま生成した文字列」を直接見る
 // (outputDate()。詳細はそのコメントを参照)ので、今度こそ本当に順序が意味を
 // 持つ: files に他の全ページが積み終わったあとで呼ぶ必要がある(このMapに
@@ -3438,6 +3669,10 @@ if (check) {
   // CSVスキーマ(列の型宣言・宣言の網羅性・行の列数・数値セル)も他のどの検査
   // とも独立(生成物にもOGP画像にも関わらない、data/*.csvそのものの壊れ方)。
   const csvSchemaErrs = csvSchemaErrors();
+  // /cite の DATA_FILES ↔ CSV_COLUMNS の同期も、生成物にもOGP画像にもdata/の
+  // 内容そのものにも関わらない別種の壊れ方なので、csvSchemaErrs とは独立に
+  // 必ず見る。
+  const citeDataFilesErrs = citeDataFilesErrors();
   if (
     stale.length ||
     orphans.length ||
@@ -3448,7 +3683,8 @@ if (check) {
     homeFillsErrs.length ||
     ogErrs.length ||
     ogFileErrs.length ||
-    csvSchemaErrs.length
+    csvSchemaErrs.length ||
+    citeDataFilesErrs.length
   ) {
     if (stale.length) console.error(`✗ 生成物が古い: ${stale.join(", ")}`);
     if (orphans.length) console.error(`✗ 余分なファイル: chart/${orphans.join(", chart/")}`);
@@ -3460,11 +3696,12 @@ if (check) {
     ogErrs.forEach((e) => console.error(`✗ ${e}`));
     ogFileErrs.forEach((e) => console.error(`✗ ${e}`));
     csvSchemaErrs.forEach((e) => console.error(`✗ ${e}`));
+    citeDataFilesErrs.forEach((e) => console.error(`✗ ${e}`));
     if (stale.length || orphans.length || orphansEn.length) console.error("  node bin/build.mjs を実行してからデプロイすること");
     process.exit(1);
   }
   console.log(
-    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル)とも一致）`
+    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応とも一致）`
   );
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -3486,4 +3723,5 @@ if (check) {
   ogStalenessErrors().forEach((e) => console.warn(`⚠ ${e}`));
   ogFileErrors().forEach((e) => console.warn(`⚠ ${e}`));
   csvSchemaErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  citeDataFilesErrors().forEach((e) => console.warn(`⚠ ${e}`));
 }

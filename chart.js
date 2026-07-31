@@ -48,6 +48,12 @@ const T = {
     tableToggle: (n) => `年度ごとの数値を表で見る（${n}年度分）`,
     tableCaptionSuffix: "｜年度ごとの見通し・実績・ズレ",
     tableCsvLabel: "元データ: ",
+    // 元データのリンクの隣に置く「引用のしかた」への導線(2026-07-31)。
+    // build.mjs 側でも同じ文言を使う(fertilitySection())。写しを作らず
+    // build.mjs が `const { T } = R` 経由でこのT自体を読むので、1箇所に
+    // 定義すれば両方に効く。フッターに置かない理由(CLAUDE.mdの判断)は
+    // build.mjs のコメントを参照。
+    citeLinkText: "引用のしかた",
     // グラフの <noscript> 案内文。JSが動く限りこの文言はどこにも表示されず
     // applyI18n() からも参照されないため、これまで辞書に無く build.mjs に
     // 直書きされていた。/en/ ページを機械生成するには英語側の文言も要るため、
@@ -89,6 +95,7 @@ const T = {
     tableToggle: (n) => `Show the figures as a table (${n} fiscal years)`,
     tableCaptionSuffix: " — forecast, actual and gap by fiscal year",
     tableCsvLabel: "Source data: ",
+    citeLinkText: "How to cite",
     chartNoscript: "This chart requires JavaScript to draw. The figures are in the table below.",
   },
 };
@@ -745,6 +752,7 @@ async function main() {
     set("t-th-gap", t.gap);
     set("t-th-source", t.thSource);
     set("t-table-csv", t.tableCsvLabel);
+    set("t-cite-link", t.citeLinkText);
     set("t-table-caption", (lang === "ja" ? metric.title : metric.titleEn) + t.tableCaptionSuffix);
 
     const yearCells = dataTable.querySelectorAll("th[data-year]");
