@@ -110,7 +110,7 @@ function hreflangTags(pair) {
 }
 
 // style.css / chart.js のキャッシュバスター。ページ側の ?v= と揃える。
-const ASSET_V = "20260801a";
+const ASSET_V = "20260801b";
 
 const read = (f) => fs.readFileSync(path.join(SITE_DIR, f), "utf8");
 
@@ -1002,10 +1002,19 @@ ${JSON.stringify(
 `;
 }
 
+// 範囲注記(2026-08-01)。合計特殊出生率(比率)と出生数(人数)を読者が取り違え
+// やすいため、fert-desc の直後に静的な<p>として常設する。原本は
+// fertility.js の T.scopeNote 1箇所(FERT.T[lang].scopeNoteとしてここで
+// そのまま読む。写しは作らない)。
+function fertilityScopeNote(lang) {
+  return escapeHTML(FERT.T[lang].scopeNote);
+}
+
 function buildFertility() {
   const d = fertilityData();
   let html = read("fertility.html");
   html = injectRegion(html, "jsonld", fertilityJsonLd(d, "ja"), "fertility.html");
+  html = injectRegion(html, "scope", fertilityScopeNote("ja"), "fertility.html");
   html = injectRegion(html, "table", fertilitySection(d, "ja"), "fertility.html");
   return html;
 }
@@ -1055,6 +1064,7 @@ ${header("en", urls)}
     <section class="chart-section">
       <h1 class="chart-title" id="fert-title">${escapeHTML(t.title)}</h1>
       <p class="chart-desc" id="fert-desc">${escapeHTML(t.desc)}</p>
+      <p class="chart-note mono" id="fert-scope-note">${fertilityScopeNote("en")}</p>
 
       <div class="chart-wrap">
         <svg id="fertility-chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHTML(t.chartAriaLabel)}"></svg>
@@ -1536,7 +1546,8 @@ function buildHome(keys) {
 // 判断基準は header() 直上のコメントを参照)。
 function buildHomeEn(keys) {
   const t = HOME.T.en;
-  const desc = "An instrument that records the government's economic forecasts and the actual figures side by side, every year, with sources.";
+  const desc =
+    "An instrument that records the government's economic forecasts and the actual figures side by side, every year, with sources. It lets you follow the gap between the government's forecast and what actually happened, indicator by indicator, year by year.";
   const title = "zurekei — the gap between government forecasts and actual outcomes";
   const url = abs(REL.home.en);
 

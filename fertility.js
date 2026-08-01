@@ -10,6 +10,12 @@ const T = {
     back: "← 指標一覧",
     title: "合計特殊出生率 — 歴代推計 vs 実績",
     desc: "国立社会保障・人口問題研究所「日本の将来推計人口」が版ごとに置いた合計特殊出生率の仮定(中位)を重ねたもの。線の色が薄いほど古い推計、濃いほど新しい推計。",
+    // このページが扱う指標の範囲注記(2026-08-01)。合計特殊出生率(比率)と
+    // 出生数(人数)は読者が取り違えやすいため、desc の直後に静的な<p>として
+    // 常設する(bin/build.mjsのfertilityScopeNote()がfertility.html/en/fertility.htmlの
+    // fert-desc直後に焼き込み、ここではJS実行時に同じ文言をfert-scope-noteへ
+    // 冪等に再適用するだけ。原本はこの1箇所)。
+    scopeNote: "このページが並べているのは合計特殊出生率（1人の女性が生涯に産む子どもの数を表す指標）であり、年間の出生数（人数）ではない。出生数の系列はこのサイトではまだ扱っていない。",
     chartAriaLabel: "合計特殊出生率の歴代推計と実績",
     legendActual: "実績",
     vintageSuffix: "年推計",
@@ -38,6 +44,8 @@ const T = {
     back: "← Indicators",
     title: "Total fertility rate — successive projections vs actual",
     desc: "Fertility assumptions (medium variant) from successive editions of NIPSSR's population projections, overlaid. Lighter lines are older projections; darker lines are more recent.",
+    scopeNote:
+      "What this page lays out is the total fertility rate — the average number of children a woman would bear over her lifetime — not the annual number of births. A series for the number of births is not yet covered on this site.",
     chartAriaLabel: "Successive fertility-rate projections and the actual rate",
     legendActual: "Actual",
     vintageSuffix: " projection",
@@ -98,8 +106,8 @@ async function main() {
   let lang = document.documentElement.lang === "en" ? "en" : "ja";
 
   const [forecastRaw, actualRaw] = await Promise.all([
-    loadCSV("data/fertility_forecast.csv"),
-    loadCSV("data/fertility_actual.csv"),
+    loadCSV("/data/fertility_forecast.csv"),
+    loadCSV("/data/fertility_actual.csv"),
   ]);
 
   const forecastRows = forecastRaw
@@ -298,6 +306,7 @@ async function main() {
     document.getElementById("t-back").textContent = t.back;
     document.getElementById("fert-title").textContent = t.title;
     document.getElementById("fert-desc").textContent = t.desc;
+    document.getElementById("fert-scope-note").textContent = t.scopeNote;
     document.getElementById("fertility-chart").setAttribute("aria-label", t.chartAriaLabel);
     document.getElementById("t-footer-src").textContent = t.footerSrc;
     document.getElementById("t-footer-about").textContent = t.footerAbout;

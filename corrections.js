@@ -73,7 +73,7 @@ async function main() {
 
   applyStatic(lang);
 
-  const rows = await loadCSV("data/corrections.csv");
+  const rows = await loadCSV("/data/corrections.csv");
   const list = document.getElementById("corrections-list");
 
   if (rows.length === 0) {

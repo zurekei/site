@@ -50,7 +50,7 @@
     return e;
   }
 
-  const rows = (await loadCSV("data/gdp_forecast.csv"))
+  const rows = (await loadCSV("/data/gdp_forecast.csv"))
     .map((r) => ({
       year: Number(r.fiscal_year),
       f: toNum(r.forecast_nominal),

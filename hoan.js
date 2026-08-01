@@ -195,10 +195,18 @@ async function toggleDetail(id) {
   if (opening && !clauseCache[id]) {
     const pre = document.getElementById(`clause-${id}`);
     try {
-      const res = await fetch(`data/hoan_clauses/${id}.txt`);
-      const text = res.ok ? await res.text() : tr().clauseError;
+      const res = await fetch(`/data/hoan_clauses/${id}.txt`);
+      const raw = res.ok ? await res.text() : null;
+      // res.ok だけでは足りない。**Cloudflare Pages は存在しないパスにもトップページの
+      // HTMLを200で返す**ので、条文txtが1本欠けていると res.ok は真になり、
+      // 「日本語トップのHTML全文が条文として表示され、しかも clauseCache に
+      // 焼き付く」という壊れ方をする。csv.js の loadCSV に足したのと同じ判定を
+      // ここにも置く(同じ欠陥クラスなので片方だけ塞がない)。条文原文が `<` で
+      // 始まることはない。
+      const ok = raw !== null && !/^\s*</.test(raw);
+      const text = ok ? raw : tr().clauseError;
       // 原文(法令の条文)は言語に依存しない一次資料なのでそのままキャッシュする
-      if (res.ok) clauseCache[id] = text;
+      if (ok) clauseCache[id] = text;
       pre.textContent = text;
     } catch (e) {
       pre.textContent = tr().clauseError;
@@ -275,7 +283,7 @@ function applyAll() {
 
 async function main() {
   lang = document.documentElement.lang === "en" ? "en" : "ja";
-  ROWS = await loadCSV("data/hoan_review.csv");
+  ROWS = await loadCSV("/data/hoan_review.csv");
   // lang-ja/lang-en は他ページの URL への実リンク(<a>)。切り替えはブラウザの通常の
   // ナビゲーションに任せるので、クリック自体にJSは要らない(home.js の同じ変更の
   // コメントを参照)。

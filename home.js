@@ -73,7 +73,7 @@ const INDICATOR_META = [
     nameJa: "実質GDP成長率", nameEn: "Real GDP growth",
     descJa: "物価変動を除いた、経済全体の成長率。", descEn: "Overall economic growth, adjusted for price changes.",
     unit: "%", kind: "series",
-    csv: "data/gdp_forecast.csv", forecastCol: "forecast_real", actualCol: "actual_real",
+    csv: "/data/gdp_forecast.csv", forecastCol: "forecast_real", actualCol: "actual_real",
     chartHref: "chart/gdp-real",
   },
   {
@@ -81,7 +81,7 @@ const INDICATOR_META = [
     nameJa: "名目GDP成長率", nameEn: "Nominal GDP growth",
     descJa: "物価変動を含む、金額ベースの成長率。", descEn: "Growth in monetary terms, including price changes.",
     unit: "%", kind: "series",
-    csv: "data/gdp_forecast.csv", forecastCol: "forecast_nominal", actualCol: "actual_nominal",
+    csv: "/data/gdp_forecast.csv", forecastCol: "forecast_nominal", actualCol: "actual_nominal",
     chartHref: "chart/gdp-nominal",
   },
   {
@@ -89,7 +89,7 @@ const INDICATOR_META = [
     nameJa: "消費者物価 (CPI)", nameEn: "Consumer prices (CPI)",
     descJa: "家計が購入する財・サービスの価格変動。", descEn: "Change in prices of the goods and services households buy.",
     unit: "%", kind: "series",
-    csv: "data/cpi_forecast.csv", forecastCol: "forecast_cpi", actualCol: "actual_cpi",
+    csv: "/data/cpi_forecast.csv", forecastCol: "forecast_cpi", actualCol: "actual_cpi",
     chartHref: "chart/cpi",
   },
   {
@@ -97,7 +97,7 @@ const INDICATOR_META = [
     nameJa: "完全失業率", nameEn: "Unemployment rate",
     descJa: "働く意思がありながら職に就けない人の割合。", descEn: "Share of the labor force without a job and actively seeking one.",
     unit: "%", kind: "series", signed: false,
-    csv: "data/unemployment_forecast.csv", forecastCol: "forecast_rate", actualCol: "actual_rate",
+    csv: "/data/unemployment_forecast.csv", forecastCol: "forecast_rate", actualCol: "actual_rate",
     chartHref: "chart/unemployment",
   },
   {
@@ -105,7 +105,7 @@ const INDICATOR_META = [
     nameJa: "経常収支", nameEn: "Current account",
     descJa: "海外との取引で生じる収支の合計。", descEn: "Net balance of transactions with the rest of the world.",
     unit: "兆円", unitEn: "tn yen", kind: "series", signed: false,
-    csv: "data/current_account_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
+    csv: "/data/current_account_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
     chartHref: "chart/current-account",
   },
   {
@@ -113,7 +113,7 @@ const INDICATOR_META = [
     nameJa: "一般会計税収", nameEn: "Tax revenue",
     descJa: "国の一般会計に入る税の総額。", descEn: "Total tax revenue flowing into the general account.",
     unit: "兆円", unitEn: "tn yen", kind: "series", signed: false,
-    csv: "data/tax_revenue_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
+    csv: "/data/tax_revenue_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
     chartHref: "chart/tax-revenue",
   },
   {
@@ -121,7 +121,7 @@ const INDICATOR_META = [
     nameJa: "国債発行額", nameEn: "Government bond issuance",
     descJa: "国の一般会計が発行する新規国債(建設国債+特例国債)の額。", descEn: "New bonds issued by the general account (construction and deficit-financing bonds).",
     unit: "兆円", unitEn: "tn yen", kind: "series", signed: false,
-    csv: "data/bond_issuance_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
+    csv: "/data/bond_issuance_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
     // keep in sync with METRICS["bond-issuance"].statsFromYear in chart.js —
     // FY1947-1964 are 0 planned vs 0 issued and are not counted
     statsFromYear: 1965,
@@ -132,7 +132,7 @@ const INDICATOR_META = [
     nameJa: "国債発行総額", nameEn: "Total JGB issuance",
     descJa: "借換債・財投債等を含む、国債発行の総額。", descEn: "Total JGB issuance, including refunding and FILP bonds.",
     unit: "兆円", unitEn: "tn yen", kind: "series", signed: false,
-    csv: "data/jgb_total_issuance_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
+    csv: "/data/jgb_total_issuance_forecast.csv", forecastCol: "forecast_tn", actualCol: "actual_tn",
     chartHref: "chart/jgb-total",
   },
   {
@@ -271,8 +271,8 @@ function buildFertilitySparkline(actualRows, forecastRows) {
 
 async function loadFertilityCard() {
   const [forecastRaw, actualRaw] = await Promise.all([
-    loadCSV("data/fertility_forecast.csv"),
-    loadCSV("data/fertility_actual.csv"),
+    loadCSV("/data/fertility_forecast.csv"),
+    loadCSV("/data/fertility_actual.csv"),
   ]);
   const forecastRows = forecastRaw
     .map((r) => ({ vintageYear: Number(r.vintage_year), targetYear: Number(r.target_year), mid: toNum(r.assumed_tfr_mid) }))
@@ -287,7 +287,7 @@ async function loadFertilityCard() {
 // === "due", total = row count) so the entry card's count always agrees with
 // the bills page it links to.
 async function loadHoanSummary() {
-  const rows = await loadCSV("data/hoan_review.csv");
+  const rows = await loadCSV("/data/hoan_review.csv");
   const total = rows.length;
   const due = rows.filter((r) => r.review_status === "due").length;
   return { total, due };
