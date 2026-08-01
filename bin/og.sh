@@ -418,6 +418,23 @@ verify_dom() {
     echo "  該当箇所: $(grep -Eo '<[a-z]+[^>]*="[^"]*NaN[^"]*"' "$dom" | head -1 | cut -c1-120)" >&2
     exit 1
   fi
+
+  # ウェブフォントが載らないまま焼けた回を捕まえる(og.html の末尾が立てる印)。
+  # style.css は Google Fonts を @import しており、IBM Plex Sans JP /
+  # IBM Plex Mono はネットワーク越しの取得になる。取得が --virtual-time-budget の
+  # 内に間に合わなかった回はフォールバックの素のサンセリフで焼ける。
+  # 2026-08-01に og-fertility-en.png が実際にそうなった(データ・線は正しく、
+  # ワードマークだけがサンセリフになる)。**PNGの中身は誰も検査していない**ので、
+  # DOM側にこの印を出させて見るのが唯一の機械的な手当てになる。印が立たない
+  # (=false、または main() が投げて then に到達しなかった)場合はここで止める。
+  if ! grep -q 'data-font-ok="1"' "$dom"; then
+    echo "エラー: ウェブフォント(IBM Plex Mono)が載らないまま焼かれています(query=$query)。" >&2
+    echo "  そのまま出すとワードマークだけがフォールバックのサンセリフになったカードが配信されます。" >&2
+    echo "  bin/og.sh をもう一度実行すれば直ることが多い(取得がネットワーク次第のため)。" >&2
+    echo "  毎回落ちる場合は fonts.googleapis.com に到達できるかを確認すること。" >&2
+    exit 1
+  fi
+
   case "$type" in
     metric)
       verify_line "$dom" "line-forecast" "$has_forecast" "$query"

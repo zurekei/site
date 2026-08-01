@@ -22,7 +22,7 @@
      汎用2枚+指標8種×2言語+出生率2言語=計20枚を bin/og.sh で一括して焼き直す
      (2026-07-30、1指標1枚だった旧構成から18枚体制・複数CSVに拡張した後、
      同日中に出生率専用カードを足して20枚体制へ)。 -->
-<link rel="stylesheet" href="style.css?v=20260801b">
+<link rel="stylesheet" href="style.css?v=20260801c">
 <style>
   html, body { background: #888; }
   /* ?shot: ヘッドレスChromeでの書き出し用に余白と背景を消し、フレームを原点に置く */
@@ -133,7 +133,7 @@
     <div class="og-domain">zurekei.org</div>
   </div>
 </div>
-<script src="csv.js?v=20260801b"></script>
+<script src="csv.js?v=20260801c"></script>
 <script>
 if (location.search.includes("shot")) document.body.classList.add("shot");
 
@@ -592,7 +592,47 @@ async function main() {
   ap.setAttribute("stroke-width", 3);
   svg.appendChild(ap);
 }
-main();
+// フォントが載らないまま焼けた回を、PNGを見て気づくのではなくDOMの側で機械的に
+// 捕まえるための印。style.css の1行目が Google Fonts を @import しており、
+// IBM Plex Sans JP / IBM Plex Mono は**ネットワーク越しに取得するウェブフォント**
+// (このリポジトリに @font-face もフォントファイルも無く、システムにも入っていない)。
+// つまり取得が --virtual-time-budget の内に間に合わなかった回は、フォールバックの
+// 素のサンセリフで焼ける。2026-08-01に assets/og-fertility-en.png が実際にそうなり、
+// データと線は正しいのにワードマークだけがサンセリフになった。レビューで
+// og-cpi-en.png と2枚を目視比較して初めて見つかっている。**PNGの中身は誰も
+// 検査していない**(bin/build.mjs の --check は入力のハッシュしか見ない)ので、
+// DOM側にこの印を出させるのが唯一の機械的な手当てになる。
+//
+// **document.fonts.check() は使えない。** 一見これ用のAPIに見えるが、
+// 宣言の無いフォント名を渡すとフォールバックで描けるので true を返す仕様で、
+// false になるのは「宣言済みのウェブフォントがまだ読み込み中」のときだけ。
+// つまり @import 自体が失敗して FontFace が1つも作られなかった場合
+// (= 今回実際に起きた壊れ方)には true を返し、何も検出しない。
+// 2026-08-01に一度この実装で書き、存在しないフォント名に差し替える負のテストで
+// 20枚とも素通りすることを確認して捨てた。
+//
+// 代わりに**実際に描かれた幅を測る**。同じ文字列を "IBM Plex Mono", monospace と
+// monospace だけで描いて幅が変わらなければ、ウェブフォントが当たっていない。
+// document.fonts.ready を待ってから測る(取得の途中で測ると、正常な回でも
+// フォールバックの幅を拾う)。
+//
+// main() が投げた場合はこの then が走らず印も立たないので、そのときも
+// bin/og.sh の verify_dom 側で止まる。
+main().then(async () => {
+  await document.fonts.ready;
+  const probe = (family) => {
+    const s = document.createElement("span");
+    s.textContent = "zurekei0123456789";
+    s.style.cssText =
+      "position:absolute;left:-9999px;top:-9999px;white-space:pre;font-size:64px;font-family:" + family;
+    document.body.appendChild(s);
+    const w = s.getBoundingClientRect().width;
+    s.remove();
+    return w;
+  };
+  const ok = probe('"IBM Plex Mono", monospace') !== probe("monospace");
+  document.documentElement.setAttribute("data-font-ok", ok ? "1" : "0");
+});
 </script>
 </body>
 </html>

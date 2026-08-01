@@ -83,8 +83,8 @@ const METHODS_ROWS = [
     en: ["Real GDP growth / Nominal GDP growth", "Cabinet Office, “Economic Outlook and Basic Stance for Economic and Fiscal Management” (initial, decided by the Cabinet around January each year)", "Cabinet Office, System of National Accounts (SNA), confirmed figures"],
   },
   {
-    ja: ["消費者物価 (CPI)", "内閣府「経済見通しと経済財政運営の基本的態度」", "総務省統計局「消費者物価指数」年度平均、長期時系列データ(e-Stat)"],
-    en: ["Consumer prices (CPI)", "Cabinet Office, “Economic Outlook and Basic Stance for Economic and Fiscal Management”", "Ministry of Internal Affairs and Communications, Statistics Bureau, Consumer Price Index, fiscal-year averages, long-term time series (e-Stat)"],
+    ja: ["消費者物価上昇率 (CPI)", "内閣府「経済見通しと経済財政運営の基本的態度」", "総務省統計局「消費者物価指数」年度平均、長期時系列データ(e-Stat)"],
+    en: ["Consumer price inflation (CPI)", "Cabinet Office, “Economic Outlook and Basic Stance for Economic and Fiscal Management”", "Ministry of Internal Affairs and Communications, Statistics Bureau, Consumer Price Index, fiscal-year averages, long-term time series (e-Stat)"],
   },
   {
     ja: ["完全失業率", "内閣府「経済見通しと経済財政運営の基本的態度」(主要経済指標表)", "総務省統計局「労働力調査」長期時系列表"],

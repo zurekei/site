@@ -22,7 +22,7 @@
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="style.css?v=20260801b">
+<link rel="stylesheet" href="style.css?v=20260801c">
 <!-- BUILD:jsonld --><script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -60,7 +60,7 @@
           "@type": "Dataset",
           "@id": "https://zurekei.org/chart/gdp-real#dataset",
           "name": "実質GDP成長率｜政府の当初見通しと実績",
-          "description": "内閣府「経済見通しと経済財政運営の基本的態度」の当初見通し(実質)と、同じく内閣府「国民経済計算(SNA)」の確定した実績を並べたもの。",
+          "description": "内閣府「経済見通しと経済財政運営の基本的態度」の当初見通し(実質)と、同じく内閣府「国民経済計算(SNA)」の確定した実績を並べたもの。実質経済成長率とも呼ぶ。",
           "url": "https://zurekei.org/chart/gdp-real",
           "license": "https://creativecommons.org/licenses/by/4.0/",
           "creator": {
@@ -71,7 +71,7 @@
           "@type": "Dataset",
           "@id": "https://zurekei.org/chart/gdp-nominal#dataset",
           "name": "名目GDP成長率｜政府の当初見通しと実績",
-          "description": "内閣府「経済見通しと経済財政運営の基本的態度」の当初見通し(名目)と、同じく内閣府「国民経済計算(SNA)」の確定した実績を並べたもの。",
+          "description": "内閣府「経済見通しと経済財政運営の基本的態度」の当初見通し(名目)と、同じく内閣府「国民経済計算(SNA)」の確定した実績を並べたもの。名目経済成長率とも呼ぶ。",
           "url": "https://zurekei.org/chart/gdp-nominal",
           "license": "https://creativecommons.org/licenses/by/4.0/",
           "creator": {
@@ -115,7 +115,7 @@
           "@type": "Dataset",
           "@id": "https://zurekei.org/chart/bond-issuance#dataset",
           "name": "国債発行額(一般会計)｜政府の当初見通しと実績",
-          "description": "財務省の当初予算における公債発行予定額と、決算における実績発行額を並べたもの。復興債・年金特例公債など別枠区分の公債は含まない(原資料の区分に従う)。",
+          "description": "財務省の当初予算における公債発行予定額(いわゆる新規国債発行額)と、決算における実績発行額を並べたもの。復興債・年金特例公債など別枠区分の公債は含まない(原資料の区分に従う)。",
           "url": "https://zurekei.org/chart/bond-issuance",
           "license": "https://creativecommons.org/licenses/by/4.0/",
           "creator": {
@@ -136,8 +136,8 @@
         {
           "@type": "Dataset",
           "@id": "https://zurekei.org/chart/cpi#dataset",
-          "name": "消費者物価指数(総合)｜政府の当初見通しと実績",
-          "description": "内閣府の経済見通しにおける消費者物価(総合)の見込みと、総務省統計局「消費者物価指数」年度平均による確定した実績を並べたもの。",
+          "name": "消費者物価(総合)の上昇率｜政府の当初見通しと実績",
+          "description": "内閣府の経済見通しにおける消費者物価(総合)の上昇率の見込みと、総務省統計局「消費者物価指数」年度平均の前年度比による確定した実績を並べたもの。いわゆる物価上昇率。",
           "url": "https://zurekei.org/chart/cpi",
           "license": "https://creativecommons.org/licenses/by/4.0/",
           "creator": {
@@ -159,7 +159,7 @@
           "@type": "Dataset",
           "@id": "https://zurekei.org/hoan#dataset",
           "name": "法律の見直し条項｜期限と検討状況",
-          "description": "多くの法律は、その附則に「施行後◯年を目途に検討を加える」という見直し条項を置いている。見直しの期限は「施行日＋◯年」で機械的に算出できる。ここでは期限順に並べ、期限が到来した法律を上に置く。数値・条文・出典のみを並べ、評価は書かない。",
+          "description": "多くの法律は、その附則に「施行後◯年を目途に検討を加える」という見直し条項(検討条項とも呼ばれる)を置いている。見直しの期限は「施行日＋◯年」で機械的に算出できる。ここでは期限順に並べ、期限が到来した法律を上に置く。数値・条文・出典のみを並べ、評価は書かない。",
           "url": "https://zurekei.org/hoan",
           "license": "https://creativecommons.org/licenses/by/4.0/",
           "creator": {
@@ -236,7 +236,7 @@
   <div class="card-grid" id="card-grid">
     <a class="card-fallback" href="chart/gdp-real">実質GDP成長率</a>
     <a class="card-fallback" href="chart/gdp-nominal">名目GDP成長率</a>
-    <a class="card-fallback" href="chart/cpi">消費者物価 (CPI)</a>
+    <a class="card-fallback" href="chart/cpi">消費者物価上昇率 (CPI)</a>
     <a class="card-fallback" href="chart/unemployment">完全失業率</a>
     <a class="card-fallback" href="chart/current-account">経常収支</a>
     <a class="card-fallback" href="chart/tax-revenue">一般会計税収</a>
@@ -267,8 +267,8 @@
     <a class="footer-about" id="t-footer-contact" href="contact.html">お問い合わせ</a>
   </footer>
 </div>
-<script src="csv.js?v=20260801b"></script>
-<script src="hero.js?v=20260801b"></script>
-<script src="home.js?v=20260801b"></script>
+<script src="csv.js?v=20260801c"></script>
+<script src="hero.js?v=20260801c"></script>
+<script src="home.js?v=20260801c"></script>
 </body>
 </html>

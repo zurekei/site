@@ -133,8 +133,8 @@ const DATA_FILES = [
   },
   {
     file: "cpi_forecast.csv",
-    ja: "消費者物価指数の見通しと実績",
-    en: "Consumer price index — forecast and actual",
+    ja: "消費者物価(総合)の上昇率の見通しと実績",
+    en: "Consumer price inflation — forecast and actual",
     pages: ["cpi"],
   },
   {

@@ -86,7 +86,7 @@ const INDICATOR_META = [
   },
   {
     key: "cpi",
-    nameJa: "消費者物価 (CPI)", nameEn: "Consumer prices (CPI)",
+    nameJa: "消費者物価上昇率 (CPI)", nameEn: "Consumer price inflation (CPI)",
     descJa: "家計が購入する財・サービスの価格変動。", descEn: "Change in prices of the goods and services households buy.",
     unit: "%", kind: "series",
     csv: "/data/cpi_forecast.csv", forecastCol: "forecast_cpi", actualCol: "actual_cpi",
