@@ -110,7 +110,7 @@ const METRICS = {
   "gdp-real": {
     title: "実質GDP成長率",
     titleEn: "Real GDP growth",
-    desc: "政府の当初見通し(実質)と、確定した実績を並べたもの。",
+    desc: "内閣府「経済見通しと経済財政運営の基本的態度」の当初見通し(実質)と、同じく内閣府「国民経済計算(SNA)」の確定した実績を並べたもの。",
     descEn: "The government's initial forecast (real) laid alongside the confirmed actual.",
     note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。",
     noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases).",
@@ -130,7 +130,7 @@ const METRICS = {
   "gdp-nominal": {
     title: "名目GDP成長率",
     titleEn: "Nominal GDP growth",
-    desc: "政府の当初見通し(名目)と、確定した実績を並べたもの。",
+    desc: "内閣府「経済見通しと経済財政運営の基本的態度」の当初見通し(名目)と、同じく内閣府「国民経済計算(SNA)」の確定した実績を並べたもの。",
     descEn: "The government's initial forecast (nominal) laid alongside the confirmed actual.",
     note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。名目の見通しはFY1988が未収集のため、この年は線が途切れる。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。",
     noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The nominal forecast for FY1988 has not been collected, so the line breaks at that year. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases).",
@@ -150,7 +150,7 @@ const METRICS = {
   "unemployment": {
     title: "完全失業率",
     titleEn: "Unemployment rate",
-    desc: "政府の当初見通しと、確定した実績を並べたもの。",
+    desc: "内閣府の経済見通しにおける完全失業率の見込みと、総務省統計局「労働力調査」年度平均による確定した実績を並べたもの。",
     descEn: "The government's initial forecast laid alongside the confirmed actual.",
     csv: "/data/unemployment_forecast.csv",
     forecastCol: "forecast_rate",
@@ -163,7 +163,7 @@ const METRICS = {
   "current-account": {
     title: "経常収支",
     titleEn: "Current account",
-    desc: "政府の当初見通しと、確定した実績を並べたもの。",
+    desc: "内閣府の経済見通しにおける経常収支の見込みと、財務省「国際収支状況」年度別時系列による確定した実績を並べたもの。",
     descEn: "The government's initial forecast laid alongside the confirmed actual.",
     csv: "/data/current_account_forecast.csv",
     forecastCol: "forecast_tn",
@@ -180,7 +180,7 @@ const METRICS = {
   "tax-revenue": {
     title: "一般会計税収",
     titleEn: "Tax revenue",
-    desc: "財務省の当初予算における税収見積もりと、確定した決算額を並べたもの。",
+    desc: "財務省「一般会計税収の予算額と決算額の推移」の当初予算額と、同資料による決算額(直近年度は確定前の概数)を並べたもの。",
     descEn: "The Ministry of Finance's initial budget estimate for tax revenue, laid alongside the confirmed settlement figure.",
     csv: "/data/tax_revenue_forecast.csv",
     forecastCol: "forecast_tn",
@@ -236,7 +236,7 @@ const METRICS = {
   cpi: {
     title: "消費者物価指数(総合)",
     titleEn: "Consumer prices (CPI)",
-    desc: "政府の当初見通しと、総務省統計局が公表する確定した実績を並べたもの。",
+    desc: "内閣府の経済見通しにおける消費者物価(総合)の見込みと、総務省統計局「消費者物価指数」年度平均による確定した実績を並べたもの。",
     descEn: "The government's initial forecast laid alongside the confirmed actual published by the Ministry of Internal Affairs and Communications' Statistics Bureau.",
     archiveNote: "FY1997以前の消費者物価見通しも内閣府の見通しアーカイブには存在しないため、同じ経済演説から収集した。演説に言及がない年度(FY1989、FY1993〜1997)は未収集のまま空欄にしている。",
     archiveNoteEn: "The consumer price forecast for FY1997 and earlier is likewise absent from the Cabinet Office's archive; it was collected from the same economic addresses. Years the address did not mention (FY1989, FY1993–1997) remain uncollected and blank.",

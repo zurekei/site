@@ -110,7 +110,7 @@ function hreflangTags(pair) {
 }
 
 // style.css / chart.js のキャッシュバスター。ページ側の ?v= と揃える。
-const ASSET_V = "20260731m";
+const ASSET_V = "20260801a";
 
 const read = (f) => fs.readFileSync(path.join(SITE_DIR, f), "utf8");
 
