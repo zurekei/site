@@ -22,7 +22,7 @@
      汎用2枚+指標8種×2言語+出生率2言語=計20枚を bin/og.sh で一括して焼き直す
      (2026-07-30、1指標1枚だった旧構成から18枚体制・複数CSVに拡張した後、
      同日中に出生率専用カードを足して20枚体制へ)。 -->
-<link rel="stylesheet" href="style.css?v=20260801c">
+<link rel="stylesheet" href="style.css?v=20260803a">
 <style>
   html, body { background: #888; }
   /* ?shot: ヘッドレスChromeでの書き出し用に余白と背景を消し、フレームを原点に置く */
@@ -133,7 +133,7 @@
     <div class="og-domain">zurekei.org</div>
   </div>
 </div>
-<script src="csv.js?v=20260801c"></script>
+<script src="csv.js?v=20260803a"></script>
 <script>
 if (location.search.includes("shot")) document.body.classList.add("shot");
 
@@ -593,21 +593,25 @@ async function main() {
   svg.appendChild(ap);
 }
 // フォントが載らないまま焼けた回を、PNGを見て気づくのではなくDOMの側で機械的に
-// 捕まえるための印。style.css の1行目が Google Fonts を @import しており、
-// IBM Plex Sans JP / IBM Plex Mono は**ネットワーク越しに取得するウェブフォント**
-// (このリポジトリに @font-face もフォントファイルも無く、システムにも入っていない)。
-// つまり取得が --virtual-time-budget の内に間に合わなかった回は、フォールバックの
-// 素のサンセリフで焼ける。2026-08-01に assets/og-fertility-en.png が実際にそうなり、
-// データと線は正しいのにワードマークだけがサンセリフになった。レビューで
-// og-cpi-en.png と2枚を目視比較して初めて見つかっている。**PNGの中身は誰も
-// 検査していない**(bin/build.mjs の --check は入力のハッシュしか見ない)ので、
-// DOM側にこの印を出させるのが唯一の機械的な手当てになる。
+// 捕まえるための印。IBM Plex Mono は**ウェブフォント**であり(焼く機械にローカル
+// インストールしないこと。入れるとこの検査は webfont が壊れていても通ってしまう)、
+// 当たらなければフォールバックの素のサンセリフで焼ける。2026-08-01に
+// assets/og-fertility-en.png が実際にそうなり、データと線は正しいのにワードマーク
+// だけがサンセリフになった。レビューで og-cpi-en.png と2枚を目視比較して初めて
+// 見つかっている。**PNGの中身は誰も検査していない**(bin/build.mjs の --check は
+// 入力のハッシュしか見ない)ので、DOM側にこの印を出させるのが唯一の機械的な手当て。
+//
+// 当時は style.css の1行目が Google Fonts を @import しており、取得が
+// --virtual-time-budget の内に間に合わないのが壊れ方だった。2026-08-03に
+// assets/fonts/ の woff2 を @font-face で読む自前ホストへ移したのでその経路は
+// 消えたが、src のパス違い・ファイルの取り違え・unicode-range の書き損じで
+// 同じ結果になるため、この印は残す。
 //
 // **document.fonts.check() は使えない。** 一見これ用のAPIに見えるが、
 // 宣言の無いフォント名を渡すとフォールバックで描けるので true を返す仕様で、
 // false になるのは「宣言済みのウェブフォントがまだ読み込み中」のときだけ。
 // つまり @import 自体が失敗して FontFace が1つも作られなかった場合
-// (= 今回実際に起きた壊れ方)には true を返し、何も検出しない。
+// (= 当時実際に起きた壊れ方)には true を返し、何も検出しない。
 // 2026-08-01に一度この実装で書き、存在しないフォント名に差し替える負のテストで
 // 20枚とも素通りすることを確認して捨てた。
 //
@@ -616,21 +620,47 @@ async function main() {
 // document.fonts.ready を待ってから測る(取得の途中で測ると、正常な回でも
 // フォールバックの幅を拾う)。
 //
+// **ウェイトごとに測る(400/500/600)。** 自前ホスト化まではこれを400の1回しか
+// やっていなかった。@import は all-or-nothing で落ちるので当時はそれで足りたが、
+// いまは @font-face が15本あり「600の3本だけ src を打ち間違える」という部分故障が
+// 起こり得る。ワードマーク(.og-brand-name)は 600 なので、400だけ測る検査は
+// 2026-08-01とまったく同じ絵を素通りさせる(2026-08-03のレビューで指摘)。
+// style.css が宣言しているウェイトと同じ3つを、宣言側を唯一の出所にはできない
+// (og.htmlからCSSの@font-faceを機械的に読む手段が無い)ため、ここに書き下している。
+// ウェイトを増減したらここも直すこと。
+//
 // main() が投げた場合はこの then が走らず印も立たないので、そのときも
 // bin/og.sh の verify_dom 側で止まる。
 main().then(async () => {
+  // document.fonts.ready は「いま描画に必要なフォント」しか待たない。og.html が
+  // 実際に描くのは 400 と 600 だけなので、500 の FontFace は ready の時点で
+  // 未ロードのままになり、測定用のspanを足した瞬間に遅れて読み込みが始まって
+  // **正常な回でもフォールバック幅を拾って落ちる**(2026-08-03、3ウェイト化した
+  // 直後に1枚目で実際に落ちた)。測る前に測る文字列で明示的にロードさせる。
+  // なお load() 自体は検査にならない(宣言の無いファミリでも空配列で解決する。
+  // check() が使えないのと同じ理由)。検査はあくまで下の幅の比較。
+  const PROBE_TEXT = "zurekei0123456789";
+  const WEIGHTS = [400, 500, 600];
+  await Promise.all(
+    WEIGHTS.map((w) => document.fonts.load(`${w} 64px "IBM Plex Mono"`, PROBE_TEXT))
+  );
   await document.fonts.ready;
-  const probe = (family) => {
+  const probe = (family, weight) => {
     const s = document.createElement("span");
-    s.textContent = "zurekei0123456789";
+    s.textContent = PROBE_TEXT;
     s.style.cssText =
-      "position:absolute;left:-9999px;top:-9999px;white-space:pre;font-size:64px;font-family:" + family;
+      "position:absolute;left:-9999px;top:-9999px;white-space:pre;font-size:64px;font-weight:" +
+      weight +
+      ";font-family:" +
+      family;
     document.body.appendChild(s);
     const w = s.getBoundingClientRect().width;
     s.remove();
     return w;
   };
-  const ok = probe('"IBM Plex Mono", monospace') !== probe("monospace");
+  const ok = WEIGHTS.every(
+    (w) => probe('"IBM Plex Mono", monospace', w) !== probe("monospace", w)
+  );
   document.documentElement.setAttribute("data-font-ok", ok ? "1" : "0");
 });
 </script>

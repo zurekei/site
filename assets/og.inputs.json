@@ -12,7 +12,7 @@
     "data/jgb_total_issuance_forecast.csv": "sha256:d689e26708553a8cd1b4c0e0da73c1c40be4d376fe1e559a640c6d09bcd5504a",
     "data/tax_revenue_forecast.csv": "sha256:af66f6666bff6ccb2c0bb1860020f112f98582493c85c7749a994f93729dd2f5",
     "data/unemployment_forecast.csv": "sha256:4f6e183f5b23aac8a25dc2f05f3f6f5b7120e37a68f1c30f80f14efa2cc1a57f",
-    "og.html": "sha256:c1bf48518c596b78ad3f80768b85de35e938be5b36ea283044d44bea5d33c29e",
-    "style.css": "sha256:a5b3d22c54b32463fb80f93823764f5549fe55e320f908e784ae7cb00a9905ef"
+    "og.html": "sha256:cff9a6e04f54e984153c27498906ea90847d6f53ac25ca8fe0ceef8cae0ab756",
+    "style.css": "sha256:f45fee66d3bef81a6fbb23ceb94640e4c3f2792483f17218257b109567369f0c"
   }
 }

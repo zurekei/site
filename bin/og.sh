@@ -420,18 +420,20 @@ verify_dom() {
   fi
 
   # ウェブフォントが載らないまま焼けた回を捕まえる(og.html の末尾が立てる印)。
-  # style.css は Google Fonts を @import しており、IBM Plex Sans JP /
-  # IBM Plex Mono はネットワーク越しの取得になる。取得が --virtual-time-budget の
-  # 内に間に合わなかった回はフォールバックの素のサンセリフで焼ける。
-  # 2026-08-01に og-fertility-en.png が実際にそうなった(データ・線は正しく、
-  # ワードマークだけがサンセリフになる)。**PNGの中身は誰も検査していない**ので、
-  # DOM側にこの印を出させて見るのが唯一の機械的な手当てになる。印が立たない
-  # (=false、または main() が投げて then に到達しなかった)場合はここで止める。
+  # IBM Plex Mono は 2026-08-03 から assets/fonts/ の woff2 を style.css の
+  # @font-face で読む自前ホストになった(それ以前は Google Fonts の @import で、
+  # 取得が --virtual-time-budget の内に間に合わないと落ちた)。自前ホストでも
+  # ファイルの取り違え・パスの綴り違い・unicode-range の書き損じで同じ壊れ方を
+  # するので、この検査は外さない。2026-08-01に og-fertility-en.png が実際に
+  # フォールバックで焼かれている(データ・線は正しく、ワードマークだけが
+  # サンセリフになる)。**PNGの中身は誰も検査していない**ので、DOM側にこの印を
+  # 出させて見るのが唯一の機械的な手当てになる。印が立たない(=false、または
+  # main() が投げて then に到達しなかった)場合はここで止める。
   if ! grep -q 'data-font-ok="1"' "$dom"; then
     echo "エラー: ウェブフォント(IBM Plex Mono)が載らないまま焼かれています(query=$query)。" >&2
     echo "  そのまま出すとワードマークだけがフォールバックのサンセリフになったカードが配信されます。" >&2
-    echo "  bin/og.sh をもう一度実行すれば直ることが多い(取得がネットワーク次第のため)。" >&2
-    echo "  毎回落ちる場合は fonts.googleapis.com に到達できるかを確認すること。" >&2
+    echo "  assets/fonts/ の woff2 と style.css の @font-face の src が合っているかを確認すること" >&2
+    echo "  (このスクリプトが立てるローカルサーバのルートは $ROOT なので、/assets/fonts/... で引ける)。" >&2
     exit 1
   fi
 

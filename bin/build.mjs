@@ -110,7 +110,7 @@ function hreflangTags(pair) {
 }
 
 // style.css / chart.js のキャッシュバスター。ページ側の ?v= と揃える。
-const ASSET_V = "20260801c";
+const ASSET_V = "20260803a";
 
 const read = (f) => fs.readFileSync(path.join(SITE_DIR, f), "utf8");
 
@@ -442,8 +442,7 @@ function footer(lang) {
 // ルート絶対で書くこと。<base> で誤魔化さないのは、ここを読んだ人が理由ごと
 // 分かるようにするため。
 function assetHead() {
-  return `<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="/style.css?v=${ASSET_V}">`;
+  return `<link rel="stylesheet" href="/style.css?v=${ASSET_V}">`;
 }
 
 // JSが動かないときに、中身が入らないまま残る部品を畳んで、案内文と入れ替える。
@@ -1050,7 +1049,6 @@ ${hreflangTags(urls)}
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/style.css?v=${ASSET_V}">
 <noscript><style>.chart-wrap > svg, #fertility-legend, #fertility-source { display: none !important; } .chart-noscript { display: block; }</style></noscript>
 ${fertilityJsonLd(d, "en")}</head>
@@ -1250,7 +1248,6 @@ ${hreflangTags(urls)}
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/style.css?v=${ASSET_V}">
 ${hoanJsonLd(rows, "en")}</head>
 <body>
@@ -1579,7 +1576,6 @@ ${hreflangTags(REL.home)}
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/style.css?v=${ASSET_V}">
 ${buildHomeJsonLd(desc, keys, "en")}
 </head>
@@ -1701,7 +1697,6 @@ ${hreflangTags(urls)}
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/style.css?v=${ASSET_V}">
 </head>
 <body>
@@ -1888,7 +1883,6 @@ ${hreflangTags(urls)}
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/style.css?v=${ASSET_V}">
 </head>
 <body>
@@ -1949,7 +1943,6 @@ ${hreflangTags(urls)}
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/assets/og-en.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/style.css?v=${ASSET_V}">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 ${CONTACT_STYLE}
@@ -2042,7 +2035,6 @@ ${hreflangTags(urls)}
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/assets/og-en.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/style.css?v=${ASSET_V}">
 ${CITE_STYLE}
 </head>

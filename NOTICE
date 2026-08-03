@@ -42,6 +42,12 @@ compiled is CC BY 4.0, and what it merely mirrors is not this project's to
 license. If a specific file's status matters to you and isn't clear from that
 rule, ask via https://zurekei.org/contact rather than guessing.
 
-Third-party components: this site loads the IBM Plex fonts from the Google
-Fonts CDN at runtime. No copy of those fonts is redistributed in this
-repository, so their license is not implicated here.
+Third-party components: the IBM Plex Mono font files under `assets/fonts/`
+(15 `.woff2` subsets) are redistributed here. They are © 2017 IBM Corp.,
+licensed under the SIL Open Font License 1.1 — see `assets/fonts/LICENSE.txt`
+for the full text. They are not this project's to license and are not covered
+by LICENSE or LICENSE-DATA. Until 2026-08-03 the site loaded IBM Plex Mono, along
+with IBM Plex Sans JP, from the Google Fonts CDN at runtime. Mono is now
+served from this repository instead, and Sans JP was dropped altogether in
+favour of system fonts. The point of the change was that visiting the site
+should not send anyone's IP address to a third party.
