@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# assets/og*.png(汎用2枚 + 指標8種×2言語の16枚 + 出生率専用2言語2枚 = 計20枚、
-# 2026-07-30に出生率2枚を追加)を og.html から焼き直す。
+# assets/og*.png(汎用2枚 + 指標8種×2言語の16枚 + 扇形2種×2言語の4枚 = 計22枚、
+# 2026-07-30に出生率2枚・2026-08-04に出生数2枚を追加)を og.html から焼き直す。
 #
 # 何をするか:
 #   1. リポジトリルートをドキュメントルートにローカルHTTPサーバを一時的に立てる
@@ -13,7 +13,7 @@
 #   4. 書き出したPNGのサイズと、同じChrome実行で取った--dump-domの中身を
 #      検証してから所定の場所へ置く(検証前の一時ファイルに書き、通ってから
 #      mvするので、失敗時に既存の正しいassets/og*.pngを上書きすることもない)
-#   5. 入力ファイル群(chart.js・全指標CSV・出生率CSV2本・og.html・csv.js・
+#   5. 入力ファイル群(chart.js・全指標CSV・扇形カードのCSV4本・og.html・csv.js・
 #      style.css)のsha256を assets/og.inputs.json(スタンプ)へ書く。node bin/build.mjs
 #      --check の陳腐化検査はこのスタンプを見て「焼き直し忘れ」を検出する
 #      (詳細は bin/build.mjs の ogStalenessErrors() 直上コメントを参照)。
@@ -126,15 +126,19 @@ trap cleanup EXIT
 #   出たがその手前が切れている」ような部分出力も閉じられる。
 #
 #   出力形式(bin/build.mjsの--og-list直上コメントと対で。2026-07-30、
-#   出生率カード対応でtype/vintageCountの2列を追加):
+#   出生率カード対応でtype/vintageCountの2列を追加。2026-08-04にtypeの値を
+#   fertility→fanへ改名):
 #     INPUT\t<相対パス>
 #     CARD\t<query>\t<出力先相対パス>\t<期待最小年度>\t<hasForecast:0/1>\t<hasActual:0/1>\t<type>\t<vintageCount>
 #     END\t<INPUT件数>\t<CARD件数>
-#   type は "metric"(汎用2枚+指標8種×2言語)か "fertility"(出生率2言語)。
+#   type は "metric"(汎用2枚+指標8種×2言語)か "fan"(扇形2種×2言語)。
 #   verify_dom はこれで検査内容を分岐する(下記参照)。未知のtypeが来たら
 #   エラーで止める(fail-closed。「知らない行=カード」のフォールバックを
 #   無くしたのと同じ趣旨)。vintageCount は type="fertility" のときだけ意味を
 #   持つ(扇の本数の期待値)。type="metric" では常に0で未使用。
+#   ("fan"がページ名ではなく描画の形で名乗っているのは、扇形のページが2枚に
+#   なった時点でページ名では内容と合わなくなるため。bin/build.mjsのOG_CARDS
+#   直上コメント参照)
 #
 # ■ 知らない行はエラーにする(2026-07-30、D)
 #   以前は "INPUT" 以外の行を無条件にカード扱いしていた。誰かがbin/build.mjs
@@ -145,7 +149,7 @@ trap cleanup EXIT
 #   どのフッタでも通ってしまう)。1列目が INPUT/CARD/END のいずれでもなければ
 #   ここでエラーにする(「知らない行=カード」というフォールバックを無くす)。
 #   カード行の形式(出力先が assets/og*.png の形・期待最小年度が数字のみ・
-#   hasForecast/hasActualが0/1のみ・typeがmetric/fertilityのみ・vintageCountが
+#   hasForecast/hasActualが0/1のみ・typeがmetric/fanのみ・vintageCountが
 #   数字のみ)も併せて検証する(構造で塞ぐのと形式で塞ぐのは別の網なので
 #   両方入れる)。
 OG_LIST="$(mktemp)"
@@ -174,7 +178,7 @@ while IFS=$'\t' read -r col1 col2 col3 col4 col5 col6 col7 col8; do
       ;;
     CARD)
       # col2=query col3=出力先 col4=期待最小年度 col5=hasForecast col6=hasActual
-      # col7=type(metric/fertility) col8=vintageCount(fertilityのみ意味を持つ)
+      # col7=type(metric/fan) col8=vintageCount(fanのみ意味を持つ)
       if [[ ! "$col3" =~ ^assets/og[A-Za-z0-9._-]*\.png$ ]]; then
         echo "エラー: --og-list のCARD行の出力先が assets/og*.png の形でない(out=$col3)。" >&2
         exit 1
@@ -191,8 +195,8 @@ while IFS=$'\t' read -r col1 col2 col3 col4 col5 col6 col7 col8; do
         echo "エラー: --og-list のCARD行のhasActualが0/1でない(値=$col6, out=$col3)。" >&2
         exit 1
       fi
-      if [[ "$col7" != "metric" && "$col7" != "fertility" ]]; then
-        echo "エラー: --og-list のCARD行のtypeがmetric/fertilityのいずれでもない(値=$col7, out=$col3)。bin/build.mjs側にtypeの付け忘れ・タイポがある可能性。" >&2
+      if [[ "$col7" != "metric" && "$col7" != "fan" ]]; then
+        echo "エラー: --og-list のCARD行のtypeがmetric/fanのいずれでもない(値=$col7, out=$col3)。bin/build.mjs側にtypeの付け忘れ・タイポがある可能性。" >&2
         exit 1
       fi
       if [[ ! "$col8" =~ ^[0-9]+$ ]]; then
@@ -332,12 +336,12 @@ verify_size() {
 # 検査内容を分岐する(2026-07-30、出生率カード対応で追加):
 #   (a) フッタの年度ラベルが「${min_year}–」を含むか(汎用カードは
 #       「指標名 ${min_year}–…」、指標カードは「${min_year}–…」そのもの、
-#       出生率カードは「${min_year}–…年」と文言の形がそれぞれ違うが、
+#       扇形カードは「${min_year}–…年」と文言の形がそれぞれ違うが、
 #       どれも"${min_year}–"を含む点は共通なので同じパターンで全対応できる)。
 #       これはtypeによらず常に見る。
 #       min_year は `node bin/build.mjs --og-list` の4列目(カードごとの
 #       期待最小年度)から受け取る。bash側にCSVパスや列名を持たず、
-#       chart.js の METRICS(またはfertility用の専用CSV)が唯一の出所である
+#       chart.js の METRICS(または扇形カード用の専用CSV)が唯一の出所である
 #       べきという方針に合わせている。なお、CSVのfetchがrejectする経路
 #       (og.htmlのloadCSVが失敗する場合)はfooterRange()系関数自体が呼ばれず、
 #       置き文字列(「…」)のまま残る。xMin/xMaxがNaN/Infinityになって呼ばれた
@@ -360,13 +364,15 @@ verify_size() {
 #       見通し線が全滅しても検査は全部通り、実績線だけのカードが静かに
 #       配信されうる欠陥もあった。データの実態どおりの線を要求する形にして
 #       両方を塞いだ。
-#   (c) type="fertility" のとき: 出生率カードには line-forecast が存在しない
-#       (og.htmlのrenderFertility()はこの要素を一切appendしない別系統の
+#   (c) type="fan" のとき: 扇形カードには line-forecast が存在しない
+#       (og.htmlのrenderFan()はこの要素を一切appendしない別系統の
 #       描画なので、metricの(b)のように「要素はあるがd=""」を要求すると
 #       誤爆する)。代わりに実績線(line-actual)にデータが入っていることと、
 #       扇の線(line-forecast-vintage)がvintageCount(`--og-list`の8列目)本
 #       ちょうどデータ付きで描かれていることを見る(verify_fan、2026-07-30
 #       追加)。1本でも欠けたら、あるいは余分に描かれても落ちる。
+#       出生率カードと出生数カードで検査は同一(扇の本数を数えるだけで、
+#       どちらのCSVかには依存しない)。
 # ここで捕まえられないもの(正直に書く): 指定フォントの読み込みに失敗して
 # 代替書体にフォールバックした場合。DOM構造やテキスト自体は正しいままなので
 # 機械的には検出できず、目視確認に頼るしかない。同様にy軸ラベルの幅の
@@ -395,7 +401,7 @@ verify_dom() {
   #   - フッタ検査(a)はx定義域が無傷なので通る
   #   - verify_fan/verify_lineのパターンは `d="M [0-9]` で**最初のx座標しか
   #     見ない**ので、7本ちょうど数えて通る
-  #   - bin/build.mjsのfertilityCardInfo()も同じ `!== null` フィルタで数えるため
+  #   - bin/build.mjsのfanCardInfo()も同じ `!== null` フィルタで数えるため
   #     vintageCountは7のままで、両側が自己整合的に「正常」と答える
   # という具合に、**真っ白なカードが全機械検査を通過してデプロイされる**。
   # データの転記ミスはこのサイトで最もありそうな壊れ方なので、
@@ -409,7 +415,7 @@ verify_dom() {
   # `d="[^"]*NaN` のような素朴なパターンでは駄目で、**--dump-domは<script>の
   # 中身もDOMとして吐く**ため、og.html側のJSコメントに壊れたd属性の実例を
   # 文字列として書いた瞬間に全カードで誤爆する(2026-07-30に実際に踏んだ。
-  # og.htmlのrenderFertility側にも「実例を書くな」と注記した)。属性値に
+  # og.htmlのrenderFan側にも「実例を書くな」と注記した)。属性値に
   # 限定したのは、d属性以外(グリッド線のy1/y2、ラベルのx/y)もy軸の定義域が
   # 非数になれば同時に汚染されるので、そちらも一緒に捕まえるためでもある。
   if grep -Eq '<[a-z]+[^>]*="[^"]*NaN' "$dom"; then
@@ -442,12 +448,12 @@ verify_dom() {
       verify_line "$dom" "line-forecast" "$has_forecast" "$query"
       verify_line "$dom" "line-actual" "$has_actual" "$query"
       ;;
-    fertility)
+    fan)
       verify_line "$dom" "line-actual" "$has_actual" "$query"
       verify_fan "$dom" "$vintage_count" "$query"
       ;;
     *)
-      # --og-list読み込み時点(上のwhileループ)でmetric/fertility以外は
+      # --og-list読み込み時点(上のwhileループ)でmetric/fan以外は
       # 既に弾いているので、ここに来るのはverify_domの呼び出し側自体に
       # バグがある場合のみ。fail-closedの最終防波堤として残す。
       echo "エラー: verify_domに未知のtype($type)が渡された(query=$query)。呼び出し側のバグの可能性。" >&2
@@ -479,7 +485,7 @@ verify_line() {
   fi
 }
 
-# verify_dom(c) の実体。出生率カード専用: line-forecast-vintage クラスを
+# verify_dom(c) の実体。扇形カード専用: line-forecast-vintage クラスを
 # 持つpath要素のうち、実際にデータ(d="M <数字>…)が入っているものの本数を
 # 数え、期待本数(want_count、--og-listの8列目=vintage_yearの異なる値の
 # 個数)とちょうど一致するかを見る。grep -o は一致1件につき1行を出力する
@@ -495,20 +501,20 @@ verify_fan() {
   # 影響は2つあり、どちらも都合が悪い:
   #   - 扇が全滅した(0本)という**この検査が最も捕まえたいケース**でだけ
   #     診断が出ない(1本欠けの6本なら出る、という一貫しない挙動になる)
-  #   - data/fertility_forecast.csv が正当に空でvintageCount=0のとき、
+  #   - 推計側のCSVが正当に空でvintageCount=0のとき、
   #     0==0で通るべきところが代入時点で死ぬのでbin/og.shが永久に完走できず、
   #     スタンプが書けず--checkが赤のまま=デプロイゲートが開かない
   actual_count="$(grep -Eo 'class="line-forecast-vintage"[^>]*d="M [0-9][^"]*"' "$dom" | wc -l | tr -d ' ')" || true
   if [[ "$actual_count" != "$want_count" ]]; then
     echo "エラー: 扇の線(line-forecast-vintage)の本数が期待と違う(期待=$want_count, 実際=$actual_count, query=$query)。" >&2
-    echo "  data/fertility_forecast.csvのvintage_yearの種類数とog.htmlのrenderFertility()の描画が食い違っている可能性があります。" >&2
+    echo "  推計側CSVのvintage_yearの種類数とog.htmlのrenderFan()の描画が食い違っている可能性があります(どのCSVかはqueryの?m=…から分かる)。" >&2
     exit 1
   fi
 }
 
 # $1: og.html に渡すクエリ文字列 $2: 書き出し先の最終パス(絶対) $3: 期待最小年度
-# $4: hasForecast(0/1) $5: hasActual(0/1) $6: type(metric/fertility)
-# $7: vintageCount(fertilityのみ意味を持つ)
+# $4: hasForecast(0/1) $5: hasActual(0/1) $6: type(metric/fan)
+# $7: vintageCount(fanのみ意味を持つ)
 shoot() {
   local query="$1" out="$2" min_year="$3" has_forecast="$4" has_actual="$5" type="$6" vintage_count="$7"
   local udir wdir tmp_png tmp_dom
@@ -627,12 +633,12 @@ for rel in rels:
 
 data = {
     "_comment": (
-        "bin/og.sh が assets/og*.png(汎用2枚+指標8種×2言語+出生率2言語の計20枚)を焼く"
+        "bin/og.sh が assets/og*.png(汎用2枚+指標8種×2言語+扇形2種×2言語の計22枚)を焼く"
         "たびに書き直す。node bin/build.mjs --check の陳腐化検査"
         "(ogStalenessErrors)が、ここに記録したsha256といまの入力ファイルの"
         "実ハッシュを突き合わせて焼き直し忘れを検出する。入力ファイルの一覧"
-        "(chart.js・METRICSの全指標CSV・出生率カード用のdata/fertility_*.csv"
-        "2本・og.html・csv.js・style.css)は"
+        "(chart.js・METRICSの全指標CSV・扇形カード用のdata/fertility_*.csvと"
+        "data/births_*.csvの4本・og.html・csv.js・style.css)は"
         "node bin/build.mjs --og-list が唯一の出所で、ここに手書きのコピーは"
         "持たない。このファイルはsite/配下にあるため配信されるが、パスと"
         "ハッシュの対応表だけで秘密は含まない(承知の上で置いている)。"

@@ -17,12 +17,10 @@
 <meta property="og:title" content="出生数 — 歴代推計 vs 実績 — ズレ計">
 <meta property="og:description" content="社人研の歴代将来推計が置いた出生数の推計と実績を、出典つきで重ねて記録する。">
 <meta property="og:url" content="https://zurekei.org/births">
-<!-- 専用のOGカードは持たず、汎用の assets/og.png を使う(/hoan と同じ扱い)。
-     指標ごとのカードは bin/og.sh が20枚を一度に焼き直す仕組みで、1枚増やすと
-     og.html 側に描画経路を足したうえで20枚とも焼き直すことになる。ページの
-     公開はそれと切り離せるので、まず出す。専用カードを足すときは
-     bin/build.mjs の OG_CARDS / OG_INPUT_RELS と og.html を一緒に直すこと。 -->
-<meta property="og:image" content="https://zurekei.org/assets/og.png">
+<!-- 出生数専用カード(2026-08-04追加。og.html?shot&m=births で焼く)。
+     汎用og.pngは他のページ(トップ・/chart一覧・about等)用で、birthsは
+     対象から外れた(og.htmlのrenderFan()とFAN_SPECS参照)。 -->
+<meta property="og:image" content="https://zurekei.org/assets/og-births.png">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">

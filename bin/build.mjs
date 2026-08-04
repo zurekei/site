@@ -1163,7 +1163,7 @@ ${hreflangTags(urls)}
 <meta property="og:url" content="${url}">
 <!-- 出生率専用カード(2026-07-30追加。og.html?shot&m=fertility&lang=enで焼く)。
      汎用og-en.pngは他のページ(トップ・/chart一覧・about等)用で、fertilityは
-     対象から外れた(og.htmlのrenderFertility()参照)。 -->
+     対象から外れた(og.htmlのrenderFan()参照)。 -->
 <meta property="og:image" content="${SITE}/assets/og-fertility-en.png">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
@@ -1505,8 +1505,9 @@ ${hreflangTags(urls)}
 <meta property="og:title" content="${escapeHTML(title)}">
 <meta property="og:description" content="${escapeHTML(desc)}">
 <meta property="og:url" content="${url}">
-<!-- 専用のOGカードは持たない(JA側 births.html の同じ位置のコメントを参照)。 -->
-<meta property="og:image" content="${SITE}/assets/og-en.png">
+<!-- 出生数専用カード(2026-08-04追加。og.html?shot&m=births&lang=en で焼く)。
+     JA側 births.html の同じ位置のコメントを参照。 -->
+<meta property="og:image" content="${SITE}/assets/og-births-en.png">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
@@ -3400,7 +3401,7 @@ function homeFillsCoverageErrors() {
  *     METRICSをfetchして読むようになったため追加。**ファイル全体のハッシュ
  *     を取る(カードが実際に使うフィールドだけを見る形にはしない)。**
  *     chart.jsはnote/desc/archiveNoteといったカードに出ない長い文章も
- *     抱えているので、その1文字を直すだけでも20枚(2026-07-30、出生率カード
+ *     抱えているので、その1文字を直すだけでも22枚(2026-07-30、出生率カード
  *     追加後の枚数)の焼き直しが要求される(1分ほど)。これは承知の上での
  *     選択: 「カードが使うフィールドだけ」を
  *     列挙する方式にすると、og.htmlが将来別のフィールドを使い始めたときに
@@ -3427,10 +3428,10 @@ function homeFillsCoverageErrors() {
  *     では検出できない。og.html自体の変更(フォント指定行の変更等)は
  *     捕まるが、フォント配信側の障害は捕まらない。目視確認に頼る
  *   - ヘッドレスChrome自体のバージョン差によるレンダリングの微差
- *   - assets/og*.png(20枚、2026-07-30に出生率2枚を追加)を bin/og.sh を
+ *   - assets/og*.png(22枚、2026-07-30に出生率2枚・2026-08-04に出生数2枚を追加)を bin/og.sh を
  *     経由せず直接上書きした場合の「中身」の正しさ(スタンプの記録内容とは
  *     無関係に発生するため、この検査の対象外。生成物ではなく人間が置く画像
- *     である以上、ここまでは面倒を見ない)。ただしファイルの過不足(20枚の
+ *     である以上、ここまでは面倒を見ない)。ただしファイルの過不足(22枚の
  *     うち何かが無い・余分にある)はこの検査とは別に ogFileErrors() が見る
  *     (下記参照)
  */
@@ -3457,30 +3458,53 @@ function homeFillsCoverageErrors() {
 //   直らない=デプロイゲート(bin/deploy.sh)が閉じたまま開かない。時刻比較方式を
 //   撤回した理由と同型のデッドロックなので、配列全体をSetに通して構造的に
 //   潰しておく。
+// 扇形カード(?m=fertility / ?m=births)の一覧。og.html の FAN_SPECS と対に
+// なっていて、**CSVパスと値の列名は両側に同じものを書く**(og.htmlはHTMLなので
+// loadModule()で読めず、辞書と違って共有経路が作れない。og.html側のFAN_SPECS
+// 直上コメント参照)。ずれると、こちらが数えたminYear/vintageCountを期待値と
+// して bin/og.sh の verify_dom が焼き上がりを検査するため、必ず赤くなって
+// 気づける(黙って違う絵が出る経路にはならない)。
+// key は og.html に渡す ?m= の値であり、出力先 assets/og-<key>[-en].png でもある。
+const FAN_CARDS = [
+  {
+    key: "fertility",
+    forecastCsv: "data/fertility_forecast.csv",
+    actualCsv: "data/fertility_actual.csv",
+    forecastValCol: "assumed_tfr_mid",
+    actualValCol: "actual_tfr",
+  },
+  {
+    key: "births",
+    forecastCsv: "data/births_forecast.csv",
+    actualCsv: "data/births_actual.csv",
+    forecastValCol: "projected_births",
+    actualValCol: "actual_births",
+  },
+];
+
 const OG_INPUT_RELS = [...new Set([
   "og.html",
   "csv.js",
   "style.css",
   "chart.js",
   ...Object.values(METRICS).map((m) => m.csv.replace(/^\//, "")),
-  // 出生率カード(assets/og-fertility.png / og-fertility-en.png、2026-07-30
-  // 追加)の入力2本。**fertility.js は入れない**: og.html は fertility.js を
-  // 一切読み込まず(?m=fertilityの描画はrenderFertility()が持つ、og.html
-  // 自前のCSVパス・列名(vintage_year/target_year/assumed_tfr_mid、
-  // year/actual_tfr)で完結する)、fertility.jsのどの関数・定数にも触れて
-  // いない。したがってfertility.js自体の変更(版ラベルの位置調整や
-  // アニメーション速度など)はog-fertility系画像の見た目に一切影響しない。
-  // 列名が変わればこの2本のCSVの中身も必ず変わるため、CSV2本のハッシュ
-  // だけで検出でき、chart.jsを丸ごとハッシュしている理由(「カードが使う
-  // フィールドだけ列挙すると将来の見落としが構造的に残る」上のコメント参照)
-  // とは事情が異なる。
-  "data/fertility_forecast.csv",
-  "data/fertility_actual.csv",
+  // 扇形カード(assets/og-fertility[-en].png / og-births[-en].png、2026-07-30に
+  // 出生率、2026-08-04に出生数)の入力CSV。下のFAN_CARDSから機械的に導くので、
+  // 扇形ページを足せば自動でここにも入る(METRICS由来のCSVと同じ扱い)。
+  // **fertility.js / births.js は入れない**: og.html はどちらも読み込まず
+  // (?m=fertility / ?m=births の描画はrenderFan()が持ち、og.html自前の
+  // CSVパス・列名(FAN_SPECS)で完結する)、両ファイルのどの関数・定数にも
+  // 触れていない。したがってページ側の変更(版ラベルの位置調整やアニメー
+  // ション速度など)は扇形カードの見た目に一切影響しない。列名が変われば
+  // CSVの中身も必ず変わるため、CSVのハッシュだけで検出でき、chart.jsを
+  // 丸ごとハッシュしている理由(「カードが使うフィールドだけ列挙すると
+  // 将来の見落としが構造的に残る」上のコメント参照)とは事情が異なる。
+  ...FAN_CARDS.flatMap((f) => [f.forecastCsv, f.actualCsv]),
 ])];
 const OG_STAMP_REL = "assets/og.inputs.json";
 
-// og.htmlが焼くべきOGカード全部(汎用2枚+指標8種×2言語の16枚+出生率2言語=
-// 計20枚、2026-07-30に出生率2枚を追加)。
+// og.htmlが焼くべきOGカード全部(汎用2枚+指標8種×2言語の16枚+扇形2種×2言語=
+// 計22枚、2026-07-30に出生率2枚・2026-08-04に出生数2枚を追加)。
 // query は og.html に渡すクエリ文字列(`shot`を含む)、out は assets/ 以下の
 // 出力先相対パス、minYear はそのカードの年度レンジ最小値の期待値
 // (og.html側の「見通し列か実績列に値がある行の最小fiscal_year」と同じ規則。
@@ -3488,12 +3512,15 @@ const OG_STAMP_REL = "assets/og.inputs.json";
 // 経由して og.html と同じデータから導く)。汎用2枚は gdp-real の値を使う
 // (og.htmlの?mなし=実質GDP固定という仕様に合わせる)。
 //
-// type(2026-07-30、出生率カード対応で追加): bin/og.sh の verify_dom がどの
-// 検査をすべきかを表す種別。"metric"(汎用2枚+指標8種×2言語)は従来どおり
+// type(2026-07-30、出生率カード対応で追加。2026-08-04に出生数カードを足す
+// のに合わせて "fertility" から "fan" へ改名した — 種別が表しているのは
+// 「どのページか」ではなく「扇形の描画か」なので、ページ名で名乗ると2枚目を
+// 足した時点で内容と合わなくなる): bin/og.sh の verify_dom がどの検査を
+// すべきかを表す種別。"metric"(汎用2枚+指標8種×2言語)は従来どおり
 // hasForecast/hasActualに応じてline-forecast/line-actualを双方向に見る。
-// "fertility"はline-forecastが存在しない別系統の描画なので、代わりに
-// vintageCount(下記)本のline-forecast-vintageがデータ付きで描かれている
-// ことを見る。bin/og.sh は未知のtypeが来たらエラーで止める(fail-closed。
+// "fan"(出生率・出生数の各2言語)はline-forecastが存在しない別系統の描画
+// なので、代わりにvintageCount(下記)本のline-forecast-vintageがデータ付きで
+// 描かれていることを見る。bin/og.sh は未知のtypeが来たらエラーで止める(fail-closed。
 // 「知らない行=カード」のフォールバックを無くしたのと同じ趣旨)。
 //
 // hasForecast/hasActual(2026-07-30追加): そのカードの見通し列/実績列に
@@ -3520,19 +3547,25 @@ function metricLineInfo(metric) {
   };
 }
 
-// 出生率カード(type="fertility")用。og.htmlのrenderFertility()と同じ規則で
+// 扇形カード(type="fan")用。og.htmlのrenderFan()と同じ規則で
 // minYear(推計target_year・実績yearの両方を含めた最小年)とvintageCount
 // (vintage_yearの異なる値の個数=扇の本数の期待値)を導く。og.htmlはこの2本の
 // CSVをchart.jsのMETRICSを経由せず自前で読むため、readRows()(METRICS前提)は
-// 使えず専用に書く。
+// 使えず専用に書く。引数は上のFAN_CARDSの1要素(2026-08-04、出生数カードの
+// 追加でCSVと列名を引数化した。それまでは出生率決め打ちだった)。
 //
-// 空でない非数値セルは必ず投げる(2026-07-30追加。og.htmlのrenderFertility()と
+// 空でない非数値セルは必ず投げる(2026-07-30追加。og.htmlのrenderFan()と
 // 同じ規則。理由の詳細はそちら側のコメントを参照): csv.jsのtoNum()は空文字
 // だけをnullにし、転記ミスの `1.49x934` のようなセルにはNaNを返す。`!== null`
 // のフィルタはNaNを素通しするため、ここで数えるvintageCountとog.htmlが描く
 // 扇の本数が**両側とも自己整合的に「7本」と答えたまま、実際には全pathが
 // NaNで1本も描かれていない**という状態が全機械検査を通過しえた。
-function fertilityCardInfo() {
+//
+// 列がヘッダに実在するかも見る(2026-08-04追加。og.htmlのrequireColと同じ
+// 理由): toNum()は存在しない列(undefined)をnullにするので、列名の綴り違いは
+// 「全行が消える」=vintageCount 0 として静かに通り、og.html側も同じ綴り違いを
+// 持っていれば 0==0 で検査が成立してしまう。
+function fanCardInfo(fan) {
   const reqNum = (raw, where) => {
     const v = Number(raw);
     if (!Number.isFinite(v)) throw new Error(`${where}: 数値として読めない(${JSON.stringify(raw)})。CSVの転記ミスの可能性`);
@@ -3545,18 +3578,27 @@ function fertilityCardInfo() {
     }
     return v;
   };
-  const FC = "data/fertility_forecast.csv";
-  const AC = "data/fertility_actual.csv";
-  const forecastRows = parseCSV(fs.readFileSync(path.join(SITE_DIR, FC), "utf8"))
+  const requireCol = (rows, col, where) => {
+    if (rows.length && !(col in rows[0])) {
+      throw new Error(`${where}: 列 "${col}" がCSVのヘッダに無い(FAN_CARDSの列名の綴り違いの可能性)`);
+    }
+  };
+  const FC = fan.forecastCsv;
+  const AC = fan.actualCsv;
+  const forecastRaw = parseCSV(fs.readFileSync(path.join(SITE_DIR, FC), "utf8"));
+  const actualRaw = parseCSV(fs.readFileSync(path.join(SITE_DIR, AC), "utf8"));
+  requireCol(forecastRaw, fan.forecastValCol, FC);
+  requireCol(actualRaw, fan.actualValCol, AC);
+  const forecastRows = forecastRaw
     .map((r) => ({
       vintageYear: reqNum(r.vintage_year, `${FC} vintage_year`),
       targetYear: reqNum(r.target_year, `${FC} target_year`),
-      mid: optNum(r.assumed_tfr_mid, `${FC} assumed_tfr_mid`),
+      val: optNum(r[fan.forecastValCol], `${FC} ${fan.forecastValCol}`),
     }))
-    .filter((r) => r.mid !== null);
-  const actualRows = parseCSV(fs.readFileSync(path.join(SITE_DIR, AC), "utf8"))
-    .map((r) => ({ year: reqNum(r.year, `${AC} year`), tfr: optNum(r.actual_tfr, `${AC} actual_tfr`) }))
-    .filter((r) => r.tfr !== null);
+    .filter((r) => r.val !== null);
+  const actualRows = actualRaw
+    .map((r) => ({ year: reqNum(r.year, `${AC} year`), val: optNum(r[fan.actualValCol], `${AC} ${fan.actualValCol}`) }))
+    .filter((r) => r.val !== null);
   const domainYears = forecastRows.map((r) => r.targetYear).concat(actualRows.map((r) => r.year));
   return {
     minYear: Math.min(...domainYears),
@@ -3578,12 +3620,14 @@ const OG_CARDS = (() => {
     cards.push({ query: `shot&m=${k}`, out: `assets/og-${k}.png`, type: "metric", vintageCount: 0, ...info });
     cards.push({ query: `shot&m=${k}&lang=en`, out: `assets/og-${k}-en.png`, type: "metric", vintageCount: 0, ...info });
   }
-  // 出生率カード(2026-07-30追加): line-forecastが無い別系統の描画なので
-  // hasForecastは持たない(0を入れているが、bin/og.sh側はtype="fertility"の
-  // カードに対してこの値を見ない。列を揃えるためだけに置いている)。
-  const fert = fertilityCardInfo();
-  cards.push({ query: "shot&m=fertility", out: "assets/og-fertility.png", type: "fertility", hasForecast: 0, ...fert });
-  cards.push({ query: "shot&m=fertility&lang=en", out: "assets/og-fertility-en.png", type: "fertility", hasForecast: 0, ...fert });
+  // 扇形カード(2026-07-30に出生率、2026-08-04に出生数): line-forecastが無い
+  // 別系統の描画なので hasForecast は持たない(0を入れているが、bin/og.sh側は
+  // type="fan" のカードに対してこの値を見ない。列を揃えるためだけに置いている)。
+  for (const fan of FAN_CARDS) {
+    const info = fanCardInfo(fan);
+    cards.push({ query: `shot&m=${fan.key}`, out: `assets/og-${fan.key}.png`, type: "fan", hasForecast: 0, ...info });
+    cards.push({ query: `shot&m=${fan.key}&lang=en`, out: `assets/og-${fan.key}-en.png`, type: "fan", hasForecast: 0, ...info });
+  }
   return cards;
 })();
 
@@ -3592,8 +3636,8 @@ const OG_CARDS = (() => {
 // 併存のような別の衝突パターンを見逃す。OG_CARDSの出力先パス(out)が重複して
 // いないかを機械的に見る構造的なチェックに置き換えた。"en"というキー名も
 // これで自動的に捕まる(og-en.pngという出力先を持つのが2件になるため)。
-// 衝突すると片方が後に焼いた方に黙って上書きされ、20枚焼いたつもりで実際は
-// 19枚(1枚は別指標の絵)という事故になるため、検出したら列挙せずに止める。
+// 衝突すると片方が後に焼いた方に黙って上書きされ、22枚焼いたつもりで実際は
+// 21枚(1枚は別指標の絵)という事故になるため、検出したら列挙せずに止める。
 {
   const outs = OG_CARDS.map((c) => c.out);
   const seen = new Set();
@@ -3610,7 +3654,7 @@ const OG_CARDS = (() => {
   }
 }
 
-// assets/ 配下の og*.png が「焼くべき20枚」の集合とちょうど一致するかを見る
+// assets/ 配下の og*.png が「焼くべき22枚」の集合とちょうど一致するかを見る
 // (findOrphansがchart/に対してやっているのと同じ趣旨)。指標を消したときに
 // 古いカードが配信され続ける事故や、bin/og.shを経ずに置かれた置き土産
 // (og-zzz.pngのような)を検出する。zurekei_icon_512.pngはassets/の外にある
@@ -3700,7 +3744,7 @@ function ogStalenessErrors() {
  * NaN を返す。呼び出し側のフィルタは大半が `!== null` なので NaN は素通り
  * し、Math.min/Math.max 経由でy軸の定義域が非数になり、1セル汚れるだけで
  * 線が1本も描かれないページ・カードができる。dec6075 でOGカードの経路
- * (og.html の renderFertility()・bin/build.mjs の fertilityCardInfo()・
+ * (og.html の renderFan()・bin/build.mjs の fanCardInfo()・
  * bin/og.sh の verify_dom)にはこれを塞ぐ網を入れたが、/chart 系や
  * /fertility のページ自体には数値セルの検査がどこにも無く、転記ミス1文字で
  * 線が消えたページが配信されても --check は緑のままだった。ここでその穴を
@@ -4522,9 +4566,9 @@ function findOrphans(dir) {
 //   INPUT\t<相対パス>
 //     … OG_INPUT_RELSの各要素(先頭で全行出す)
 //   CARD\t<query>\t<出力先相対パス>\t<期待最小年度>\t<hasForecast:0/1>\t<hasActual:0/1>\t<type>\t<vintageCount>
-//     … OG_CARDSの各カード。type("metric"/"fertility")はbin/og.shのverify_domが
+//     … OG_CARDSの各カード。type("metric"/"fan")はbin/og.shのverify_domが
 //       どの検査をすべきかの分岐に使う(OG_CARDS直上コメント参照)。
-//       vintageCountはtype="fertility"のときだけ意味を持つ(扇の本数の期待値。
+//       vintageCountはtype="fan"のときだけ意味を持つ(扇の本数の期待値。
 //       type="metric"では常に0で未使用)。
 //   END\t<INPUT行の件数>\t<CARD行の件数>
 //     … 最終行のセンチネル
@@ -4599,7 +4643,7 @@ if (check) {
   // OGP画像の陳腐化は生成物ではないog.htmlが起点なので、上のどの検査とも
   // 独立に必ず見る(stale/orphans/refs/id/drift/homeFillsのいずれにも掛からない)。
   const ogErrs = ogStalenessErrors();
-  // assets/のog*.pngが「焼くべき20枚」とちょうど一致するかも同様に独立
+  // assets/のog*.pngが「焼くべき22枚」とちょうど一致するかも同様に独立
   // (ogStalenessErrorsは入力ファイルのハッシュしか見ておらず、出力側の
   // 過不足はここでしか捕まえられない)。
   const ogFileErrs = ogFileErrors();
