@@ -22,7 +22,11 @@
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/style.css?v=20260803a">
-<noscript><style>.chart-wrap > svg, #fertility-legend, #fertility-source { display: none !important; } .chart-noscript { display: block; }</style></noscript>
+<!-- JAの fertility.html と同じ規則。#fertility-source をここに入れないのは、
+     中身をビルドがHTMLに埋めてあり、JSが動かない相手にこそ見せたいものだから
+     (隠すと出典が届かなくなる)。#fertility-legend はJSが描くSVGの凡例なので
+     SVGごと隠す。 -->
+<noscript><style>.chart-wrap > svg, #fertility-legend { display: none !important; } .chart-noscript { display: block; }</style></noscript>
 
 <script type="application/ld+json">
 {
@@ -117,7 +121,7 @@
 
       <div class="fertility-legend" id="fertility-legend"></div>
 
-      <div class="readout-source" id="fertility-source"></div>
+      <div class="readout-source" id="fertility-source"><span>1992 projection</span>: <a href="https://www.ipss.go.jp/syoushika/bunken/data/pdf/101827_4.pdf" target="_blank" rel="noopener">https://www.ipss.go.jp/syoushika/bunken/data/pdf/101827_4.pdf</a><br><span>1997 projection</span>: <a href="https://www.ipss.go.jp/syoushika/bunken/data/pdf/120010.pdf" target="_blank" rel="noopener">https://www.ipss.go.jp/syoushika/bunken/data/pdf/120010.pdf</a><br><span>2002 projection</span>: <a href="https://www.ipss.go.jp/syoushika/bunken/data/pdf/126596.pdf" target="_blank" rel="noopener">https://www.ipss.go.jp/syoushika/bunken/data/pdf/126596.pdf</a> <span lang="ja">(社人研原本はスキャンPDFのため、内容は国立環境研究所ミラー(https://www-iam.nies.go.jp/aim/publications/book/reference/japan/jinko_lab/popu_estimate/2002.pdf)の同一報告書で数値を確認)</span><br><span>2006 projection</span>: <a href="https://www.ipss.go.jp/syoushika/bunken/data/pdf/132498.pdf" target="_blank" rel="noopener">https://www.ipss.go.jp/syoushika/bunken/data/pdf/132498.pdf</a><br><span>2012 projection</span>: <a href="https://www.ipss.go.jp/syoushika/tohkei/newest04/gh2401.pdf" target="_blank" rel="noopener">https://www.ipss.go.jp/syoushika/tohkei/newest04/gh2401.pdf</a><br><span>2017 projection</span>: <a href="https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2017/pp29_gaiyou.pdf" target="_blank" rel="noopener">https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2017/pp29_gaiyou.pdf</a><br><span>2023 projection</span>: <a href="https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2023/pp2023_gaiyou.pdf" target="_blank" rel="noopener">https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2023/pp2023_gaiyou.pdf</a><br><span>Actual: </span><a href="https://www.ipss.go.jp/syoushika/tohkei/Data/Popular2024/T04-03.htm" target="_blank" rel="noopener">https://www.ipss.go.jp/syoushika/tohkei/Data/Popular2024/T04-03.htm</a><br><span>Actual: </span><a href="https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/kakutei24/dl/03_h1.pdf" target="_blank" rel="noopener">https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/kakutei24/dl/03_h1.pdf</a><br><span>Actual: </span><a href="https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/nengai25/dl/gaikyouR7.pdf" target="_blank" rel="noopener">https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/nengai25/dl/gaikyouR7.pdf</a></div>
     </section>
 
 

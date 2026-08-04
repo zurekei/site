@@ -800,6 +800,7 @@ function fertilityData() {
       year: Number(r.target_year),
       mid: toNum(r.assumed_tfr_mid),
       sourceUrl: r.forecast_source_url,
+      notes: r.notes,
     }))
     .filter((r) => r.mid !== null);
   const actual = parseCSV(read("data/fertility_actual.csv"))
@@ -957,6 +958,49 @@ ${fertilityTable(d, lang)}
   `;
 }
 
+// 出典行(#fertility-source)。元は fertility.js の buildSourceHtml() が組み立てて
+// いたが、それだと**JSを実行しない相手には出典そのものが届かない**。実際、実績値の
+// 出典3件と2002年推計の「原本はスキャンPDFなので別機関のミラーで数値を確認した」
+// という注記は、静的HTMLのどこにも出ていなかった(2026-08-04発見)。推計側のURLだけは
+// 上のズレ一覧が別途持っていたので、URLが1本も無いようには見えず気づきにくかった。
+// 「出典つきで確かめられる」がこのサイトの前提である以上、数値表と同じ扱い——
+// ビルドがHTMLに埋め、JSでは組み直さない——にする。
+function fertilitySourceHtml(d, lang = "ja") {
+  // JAページは本文=JA・data-en=EN。ラベルだけが訳の対象で、URLは言語に依らない。
+  // data-en は textContent ごと差し替えられるので、<a> を含まない <span> に付ける。
+  const label = (ja, en) =>
+    lang === "ja"
+      ? `<span${dual(en)}>${escapeHTML(ja)}</span>`
+      : `<span>${escapeHTML(en)}</span>`;
+  const link = (url) =>
+    `<a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(url)}</a>`;
+
+  const lines = [];
+  const seen = new Set();
+  for (const v of d.vintages) {
+    const first = d.forecast.find((r) => r.vintage === v);
+    const url = safeUrl(first.sourceUrl);
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    // notes は原資料についての但し書き(ミラーで確認した等)で、訳は用意していない。
+    // 日本語のまま出すので lang="ja" を付ける。JAページでも付けるのは、EN表示に
+    // 切り替わると <html lang> が en になり、この注記だけ嘘になるため。
+    const note = first.notes ? ` <span lang="ja">(${escapeHTML(first.notes)})</span>` : "";
+    lines.push(
+      `${label(FERT.vintageLabel(v, "ja"), FERT.vintageLabel(v, "en"))}: ${link(url)}${note}`
+    );
+  }
+  for (const r of d.actual) {
+    const url = safeUrl(r.sourceUrl);
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    lines.push(
+      `${label(FERT.T.ja.sourceActualPrefix, FERT.T.en.sourceActualPrefix)}${link(url)}`
+    );
+  }
+  return lines.join("<br>");
+}
+
 function fertilityJsonLd(d, lang = "ja") {
   const url = abs(REL.fertility[lang]);
   return `
@@ -1015,6 +1059,7 @@ function buildFertility() {
   html = injectRegion(html, "jsonld", fertilityJsonLd(d, "ja"), "fertility.html");
   html = injectRegion(html, "scope", fertilityScopeNote("ja"), "fertility.html");
   html = injectRegion(html, "table", fertilitySection(d, "ja"), "fertility.html");
+  html = injectRegion(html, "fertsource", fertilitySourceHtml(d, "ja"), "fertility.html");
   return html;
 }
 
@@ -1050,7 +1095,11 @@ ${hreflangTags(urls)}
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="/style.css?v=${ASSET_V}">
-<noscript><style>.chart-wrap > svg, #fertility-legend, #fertility-source { display: none !important; } .chart-noscript { display: block; }</style></noscript>
+<!-- JAの fertility.html と同じ規則。#fertility-source をここに入れないのは、
+     中身をビルドがHTMLに埋めてあり、JSが動かない相手にこそ見せたいものだから
+     (隠すと出典が届かなくなる)。#fertility-legend はJSが描くSVGの凡例なので
+     SVGごと隠す。 -->
+<noscript><style>.chart-wrap > svg, #fertility-legend { display: none !important; } .chart-noscript { display: block; }</style></noscript>
 ${fertilityJsonLd(d, "en")}</head>
 <body>
 <div class="page">
@@ -1071,7 +1120,7 @@ ${header("en", urls)}
 
       <div class="fertility-legend" id="fertility-legend"></div>
 
-      <div class="readout-source" id="fertility-source"></div>
+      <div class="readout-source" id="fertility-source">${fertilitySourceHtml(d, "en")}</div>
     </section>
 
 ${fertilitySection(d, "en")}
@@ -3623,17 +3672,23 @@ function hoanLawNumErrors() {
 // fail-closed: 1件も見つからない場合もエラーにする。手書きHTMLから ?v= が
 // 消えることは通常ありえず、0件は「正規表現が現実に追いつけなくなった」以外
 // の意味を持たない(handwrittenJaDriftErrors の 0件チェックと同じ考え方)。
-function assetVersionErrors() {
-  const walk = (dir) =>
-    fs.readdirSync(dir, { withFileTypes: true }).flatMap((d) => {
+// サイト配下の .html を全部拾う。dotfile と node_modules は対象外(前者は
+// 配信物ではなく、後者は他人のHTML)。全ページを見る検査が3つあるので1箇所に置く。
+function walkHtml(dir = SITE_DIR) {
+  return fs
+    .readdirSync(dir, { withFileTypes: true })
+    .flatMap((d) => {
       if (d.name === "node_modules" || d.name.startsWith(".")) return [];
       const p = path.join(dir, d.name);
-      return d.isDirectory() ? walk(p) : /\.html$/i.test(d.name) ? [p] : [];
-    });
+      return d.isDirectory() ? walkHtml(p) : /\.html$/i.test(d.name) ? [p] : [];
+    })
+    .sort();
+}
 
+function assetVersionErrors() {
   const errs = [];
   let seen = 0;
-  for (const file of walk(SITE_DIR).sort()) {
+  for (const file of walkHtml()) {
     const html = fs.readFileSync(file, "utf8");
     for (const m of html.matchAll(/(?:href|src)="[^"]*\?v=([^"&]*)"/g)) {
       seen++;
@@ -3722,16 +3777,9 @@ function cardFallbackErrors() {
 // fail-closed: description を持つのに og:description が無い(またはその逆)も
 // エラー。og だけ消える壊れ方はSNSカードにしか出ないので目視では気づけない。
 function ogDescriptionErrors() {
-  const walk = (dir) =>
-    fs.readdirSync(dir, { withFileTypes: true }).flatMap((d) => {
-      if (d.name === "node_modules" || d.name.startsWith(".")) return [];
-      const p = path.join(dir, d.name);
-      return d.isDirectory() ? walk(p) : /\.html$/i.test(d.name) ? [p] : [];
-    });
-
   const errs = [];
   let seen = 0;
-  for (const file of walk(SITE_DIR).sort()) {
+  for (const file of walkHtml()) {
     const html = fs.readFileSync(file, "utf8");
     const rel = path.relative(SITE_DIR, file);
     const desc = /<meta name="description" content="([^"]*)"/.exec(html);
@@ -3758,6 +3806,61 @@ function ogDescriptionErrors() {
     errs.push(
       "og:description 検査: description を持つHTMLを1件も見つけられなかった" +
         "(0件はありえない。meta の書き方が変わって正規表現が追いつけなくなった可能性が高い)"
+    );
+  }
+  return errs;
+}
+
+/* ── 出典URLが静的HTMLから辿れるか ─────────────────────────────
+ * 「出典つきで確かめられる」はこのサイトの前提で、確かめるのにJSの実行を
+ * 要求しないことまで含む。ところが2026-08-04まで /fertility の実績値の出典
+ * (3件)と2002年推計の但し書きは fertility.js が組み立てていて、**静的HTMLの
+ * どこにも出ていなかった**。推計側のURLだけはズレ一覧が別途持っていたので、
+ * ページを見ても「出典が1件も無い」ようには見えず、気づきようが無かった。
+ *
+ * そこで data/*.csv のURL列に載っているURLが、サイトのどれかの静的HTMLに
+ * 現れることを要求する。ページ単位ではなくサイト全体で見るのは、gdp_forecast の
+ * `実質:URL 名目:URL` のような複合セルが2ページに分かれて出るため(片方ずつ
+ * 正しく出ているのを「そのページに無い」と誤検出させない)。実測212件が全部
+ * 現れる状態から始めている。
+ *
+ * 比較の前に &amp; を戻すこと。e-stat のURLはクエリを持つので、HTMLに
+ * 埋まった側は必ずエスケープされている(これを忘れると全件エラーになる)。
+ */
+function sourceUrlReachErrors() {
+  const html = walkHtml()
+    .map((f) => fs.readFileSync(f, "utf8"))
+    .join("\n")
+    .replace(/&amp;/g, "&");
+
+  const errs = [];
+  let seen = 0;
+  for (const file of fs.readdirSync(path.join(SITE_DIR, "data")).sort()) {
+    if (!file.endsWith(".csv")) continue;
+    const rows = parseCSV(read(`data/${file}`));
+    if (!rows.length) continue;
+    const cols = Object.keys(rows[0]).filter((c) => /url/i.test(c));
+    const urls = new Set();
+    for (const r of rows) {
+      for (const c of cols) {
+        for (const u of (r[c] || "").matchAll(/https?:\/\/[^\s"<>]+/g)) urls.add(u[0]);
+      }
+    }
+    for (const u of urls) {
+      seen++;
+      if (!html.includes(u)) {
+        errs.push(
+          `出典URLが静的HTMLに無い: data/${file} の ${u}\n` +
+            `    JSを実行しない相手にはこの出典が届いていない` +
+            `(ページのJSが組み立てているだけになっていないか見ること)`
+        );
+      }
+    }
+  }
+  if (seen === 0) {
+    errs.push(
+      "出典URLの検査: data/*.csv からURLを1件も取り出せなかった" +
+        "(0件はありえない。列名の付け方が変わって /url/i で拾えなくなった可能性が高い)"
     );
   }
   return errs;
@@ -3937,6 +4040,9 @@ if (check) {
   // description ↔ og:description の一致も独立(SNSカードにしか出ないので、
   // 生成物が最新でも画面が正しくても検出されない壊れ方)。
   const ogDescErrs = ogDescriptionErrors();
+  // 出典URLが静的HTMLから辿れるかも独立(生成物は最新・文言も一致している状態で、
+  // 「その出典をJSしか組み立てていない」という形で欠ける)。
+  const srcReachErrs = sourceUrlReachErrors();
   if (
     stale.length ||
     orphans.length ||
@@ -3952,7 +4058,8 @@ if (check) {
     hoanNumErrs.length ||
     assetVErrs.length ||
     cardFbErrs.length ||
-    ogDescErrs.length
+    ogDescErrs.length ||
+    srcReachErrs.length
   ) {
     if (stale.length) console.error(`✗ 生成物が古い: ${stale.join(", ")}`);
     if (orphans.length) console.error(`✗ 余分なファイル: chart/${orphans.join(", chart/")}`);
@@ -3969,11 +4076,12 @@ if (check) {
     assetVErrs.forEach((e) => console.error(`✗ ${e}`));
     cardFbErrs.forEach((e) => console.error(`✗ ${e}`));
     ogDescErrs.forEach((e) => console.error(`✗ ${e}`));
+    srcReachErrs.forEach((e) => console.error(`✗ ${e}`));
     if (stale.length || orphans.length || orphansEn.length) console.error("  node bin/build.mjs を実行してからデプロイすること");
     process.exit(1);
   }
   console.log(
-    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 法令番号の英語換算(公布年・law_idとの突き合わせ) / 全HTMLの?v=とASSET_Vの一致 / JAトップのcard-fallbackとINDICATOR_METAの一致 / descriptionとog:descriptionの一致とも一致）`
+    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 法令番号の英語換算(公布年・law_idとの突き合わせ) / 全HTMLの?v=とASSET_Vの一致 / JAトップのcard-fallbackとINDICATOR_METAの一致 / descriptionとog:descriptionの一致 / data/*.csvの出典URLが静的HTMLから辿れることとも一致）`
   );
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -3996,4 +4104,12 @@ if (check) {
   ogFileErrors().forEach((e) => console.warn(`⚠ ${e}`));
   csvSchemaErrors().forEach((e) => console.warn(`⚠ ${e}`));
   citeDataFilesErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  // 2026-08-03〜04に足した5件も、ここに並べないとデプロイ直前の --check まで
+  // 出てこない(気づくのが遅いほど直すのが面倒になる)。どれも書き出し後の
+  // ファイルを読むので、この位置でなければならない。
+  hoanLawNumErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  assetVersionErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  cardFallbackErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  ogDescriptionErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  sourceUrlReachErrors().forEach((e) => console.warn(`⚠ ${e}`));
 }

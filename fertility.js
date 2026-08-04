@@ -115,14 +115,13 @@ async function main() {
       vintageYear: Number(r.vintage_year),
       targetYear: Number(r.target_year),
       mid: toNum(r.assumed_tfr_mid),
-      sourceUrl: r.forecast_source_url,
-      publishedDate: r.forecast_published_date,
-      notes: r.notes,
     }))
     .filter((r) => r.mid !== null);
 
+  // 出典URL・注記の列はここでは読まない。出典行は bin/build.mjs が組み立てて
+  // HTMLに埋めてある(applyBuiltI18n のコメントを参照)。
   const actualRows = actualRaw
-    .map((r) => ({ year: Number(r.year), tfr: toNum(r.actual_tfr), sourceUrl: r.source_url }))
+    .map((r) => ({ year: Number(r.year), tfr: toNum(r.actual_tfr) }))
     .filter((r) => r.tfr !== null)
     .sort((a, b) => a.year - b.year);
 
@@ -268,34 +267,15 @@ async function main() {
     );
   }
 
-  function buildSourceHtml() {
-    const sourceLines = [];
-    const seenUrls = new Set();
-    byVintage.forEach(({ vintageYear, rows }) => {
-      const url = safeUrl(rows[0].sourceUrl);
-      if (url && !seenUrls.has(url)) {
-        seenUrls.add(url);
-        const note = rows[0].notes ? `(${escapeHTML(rows[0].notes)})` : "";
-        sourceLines.push(`${vintageLabel(vintageYear, lang)}: <a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(url)}</a>${note}`);
-      }
-    });
-    const actualUrls = [...new Set(actualRows.map((r) => r.sourceUrl).filter(Boolean))];
-    actualUrls.forEach((u) => {
-      const url = safeUrl(u);
-      if (url && !seenUrls.has(url)) {
-        seenUrls.add(url);
-        sourceLines.push(`${T[lang].sourceActualPrefix}<a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(url)}</a>`);
-      }
-    });
-    return sourceLines.join("<br>");
-  }
-
-  // 数値表は bin/build.mjs が data/*.csv から HTML に埋め込んでいる。JSでは組み直さない
-  // （JSを実行しないクローラにとって、このページで数値が読める唯一の場所だから）。
+  // 数値表と出典行は bin/build.mjs が data/*.csv から HTML に埋め込んでいる。JSでは
+  // 組み直さない（JSを実行しないクローラにとって、このページで数値と出典が読める唯一の
+  // 場所だから）。出典行は2026-08-04までここで組み立てていて、そのせいで実績値の出典が
+  // JS無しでは1件も辿れなかった。ビルド側へ移して原本を1つにしてある。
   // ビルド側が EN 訳を data-en に入れてあるので、ここは辞書を引かずに入れ替えるだけ。
-  // textContent ごと差し替えるため、data-en は子要素を持たない節点にだけ付けてある。
-  function applyTableI18n() {
-    document.querySelectorAll(".data-section [data-en]").forEach((el) => {
+  // textContent ごと差し替えるため、data-en は子要素を持たない節点にだけ付けてある
+  // (出典行の <a> は data-en を持たないので、URLは触られない)。
+  function applyBuiltI18n() {
+    document.querySelectorAll(".data-section [data-en], #fertility-source [data-en]").forEach((el) => {
       if (el.dataset.ja === undefined) el.dataset.ja = el.textContent;
       el.textContent = lang === "en" ? el.dataset.en : el.dataset.ja;
     });
@@ -312,11 +292,10 @@ async function main() {
     document.getElementById("t-footer-about").textContent = t.footerAbout;
     document.getElementById("t-footer-contact").textContent = t.footerContact;
     document.getElementById("fertility-legend").innerHTML = buildLegendHtml();
-    document.getElementById("fertility-source").innerHTML = buildSourceHtml();
     document.getElementById("lang-ja").classList.toggle("active", lang === "ja");
     document.getElementById("lang-en").classList.toggle("active", lang === "en");
     document.documentElement.lang = lang;
-    applyTableI18n();
+    applyBuiltI18n();
   }
 
   // lang-ja/lang-en は他ページの URL への実リンク(<a>)。切り替えはブラウザの通常の
