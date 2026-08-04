@@ -1,7 +1,7 @@
 {
   "_comment": "bin/og.sh が assets/og*.png(汎用2枚+指標8種×2言語+扇形2種×2言語の計22枚)を焼くたびに書き直す。node bin/build.mjs --check の陳腐化検査(ogStalenessErrors)が、ここに記録したsha256といまの入力ファイルの実ハッシュを突き合わせて焼き直し忘れを検出する。入力ファイルの一覧(chart.js・METRICSの全指標CSV・扇形カード用のdata/fertility_*.csvとdata/births_*.csvの4本・og.html・csv.js・style.css)はnode bin/build.mjs --og-list が唯一の出所で、ここに手書きのコピーは持たない。このファイルはsite/配下にあるため配信されるが、パスとハッシュの対応表だけで秘密は含まない(承知の上で置いている)。ハッシュは焼き始める前に計算し固定したもの(TOCTOU対策。bin/og.shのcompute_stamp直上コメント参照)。",
   "inputs": {
-    "chart.js": "sha256:007caaa888f93fd56d1a0627ec80477d1b9cede46a9a379683f16204fbc45ec6",
+    "chart.js": "sha256:db8f7ff1559d049fc58f2cc43d1f023796be6f76185df2c59bf9f971519d7a54",
     "csv.js": "sha256:f2fd74a23e5e7636f0e1b091b88ed3465b684959be298ddd14c5137593fbd97a",
     "data/births_actual.csv": "sha256:eb180051d3fcbb26b2f940353fb2f135320bd8910534f600f798c9b63d3fb4b6",
     "data/births_forecast.csv": "sha256:88a8724004c192ec54ca687740b93c1e85592021dadebbd114d95d73f5a52237",
@@ -10,7 +10,7 @@
     "data/current_account_forecast.csv": "sha256:c87c9c373a0620db0afb3e31d0d2106d335e787b950f7152feca935ac75eeec7",
     "data/fertility_actual.csv": "sha256:d198efc08e256be85e39d2a9c50441b07c9042fca981af4f62564f99049ca7c5",
     "data/fertility_forecast.csv": "sha256:ca5655414ce1d636d1d155912c7b3c10ac70187e5aa6339449f1fd3821906b56",
-    "data/gdp_forecast.csv": "sha256:a5e9917b3af319ea7e87003e1a47501dbbe2fb15ee37f7bc681a5cba3dc2be33",
+    "data/gdp_forecast.csv": "sha256:28add72c5c48ff8c97688a4c905d30dd0ef7451eb79a96e41d3b6ce1c2287a3a",
     "data/jgb_total_issuance_forecast.csv": "sha256:d689e26708553a8cd1b4c0e0da73c1c40be4d376fe1e559a640c6d09bcd5504a",
     "data/tax_revenue_forecast.csv": "sha256:af66f6666bff6ccb2c0bb1860020f112f98582493c85c7749a994f93729dd2f5",
     "data/unemployment_forecast.csv": "sha256:4f6e183f5b23aac8a25dc2f05f3f6f5b7120e37a68f1c30f80f14efa2cc1a57f",
