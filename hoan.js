@@ -23,6 +23,46 @@ const NOTE_LABEL = {
   en: { "段階施行": "Staged enforcement" },
 };
 
+// 法令名は EN でも訳さない。公式の英訳(法務省「日本法令外国語訳データベース
+// システム」)があるのは対象49法のうち18法=37%しかなく(2026-08-03に法令番号で
+// 全件照会して実測)、当てると表が英日のまだらになる。しかも未訳が多いのは新しい
+// 法律のほうで、このページの対象は「直近5年の制定法」なので不利は解消しない。
+// 全部日本語のまま lang="ja" を付けるのが、一貫していて誤解も生まない。
+//
+// 一方で**法令番号は訳ではなく換算で英語化できる**ので、そこだけ併記する。
+// 元号表記は日本語圏の外では読めないが、"Act No. 78 of 2022" は英語圏で法令を
+// 指すときの標準形(日本法令外国語訳DB自身もこの形を使う)。西暦は元号の初年から
+// 機械的に決まり、訳の判断が入らない。
+// 日本語表記のほうは消さないこと。消すと e-Gov で引けなくなる(法令番号は
+// 一次資料の識別子であって、表示用の文字列ではない)。
+const ERA_BASE = { "明治": 1867, "大正": 1911, "昭和": 1925, "平成": 1988, "令和": 2018 };
+const KANJI_DIGIT = { "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9 };
+
+function kanjiToInt(s) {
+  let n = 0, cur = 0;
+  for (const ch of s) {
+    if (ch === "元") cur = 1;                                  // 令和元年 = 令和1年
+    else if (KANJI_DIGIT[ch]) cur = KANJI_DIGIT[ch];
+    else if (ch === "十") { n += (cur || 1) * 10; cur = 0; }
+    else if (ch === "百") { n += (cur || 1) * 100; cur = 0; }
+    else return null;
+  }
+  return n + cur;
+}
+
+// "令和四年法律第七十八号" -> "Act No. 78 of 2022"
+// 読めない形は null を返し、呼び出し側は併記を省く(誤った番号を出すより出さない)。
+// 法令番号の年は公布年なので、算出した西暦は promulgation_date の年と必ず一致する。
+// この不変条件は bin/build.mjs の --check が全行について確認している。
+function lawNumEn(lawNum) {
+  const m = /^(明治|大正|昭和|平成|令和)(.+?)年法律第(.+?)号$/.exec(lawNum || "");
+  if (!m) return null;
+  const year = kanjiToInt(m[2]);
+  const no = kanjiToInt(m[3]);
+  if (!year || !no) return null;
+  return `Act No. ${no} of ${ERA_BASE[m[1]] + year}`;
+}
+
 const T = {
   ja: {
     back: "← 指標一覧",
@@ -154,11 +194,17 @@ function rowHTML(r) {
   const src = url
     ? `<a class="hoan-srclink mono" href="${escapeHTML(url)}" target="_blank" rel="noopener">${t.srcLink}</a>`
     : "";
+  // lang="ja" は bin/build.mjs の静的版が付けているのと同じ理由・同じ範囲で付ける
+  // (訳していない日本語をEN文書の中に置くため)。JS側に付け忘れていて、JSが動くと
+  // 属性が消える不揃いがあった(2026-08-03)。
+  const jaLang = lang === "en" ? ` lang="ja"` : "";
+  const numEn = lang === "en" ? lawNumEn(r.law_num) : null;
+  const numEnHtml = numEn ? ` <span class="hoan-lawnum-en">(${escapeHTML(numEn)})</span>` : "";
   return `
     <tr class="hoan-row" data-id="${escapeHTML(r.law_id)}" tabindex="0" aria-expanded="false">
       <td class="col-title">
-        <div class="hoan-lawtitle">${escapeHTML(r.law_title)}</div>
-        <div class="hoan-lawnum mono">${escapeHTML(r.law_num)}</div>
+        <div class="hoan-lawtitle"${jaLang}>${escapeHTML(r.law_title)}</div>
+        <div class="hoan-lawnum mono"><span${jaLang}>${escapeHTML(r.law_num)}</span>${numEnHtml}</div>
       </td>
       <td class="col-date mono">${escapeHTML(r.enforcement_date || t.enforceMissing)}${staged}</td>
       <td class="col-date mono">${escapeHTML(deadline)}<div class="hoan-yrs mono">${escapeHTML(yrs)}</div></td>

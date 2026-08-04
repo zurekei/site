@@ -1092,7 +1092,7 @@ ${fertilitySection(d, "en")}
 
 /* ── 見直し条項 ─────────────────────────────────────────── */
 
-const HOAN = loadModule("hoan.js", ["T", "STATUS", "NOTE_LABEL"]);
+const HOAN = loadModule("hoan.js", ["T", "STATUS", "NOTE_LABEL", "lawNumEn"]);
 
 // 並びは hoan.js の sortRows と同じ規則（状況 → 期限）。STATUS も本物を使う。
 function hoanRows() {
@@ -1136,7 +1136,12 @@ function hoanRowHtml(r, lang = "ja") {
   // <pre>にだけ付けて.hoan-lawtitle/.hoan-lawnumに付け忘れていた不揃いが
   // あった(2026-07-30レビュー指摘。日本語のまま残すこと自体は方針どおり
   // 正しいので、マークだけ揃える)。
+  // 2026-08-03に法令番号だけ英語の換算形を**併記**するようにした(日本語表記は
+  // 消していない。理由と換算規則は hoan.js の lawNumEn を参照)。併記部分は
+  // 英語なので lang="ja" の外に出す。
   const clauseLang = lang === "en" ? ` lang="ja"` : "";
+  const numEn = lang === "en" ? HOAN.lawNumEn(r.law_num) : null;
+  const numEnHtml = numEn ? ` <span class="hoan-lawnum-en">(${escapeHTML(numEn)})</span>` : "";
   const detail = clause
     ? `      <tr class="hoan-detail hoan-detail-static">
         <td colspan="4">
@@ -1151,7 +1156,7 @@ function hoanRowHtml(r, lang = "ja") {
   return `      <tr class="hoan-row hoan-row-static">
         <td class="col-title">
           <div class="hoan-lawtitle"${clauseLang}>${escapeHTML(r.law_title)}</div>
-          <div class="hoan-lawnum mono"${clauseLang}>${escapeHTML(r.law_num)} ${src}</div>
+          <div class="hoan-lawnum mono"><span${clauseLang}>${escapeHTML(r.law_num)}</span>${numEnHtml} ${src}</div>
         </td>
         <td class="col-date mono">${escapeHTML(r.enforcement_date || t.enforceMissing)}${staged}</td>
         <td class="col-date mono">${escapeHTML(deadline)}<div class="hoan-yrs mono">${escapeHTML(yrs)}</div></td>
@@ -3514,6 +3519,63 @@ function csvSchemaErrors() {
  * ファイルの行が表に残っている)側も、CSV_COLUMNS にあって DATA_FILES に
  * 無い(新しいファイルの行が表に無い)側も、どちらか片方だけでは穴が残る。
  */
+// hoan_review.csv の law_num が全行 lawNumEn() で読めること、かつ換算結果が
+// 同じ行の他の列と食い違わないことを見る。突き合わせ先は2つで、年と号を別々に
+// 押さえている:
+//   年 → promulgation_date の西暦(法令番号の年は公布年なので必ず一致する)
+//   号 → law_id(e-Govの法令IDは "5" + 年2桁 + "AC" + … + 号3桁 の形で、
+//        元号・年・号をそのまま埋め込んでいる。49行すべてでこの形を確認済み)
+// ズレたら元号の換算表(ERA_BASE)か漢数字の解釈(kanjiToInt)が壊れている。
+//
+// 検査が要る理由: lawNumEn() は読めない番号に対して null を返して**併記を黙って
+// 省く**設計なので、壊れても画面は「英語の番号が出ないだけ」になり、JA側は元から
+// 出さないので何も変わらない。放っておくと気づけない。
+//
+// 号の突き合わせは後から足した。最初は年(promulgation_date)しか見ておらず、
+// **漢数字の「十」の解釈を壊す負例が素通りした**(2026-08-03)。対象49法の年は
+// 三〜七の一文字で「十」を含まないため、年の検査だけでは号の壊れ方に触れない。
+// 逆方向で確認済み: ERA_BASE の令和を1つずらすと49行全部、「十」を壊すと
+// 該当する号を持つ行が落ちる。
+function hoanLawNumErrors() {
+  let rows;
+  try {
+    rows = parseCSV(read("data/hoan_review.csv"));
+  } catch (e) {
+    return [`法令番号検査: data/hoan_review.csv が読めない(${e.message})`];
+  }
+  const errs = [];
+  for (const r of rows) {
+    const en = HOAN.lawNumEn(r.law_num);
+    if (!en) {
+      errs.push(
+        `法令番号: "${r.law_num}" (${r.law_id}) を lawNumEn() が読めない。` +
+          `EN側は英語の番号を黙って省くので画面には出ない。hoan.js の lawNumEn を見ること`
+      );
+      continue;
+    }
+    const m = /^Act No\. (\d+) of (\d+)$/.exec(en);
+    if (!m) {
+      errs.push(`法令番号: lawNumEn("${r.law_num}") の形が想定外(値: "${en}")`);
+      continue;
+    }
+    const [no, year] = [Number(m[1]), Number(m[2])];
+    const promulgated = Number((r.promulgation_date || "").slice(0, 4));
+    if (promulgated && year !== promulgated) {
+      errs.push(
+        `法令番号: "${r.law_num}" (${r.law_id}) の換算が ${year}年 だが ` +
+          `promulgation_date は ${promulgated}年。法令番号の年は公布年なので一致するはず`
+      );
+    }
+    if (!String(r.law_id || "").endsWith(String(no).padStart(3, "0"))) {
+      errs.push(
+        `法令番号: "${r.law_num}" の換算が第${no}号 だが law_id "${r.law_id}" の` +
+          `末尾3桁と合わない(law_idは号をそのまま埋め込んでいる)`
+      );
+    }
+  }
+  return errs;
+}
+
 function citeDataFilesErrors() {
   const errs = [];
   const declared = new Set(Object.keys(CSV_COLUMNS));
@@ -3676,6 +3738,9 @@ if (check) {
   // 内容そのものにも関わらない別種の壊れ方なので、csvSchemaErrs とは独立に
   // 必ず見る。
   const citeDataFilesErrs = citeDataFilesErrors();
+  // 法令番号の英語換算も、生成物の新旧にもCSVのスキーマにも掛からない別種の
+  // 壊れ方(値は正しい形をしているのに換算だけ間違う)なので独立に見る。
+  const hoanNumErrs = hoanLawNumErrors();
   if (
     stale.length ||
     orphans.length ||
@@ -3687,7 +3752,8 @@ if (check) {
     ogErrs.length ||
     ogFileErrs.length ||
     csvSchemaErrs.length ||
-    citeDataFilesErrs.length
+    citeDataFilesErrs.length ||
+    hoanNumErrs.length
   ) {
     if (stale.length) console.error(`✗ 生成物が古い: ${stale.join(", ")}`);
     if (orphans.length) console.error(`✗ 余分なファイル: chart/${orphans.join(", chart/")}`);
@@ -3700,11 +3766,12 @@ if (check) {
     ogFileErrs.forEach((e) => console.error(`✗ ${e}`));
     csvSchemaErrs.forEach((e) => console.error(`✗ ${e}`));
     citeDataFilesErrs.forEach((e) => console.error(`✗ ${e}`));
+    hoanNumErrs.forEach((e) => console.error(`✗ ${e}`));
     if (stale.length || orphans.length || orphansEn.length) console.error("  node bin/build.mjs を実行してからデプロイすること");
     process.exit(1);
   }
   console.log(
-    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応とも一致）`
+    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 法令番号の英語換算(公布年・law_idとの突き合わせ)とも一致）`
   );
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
