@@ -2710,6 +2710,27 @@ function handwrittenJaDriftErrors() {
       // 本物)をそのまま呼ぶ。
       extra: [{ id: "cite-data-tbody", prop: "innerHTML", raw: CITE.renderDataRows("ja"), markup: true }],
     },
+    // hoan.html / fertility.html は「全体が生成物」ではなく、injectRegion() で
+    // 一部の領域(hoan: jsonld/summary/rows、fertility: jsonld/scope/table)だけを
+    // 差し替える形なので、**それ以外の地の文は上の4ファイルと同じ手書き**であり
+    // 同じ壊れ方をする。2026-08-01に hoan.js の T.ja.desc だけを直して
+    // hoan.html の静的本文を直し忘れ、同じページの中で本文(旧)とJSON-LD(新)が
+    // 食い違ったまま --check が緑で通った(JSが動く環境では set() が上書きする
+    // ので永久に気づけない)。2026-08-04にこの2つを対象へ入れて塞いだ。
+    //
+    // injectRegion() が生成する領域の中にあるidも、ここでは特に除外しない。
+    // 生成側が T.ja から作っているなら一致するので無害で、もし食い違うなら
+    // それは生成側の実バグとして拾いたい(#fert-scope-note が実際にこの形)。
+    // なお #summary(hoan) は tr().summary(件数) という関数呼び出しの代入で、
+    // extractStaticAssignments() が拾う「t.<key>」の形にならないため対象外。
+    // fertility.js の #fertility-legend / #fertility-source も同様に関数から
+    // 組み立てるが、about.html の #methods-tbody のような extra は足していない
+    // — あちらは「手書きHTML vs JSの関数」の突き合わせなのに対し、こちらは
+    // BUILD:table の生成領域の中にあり、生成側(fertilitySection)とJS側
+    // (buildLegendHtml)が別々に組み立てている**別種の写し**だから。これは
+    // 手書きドリフトではないので、この検査に混ぜると筋が悪くなる(TODO)。
+    { file: "hoan.html", js: "hoan.js", T: HOAN.T.ja, html: read("hoan.html"), extra: [] },
+    { file: "fertility.html", js: "fertility.js", T: FERT.T.ja, html: read("fertility.html"), extra: [] },
   ];
 
   // タグとタグの間だけにある空白(手書きHTML側の改行・インデント)を畳む。
@@ -2720,6 +2741,14 @@ function handwrittenJaDriftErrors() {
   // 変えない。t.<key>の単純な代入(拡張子extra以外)には使わない — あちらは
   // 地の文なので、空白1つでも実在する食い違いになりうる。
   const collapseMarkupWhitespace = (s) => s.replace(/>\s+</g, "><");
+
+  // injectRegion() のマーカーは差し替え先の要素の**中**に入る
+  // (例: <p id="fert-scope-note"><!-- BUILD:scope -->本文<!-- /BUILD:scope --></p>)。
+  // 落とさずに比べると、生成側とJS側が同じ T.ja を見ていても必ず食い違う
+  // (2026-08-04に hoan/fertility を対象へ入れた時点で #fert-scope-note が
+  // これで誤検出になった)。落としたうえで比べれば、injectRegion が入れた
+  // 中身が T.ja と一致しているかを見ることになり、検査としてはむしろ強くなる。
+  const stripBuildMarkers = (s) => s.replace(/<!--\s*\/?BUILD:[a-zA-Z0-9_-]+\s*-->/g, "");
 
   for (const { file, js, T, html, extra } of targets) {
     const rawAssigns = extractStaticAssignments(read(js));
@@ -2750,7 +2779,7 @@ function handwrittenJaDriftErrors() {
       // 前後の空白(手書きHTMLのインデント・改行)は正規化してよいが、中身の
       // 正規化はしない(全角/半角・句読点の違いなどをここで飲み込むと、この
       // 検査自体が事故を見逃す側になる)。
-      actual = actual.trim();
+      actual = stripBuildMarkers(actual).trim();
       expected = expected.trim();
       if (markup) {
         actual = collapseMarkupWhitespace(actual);
@@ -3576,6 +3605,164 @@ function hoanLawNumErrors() {
   return errs;
 }
 
+// 全HTMLの href/src に付く ?v= が ASSET_V と一致することを見る(2026-08-04)。
+//
+// ASSET_V は bin/build.mjs にあるが、**手書きHTML(index/about/cite/contact/
+// corrections/fertility/hoan)の ?v= はそこから生成されておらず、人間が同じ
+// 文字列を書き写している**。生成物側(chart/*・en/**)は ASSET_V から作られる
+// ので自動で揃うが、手書き側は揃いを守るものが何も無かった。実験では
+// about.html の style.css?v= だけを古い値に戻しても --check は緑のまま通り、
+// **そのページだけブラウザが古いCSS/JSを使い続ける**状態になった。
+// og.html にも「?v=を手で揃える3箇所目になるのに揃いを守る検査は何も無く
+// 形骸化していた」と書いてあり、その指摘が塞がれないまま残っていた。
+//
+// 対象は href="…?v=…" / src="…?v=…" の形だけに限る。og.html には ?v= を
+// **付けない理由**を説明したコメントがあり(焼きに対してキャッシュバスターは
+// 意味を持たないため)、素の "?v=" を拾う書き方だとそれに誤爆する。
+//
+// fail-closed: 1件も見つからない場合もエラーにする。手書きHTMLから ?v= が
+// 消えることは通常ありえず、0件は「正規表現が現実に追いつけなくなった」以外
+// の意味を持たない(handwrittenJaDriftErrors の 0件チェックと同じ考え方)。
+function assetVersionErrors() {
+  const walk = (dir) =>
+    fs.readdirSync(dir, { withFileTypes: true }).flatMap((d) => {
+      if (d.name === "node_modules" || d.name.startsWith(".")) return [];
+      const p = path.join(dir, d.name);
+      return d.isDirectory() ? walk(p) : /\.html$/i.test(d.name) ? [p] : [];
+    });
+
+  const errs = [];
+  let seen = 0;
+  for (const file of walk(SITE_DIR).sort()) {
+    const html = fs.readFileSync(file, "utf8");
+    for (const m of html.matchAll(/(?:href|src)="[^"]*\?v=([^"&]*)"/g)) {
+      seen++;
+      if (m[1] !== ASSET_V) {
+        errs.push(
+          `?v= の不一致: ${path.relative(SITE_DIR, file)} に "?v=${m[1]}" があるが ` +
+            `bin/build.mjs の ASSET_V は "${ASSET_V}"。` +
+            `そのページだけ古いCSS/JSがキャッシュから使われ続ける`
+        );
+      }
+    }
+  }
+  if (seen === 0) {
+    errs.push(
+      "?v= の検査: HTMLから ?v= を1件も見つけられなかった(0件はありえない。" +
+        "href/src の書き方が変わって正規表現が追いつけなくなった可能性が高い)"
+    );
+  }
+  return errs;
+}
+
+// index.html の .card-fallback(JSを実行しないクローラにとってトップから各指標へ
+// 辿れる唯一の経路)が、home.js の INDICATOR_META と一致することを見る(2026-08-04)。
+//
+// JSが動く環境では home.js が #card-grid を丸ごとカードへ差し替えるので、
+// .card-fallback の文字列がどれだけ古くても**画面上は正しく見える**。EN側は
+// 生成物なので INDICATOR_META から自動で追随し、JA側だけが手書きのまま
+// 取り残される(2026-08-01のCPI改題で実際に取り残した)。
+//
+// href と表示文字列の両方を、並び順込みで突き合わせる。順序まで見るのは、
+// カードの並びがそのまま指標の並び順の宣言になっているため(集合で比べると
+// 入れ替わりを見逃す)。
+function cardFallbackErrors() {
+  const html = read("index.html");
+  const found = [...html.matchAll(/<a class="card-fallback" href="([^"]*)">([^<]*)<\/a>/g)].map(
+    (m) => ({ href: m[1], text: m[2] })
+  );
+  const want = HOME.INDICATOR_META.map((m) => ({ href: m.chartHref, text: m.nameJa }));
+
+  if (found.length === 0) {
+    return [
+      "card-fallback 検査: index.html から .card-fallback を1件も見つけられなかった" +
+        "(0件はありえない。JSを実行しない相手からトップの索引が消えている可能性がある)",
+    ];
+  }
+  const errs = [];
+  if (found.length !== want.length) {
+    errs.push(
+      `card-fallback: index.html に ${found.length} 件あるが home.js の INDICATOR_META は ` +
+        `${want.length} 件。JSが動く環境ではカードに差し替わるので画面では気づけない`
+    );
+  }
+  for (let i = 0; i < Math.max(found.length, want.length); i++) {
+    const f = found[i], w = want[i];
+    if (!f || !w) continue; // 件数の不一致は上で1件にまとめて報告済み
+    if (f.href !== w.href || f.text !== w.text) {
+      errs.push(
+        `card-fallback: index.html の${i + 1}番目が <a href="${f.href}">${f.text}</a> だが ` +
+          `INDICATOR_META は <a href="${w.href}">${w.text}</a>(key: ${HOME.INDICATOR_META[i].key})`
+      );
+    }
+  }
+  return errs;
+}
+
+// 全HTMLで <meta name="description"> と <meta property="og:description"> が
+// 一致することを見る(2026-08-04)。
+//
+// 元は「JAトップの og:description が無検査の手書き複製」というTODOだった。
+// buildHome() は index.html の <meta name="description"> だけを原本として
+// JSON-LD へ流しており、og:description は誰とも突き合わせていない(EN側は
+// buildHomeEn() の const 1箇所から meta/og/JSON-LD すべてが生成されるので
+// 複製が無い)。同じ複製はトップ以外の手書きJAページにもあるので、全ページに
+// 広げてある。
+//
+// 検査を足した時点で実際に1件見つかった: hoan.html だけ og:description が
+// **古い短い版のまま**残っており、JA側に説明文が3種類(meta description /
+// og:description / JSON-LD)存在していた。EN側は生成物なので1つに揃っている。
+// og を meta に揃えて解消した(2026-08-04)。
+//
+// meta description と JSON-LD の description まで一致を要求はしない。検索
+// スニペット向けの短い説明とページの説明が違うのは正当だし、EN側の生成物は
+// 一致しているので、そこを縛ると片方の設計に引きずられる。ここで潰したいのは
+// 「同じ役割の文字列が2箇所にあって片方だけ古くなる」ほうだけ。
+//
+// fail-closed: description を持つのに og:description が無い(またはその逆)も
+// エラー。og だけ消える壊れ方はSNSカードにしか出ないので目視では気づけない。
+function ogDescriptionErrors() {
+  const walk = (dir) =>
+    fs.readdirSync(dir, { withFileTypes: true }).flatMap((d) => {
+      if (d.name === "node_modules" || d.name.startsWith(".")) return [];
+      const p = path.join(dir, d.name);
+      return d.isDirectory() ? walk(p) : /\.html$/i.test(d.name) ? [p] : [];
+    });
+
+  const errs = [];
+  let seen = 0;
+  for (const file of walk(SITE_DIR).sort()) {
+    const html = fs.readFileSync(file, "utf8");
+    const rel = path.relative(SITE_DIR, file);
+    const desc = /<meta name="description" content="([^"]*)"/.exec(html);
+    const og = /<meta property="og:description" content="([^"]*)"/.exec(html);
+    if (!desc && !og) continue; // og.html のようにどちらも持たないページは対象外
+    seen++;
+    if (!desc || !og) {
+      errs.push(
+        `og:description: ${rel} は description と og:description の片方しか持たない` +
+          `(description=${!!desc} / og:description=${!!og})`
+      );
+      continue;
+    }
+    if (desc[1] !== og[1]) {
+      errs.push(
+        `og:description: ${rel} の og:description が description と食い違っている。` +
+          `SNSカードにしか出ないので画面を見ても気づけない\n` +
+          `    description   : ${desc[1].slice(0, 60)}…\n` +
+          `    og:description: ${og[1].slice(0, 60)}…`
+      );
+    }
+  }
+  if (seen === 0) {
+    errs.push(
+      "og:description 検査: description を持つHTMLを1件も見つけられなかった" +
+        "(0件はありえない。meta の書き方が変わって正規表現が追いつけなくなった可能性が高い)"
+    );
+  }
+  return errs;
+}
+
 function citeDataFilesErrors() {
   const errs = [];
   const declared = new Set(Object.keys(CSV_COLUMNS));
@@ -3741,6 +3928,15 @@ if (check) {
   // 法令番号の英語換算も、生成物の新旧にもCSVのスキーマにも掛からない別種の
   // 壊れ方(値は正しい形をしているのに換算だけ間違う)なので独立に見る。
   const hoanNumErrs = hoanLawNumErrors();
+  // ?v=(ASSET_V)の揃いも、生成物の新旧・CSV・法令番号のいずれとも関係しない
+  // 別種の壊れ方(HTMLは最新でも、参照先のバージョンだけが古い)なので独立に見る。
+  const assetVErrs = assetVersionErrors();
+  // JAトップの .card-fallback ↔ INDICATOR_META も独立(生成物は最新・?v=も揃って
+  // いる状態で、手書きのリンク文字列だけが取り残される壊れ方)。
+  const cardFbErrs = cardFallbackErrors();
+  // description ↔ og:description の一致も独立(SNSカードにしか出ないので、
+  // 生成物が最新でも画面が正しくても検出されない壊れ方)。
+  const ogDescErrs = ogDescriptionErrors();
   if (
     stale.length ||
     orphans.length ||
@@ -3753,7 +3949,10 @@ if (check) {
     ogFileErrs.length ||
     csvSchemaErrs.length ||
     citeDataFilesErrs.length ||
-    hoanNumErrs.length
+    hoanNumErrs.length ||
+    assetVErrs.length ||
+    cardFbErrs.length ||
+    ogDescErrs.length
   ) {
     if (stale.length) console.error(`✗ 生成物が古い: ${stale.join(", ")}`);
     if (orphans.length) console.error(`✗ 余分なファイル: chart/${orphans.join(", chart/")}`);
@@ -3767,11 +3966,14 @@ if (check) {
     csvSchemaErrs.forEach((e) => console.error(`✗ ${e}`));
     citeDataFilesErrs.forEach((e) => console.error(`✗ ${e}`));
     hoanNumErrs.forEach((e) => console.error(`✗ ${e}`));
+    assetVErrs.forEach((e) => console.error(`✗ ${e}`));
+    cardFbErrs.forEach((e) => console.error(`✗ ${e}`));
+    ogDescErrs.forEach((e) => console.error(`✗ ${e}`));
     if (stale.length || orphans.length || orphansEn.length) console.error("  node bin/build.mjs を実行してからデプロイすること");
     process.exit(1);
   }
   console.log(
-    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 法令番号の英語換算(公布年・law_idとの突き合わせ)とも一致）`
+    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 法令番号の英語換算(公布年・law_idとの突き合わせ) / 全HTMLの?v=とASSET_Vの一致 / JAトップのcard-fallbackとINDICATOR_METAの一致 / descriptionとog:descriptionの一致とも一致）`
   );
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });

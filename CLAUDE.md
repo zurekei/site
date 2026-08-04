@@ -136,14 +136,16 @@
 
 - [ ] **`/hoan` のEN側に、公式英訳へのリンクを併記するか。** 法務省「日本法令外国語訳データベースシステム」に条文の訳があるのは対象49法のうち18法(2026-08-03実測)。訳がある法律だけリンクを出せば、法令名を訳さないまま英語圏の読者に一次資料を渡せる。**ただし18法をコードに焼き込むと必ず腐る**(訳は後から追加され、カバー率は上がっていく)。やるなら `bin/build_hoan.py` の巡回に法令番号での照会を足して毎回測り直す形にすること。照会は `https://www.japaneselawtranslation.go.jp/ja/laws/result/` へのPOST(`gn`=元号コード, `sy`=年, `ht=A`, `no`=号。CSRFトークンとcookieが要る)で、既定の検索対象には「概要情報」が含まれるので**除外しないと訳が無い法律まで当たる**
 
-### 検査の穴(開発・急がない)
+### 検査の穴
 
-2026-08-01のレビューで、どの検査にも掛からない手書きの複製が2つ見つかった。どちらも今回持ち込まれたものではなく元からある。片方だけ直すと黙ってズレるという点で「同じ文字列を2箇所に置かない」の未達例。
+2026-08-01のレビューで、どの検査にも掛からない手書きの複製が見つかった。いずれも当時持ち込まれたものではなく元からある。片方だけ直すと黙ってズレるという点で「同じ文字列を2箇所に置かない」の未達例。**4件とも2026-08-04に塞いだ**(それぞれ負例で落ちることを実測してある。検査を足しただけで実際の不整合が1件見つかっている)。
 
-- [ ] **`ASSET_V` の複製が無検査。** `bin/build.mjs` の `ASSET_V` と、手書きHTML各ページの `?v=` は別々に書かれている。実験では `about.html` の `style.css?v=` だけを古い値に戻しても `--check` は緑のまま通った。取り違えると、そのページだけ古いCSS/JSをブラウザが使い続ける
-- [ ] **`hoan.html` / `fertility.html` が手書きJAページの文言検査の対象外。** `handwrittenJaDriftErrors()` が見ているのは `about` / `corrections` / `contact` / `cite` で、`hoan` と `fertility` は入っていない。2026-08-01に `hoan.js` の `T.ja.desc` だけを直して `hoan.html` の静的本文を直し忘れ、**同じページの中で本文(旧)とJSON-LD(新)が食い違ったまま `--check` が緑で通った**。JSが動く環境では `set("t-desc", t.desc)` が上書きするので永久に気づけない
-- [ ] **JAトップの `card-fallback` のリンク文字列が無検査。** `home.js` の `INDICATOR_META.nameJa` を改名しても、`index.html` の素のリンクは手書きのまま取り残される(EN側は生成物なので自動で追随し、JA/ENが非対称になる)。2026-08-01のCPI改題で実際に取り残した
-- [ ] **JAトップの `og:description` が無検査の手書き複製。** `buildHome()` は `index.html` の `<meta name="description">` だけを原本としてJSON-LDへ流しており、`og:description` は誰とも突き合わせていない。EN側は `buildHomeEn()` の const 1箇所から meta/og/JSON-LD すべてが生成されるので複製が無い。この非対称を解消するか、検査を足すか
+- [x] **`ASSET_V` の複製。** `bin/build.mjs` の `ASSET_V` と、手書きHTML各ページの `?v=` は別々に書かれていた。実験では `about.html` の `style.css?v=` だけを古い値に戻しても `--check` は緑のまま通った(取り違えると、そのページだけ古いCSS/JSをブラウザが使い続ける)。`assetVersionErrors()` が全HTMLの `href`/`src` に付く `?v=` を `ASSET_V` と突き合わせる。**対象を属性に限っているのは、`og.html` に「`?v=` を付けない理由」を説明したコメントがあり、素の `?v=` を拾うと誤爆するため。** 0件もエラー(fail-closed)
+- [x] **`hoan.html` / `fertility.html` が手書きJAページの文言検査の対象外だった。** `handwrittenJaDriftErrors()` が見ていたのは `about` / `corrections` / `contact` / `cite` だけ。2026-08-01に `hoan.js` の `T.ja.desc` だけを直して `hoan.html` の静的本文を直し忘れ、**同じページの中で本文(旧)とJSON-LD(新)が食い違ったまま `--check` が緑で通った**(JSが動く環境では `set("t-desc", t.desc)` が上書きするので永久に気づけない)。この2つは「全体が生成物」ではなく `injectRegion()` で一部の領域だけを差し替える形なので、**それ以外の地の文は他の4ファイルと同じ手書き**であり同じ壊れ方をする。対象に追加した。**このとき `injectRegion()` のマーカーが差し替え先の要素の中に入る**(`<p id="fert-scope-note"><!-- BUILD:scope -->本文<!-- /BUILD:scope --></p>`)ため、落とさずに比べると生成側とJS側が同じ `T.ja` を見ていても必ず食い違う(実際に `#fert-scope-note` が誤検出になった)。落としてから比べることで、生成領域の中身が `T.ja` と一致しているかまで見る検査になっている
+- [x] **JAトップの `card-fallback` のリンク文字列。** `home.js` の `INDICATOR_META.nameJa` を改名しても、`index.html` の素のリンクは手書きのまま取り残されていた(EN側は生成物なので自動で追随し、JA/ENが非対称になる)。2026-08-01のCPI改題で実際に取り残した。`cardFallbackErrors()` が href と表示文字列を**並び順込みで**突き合わせる(集合で比べると入れ替わりを見逃す)。件数の不一致・0件もエラー
+- [x] **`og:description` が無検査の手書き複製。** `buildHome()` は `index.html` の `<meta name="description">` だけを原本としてJSON-LDへ流しており、`og:description` は誰とも突き合わせていなかった(EN側は `buildHomeEn()` の const 1箇所から meta/og/JSON-LD すべてが生成されるので複製が無い)。同じ複製はトップ以外の手書きJAページにもあるので、`ogDescriptionErrors()` は全ページを見る。**検査を足した時点で実際に1件見つかった**: `hoan.html` だけ `og:description` が古い短い版のまま残っており、**JA側に説明文が3種類**(meta description / og:description / JSON-LD)存在していた。EN側は生成物なので1つに揃っている。`og` を `meta` に揃えて解消した。なお `meta description` と JSON-LD の `description` まで一致は要求していない — 検索スニペット向けの短い説明とページの説明が違うのは正当で、ここで潰したいのは「同じ役割の文字列が2箇所にあって片方だけ古くなる」ほうだけ。片方だけ存在する場合もエラー(`og` だけ消える壊れ方はSNSカードにしか出ないので目視では気づけない)
+
+- [ ] **`/fertility` の凡例と出典行(`#fertility-legend` / `#fertility-source`)が無検査。** `bin/build.mjs` の `fertilitySection()`(静的版)と `fertility.js` の `buildLegendHtml()` / `buildSourceHtml()`(JS版)が**別々に同じものを組み立てている**。上の手書きドリフト検査には入れていない — あちらは「手書きHTML vs JSの関数」の突き合わせなのに対し、これは生成側とJS側という別種の写しなので、混ぜると検査の筋が悪くなる。`about.html` の `#methods-tbody` のように片側を本物の関数呼び出しにする形にはできない(両方とも関数で、原本がそもそも2つある)。**先に原本を1つにするのが本筋**
 
 ### 運用(人間の判断待ち)
 
