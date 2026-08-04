@@ -1206,7 +1206,13 @@ ${fertilitySection(d, "en")}
 
 /* ── 見直し条項 ─────────────────────────────────────────── */
 
-const HOAN = loadModule("hoan.js", ["T", "STATUS", "NOTE_LABEL", "lawNumEn"]);
+const HOAN = loadModule("hoan.js", ["T", "STATUS", "NOTE_LABEL", "lawNumEn", "transLinkHtml", "TENTATIVE"]);
+
+// 公式英訳(法務省「日本法令外国語訳データベースシステム」)。translation_url を
+// 作るのは bin/build_hoan.py 側で、ここで使うのはフッタの出所表示と、
+// hoanTranslationErrors() が列の形を確かめるための前提だけ。
+const HOAN_TRANS_SITE = "https://www.japaneselawtranslation.go.jp/";
+const HOAN_TRANS_PREFIX = "https://www.japaneselawtranslation.go.jp/en/laws/view/";
 
 // 並びは hoan.js の sortRows と同じ規則（状況 → 期限）。STATUS も本物を使う。
 function hoanRows() {
@@ -1256,6 +1262,10 @@ function hoanRowHtml(r, lang = "ja") {
   const clauseLang = lang === "en" ? ` lang="ja"` : "";
   const numEn = lang === "en" ? HOAN.lawNumEn(r.law_num) : null;
   const numEnHtml = numEn ? ` <span class="hoan-lawnum-en">(${escapeHTML(numEn)})</span>` : "";
+  // 公式英訳へのリンク(EN側のみ)。組み立てはhoan.jsのtransLinkHtmlに1本化して
+  // あり、置き場所も静的版・JS版とも法令番号の行で揃えてある(理由はあちらの
+  // 関数の直上のコメント)。
+  const trans = HOAN.transLinkHtml(r, lang);
   const detail = clause
     ? `      <tr class="hoan-detail hoan-detail-static">
         <td colspan="4">
@@ -1270,7 +1280,7 @@ function hoanRowHtml(r, lang = "ja") {
   return `      <tr class="hoan-row hoan-row-static">
         <td class="col-title">
           <div class="hoan-lawtitle"${clauseLang}>${escapeHTML(r.law_title)}</div>
-          <div class="hoan-lawnum mono"><span${clauseLang}>${escapeHTML(r.law_num)}</span>${numEnHtml} ${src}</div>
+          <div class="hoan-lawnum mono"><span${clauseLang}>${escapeHTML(r.law_num)}</span>${numEnHtml} ${src}${trans ? ` ${trans}` : ""}</div>
         </td>
         <td class="col-date mono">${escapeHTML(r.enforcement_date || t.enforceMissing)}${staged}</td>
         <td class="col-date mono">${escapeHTML(deadline)}<div class="hoan-yrs mono">${escapeHTML(yrs)}</div></td>
@@ -1415,6 +1425,10 @@ ${rows.map((r) => hoanRowHtml(r, "en")).join("\n")}
 
   <footer class="site-footer-row">
     <a class="footer-src" id="t-footer-src" href="https://laws.e-gov.go.jp/" target="_blank" rel="noopener">${escapeHTML(t.footerSrc)}</a>
+    <!-- 英訳リンクの出所。EN側にしか出さないのでJA側(hoan.html)には対応する行が無く、
+         hoan.js が差し替える文言でもないので id も持たせない(idを付けると
+         idCoverageErrors() が hoan.html 側にも同じidを要求する)。 -->
+    <a class="footer-src" href="${escapeHTML(HOAN_TRANS_SITE)}" target="_blank" rel="noopener">${escapeHTML(t.footerSrcTrans)}</a>
     <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
     <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
     <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
@@ -3451,6 +3465,8 @@ const CSV_COLUMNS = {
     review_status: "text",
     status_note: "text",
     source_law_url: "text",
+    translation_url: "text", // 公式英訳(JLT)へのリンク。訳が無ければ空
+    translation_note: "text", // 統制語彙: 空 or "暫定版"
     last_checked: "text", // ISO日付文字列
   },
   "jgb_total_issuance_forecast.csv": {
@@ -3718,6 +3734,55 @@ function hoanLawNumErrors() {
           `末尾3桁と合わない(law_idは号をそのまま埋め込んでいる)`
       );
     }
+  }
+  return errs;
+}
+
+/* ── 公式英訳の列(translation_url / translation_note)の検査 ──────────────
+ * hoan.js の transLinkHtml は、translation_note が未知の値だったらリンクごと
+ * 黙って落とす(誤った版表示を出すより安全なので、描画側としてはそれが正しい)。
+ * その代わり**黙って落ちたことに誰も気づけない**ので、語彙と形はここで見る。
+ *
+ * 0件も異常として扱う。JLTの照会は検索フォームへのPOST(bin/build_hoan.py)なので、
+ * 向こうの作りが変わればCSRFトークンや結果の形が変わり、「1件も当たらない」形で
+ * 静かに壊れうる。sourceUrlReachErrors() が seen===0 を異常とみなすのと同じ理由。
+ */
+function hoanTranslationErrors() {
+  let rows;
+  try {
+    rows = parseCSV(read("data/hoan_review.csv"));
+  } catch (e) {
+    return [`公式英訳検査: data/hoan_review.csv が読めない(${e.message})`];
+  }
+  const errs = [];
+  let withUrl = 0;
+  for (const r of rows) {
+    const url = (r.translation_url || "").trim();
+    const note = (r.translation_note || "").trim();
+    if (url) {
+      withUrl++;
+      if (!url.startsWith(HOAN_TRANS_PREFIX) || !/^\d+$/.test(url.slice(HOAN_TRANS_PREFIX.length))) {
+        errs.push(
+          `公式英訳: ${r.law_id} の translation_url が想定の形でない(値: "${url}")。` +
+            `${HOAN_TRANS_PREFIX}<数字> のはず`
+        );
+      }
+    }
+    if (note && note !== HOAN.TENTATIVE) {
+      errs.push(
+        `公式英訳: ${r.law_id} の translation_note "${note}" は統制語彙(空 or "${HOAN.TENTATIVE}")に無い。` +
+          `hoan.js の transLinkHtml はこの行のリンクを黙って出さなくなる`
+      );
+    }
+    if (note && !url) {
+      errs.push(`公式英訳: ${r.law_id} は translation_note "${note}" を持つが translation_url が空`);
+    }
+  }
+  if (rows.length && withUrl === 0) {
+    errs.push(
+      "公式英訳: translation_url が1件も入っていない" +
+        "(0件はありえない。bin/build_hoan.py の JLT 照会が壊れている可能性が高い)"
+    );
   }
   return errs;
 }
@@ -4099,6 +4164,9 @@ if (check) {
   // 法令番号の英語換算も、生成物の新旧にもCSVのスキーマにも掛からない別種の
   // 壊れ方(値は正しい形をしているのに換算だけ間違う)なので独立に見る。
   const hoanNumErrs = hoanLawNumErrors();
+  // 公式英訳の列も独立(法令番号の換算が正しくCSVのスキーマも通っている状態で、
+  // 統制語彙の外れやURLの形だけが崩れる。描画側は黙って落とすので画面に出ない)。
+  const hoanTransErrs = hoanTranslationErrors();
   // ?v=(ASSET_V)の揃いも、生成物の新旧・CSV・法令番号のいずれとも関係しない
   // 別種の壊れ方(HTMLは最新でも、参照先のバージョンだけが古い)なので独立に見る。
   const assetVErrs = assetVersionErrors();
@@ -4124,6 +4192,7 @@ if (check) {
     csvSchemaErrs.length ||
     citeDataFilesErrs.length ||
     hoanNumErrs.length ||
+    hoanTransErrs.length ||
     assetVErrs.length ||
     cardFbErrs.length ||
     ogDescErrs.length ||
@@ -4141,6 +4210,7 @@ if (check) {
     csvSchemaErrs.forEach((e) => console.error(`✗ ${e}`));
     citeDataFilesErrs.forEach((e) => console.error(`✗ ${e}`));
     hoanNumErrs.forEach((e) => console.error(`✗ ${e}`));
+    hoanTransErrs.forEach((e) => console.error(`✗ ${e}`));
     assetVErrs.forEach((e) => console.error(`✗ ${e}`));
     cardFbErrs.forEach((e) => console.error(`✗ ${e}`));
     ogDescErrs.forEach((e) => console.error(`✗ ${e}`));
@@ -4149,7 +4219,7 @@ if (check) {
     process.exit(1);
   }
   console.log(
-    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 法令番号の英語換算(公布年・law_idとの突き合わせ) / 全HTMLの?v=とASSET_Vの一致 / JAトップのcard-fallbackとINDICATOR_METAの一致 / descriptionとog:descriptionの一致 / data/*.csvの出典URLが静的HTMLから辿れることとも一致）`
+    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 法令番号の英語換算(公布年・law_idとの突き合わせ) / 公式英訳の列(統制語彙・URLの形) / 全HTMLの?v=とASSET_Vの一致 / JAトップのcard-fallbackとINDICATOR_METAの一致 / descriptionとog:descriptionの一致 / data/*.csvの出典URLが静的HTMLから辿れることとも一致）`
   );
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -4176,6 +4246,7 @@ if (check) {
   // 出てこない(気づくのが遅いほど直すのが面倒になる)。どれも書き出し後の
   // ファイルを読むので、この位置でなければならない。
   hoanLawNumErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  hoanTranslationErrors().forEach((e) => console.warn(`⚠ ${e}`));
   assetVersionErrors().forEach((e) => console.warn(`⚠ ${e}`));
   cardFallbackErrors().forEach((e) => console.warn(`⚠ ${e}`));
   ogDescriptionErrors().forEach((e) => console.warn(`⚠ ${e}`));

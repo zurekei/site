@@ -220,15 +220,19 @@
 | `review_status` | `due`(期限到来・検討未確認) / `pending`(期限前) / `no_deadline`(期限の定めなし) / `reviewed`(検討確認済み。手動昇格) |
 | `status_note` | 検討状況の説明(手動記入。現状は空欄) |
 | `source_law_url` | 人間表示用の一次資料リンク(`https://laws.e-gov.go.jp/law/{law_id}`) |
+| `translation_url` | 公式英訳へのリンク(`https://www.japaneselawtranslation.go.jp/en/laws/view/{id}`)。訳が無ければ空欄 |
+| `translation_note` | 統制語彙。空欄 or `暫定版`(JLTの言う "Tentative translation"＝校閲前) |
 | `last_checked` | 最終巡回日(YYYY-MM-DD) |
 
 サイドカー `hoan_clauses/{law_id}.txt` は見直し条項の**原文(逐語)**を保持する。要約で置き換えない(原文＋出典が信頼性の根拠)。原文は長文でカンマ・改行を含みうるため、`csv.js`の単純パーサ(§4.4)を壊さないようCSV本体から分離している。表示側(`hoan.js`)は行展開時にこのファイルを遅延取得する。
 
 `review_status`の設計上の要点: 検討が実施されたか否かの**自動判定はしない**(審議会・報告書・改正法など形態が多様で機械化しきれないため)。`due`までを機械的に付与し、`reviewed`への昇格は手動運用。表示でも「未確認」と「未実施」を混同しない文言にしている(検討の不在を断定しない)。
 
+公式英訳の2列(`translation_url` / `translation_note`)は、法務省「日本法令外国語訳データベースシステム」(以下JLT)に条文の英訳があるかを**法令番号で**照会した結果。e-Gov以外の唯一の出所であり、`bin/build_hoan.py` が同じ巡回の中で毎回測り直す(訳は後から追加されるのでカバー率は上がっていく。2026-08-04時点で49法中18法=37%、うち暫定版1)。表示側は `/en/hoan` でのみリンクとして出す(JA側には出さない。JA読者にとっては `source_law_url` の e-Gov が一次資料そのもの)。照会の際に「概要情報」を検索対象から外していることが要点で、外すと訳が無い法律まで当たる — 詳細は `../CLAUDE.md` の「公式英訳の照会」。
+
 改正法を対象外とする理由: e-Gov `/laws` は制定法しか返さず、改正法の見直し条項は改正対象の既存法の附則に`AmendLawNum`付きで畳み込まれるため、公布日フィルタでは拾えない。`build_hoan.py`は`AmendLawNum`を持たない`<SupplProvision>`(その法自身の附則)だけを抽出する。改正法対応はv2の課題。
 
-再生成: `python3 bin/build_hoan.py`(既定で2021-01-01〜2025-12-31)。期間は`--from`/`--to`で変更できる。※このファイルは他ファイルの「年1回手動更新」(§5)と異なり、成立法の追加に合わせた定期巡回を想定している(週次自動巡回は今後)。
+再生成: `python3 bin/build_hoan.py`(既定で2021-01-01〜2025-12-31)。期間は`--from`/`--to`で変更できる。e-Gov と JLT の両方を巡回するので、`last_checked` は英訳の照会日でもある。※このファイルは他ファイルの「年1回手動更新」(§5)と異なり、成立法の追加に合わせた定期巡回を想定している(週次自動巡回は今後)。
 
 ## 4. 共通規約
 
@@ -304,6 +308,7 @@ fiscal_year, forecast_<指標>, actual_<指標>, forecast_source_url, actual_sou
 - 公式サイトのURLが後年別内容に差し替えられている場合、Wayback Machineのアーカイブ版URL(元のURLをそのまま内包する形式)を出典として用いることがある。`jgb_total_issuance_forecast.csv`の1990〜2016年度の国債発行計画(`forecast_source_url`)がこれに該当する。
 - `gdp_forecast.csv`の`actual_source_url`のように1セルに複数のURLがまとめられている列は、`ラベル:URL`の形式でラベル(`実質`/`名目`)ごとに分離できる。
 - `notes`の`[実績]`タグにはグラフに表示される背景事象の記述が入ることがあるが、この記述自体は評価語を含まない事実の記録である(例:「バブル期のピーク。」「消費税率引き上げ・アジア通貨危機の年度。」)。
+- `hoan_review.csv`の`translation_url`は**数値の出典ではない**。その法律に公式英訳があることを示すポインタであり、CSVのどの値の裏付けでもない(その行の裏付けは`source_law_url`の側)。列名に`url`が付くため機械的な検査(`bin/build.mjs`の`sourceUrlReachErrors()`)では他の出典URLと同じ扱いで「静的HTMLから辿れるか」を見られるが、監査の際は突き合わせる数値が無い列として扱う。
 
 ## 7. ライセンス
 

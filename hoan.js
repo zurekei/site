@@ -28,6 +28,8 @@ const NOTE_LABEL = {
 // 全件照会して実測)、当てると表が英日のまだらになる。しかも未訳が多いのは新しい
 // 法律のほうで、このページの対象は「直近5年の制定法」なので不利は解消しない。
 // 全部日本語のまま lang="ja" を付けるのが、一貫していて誤解も生まない。
+// 訳がある法律には**リンクだけ**をEN側に併記する(下の transLinkHtml)。表の見た目は
+// 日本語で揃えたまま、英語で読める一次資料への入口を渡す、という分け方にしてある。
 //
 // 一方で**法令番号は訳ではなく換算で英語化できる**ので、そこだけ併記する。
 // 元号表記は日本語圏の外では読めないが、"Act No. 78 of 2022" は英語圏で法令を
@@ -61,6 +63,35 @@ function lawNumEn(lawNum) {
   const no = kanjiToInt(m[3]);
   if (!year || !no) return null;
   return `Act No. ${no} of ${ERA_BASE[m[1]] + year}`;
+}
+
+// translation_note は統制語彙(空 or "暫定版")。JLT の言う "Tentative translation"
+// = ネイティブ・法令翻訳専門家の校閲前という意味で、JLT自身がページ上で断って
+// いる区別なので、こちらでも黙って落とさない。
+// 未知の値が来たらリンクごと出さない。「暫定版かどうか」を誤って表示するくらい
+// なら訳が無いのと同じ扱いにするほうが安全。語彙そのものは bin/build.mjs の
+// hoanTranslationErrors() がビルド時に検査していて、未知の値はそこで止まる。
+const TENTATIVE = "暫定版";
+
+// 公式英訳へのリンク。JA側では出さない(JA読者には source_law_url の e-Gov が
+// 一次資料そのもので、英訳は要らない)。
+//
+// 置き場所は静的版(bin/build.mjs)・JS版(下の rowHTML)とも**法令番号の行**で揃える。
+// 条文の見出し(hoan-clause-head)側ではない。あちらはJS版では行を開くまで表示
+// されないので、置くと「訳がある」ことがクリックするまで分からなくなる
+// (e-Govリンクが静的版では法令番号の行に、JS版では条文の見出しにある不揃いは
+// 元からのもので、ここでそれに合わせると同じ見えなさを持ち込むことになる)。
+// 併記先を法令番号の行にしたのは、EN向けの表記("Act No. 78 of 2022")が既に
+// そこにあるため。
+function transLinkHtml(r, lang) {
+  if (lang !== "en") return "";
+  const url = safeUrl(r.translation_url);
+  if (!url) return "";
+  const note = r.translation_note || "";
+  if (note && note !== TENTATIVE) return "";
+  const t = T[lang];
+  const text = note ? t.transLinkTentative : t.transLink;
+  return `<a class="hoan-srclink mono" href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(text)}</a>`;
 }
 
 const T = {
@@ -118,6 +149,11 @@ const T = {
     clauseLoading: "Loading…",
     clauseError: "(Original text could not be retrieved)",
     srcLink: "e-Gov ↗",
+    // JA側には対応する組を置かない。JA では併記しないので、置いても誰も読まない
+    // 文字列が増えるだけになる(transLinkHtml が lang !== "en" で先に抜ける)。
+    transLink: "official translation ↗",
+    transLinkTentative: "official translation (tentative) ↗",
+    footerSrcTrans: "src: Japanese Law Translation (Ministry of Justice)",
     noDeadline: "none",
     noDeadlineYears: "no deadline set",
     enforceMissing: "—",
@@ -194,6 +230,7 @@ function rowHTML(r) {
   const src = url
     ? `<a class="hoan-srclink mono" href="${escapeHTML(url)}" target="_blank" rel="noopener">${t.srcLink}</a>`
     : "";
+  const trans = transLinkHtml(r, lang);
   // lang="ja" は bin/build.mjs の静的版が付けているのと同じ理由・同じ範囲で付ける
   // (訳していない日本語をEN文書の中に置くため)。JS側に付け忘れていて、JSが動くと
   // 属性が消える不揃いがあった(2026-08-03)。
@@ -204,7 +241,7 @@ function rowHTML(r) {
     <tr class="hoan-row" data-id="${escapeHTML(r.law_id)}" tabindex="0" aria-expanded="false">
       <td class="col-title">
         <div class="hoan-lawtitle"${jaLang}>${escapeHTML(r.law_title)}</div>
-        <div class="hoan-lawnum mono"><span${jaLang}>${escapeHTML(r.law_num)}</span>${numEnHtml}</div>
+        <div class="hoan-lawnum mono"><span${jaLang}>${escapeHTML(r.law_num)}</span>${numEnHtml}${trans ? ` ${trans}` : ""}</div>
       </td>
       <td class="col-date mono">${escapeHTML(r.enforcement_date || t.enforceMissing)}${staged}</td>
       <td class="col-date mono">${escapeHTML(deadline)}<div class="hoan-yrs mono">${escapeHTML(yrs)}</div></td>

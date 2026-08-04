@@ -4,7 +4,8 @@
 e-Gov法令API v2 から対象期間の制定法を列挙し、附則の見直し条項を抽出して
   data/hoan_review.csv           … 索引・機械項目（1行1法律）
   data/hoan_clauses/{law_id}.txt … 見直し条項の原文（逐語・サイドカー）
-を生成する。
+を生成する。あわせて法務省「日本法令外国語訳データベースシステム」に公式英訳が
+あるかを法令番号で照会し、あれば translation_url / translation_note を埋める。
 
 使い方:
   python3 bin/build_hoan.py                 # 既定期間で全件生成
@@ -17,12 +18,16 @@ e-Gov法令API v2 から対象期間の制定法を列挙し、附則の見直�
 - 当初施行日は amendment_type=="1"（制定）リビジョンの施行日を採用（政令依存の施行日もここで解決済み）。
   段階施行で制定リビジョンが複数ある場合は本体施行日（最後の制定リビジョン）を採り、注記を付す。
 - CSV の自由記述欄に ASCII カンマ・改行を入れない（既存 csv.js は単純 split(",")）。読点は「、」。
+- 公式英訳の有無は**焼き込まず毎回照会する**。訳は後から追加されるので、一覧を
+  コードに書くと必ず腐る（下の jlt_lookup のコメントを参照）。
 """
-import argparse, csv, json, os, re, sys, time, urllib.request
+import argparse, csv, http.cookiejar, json, os, re, sys, time
+import urllib.parse, urllib.request
 import xml.etree.ElementTree as ET
 from datetime import date
 
 API = "https://laws.e-gov.go.jp/api/2"
+UA = "zurekei-build/1.0 (+https://zurekei.org/)"
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = os.path.normpath(os.path.join(HERE, "..", "data"))
 CLAUSE_DIR = os.path.join(DATA, "hoan_clauses")
@@ -51,6 +56,121 @@ def kanji_num(s):
         return K[s]
     m = re.search(r'\d+', s)
     return int(m.group()) if m else None
+
+# --- 漢数字→int（法令番号用。百の位まで。「元」＝1） ---
+# 上の kanji_num と分けてあるのは入力の性質が違うため。あちらは見直し条項の
+# 「施行後◯年」（1〜99・算用数字混じりもある本文からの抜き出し）で、こちらは
+# 法令番号の年と号（令和四年法律第百五号のように百を含み、令和元年もある）。
+# 規則は hoan.js の kanjiToInt と同じにしてある（同じ文字列を同じ数に読む必要が
+# あるのは、この2つが同一のCSV列を作る側と読む側だから）。
+def kanji_int(s):
+    n, cur = 0, 0
+    for ch in s or '':
+        if ch == '元':
+            cur = 1
+        elif ch in K and ch != '〇':
+            cur = K[ch]
+        elif ch == '十':
+            n += (cur or 1) * 10
+            cur = 0
+        elif ch == '百':
+            n += (cur or 1) * 100
+            cur = 0
+        else:
+            return None
+    return n + cur
+
+# --- 公式英訳（法務省「日本法令外国語訳データベースシステム」）の照会 ---
+#
+# 訳がある法律だけ一次資料へのリンクを出すために、対象法ごとに**法令番号で**
+# 照会する。法令名での照会にしないのは、JLT側の日本語表題が e-Gov と字句レベルで
+# 一致する保証が無いのに対し、法令番号は法律の識別子そのものだから。
+#
+# 結果の一覧をコードに焼き込まないこと。カバー率は時間とともに上がる（2026-08-04
+# の実測で対象49法のうち18法=37%）ので、焼き込むと必ず古くなる。
+#
+# 検索フォーム（/ja/laws/search-no）は POST で、CSRFトークンとcookieが要る。
+# 検索範囲のチェックボックスは4つあり、既定では ia（暫定版）と ja（概要情報）が
+# 入っている。**ja は必ず外す。** 概要情報は「訳は無いが概要だけある」法律にも
+# 付いているので、外さないと訳の無い法律まで当たる。ha（過去の法令データ）と
+# la（未翻訳法令の法令名）も外したままにする。
+#
+# 暫定版（JLT の言う "Tentative translation"。ネイティブ・専門家の校閲前）は
+# 訳の質が違うので区別して記録する。判定は ia を外した検索で当たるかどうかで
+# 見る。ページ本文の「暫定版」表示を読む手もあるが、それは注意書きの文言に
+# 依存する（実際、表題の側には何も付かない）ので検索条件で切るほうが堅い。
+JLT = "https://www.japaneselawtranslation.go.jp"
+ERA_CODE = {'明治': 1, '大正': 2, '昭和': 3, '平成': 4, '令和': 5}
+LAW_NUM_RE = re.compile(r'^(明治|大正|昭和|平成|令和)(.+?)年法律第(.+?)号$')
+
+def law_num_parts(law_num):
+    """"令和四年法律第七十八号" -> (5, 4, 78)。読めない形は None。"""
+    m = LAW_NUM_RE.match(law_num or '')
+    if not m:
+        return None
+    year, no = kanji_int(m.group(2)), kanji_int(m.group(3))
+    if not year or not no:
+        return None
+    return ERA_CODE[m.group(1)], year, no
+
+def jlt_open():
+    """cookie付きのopenerとCSRFトークンを返す。"""
+    cj = http.cookiejar.CookieJar()
+    op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
+    op.addheaders = [('User-Agent', UA)]
+    html = op.open(f"{JLT}/ja/laws/search-no", timeout=60).read().decode('utf-8')
+    m = re.search(r'name="_csrfToken"[^>]*value="([^"]+)"', html)
+    if not m:
+        raise RuntimeError("JLT: 検索フォームから _csrfToken を取れない（フォームの作りが変わった可能性）")
+    return op, m.group(1)
+
+def jlt_search(op, tok, gn, sy, no, tentative):
+    """法令番号で検索し、当たった翻訳データのID（/laws/view/{id} の id）を返す。"""
+    fields = {'_csrfToken': tok, 'gn': str(gn), 'sy': str(sy), 'ht': 'A', 'no': str(no)}
+    if tentative:
+        fields['ia'] = '03'   # 暫定版を含む
+    req = urllib.request.Request(
+        f"{JLT}/ja/laws/result/",
+        data=urllib.parse.urlencode(fields).encode(),
+        headers={'User-Agent': UA, 'Referer': f"{JLT}/ja/laws/search-no"},
+    )
+    body = op.open(req, timeout=60).read().decode('utf-8')
+    ids = re.findall(r'/ja/laws/view/(\d+)', body)
+    return sorted(set(ids), key=ids.index)
+
+def jlt_lookup(op, tok, law_num, law_title):
+    """(translation_url, translation_note) を返す。訳が無ければ ("", "")。"""
+    parts = law_num_parts(law_num)
+    if not parts:
+        print(f"  ⚠ 法令番号を読めないので英訳の照会を省く: {law_num}", file=sys.stderr)
+        return "", ""
+    gn, sy, no = parts
+    ids = jlt_search(op, tok, gn, sy, no, tentative=False)
+    note = ""
+    time.sleep(0.3)
+    if not ids:
+        ids = jlt_search(op, tok, gn, sy, no, tentative=True)
+        time.sleep(0.3)
+        if ids:
+            note = "暫定版"
+    if not ids:
+        return "", ""
+    if len(ids) > 1:
+        raise RuntimeError(f"JLT: {law_num} に翻訳データが{len(ids)}件当たった（法令番号は一意のはず）: {ids}")
+    vid = ids[0]
+    # 当たったデータが本当にこの法律かを、翻訳ページ側の法令番号で確かめる。
+    # 検索が法令番号によるものである以上ふつうは自明だが、ここを信じ違えると
+    # 「別の法律の訳へのリンク」を一次資料として出すことになるので確認する。
+    page = op.open(f"{JLT}/en/laws/view/{vid}", timeout=60).read().decode('utf-8')
+    page = re.sub(r'\s+', ' ', page)
+    titles = re.findall(r'<div class="title"> (.*?) </div>', page)
+    if not titles or f"（{law_num}）" not in titles[0]:
+        raise RuntimeError(f"JLT: view/{vid} の表題に {law_num} が無い（照合失敗）: {titles[:1]}")
+    if titles[0].replace(f"（{law_num}）", "").strip() != law_title:
+        # 表題の字句違いは実害が無い（照合は法令番号でしている）ので止めない。
+        print(f"  ⚠ 英訳ページの法令名が e-Gov と違う: {law_num}", file=sys.stderr)
+    time.sleep(0.3)
+    return f"{JLT}/en/laws/view/{vid}", note
 
 # --- 定型句パターン（§5・受動態対応） ---
 KENTO = re.compile(r'検討(?:を加え|が加えられ|を行(?:い|う)|する)')
@@ -126,6 +246,7 @@ def build(dfrom, dto):
     os.makedirs(CLAUSE_DIR, exist_ok=True)
     laws = list_acts(dfrom, dto)
     print(f"# 制定法 {len(laws)}件（{dfrom}〜{dto}）を走査", file=sys.stderr)
+    jlt_op, jlt_tok = jlt_open()
     rows = []
     for l in laws:
         li, ri = l['law_info'], l['revision_info']
@@ -149,6 +270,7 @@ def build(dfrom, dto):
         else:
             status = "pending"
         note = "段階施行" if staged else ""
+        trans_url, trans_note = jlt_lookup(jlt_op, jlt_tok, li['law_num'], ri['law_title'])
         rows.append({
             "law_id": law_id,
             "law_title": ri['law_title'],
@@ -161,19 +283,22 @@ def build(dfrom, dto):
             "review_status": status,
             "status_note": "",
             "source_law_url": f"https://laws.e-gov.go.jp/law/{law_id}",
+            "translation_url": trans_url,
+            "translation_note": trans_note,
             "last_checked": TODAY,
         })
         # サイドカー: 見直し条項の原文（逐語）
         header = f"{ri['law_title']}（{li['law_num']}）\n出典: https://laws.e-gov.go.jp/law/{law_id}\n\n"
         with open(os.path.join(CLAUSE_DIR, f"{law_id}.txt"), "w", encoding="utf-8") as f:
             f.write(header + "\n\n".join(blocks) + "\n")
-        print(f"  ✅ {li['law_num']} {ri['law_title'][:26]}  年数={years} 期限={deadline or '—'} {status}", file=sys.stderr)
+        tr = "英訳" + ("(暫定版)" if trans_note else "") if trans_url else "—"
+        print(f"  ✅ {li['law_num']} {ri['law_title'][:26]}  年数={years} 期限={deadline or '—'} {status} {tr}", file=sys.stderr)
         time.sleep(0.15)
 
     # ASCII カンマ混入チェック（csv.js の単純パーサ保護）
     cols = ["law_id","law_title","law_num","promulgation_date","enforcement_date",
             "enforcement_note","review_years","review_deadline","review_status",
-            "status_note","source_law_url","last_checked"]
+            "status_note","source_law_url","translation_url","translation_note","last_checked"]
     for r in rows:
         for c in cols:
             if "," in str(r[c]) or "\n" in str(r[c]):
@@ -187,7 +312,9 @@ def build(dfrom, dto):
         w.writeheader()
         w.writerows(rows)
     n_due = sum(1 for r in rows if r["review_status"] == "due")
-    print(f"# {len(rows)}件を {out} に出力（うち due={n_due}）", file=sys.stderr)
+    n_tr = sum(1 for r in rows if r["translation_url"])
+    n_tent = sum(1 for r in rows if r["translation_note"] == "暫定版")
+    print(f"# {len(rows)}件を {out} に出力（うち due={n_due} / 公式英訳あり={n_tr}（暫定版{n_tent}））", file=sys.stderr)
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
