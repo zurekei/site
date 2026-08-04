@@ -1,7 +1,7 @@
 {
   "_comment": "bin/og.sh が assets/og*.png(汎用2枚+指標8種×2言語+出生率2言語の計20枚)を焼くたびに書き直す。node bin/build.mjs --check の陳腐化検査(ogStalenessErrors)が、ここに記録したsha256といまの入力ファイルの実ハッシュを突き合わせて焼き直し忘れを検出する。入力ファイルの一覧(chart.js・METRICSの全指標CSV・出生率カード用のdata/fertility_*.csv2本・og.html・csv.js・style.css)はnode bin/build.mjs --og-list が唯一の出所で、ここに手書きのコピーは持たない。このファイルはsite/配下にあるため配信されるが、パスとハッシュの対応表だけで秘密は含まない(承知の上で置いている)。ハッシュは焼き始める前に計算し固定したもの(TOCTOU対策。bin/og.shのcompute_stamp直上コメント参照)。",
   "inputs": {
-    "chart.js": "sha256:d20bec339559d73405ca5e4ed5ac55a2e5e09f62e3bae72888909baf41bfb61f",
+    "chart.js": "sha256:007caaa888f93fd56d1a0627ec80477d1b9cede46a9a379683f16204fbc45ec6",
     "csv.js": "sha256:f2fd74a23e5e7636f0e1b091b88ed3465b684959be298ddd14c5137593fbd97a",
     "data/bond_issuance_forecast.csv": "sha256:45732100bf2a5b20db3bd3e61140ff36c918244eaab875d0fbb779cbd60a4f21",
     "data/cpi_forecast.csv": "sha256:45c4aba3fc25631b64e1848f9e28f04a7bea24838920e5deb8734caedb3ac5e4",

@@ -62,24 +62,28 @@ FY1989〜FY1997の名目成長率見通し(9年分)は財務省『平成財政�
 
 実質GDPページ・名目GDPページの背景に描く「包絡帯」の元データ。**同じ年度のGDP成長率が、統計の基準改定でどれだけ書き換わってきたか**を、基準ごとの後年推計系列として並べたもの。すべて内閣府ESRIがウェブで公開している一次資料の統計表(xls/csv)から、表に載っている対前年度成長率をそのまま転記した(水準からの再計算はしていない)。
 
-- 列: `fiscal_year` と、実質6系列 `real_1990base`/`real_1995base`/`real_2000base`/`real_2005base_ref`/`real_2011base_ref`/`real_2015base_ref`、名目6系列 `nominal_*`(同じ接尾辞)
+- 列: `fiscal_year`・`basis`・`actual_real`・`actual_nominal`・`actual_real_source_url`・`actual_nominal_source_url`・`notes`。**1行=(年度 × 基準)の縦持ち**で、1つの年度に最大6行が並ぶ(2026-08-04に横持ちから移行。経緯は `data/README.md` の該当節)
 - 年度=会計年度(4月〜翌3月)。数値は原表どおり小数第1位まで
-- チャートは各年の「6系列のうち値がある2つ以上」から最小〜最大を取り、淡い帯として描く。1系列しかない年(FY1980以前やFY2004以降など)は帯を描かない
+- チャートは各年の「値がある基準が2つ以上ある場合」に最小〜最大を取り、淡い帯として描く。1系列しかない年(FY1980以前やFY2004以降など)は帯を描かない
 - **すべてGDP(国内総生産・国内総支出)ベース**。GNP系列は含まない(見通し側のGNP/GDP問題とは独立に、実績の改定幅だけを表す)
 
 ## 方式と出典(基準ごと)
 
-| 列接尾辞 | 基準 | 方式 | SNA | 収録範囲(成長率) | 実質ファイル / 名目ファイル |
+出典URLは行ごとにCSVが持っている(下表はそれを基準ごとに畳んで、方式・SNA・収録範囲を添えたもの)。同じ一覧はサイト側の実質GDP・名目GDPのページにも出る。
+
+| `basis` | 基準 | 方式 | SNA | 収録範囲(成長率) | 実質ファイル / 名目ファイル |
 |---|---|---|---|---|---|
-| `_1990base` | 平成2年基準 | 固定基準年方式 | 68SNA | FY1956〜1998 | [55ffm1r.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h10/tables/55ffm1r.xls) / [55ffm1n.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h10/tables/55ffm1n.xls) |
-| `_1995base` | 平成7年基準 | 固定基準年方式 | 93SNA | FY1981〜2003 | [n80ffr1r_jp.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h15/tables/n80ffr1r_jp.xls) / [n80ffm1n_jp.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h15/tables/n80ffm1n_jp.xls) |
-| `_2000base` | 平成12年基準 | 連鎖方式 | 93SNA | FY1981〜2009 | [21ffm1rn_jp.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h21/tables/21ffm1rn_jp.xls) / [21ffm1n_jp.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h21/tables/21ffm1n_jp.xls) |
-| `_2005base_ref` | 平成17年基準・簡易遡及 | 連鎖方式 | 93/08SNA | FY1981〜1994 | [ritu-jfy_kan-i.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/h17_retroactive/tables/ritu-jfy_kan-i.xls) / [ritu-mfy_kan-i.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/h17_retroactive/tables/ritu-mfy_kan-i.xls) |
-| `_2011base_ref` | 平成23年基準・簡易遡及 | 連鎖方式 | 2008SNA | FY1981〜1994 | [ritu-jfy_1980.csv](https://www.esri.cao.go.jp/jp/sna/data/data_list/h23_retroactive/tables/ritu-jfy_1980.csv) / [ritu-mfy_1980.csv](https://www.esri.cao.go.jp/jp/sna/data/data_list/h23_retroactive/tables/ritu-mfy_1980.csv) |
-| `_2015base_ref` | 2015年(平成27年)基準・簡易遡及 | 連鎖方式 | 2008SNA | FY1981〜1994 | [ritu-jfy_2780.csv](https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-jfy_2780.csv) / [ritu-mfy_2780.csv](https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv) |
+| `1990base` | 平成2年基準 | 固定基準年方式 | 68SNA | FY1956〜1998 | [55ffm1r.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h10/tables/55ffm1r.xls) / [55ffm1n.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h10/tables/55ffm1n.xls) |
+| `1995base` | 平成7年基準 | 固定基準年方式 | 93SNA | FY1981〜2003 | [n80ffr1r_jp.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h15/tables/n80ffr1r_jp.xls) / [n80ffm1n_jp.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h15/tables/n80ffm1n_jp.xls) |
+| `2000base` | 平成12年基準 | 連鎖方式 | 93SNA | FY1981〜2009 | [21ffm1rn_jp.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h21/tables/21ffm1rn_jp.xls) / [21ffm1n_jp.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h21/tables/21ffm1n_jp.xls) |
+| `2005base-ref` | 平成17年基準・簡易遡及 | 連鎖方式 | 93/08SNA | FY1981〜1994 | [ritu-jfy_kan-i.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/h17_retroactive/tables/ritu-jfy_kan-i.xls) / [ritu-mfy_kan-i.xls](https://www.esri.cao.go.jp/jp/sna/data/data_list/h17_retroactive/tables/ritu-mfy_kan-i.xls) |
+| `2011base-ref` | 平成23年基準・簡易遡及 | 連鎖方式 | 2008SNA | FY1981〜1994 | [ritu-jfy_1980.csv](https://www.esri.cao.go.jp/jp/sna/data/data_list/h23_retroactive/tables/ritu-jfy_1980.csv) / [ritu-mfy_1980.csv](https://www.esri.cao.go.jp/jp/sna/data/data_list/h23_retroactive/tables/ritu-mfy_1980.csv) |
+| `2015base-ref` | 2015年(平成27年)基準・簡易遡及 | 連鎖方式 | 2008SNA | FY1981〜1994 | [ritu-jfy_2780.csv](https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-jfy_2780.csv) / [ritu-mfy_2780.csv](https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv) |
 
 - 固定基準年方式→連鎖方式の切替は**平成12年基準(2004年12月改定)**で発生。平成2・7年基準のみ固定基準年方式、平成12年基準以降(簡易遡及3本を含む)はすべて連鎖方式
 - 平成2・7年基準の表側項目名は「国内総支出」(GDE)、平成12年基準以降は「国内総生産(支出側)」。呼称変更のみで実体は同じ
-- `_2015base_ref` 列は `gdp_forecast.csv` の `actual_basis=2015base-ref` 行(FY1981〜1994)と実質・名目とも全年度一致することを確認済み(同一ファイル由来。抽出ロジックの検算になった)
-- 簡易遡及3本(H17/H23/H27)は概念調整＋リンク係数接続の**参考系列**で、固定基準2本や平成12年基準の確定系列とは品質の位置づけが異なる。特にFY1993/1994境目は基礎統計の四半期分割方法の違いに留意(平成7年基準ファイルの注記)
+- `2015base-ref` の行は `gdp_forecast.csv` の `actual_basis=2015base-ref` 行(FY1981〜1994)と実質・名目とも全年度一致することを確認済み(同一ファイル由来。抽出ロジックの検算になった)
+- **2026-08-04に、上表12本のファイルを取り直して全274セルを再検証した**(相違0件)。`_1980`/`_2780` の4本と `kan-i` の2本、および固定基準・平成12年基準の6本すべてについて、原表の対前年度成長率とCSVの値が一致する
+- 簡易遡及3本(H17/H23/H27)は概念調整＋リンク係数接続の**参考系列**で、固定基準2本や平成12年基準の確定系列とは品質の位置づけが異なる
+- **FY1993/1994の断絶は平成7年基準(`1995base`)の系列の話**。原表(実質・名目とも)の注記に「1993年10-12月期以前と1994年1-3月期以降では民間企業設備、民間在庫品増加等の四半期分割方法に違いがあるため、1993年度、1994年度の前年度比の利用に際しては、十分留意されたい」とある。CSVでは該当2行の `notes` に写してあり、サイトの出典欄にも出る(2026-08-04まで、この注記を簡易遡及3本についての但し書きとして書いていたが、注記があるのは平成7年基準のファイルだけで、対象もその系列である)
 - 平成7年基準ページには別表 `n94ffm1rn_jp.xls`(連鎖の補助系列とみられ値が食い違う)も存在するが、用途不明のため不採用。固定基準の主系列のみ採用

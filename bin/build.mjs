@@ -295,6 +295,67 @@ function buildTable(metric, rows, lang) {
   );
 }
 
+// 背景の包絡帯(実績が基準改定でどれだけ動いたかの幅)の出典。
+//
+// **JS側では組み立てない。** /fertility の出典が JS でしか作られておらず、JSを
+// 実行しない相手に1文字も届いていなかった事故(2026-08-04)と同じ形にしないため、
+// ここで静的HTMLに焼く。数値表と同じ扱い。
+//
+// 原本は data/gdp_vintages.csv の行ごとのURL列で、この関数は基準ごとに1行へ
+// 畳んで見せるだけ(1つの基準の出典は全年度で同じファイル1本なので、54行ぶん
+// 並べても読めない)。畳んだ結果は sourceUrlReachErrors() が要求する「CSVの
+// URLが静的HTMLに現れること」を実質/名目の2ページで分担して満たす — 実質の
+// 6本はこのページに、名目の6本は名目GDPのページに出る。
+//
+// 基準の呼称は chart.js の T.basisLabels(実績線の基準表示と同じ辞書)を引く。
+// **知らない basis は落とす**: 黙って生の `2020base` のような文字列を画面に
+// 出すと、訳が無いまま英語ページに日本語の識別子が出たり、呼称の追加漏れが
+// 誰にも気づかれないまま公開される。基準を足すのはCSVに行を足すだけで済む
+// 作業なので、辞書への追加忘れはここで踏ませるのが正しい。
+function vintageSourceHtml(metric, lang) {
+  const rows = parseCSV(read(metric.vintageCsv.replace(/^\//, "")));
+  const urlCol = `${metric.vintageCol}_source_url`;
+  // **data-en は付けない。** /fertility の出典行は1ページの中でJS(fertility.js の
+  // applyTableI18n)が本文とdata-enを入れ替えるためあの形だが、指標ページは
+  // JA/ENを別ファイルにして解決しており(/chart/... と /en/chart/...)、chart.js に
+  // data-en を読む処理は無い。付けても誰も見ないうえ、「ここは実行時に切り替わる
+  // 」という嘘の合図になる。
+  const label = (ja, en) => `<span>${escapeHTML(lang === "ja" ? ja : en)}</span>`;
+
+  const lines = [];
+  const seen = new Set();
+  for (const r of rows) {
+    const url = safeUrl(r[urlCol]);
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    const ja = T.ja.basisLabels[r.basis];
+    const en = T.en.basisLabels[r.basis];
+    if (!ja || !en) {
+      throw new Error(
+        `data/gdp_vintages.csv の basis "${r.basis}" に呼称が無い(chart.js の T.ja/T.en の basisLabels に追加すること)`
+      );
+    }
+    // notes は原資料の但し書きの写しで、訳は用意していない(EN表示でも日本語の
+    // まま出すので lang="ja" を付ける)。同じ基準の複数行に同じ文が入るので
+    // 重複は畳む。
+    const notes = [
+      ...new Set(rows.filter((x) => x.basis === r.basis && x.notes).map((x) => x.notes)),
+    ];
+    const note = notes.length ? ` <span lang="ja">(${escapeHTML(notes.join(" / "))})</span>` : "";
+    lines.push(
+      `${label(ja, en)}: <a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(url)}</a>${note}`
+    );
+  }
+  if (!lines.length) throw new Error(`${metric.vintageCsv} から ${urlCol} を1件も取り出せなかった`);
+
+  // クラスは #v-source(JSが年ごとの出典を入れる箱)と同じ readout-source を使う。
+  // 見た目を揃えるためだけでなく、**このクラスだけが `word-break: break-all` を
+  // 持っている**ため: ESRIのURLは95文字あって区切り機会が無く、chart-note の
+  // ままだと狭い画面で横にはみ出す。
+  const prefix = label(T.ja.vintageSourcePrefix, T.en.vintageSourcePrefix);
+  return `      <p class="readout-source" id="vintage-source">${prefix}<br>${lines.join("<br>")}</p>`;
+}
+
 /* ── JSON-LD ─────────────────────────────────────────────── */
 
 // カタログ側の参照(name/url)と Dataset 自身の name を1箇所にする(呼び出し側で
@@ -481,6 +542,10 @@ function buildPage(key, metric, lang) {
   const archive = metricArchiveNote
     ? `      <p class="chart-note mono" id="archive-note">${escapeHTML(metricArchiveNote)}</p>`
     : `      <p class="chart-note mono" id="archive-note" hidden></p>`;
+  // 包絡帯を持つ指標(実質GDP・名目GDP)だけ、帯の元になった基準別系列の出典を
+  // 静的HTMLに出す。帯そのものはJSでしか描かないが、出典はJSを実行しない
+  // 相手にも届かなければならない(CLAUDE.md「出典も静的HTMLに入れる」)。
+  const vintageSource = metric.vintageCsv ? `\n${vintageSourceHtml(metric, lang)}` : "";
   // OGP画像は指標ごとに専用のカード(2026-07-30、og.html?m=<key>で焼く)。
   // ja: og-<key>.png / en: og-<key>-en.png。/chart(指標一覧)・トップ等の
   // 汎用ページは対象外(そちらは buildIndex 等で従来どおり og.png/og-en.png)。
@@ -569,7 +634,7 @@ ${summary}
 
       <div class="readout-source" id="v-source"></div>
 
-${archive}
+${archive}${vintageSource}
     </section>
 
     <section class="data-section">
@@ -3356,20 +3421,23 @@ const CSV_COLUMNS = {
     actual_basis: "text",
     forecast_basis: "text",
   },
+  // 1行=(年度 × 基準)の縦持ち。2026-08-04まで基準ごとに列を並べる横持ちで、
+  // **出典URL列も notes 列も無い唯一の数値CSV**だった(data/README.md §1の
+  // 「すべての数値行に一次資料へのURLを付す」を満たしていなかった)。横持ちの
+  // まま出典を足すと基準×実質/名目で12本のURL列が要り、しかも1つの基準の
+  // 出典は全年度で同じ1本なので同じ文字列が数十行に並ぶ。縦持ちにすると
+  // 1行が「ある年度・ある基準の観測」になり、他のCSVと同じ形(値＋出典＋notes)
+  // に収まる。基準が増えたときに列とコードを増やさずに済むのも縦持ち側の利点
+  // (2020年基準は既に gdp_forecast.csv 側で使われており、次に来るのが分かって
+  // いる)。
   "gdp_vintages.csv": {
     fiscal_year: "number",
-    real_1990base: "number",
-    real_1995base: "number",
-    real_2000base: "number",
-    real_2005base_ref: "number",
-    real_2011base_ref: "number",
-    real_2015base_ref: "number",
-    nominal_1990base: "number",
-    nominal_1995base: "number",
-    nominal_2000base: "number",
-    nominal_2005base_ref: "number",
-    nominal_2011base_ref: "number",
-    nominal_2015base_ref: "number",
+    basis: "text", // 呼称は chart.js の T.basisLabels(actual_basis と同じ語彙)
+    actual_real: "number",
+    actual_nominal: "number",
+    actual_real_source_url: "text",
+    actual_nominal_source_url: "text",
+    notes: "text",
   },
   "hoan_review.csv": {
     law_id: "text", // 例: 504AC1000000078 (英字混じりの法令ID)

@@ -31,13 +31,28 @@ const T = {
     gapSummaryCountPrefix: "対象",
     gapSummaryCountSuffix: "年度分",
     gapSummaryUnit: "回",
-    basisLabels: { "2015base-ref": "2015年基準・参考系列", "2020base-final": "2020年基準・確報" },
+    // 実績がどの基準の系列かの呼称。gdp_forecast.csv の actual_basis(実績線が
+    // 接いでいる2系列)と gdp_vintages.csv の basis(背景の帯の元になる6系列)は
+    // 同じ語彙なので辞書も1つにしてある。`2015base-ref` は両方に出る同一の系列。
+    basisLabels: {
+      "1990base": "1990年基準",
+      "1995base": "1995年基準",
+      "2000base": "2000年基準",
+      "2005base-ref": "2005年基準・参考系列",
+      "2011base-ref": "2011年基準・参考系列",
+      "2015base-ref": "2015年基準・参考系列",
+      "2020base-final": "2020年基準・確報",
+    },
     actualBasisPrefix: "実績の基準: ",
     forecastBasisLabels: { gnp: "GNPベース(国民総生産)", gdp: "GDPベース(国内総生産)" },
     forecastBasisPrefix: "見通しの基準: ",
     forecastEraBandLabel: "GNPベース期",
     vintageRangePrefix: "実績の改定幅(基準別): ",
     vintageSeriesSuffix: "系列",
+    // 背景の帯の出典(bin/build.mjs が静的HTMLに埋める。JSでは組み立てない)。
+    // 帯は基準別の系列を束ねたもので、行ごとの出典は data/gdp_vintages.csv が
+    // 持つ。ここに置くのは基準ごとに1行へ畳んで見せるための文言だけ。
+    vintageSourcePrefix: "背景の帯(実績の改定幅)の出典 — 基準別の系列:",
     footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
     footerAbout: "このサイトについて",
     footerContact: "お問い合わせ",
@@ -80,13 +95,22 @@ const T = {
     gapSummaryCountPrefix: "n=",
     gapSummaryCountSuffix: " fiscal years",
     gapSummaryUnit: "",
-    basisLabels: { "2015base-ref": "2015 base, reference series", "2020base-final": "2020 base, final" },
+    basisLabels: {
+      "1990base": "1990 base",
+      "1995base": "1995 base",
+      "2000base": "2000 base",
+      "2005base-ref": "2005 base, reference series",
+      "2011base-ref": "2011 base, reference series",
+      "2015base-ref": "2015 base, reference series",
+      "2020base-final": "2020 base, final",
+    },
     actualBasisPrefix: "Actual basis: ",
     forecastBasisLabels: { gnp: "GNP basis", gdp: "GDP basis" },
     forecastBasisPrefix: "Forecast basis: ",
     forecastEraBandLabel: "GNP-basis era",
     vintageRangePrefix: "Revision range across bases: ",
     vintageSeriesSuffix: " vintages",
+    vintageSourcePrefix: "Sources for the background band (the revision range), one series per statistical base year:",
     footerSrc: "src: Cabinet Office of Japan / SNA",
     footerAbout: "About this site",
     footerContact: "Contact",
@@ -124,7 +148,11 @@ const METRICS = {
     actualSourceCol: "actual_source_url",
     actualSourceLabel: "実質",
     vintageCsv: "/data/gdp_vintages.csv",
-    vintageCols: ["real_1990base", "real_1995base", "real_2000base", "real_2005base_ref", "real_2011base_ref", "real_2015base_ref"],
+    // gdp_vintages.csv は1行=(年度 × 基準)の縦持ちなので、基準ごとに列を並べる
+    // 必要が無く、読む列は実質/名目の1つだけでよい。出典URLの列名は
+    // `<vintageCol>_source_url` として機械的に導く(bin/build.mjs の
+    // vintageSourceHtml)。基準が増えても行が増えるだけで、ここは変わらない。
+    vintageCol: "actual_real",
     unit: "%",
   },
   "gdp-nominal": {
@@ -144,7 +172,7 @@ const METRICS = {
     actualSourceCol: "actual_source_url",
     actualSourceLabel: "名目",
     vintageCsv: "/data/gdp_vintages.csv",
-    vintageCols: ["nominal_1990base", "nominal_1995base", "nominal_2000base", "nominal_2005base_ref", "nominal_2011base_ref", "nominal_2015base_ref"],
+    vintageCol: "actual_nominal",
     unit: "%",
   },
   "unemployment": {
@@ -384,12 +412,19 @@ async function main() {
 
   // vintage envelope data (optional, per-metric): min–max of the actual across
   // statistical base-years, for years where >=2 base vintages exist. Keyed by year.
+  // 縦持ち(1行=年度×基準)なので、年ごとに畳んでから幅を取る。
   const vintageByYear = new Map();
   if (metric.vintageCsv) {
     const vrows = await loadCSV(metric.vintageCsv);
+    const byYear = new Map();
     vrows.forEach((vr) => {
+      const v = toNum(vr[metric.vintageCol]);
+      if (v === null) return;
       const year = Number(vr.fiscal_year);
-      const vals = metric.vintageCols.map((c) => toNum(vr[c])).filter((v) => v !== null);
+      if (!byYear.has(year)) byYear.set(year, []);
+      byYear.get(year).push(v);
+    });
+    byYear.forEach((vals, year) => {
       if (vals.length >= 2) {
         vintageByYear.set(year, { min: Math.min(...vals), max: Math.max(...vals), count: vals.length });
       }
