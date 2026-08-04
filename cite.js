@@ -180,6 +180,18 @@ const DATA_FILES = [
     pages: ["fertility"],
   },
   {
+    file: "births_forecast.csv",
+    ja: "出生数の歴代推計（出生中位）",
+    en: "Number of births — successive projections (medium-fertility variant)",
+    pages: ["births"],
+  },
+  {
+    file: "births_actual.csv",
+    ja: "出生数の実績",
+    en: "Number of births — actual",
+    pages: ["births"],
+  },
+  {
     file: "hoan_review.csv",
     ja: "法律の見直し条項の検討状況",
     en: "Statutory review clauses — status",
@@ -208,6 +220,7 @@ const PAGE_PATH = {
   "bond-issuance": { ja: "/chart/bond-issuance", en: "/en/chart/bond-issuance" },
   "jgb-total": { ja: "/chart/jgb-total", en: "/en/chart/jgb-total" },
   fertility: { ja: "/fertility", en: "/en/fertility" },
+  births: { ja: "/births", en: "/en/births" },
   hoan: { ja: "/hoan", en: "/en/hoan" },
   corrections: { ja: "/corrections", en: "/en/corrections" },
 };

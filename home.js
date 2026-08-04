@@ -8,7 +8,7 @@ const T = {
     lead: "政府は各年度のはじめに経済の「見通し」を示し、約一年後に「実績」が確定する。ズレ計は、その二つを並べて時系列で記録するだけの場所。",
     calloutTitle: "ズレの読み方",
     calloutBody: "ズレは「実績 − 見通し」の差であり、良し悪しの評価ではない。景気変動・災害・資源価格・政策変更など、見通しの前提が外れると生じる。プラスは実績が見通しを上回ったこと、マイナスは下回ったことを意味する。",
-    indicatorsLabel: "指標一覧 · 9",
+    indicatorsLabel: "指標一覧 · 10",
     indicatorsLatest: "確定した直近年度 / 見通し vs 実績",
     plan: "見通し",
     actual: "実績",
@@ -17,7 +17,9 @@ const T = {
     noActual: "未確定",
     awaitingActual: "（実績待ち）",
     noLinkNote: "実績データ収集後に詳細チャートを公開予定",
+    // カード下の注記。キー名は INDICATOR_META の kind + "Note"(renderCard 参照)。
     fertilityNote: "歴代7推計(1992〜2023) vs 実績",
+    birthsNote: "歴代7推計(1992〜2023) vs 実績",
     sourceLabel: "出典",
     heroCopy: "見通しと実績のズレを、\n記録し続ける。",
     heroCaption: (min, max) => `名目GDP成長率 — 当初見通しと実績 ${min}–${max}年度`,
@@ -41,7 +43,7 @@ const T = {
     lead: "At the start of each fiscal year, the government issues an economic forecast; about a year later, the actual figures are confirmed. Zurekei simply records the two side by side, over time.",
     calloutTitle: "Reading the gap",
     calloutBody: 'The gap is "actual − forecast" — not a verdict. It arises when conditions diverge from the assumptions underlying a forecast: business-cycle swings, disasters, commodity prices, policy changes. A positive gap means the actual came in above the forecast; a negative, below.',
-    indicatorsLabel: "INDICATORS · 9",
+    indicatorsLabel: "INDICATORS · 10",
     indicatorsLatest: "Latest settled FY / Forecast vs Actual",
     plan: "Forecast",
     actual: "Actual",
@@ -51,6 +53,7 @@ const T = {
     awaitingActual: " (awaiting actual)",
     noLinkNote: "Detail chart to follow once actual data is available",
     fertilityNote: "7 vintages (1992–2023) vs actual",
+    birthsNote: "7 vintages (1992–2023) vs actual",
     sourceLabel: "Source",
     heroCopy: "A running record of the gap\nbetween forecast and actual.",
     heroCaption: (min, max) => `Nominal GDP growth — initial forecast vs actual, FY${min}–${max}`,
@@ -142,6 +145,13 @@ const INDICATOR_META = [
     kind: "fertility",
     chartHref: "fertility.html",
   },
+  {
+    key: "births",
+    nameJa: "出生数", nameEn: "Number of births",
+    descJa: "社人研の歴代人口推計が置いた出生数の推計と、実績の比較。", descEn: "Projected annual births in successive NIPSSR population projections, compared with the actual figure.",
+    kind: "births",
+    chartHref: "births.html",
+  },
 ];
 
 // 単位の言語出し分け。chart.js の metricUnit と同じ規則にしてある(この2つは
@@ -212,18 +222,21 @@ function buildSparkline(rows, forecastCol, actualCol) {
   return { fc: fc.lines, fcDots: fc.dots, ac: ac.lines, acDots: ac.dots };
 }
 
-// Fertility's card mini-chart has a different shape than the other indicators:
-// one actual series against *several* forecast vintages (not a 1:1 forecast/actual
-// pair), so it can't reuse buildSparkline above. Mirrors the scaling approach of
-// fertility.js's full chart (shared x/y domain across all vintages + actual) but
-// projected into the same 300x80 card-spark viewBox as the other cards.
-function buildFertilitySparkline(actualRows, forecastRows) {
+// The vintage-fan cards (/fertility and /births) have a different shape than the
+// other indicators: one actual series against *several* forecast vintages (not a
+// 1:1 forecast/actual pair), so they can't reuse buildSparkline above. Mirrors the
+// scaling approach of fertility.js's full chart (shared x/y domain across all
+// vintages + actual) but projected into the same 300x80 card-spark viewBox as the
+// other cards.
+// 値の入っているプロパティ名は指標ごとに違う(出生率は tfr/mid、出生数は births)
+// ので引数で受ける。既定値は出生率のときの名前で、追加前と同じ挙動になる。
+function buildFertilitySparkline(actualRows, forecastRows, actualKey = "tfr", forecastKey = "mid") {
   const years = actualRows.map((r) => r.year).concat(forecastRows.map((r) => r.targetYear));
   if (years.length < 2) return { actual: [], vintages: [] };
 
   const xMin = Math.min(...years);
   const xMax = Math.max(...years);
-  const vals = actualRows.map((r) => r.tfr).concat(forecastRows.map((r) => r.mid));
+  const vals = actualRows.map((r) => r[actualKey]).concat(forecastRows.map((r) => r[forecastKey]));
   const min = Math.min(...vals);
   const max = Math.max(...vals);
   const span = max - min || 1;
@@ -252,13 +265,13 @@ function buildFertilitySparkline(actualRows, forecastRows) {
       .map((seg) => seg.map((r) => `${scaleX(r[yearKey]).toFixed(1)},${scaleY(r[valKey]).toFixed(1)}`).join(" "));
   }
 
-  const actual = segmentsFor(actualRows, "year", "tfr");
+  const actual = segmentsFor(actualRows, "year", actualKey);
 
   const vintages = [...new Set(forecastRows.map((r) => r.vintageYear))].sort((a, b) => a - b);
   const vintageSpan = vintages.length - 1 || 1;
   const vintageLines = vintages.map((vy, idx) => {
     const rows = forecastRows.filter((r) => r.vintageYear === vy).sort((a, b) => a.targetYear - b.targetYear);
-    const points = rows.map((r) => `${scaleX(r.targetYear).toFixed(1)},${scaleY(r.mid).toFixed(1)}`).join(" ");
+    const points = rows.map((r) => `${scaleX(r.targetYear).toFixed(1)},${scaleY(r[forecastKey]).toFixed(1)}`).join(" ");
     // older vintages fade further back, same intent as fertility.js's opacityFor,
     // but capped lower (~0.38-0.60) since this chart is small and the actual
     // line needs to stay the thing the eye lands on
@@ -281,6 +294,21 @@ async function loadFertilityCard() {
     .map((r) => ({ year: Number(r.year), tfr: toNum(r.actual_tfr) }))
     .filter((r) => r.tfr !== null);
   return { spark: buildFertilitySparkline(actualRows, forecastRows) };
+}
+
+// /births のカード。扇の形は出生率と同じなので描画は共通で、読む列だけが違う。
+async function loadBirthsCard() {
+  const [forecastRaw, actualRaw] = await Promise.all([
+    loadCSV("/data/births_forecast.csv"),
+    loadCSV("/data/births_actual.csv"),
+  ]);
+  const forecastRows = forecastRaw
+    .map((r) => ({ vintageYear: Number(r.vintage_year), targetYear: Number(r.target_year), births: toNum(r.projected_births) }))
+    .filter((r) => r.births !== null);
+  const actualRows = actualRaw
+    .map((r) => ({ year: Number(r.year), births: toNum(r.actual_births) }))
+    .filter((r) => r.births !== null);
+  return { spark: buildFertilitySparkline(actualRows, forecastRows, "births", "births") };
 }
 
 // Same total/due definition as hoan.js's renderSummary() (due = review_status
@@ -359,7 +387,10 @@ function renderCard(meta, lang, data) {
       </div>`;
   }
 
-  if (meta.kind === "fertility") {
+  // 扇のカード(/fertility と /births)。注記の文言は kind から引く
+  // (fertilityNote / birthsNote)。SVGのクラス名は共通のまま — 見た目は
+  // 同じで、違うのは元データだけなので分ける理由が無い。
+  if (meta.kind === "fertility" || meta.kind === "births") {
     const spark = data && data.spark;
     const sparkSvg = spark
       ? `
@@ -373,7 +404,7 @@ function renderCard(meta, lang, data) {
         <div class="card-top"><span class="card-name mono">${name}</span></div>
         <div class="card-desc">${desc}</div>
         ${sparkSvg}
-        <div class="card-note card-note-fertility">${t.fertilityNote}</div>
+        <div class="card-note card-note-fertility">${t[`${meta.kind}Note`]}</div>
       </a>`;
   }
 
@@ -429,16 +460,18 @@ function renderCard(meta, lang, data) {
 async function main() {
   const seriesMeta = INDICATOR_META.filter((m) => m.kind === "series");
   const seriesData = {};
-  const [, fertilityCard, hoanSummary] = await Promise.all([
+  const [, fertilityCard, birthsCard, hoanSummary] = await Promise.all([
     Promise.all(
       seriesMeta.map(async (m) => {
         seriesData[m.key] = await loadSeries(m);
       })
     ),
     loadFertilityCard(),
+    loadBirthsCard(),
     loadHoanSummary(),
   ]);
   seriesData["fertility"] = fertilityCard;
+  seriesData["births"] = birthsCard;
 
   // 言語はURL(=生成時に確定したdocument.documentElement.lang)が決める。localStorage は
   // 使わない — 初期値の決定に使うと、英語版に古い値(ja)が残っていた場合に日本語へ

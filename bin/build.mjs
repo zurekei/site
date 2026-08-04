@@ -72,6 +72,14 @@ const FERTILITY_DATASET = {
     en: "Total fertility rate — assumptions across successive projections vs actual",
   },
 };
+const BIRTHS_DATASET = {
+  id: `${SITE}/births#dataset`,
+  url: `${SITE}/births`,
+  name: {
+    ja: "出生数｜歴代の将来推計と実績",
+    en: "Number of births — successive projections vs actual",
+  },
+};
 const HOAN_DATASET = {
   id: `${SITE}/hoan#dataset`,
   url: `${SITE}/hoan`,
@@ -91,6 +99,7 @@ const REL = {
   home: { ja: "/", en: "/en/" },
   chartHub: { ja: "/chart/", en: "/en/chart/" },
   fertility: { ja: "/fertility", en: "/en/fertility" },
+  births: { ja: "/births", en: "/en/births" },
   hoan: { ja: "/hoan", en: "/en/hoan" },
   about: { ja: "/about", en: "/en/about" },
   corrections: { ja: "/corrections", en: "/en/corrections" },
@@ -1204,6 +1213,346 @@ ${fertilitySection(d, "en")}
 `;
 }
 
+/* ── 出生数 ─────────────────────────────────────────────
+ * 形は /fertility と同じ「歴代推計 vs 実績」だが、値が比率ではなく人数なので
+ * 書式(3桁区切り)と軸の単位が違い、さらに /fertility には無い次元がある:
+ * **推計側に2つの基準が混じる**(2012年以前の版は日本に住む外国人を含む
+ * 総人口ベース、2017年以降の版は日本人人口ベース)。実績は人口動態統計の
+ * 「日本における日本人」しか完全な年次系列が無いので、基準が揃うのは
+ * 2017/2023の2版だけになる。これを黙って混ぜないために forecast_basis 列を
+ * 持たせ、版のラベルに印を付け、注記で差の実測値(2021年で約1.8万人)を書く。
+ * 語彙そのものは下の birthsBasisErrors() が検査する。
+ */
+
+const BIRTH = loadModule("births.js", [
+  "T", "vintageLabel", "BASIS_JAPANESE", "fmtBirths", "fmtBirthsGap",
+]);
+
+function birthsData() {
+  const forecast = parseCSV(read("data/births_forecast.csv"))
+    .map((r) => ({
+      vintage: Number(r.vintage_year),
+      year: Number(r.target_year),
+      births: toNum(r.projected_births),
+      basis: r.forecast_basis,
+      sourceUrl: r.forecast_source_url,
+      notes: r.notes,
+    }))
+    .filter((r) => r.births !== null);
+  const actual = parseCSV(read("data/births_actual.csv"))
+    .map((r) => ({
+      year: Number(r.year),
+      births: toNum(r.actual_births),
+      sourceUrl: r.source_url,
+      notes: r.notes,
+    }))
+    .filter((r) => r.births !== null);
+
+  const vintages = [...new Set(forecast.map((r) => r.vintage))].sort((a, b) => a - b);
+  // 基準は版の属性(全行同じ)。1版1値であることは birthsBasisErrors() が見る。
+  const basisOf = new Map(vintages.map((v) => [v, forecast.find((r) => r.vintage === v).basis]));
+  const actualByYear = new Map(actual.map((r) => [r.year, r.births]));
+  const years = [...new Set([...actual.map((r) => r.year), ...forecast.map((r) => r.year)])].sort(
+    (a, b) => a - b
+  );
+  const cell = new Map(forecast.map((r) => [`${r.vintage}:${r.year}`, r.births]));
+  return { forecast, actual, vintages, basisOf, actualByYear, years, cell };
+}
+
+const birthsVintageLabel = (d, v, lang) => BIRTH.vintageLabel(v, lang, d.basisOf.get(v));
+
+// notes の先頭タグ([実績] 等。data/README.md の「notesのタグ」を参照)は、
+// 出典行では直前のラベル(「実績: 」)と重複するので落として出す。タグ自体は
+// CSV側の統制語彙なので消さない(chart.js の extractEventNote() が同じ規則で
+// 読んでいる)。
+const stripNoteTag = (s) => (s || "").replace(/^\[[^\]]*\]/, "");
+
+function birthsGapLines(d, lang) {
+  const t = BIRTH.T[lang];
+  const lines = [];
+  for (const v of d.vintages) {
+    const rows = d.forecast
+      .filter((r) => r.vintage === v)
+      .map((r) => ({
+        year: r.year,
+        f: r.births,
+        a: d.actualByYear.has(r.year) ? d.actualByYear.get(r.year) : null,
+      }));
+    // 実績と重なる年が無い推計は黙って飛ばす(理由は fertilityGapLines と同じ)。
+    const st = computeGapStats(rows, "f", "a");
+    if (!st) continue;
+    lines.push({
+      text: t.gapLine(birthsVintageLabel(d, v, lang), st.count, BIRTH.fmtBirthsGap(st.meanGap), st.below, st.above),
+      url: safeUrl(d.forecast.find((r) => r.vintage === v).sourceUrl),
+    });
+  }
+  return lines;
+}
+
+function birthsTable(d, lang = "ja") {
+  const th = (ja, en) =>
+    lang === "ja"
+      ? `            <th scope="col"${dual(en)}>${escapeHTML(ja)}</th>`
+      : `            <th scope="col">${escapeHTML(en)}</th>`;
+  const head = [
+    th(BIRTH.T.ja.thYear, BIRTH.T.en.thYear),
+    th(BIRTH.T.ja.thActual, BIRTH.T.en.thActual),
+    ...d.vintages.map((v) => th(birthsVintageLabel(d, v, "ja"), birthsVintageLabel(d, v, "en"))),
+  ].join("\n");
+
+  const body = d.years
+    .map((y) => {
+      const a = d.actualByYear.has(y) ? BIRTH.fmtBirths(d.actualByYear.get(y)) : "";
+      const cells = d.vintages
+        .map((v) => {
+          const val = d.cell.get(`${v}:${y}`);
+          return `        <td class="mono">${val === undefined ? "" : BIRTH.fmtBirths(val)}</td>`;
+        })
+        .join("\n");
+      return (
+        `      <tr>\n` +
+        `        <th scope="row" class="mono">${y}</th>\n` +
+        `        <td class="mono">${a}</td>\n` +
+        `${cells}\n` +
+        `      </tr>`
+      );
+    })
+    .join("\n");
+
+  const caption =
+    lang === "ja"
+      ? `        <caption${dual(BIRTH.T.en.tableCaption)}>${escapeHTML(BIRTH.T.ja.tableCaption)}</caption>\n`
+      : `        <caption>${escapeHTML(BIRTH.T.en.tableCaption)}</caption>\n`;
+
+  return (
+    `      <div class="data-table-wrap">\n` +
+    `      <table class="data-table data-table-wide">\n` +
+    caption +
+    `        <thead>\n          <tr>\n${head}\n          </tr>\n        </thead>\n` +
+    `        <tbody>\n${body}\n        </tbody>\n` +
+    `      </table>\n` +
+    `      </div>`
+  );
+}
+
+function birthsSection(d, lang = "ja") {
+  const gapEn = birthsGapLines(d, "en");
+  const srcLabel = lang === "ja" ? "出典" : "Source";
+  const gaps = (lang === "ja" ? birthsGapLines(d, "ja") : gapEn)
+    .map((g, i) => {
+      const src = g.url
+        ? ` <a href="${escapeHTML(g.url)}" target="_blank" rel="noopener">${srcLabel}</a>`
+        : "";
+      if (lang === "ja") {
+        return `          <li><span${dual(gapEn[i].text)}>${escapeHTML(g.text)}</span>${src}</li>`;
+      }
+      return `          <li><span>${escapeHTML(g.text)}</span>${src}</li>`;
+    })
+    .join("\n");
+
+  const line = (tag, cls, ja, en) =>
+    lang === "ja"
+      ? `<${tag} class="${cls}"${dual(en)}>${escapeHTML(ja)}</${tag}>`
+      : `<${tag} class="${cls}">${escapeHTML(en)}</${tag}>`;
+
+  const summary =
+    lang === "ja"
+      ? `<summary${dual(BIRTH.T.en.tableToggle(d.years.length))}>${escapeHTML(BIRTH.T.ja.tableToggle(d.years.length))}</summary>`
+      : `<summary>${escapeHTML(BIRTH.T.en.tableToggle(d.years.length))}</summary>`;
+  const gapHead = line("p", "gap-head mono", BIRTH.T.ja.gapHead, BIRTH.T.en.gapHead);
+  const roundNote = line("p", "chart-note mono", BIRTH.T.ja.tableRoundNote, BIRTH.T.en.tableRoundNote);
+  const csvLabel =
+    lang === "ja"
+      ? `<span${dual(BIRTH.T.en.tableCsvLabel)}>${escapeHTML(BIRTH.T.ja.tableCsvLabel)}</span>`
+      : `<span>${escapeHTML(BIRTH.T.en.tableCsvLabel)}</span>`;
+  const citeLink =
+    lang === "ja"
+      ? `<a href="${REL.cite.ja}"${dual(T.en.citeLinkText)}>${escapeHTML(T.ja.citeLinkText)}</a>`
+      : `<a href="${REL.cite.en}">${escapeHTML(T.en.citeLinkText)}</a>`;
+
+  return `
+  <section class="data-section">
+    <details class="data-details">
+      ${summary}
+
+      ${gapHead}
+      <ul class="gap-list mono">
+${gaps}
+      </ul>
+
+${birthsTable(d, lang)}
+
+      ${roundNote}
+      <p class="chart-note mono">${csvLabel}<a href="/data/births_forecast.csv">/data/births_forecast.csv</a> · <a href="/data/births_actual.csv">/data/births_actual.csv</a> · ${citeLink}</p>
+    </details>
+  </section>
+  `;
+}
+
+// 出典行(#births-source)。fertilitySourceHtml と同じ理由でビルドがHTMLに埋める
+// (JSでは組み直さない)。違いは実績側の notes も出すこと —— 2025年の値は確定数
+// ではなく概数で、9月公表の確定数で改定される。これは「その数字をどう読むか」に
+// 直に効く但し書きなので、JSを実行しない相手にも届いていなければ意味がない。
+function birthsSourceHtml(d, lang = "ja") {
+  const label = (ja, en) =>
+    lang === "ja" ? `<span${dual(en)}>${escapeHTML(ja)}</span>` : `<span>${escapeHTML(en)}</span>`;
+  const link = (url) =>
+    `<a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(url)}</a>`;
+  // 但し書きは一次資料についての日本語の記述で、訳は用意していない。EN表示に
+  // 切り替わると <html lang> が en になるため lang="ja" を付ける(fertility と同じ)。
+  const note = (raw) => {
+    const s = stripNoteTag(raw).trim();
+    return s ? ` <span lang="ja">(${escapeHTML(s)})</span>` : "";
+  };
+
+  const lines = [];
+  const seen = new Set();
+  for (const v of d.vintages) {
+    const first = d.forecast.find((r) => r.vintage === v);
+    const url = safeUrl(first.sourceUrl);
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    lines.push(
+      `${label(birthsVintageLabel(d, v, "ja"), birthsVintageLabel(d, v, "en"))}: ${link(url)}${note(first.notes)}`
+    );
+  }
+  for (const r of d.actual) {
+    const url = safeUrl(r.sourceUrl);
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    // 同じ出典の中で但し書きを持つのは先頭行だけ(残りは空欄)なので、その行を探す。
+    const withNote = d.actual.find((x) => x.sourceUrl === r.sourceUrl && x.notes);
+    lines.push(
+      `${label(BIRTH.T.ja.sourceActualPrefix, BIRTH.T.en.sourceActualPrefix)}${link(url)}${note(withNote && withNote.notes)}`
+    );
+  }
+  return lines.join("<br>");
+}
+
+function birthsJsonLd(d, lang = "ja") {
+  const url = abs(REL.births[lang]);
+  return `
+<script type="application/ld+json">
+${JSON.stringify(
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "@id": `${url}#dataset`,
+    name: BIRTHS_DATASET.name[lang],
+    description: BIRTH.T[lang].desc,
+    url,
+    isAccessibleForFree: true,
+    license: CC_BY_4,
+    inLanguage: lang,
+    temporalCoverage: `${d.years[0]}/${d.years[d.years.length - 1]}`,
+    creator: orgNode(),
+    includedInDataCatalog: { "@id": CATALOG_ID },
+    variableMeasured: lang === "en"
+      ? [
+          { "@type": "PropertyValue", name: "Projection (medium-fertility variant)", unitText: "Births" },
+          { "@type": "PropertyValue", name: "Actual", unitText: "Births" },
+        ]
+      : [
+          { "@type": "PropertyValue", name: "推計（出生中位）", unitText: "人" },
+          { "@type": "PropertyValue", name: "実績", unitText: "人" },
+        ],
+    distribution: [
+      { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/births_forecast.csv` },
+      { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/births_actual.csv` },
+    ],
+  },
+  null,
+  2
+)}
+</script>
+`;
+}
+
+// 範囲注記。原本は births.js の T.scopeNote 1箇所(fertilityScopeNote と同じ扱い)。
+function birthsScopeNote(lang) {
+  return escapeHTML(BIRTH.T[lang].scopeNote);
+}
+
+function buildBirths() {
+  const d = birthsData();
+  let html = read("births.html");
+  html = injectRegion(html, "jsonld", birthsJsonLd(d, "ja"), "births.html");
+  html = injectRegion(html, "scope", birthsScopeNote("ja"), "births.html");
+  html = injectRegion(html, "table", birthsSection(d, "ja"), "births.html");
+  html = injectRegion(html, "birthsource", birthsSourceHtml(d, "ja"), "births.html");
+  return html;
+}
+
+// /en/births.html は元ファイルが存在しないので丸ごと組み立てる(buildFertilityEn と同じ)。
+function buildBirthsEn() {
+  const d = birthsData();
+  const t = BIRTH.T.en;
+  const urls = REL.births;
+  const url = abs(urls.en);
+  const title = `${t.title} — zurekei`;
+  const desc = "Successive NIPSSR projections of the annual number of births, recorded alongside the actual figure with sources.";
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHTML(title)}</title>
+<meta name="description" content="${escapeHTML(desc)}">
+<link rel="canonical" href="${url}">
+${hreflangTags(urls)}
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${escapeHTML(title)}">
+<meta property="og:description" content="${escapeHTML(desc)}">
+<meta property="og:url" content="${url}">
+<!-- 専用のOGカードは持たない(JA側 births.html の同じ位置のコメントを参照)。 -->
+<meta property="og:image" content="${SITE}/assets/og-en.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+<!-- JAの births.html と同じ規則。#births-source をここに入れないのは、中身を
+     ビルドがHTMLに埋めてあり、JSが動かない相手にこそ見せたいものだから。 -->
+<noscript><style>.chart-wrap > svg, #births-legend { display: none !important; } .chart-noscript { display: block; }</style></noscript>
+${birthsJsonLd(d, "en")}</head>
+<body>
+<div class="page">
+${header("en", urls)}
+
+  <a class="chart-back" id="t-back" href="${REL.home.en}">${escapeHTML(t.back)}</a>
+
+  <main>
+    <section class="chart-section">
+      <h1 class="chart-title" id="births-title">${escapeHTML(t.title)}</h1>
+      <p class="chart-desc" id="births-desc">${escapeHTML(t.desc)}</p>
+      <p class="chart-note mono" id="births-scope-note">${birthsScopeNote("en")}</p>
+
+      <div class="chart-wrap">
+        <svg id="births-chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHTML(t.chartAriaLabel)}"></svg>
+        <p class="chart-noscript mono">${escapeHTML(t.chartNoscript)}</p>
+      </div>
+
+      <div class="fertility-legend" id="births-legend"></div>
+
+      <div class="readout-source" id="births-source">${birthsSourceHtml(d, "en")}</div>
+    </section>
+
+${birthsSection(d, "en")}
+  </main>
+
+  <footer class="site-footer-row">
+    <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
+    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
+    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
+  </footer>
+</div>
+<script src="/csv.js?v=${ASSET_V}"></script>
+<script src="/births.js?v=${ASSET_V}"></script>
+</body>
+</html>
+`;
+}
+
 /* ── 見直し条項 ─────────────────────────────────────────── */
 
 const HOAN = loadModule("hoan.js", ["T", "STATUS", "NOTE_LABEL", "lawNumEn", "transLinkHtml", "TENTATIVE"]);
@@ -1456,6 +1805,7 @@ ${rows.map((r) => hoanRowHtml(r, "en")).join("\n")}
 // 実際に10件全てへのリンクを持っており、内容と対応するのでここに移した。
 function buildHomeJsonLd(desc, keys, lang = "ja") {
   const fertUrl = abs(REL.fertility[lang]);
+  const birthsUrl = abs(REL.births[lang]);
   const hoanUrl = abs(REL.hoan[lang]);
   // 各 Dataset は description/creator を省略しない。@id が個別ページ側
   // (chart/*.html・fertility.html・hoan.html)の Dataset と同一なので、JSON-LDの
@@ -1491,6 +1841,15 @@ function buildHomeJsonLd(desc, keys, lang = "ja") {
       name: FERTILITY_DATASET.name[lang],
       description: FERT.T[lang].desc,
       url: fertUrl,
+      license: CC_BY_4,
+      creator: { "@id": ORG_ID },
+    },
+    {
+      "@type": "Dataset",
+      "@id": `${birthsUrl}#dataset`,
+      name: BIRTHS_DATASET.name[lang],
+      description: BIRTH.T[lang].desc,
+      url: birthsUrl,
       license: CC_BY_4,
       creator: { "@id": ORG_ID },
     },
@@ -1686,8 +2045,11 @@ function buildHomeEn(keys) {
 
   // JSを実行しないクローラのための素のリンク一覧。JA側の card-fallback と同じ
   // 最小限の忠実度(名前のみ、数値カードには踏み込まない)。
+  // /chart/<key> に無い指標(扇のページ)はREL側にURLを持つ。ここに書き足す
+  // 必要があるのは、chartRel() が「/chart/<key>」しか作れないから。
+  const NON_CHART_REL = { fertility: REL.fertility, births: REL.births };
   const cardFallback = HOME.INDICATOR_META.map((m) => {
-    const href = m.key === "fertility" ? REL.fertility.en : chartRel(m.key).en;
+    const href = NON_CHART_REL[m.key] ? NON_CHART_REL[m.key].en : chartRel(m.key).en;
     return `    <a class="card-fallback" href="${href}">${escapeHTML(m.nameEn)}</a>`;
   }).join("\n");
 
@@ -2475,9 +2837,11 @@ function sitemapEntries(keys, files) {
     metrics: [
       ...metricEntries,
       { loc: `${SITE}/fertility`, priority: "0.9", date: genDate(path.join(SITE_DIR, "fertility.html")) },
+      { loc: `${SITE}/births`, priority: "0.9", date: genDate(path.join(SITE_DIR, "births.html")) },
       { loc: `${SITE}/hoan`, priority: "0.8", date: genDate(path.join(SITE_DIR, "hoan.html")) },
       ...enMetricEntries,
       { loc: `${SITE}/en/fertility`, priority: "0.9", date: genDate(path.join(EN_DIR, "fertility.html")) },
+      { loc: `${SITE}/en/births`, priority: "0.9", date: genDate(path.join(EN_DIR, "births.html")) },
       { loc: `${SITE}/en/hoan`, priority: "0.8", date: genDate(path.join(EN_DIR, "hoan.html")) },
     ],
     static: [
@@ -2681,6 +3045,13 @@ function idCoverageErrors() {
       ],
     },
     {
+      js: "births.js",
+      htmls: [
+        { label: "births.html", html: files.get(path.join(SITE_DIR, "births.html")) },
+        { label: "en/births.html", html: files.get(path.join(EN_DIR, "births.html")) },
+      ],
+    },
+    {
       js: "hoan.js",
       htmls: [
         { label: "hoan.html", html: files.get(path.join(SITE_DIR, "hoan.html")) },
@@ -2859,6 +3230,7 @@ function handwrittenJaDriftErrors() {
     // 手書きドリフトではないので、この検査に混ぜると筋が悪くなる(TODO)。
     { file: "hoan.html", js: "hoan.js", T: HOAN.T.ja, html: read("hoan.html"), extra: [] },
     { file: "fertility.html", js: "fertility.js", T: FERT.T.ja, html: read("fertility.html"), extra: [] },
+    { file: "births.html", js: "births.js", T: BIRTH.T.ja, html: read("births.html"), extra: [] },
   ];
 
   // タグとタグの間だけにある空白(手書きHTML側の改行・インデント)を畳む。
@@ -3379,6 +3751,24 @@ const CSV_COLUMNS = {
   },
   // データ行0のヘッダのみのファイル。行が無くても列の分類は要る
   // (--check がここで誤爆しないことは実行結果自体が確認になる)。
+  "births_actual.csv": {
+    year: "number",
+    actual_births: "number", // 人(3桁区切りは表示側だけ。CSVはカンマ不可)
+    source_url: "text",
+    notes: "text",
+  },
+  "births_forecast.csv": {
+    vintage_year: "number",
+    target_year: "number",
+    projected_births: "number",
+    // 統制語彙(total / japanese)。中身は基準の呼称であって数値ではない
+    // (gdp_forecast.csv の forecast_basis と同じ形)。語彙そのものは
+    // birthsBasisErrors() が別に検査する。
+    forecast_basis: "text",
+    forecast_source_url: "text",
+    forecast_published_date: "text", // ISO日付文字列
+    notes: "text",
+  },
   "corrections.csv": {
     date: "text",
     target: "text",
@@ -3999,6 +4389,63 @@ function sourceUrlReachErrors() {
   return errs;
 }
 
+/* ── 出生数の基準(forecast_basis)の検査 ─────────────────────────
+ * /births は推計側に2つの基準が混じる唯一のページで、実績(日本における
+ * 日本人)と基準が揃うのは2017/2023の2版だけ。ズレの何%かが基準の違いで
+ * 説明できてしまうので、どの版がどちらかは値そのものと同じ重みを持つ。
+ *
+ * ところが壊れても画面には出ない: births.js は「japanese 以外はすべて印を
+ * 付ける」側に倒してあるので、`total` を `totl` と打ち間違えても印は付いた
+ * ままで、CSVスキーマ検査も text 列は中身を見ない。逆に `japanese` を打ち
+ * 間違えると**印が消えて基準が揃っているように見える**——こちらは静かに嘘に
+ * なる。だから語彙そのものをここで見る。
+ *
+ * 併せて (1) 1つの版の中で基準が混じっていないこと(基準は版の属性で、
+ * birthsData() は先頭行の値を版全体の基準として使っている)、(2) 0件でない
+ * こと(列名が変わって1件も読めなくなったら止める)、(3) births.js の
+ * BASIS_JAPANESE が語彙の中にあること(ここが外れると全版に印が付く)を見る。
+ */
+const BIRTHS_BASIS_VOCAB = ["total", "japanese"];
+
+function birthsBasisErrors() {
+  const errs = [];
+  if (!BIRTHS_BASIS_VOCAB.includes(BIRTH.BASIS_JAPANESE)) {
+    errs.push(
+      `births.js の BASIS_JAPANESE が "${BIRTH.BASIS_JAPANESE}" で、forecast_basis の語彙(${BIRTHS_BASIS_VOCAB.join(" / ")})に無い。` +
+        `全部の版に「総人口ベース」の印が付いた状態になる`
+    );
+  }
+  const rows = parseCSV(read("data/births_forecast.csv"));
+  const byVintage = new Map();
+  rows.forEach((r, i) => {
+    const basis = r.forecast_basis;
+    if (!BIRTHS_BASIS_VOCAB.includes(basis)) {
+      errs.push(
+        `data/births_forecast.csv ${i + 2}行目の forecast_basis が "${basis}" ` +
+          `(語彙は ${BIRTHS_BASIS_VOCAB.join(" / ")})。実績との基準の一致/不一致が誤って表示される`
+      );
+      return;
+    }
+    const v = r.vintage_year;
+    if (!byVintage.has(v)) byVintage.set(v, new Set());
+    byVintage.get(v).add(basis);
+  });
+  for (const [v, set] of byVintage) {
+    if (set.size > 1) {
+      errs.push(
+        `data/births_forecast.csv: ${v}年推計の forecast_basis が1つに定まらない(${[...set].join(" / ")})。` +
+          `基準は版の属性で、表示側は先頭行の値を版全体の基準として使う`
+      );
+    }
+  }
+  if (rows.length === 0) {
+    errs.push(
+      "出生数の基準の検査: data/births_forecast.csv から1行も読めなかった(0件はありえない)"
+    );
+  }
+  return errs;
+}
+
 function citeDataFilesErrors() {
   const errs = [];
   const declared = new Set(Object.keys(CSV_COLUMNS));
@@ -4029,6 +4476,7 @@ const files = new Map();
 for (const k of keys) files.set(path.join(OUT_DIR, `${k}.html`), buildPage(k, METRICS[k], "ja"));
 files.set(path.join(OUT_DIR, "index.html"), buildIndex(keys, "ja"));
 files.set(path.join(SITE_DIR, "fertility.html"), buildFertility());
+files.set(path.join(SITE_DIR, "births.html"), buildBirths());
 files.set(path.join(SITE_DIR, "hoan.html"), buildHoan());
 files.set(path.join(SITE_DIR, "corrections.html"), buildCorrections());
 files.set(path.join(SITE_DIR, "index.html"), buildHome(keys));
@@ -4038,6 +4486,7 @@ files.set(path.join(SITE_DIR, "index.html"), buildHome(keys));
 for (const k of keys) files.set(path.join(EN_OUT_DIR, `${k}.html`), buildPage(k, METRICS[k], "en"));
 files.set(path.join(EN_OUT_DIR, "index.html"), buildIndex(keys, "en"));
 files.set(path.join(EN_DIR, "fertility.html"), buildFertilityEn());
+files.set(path.join(EN_DIR, "births.html"), buildBirthsEn());
 files.set(path.join(EN_DIR, "hoan.html"), buildHoanEn());
 files.set(path.join(EN_DIR, "index.html"), buildHomeEn(keys));
 files.set(path.join(EN_DIR, "about.html"), buildAboutEn());
@@ -4161,6 +4610,9 @@ if (check) {
   // 内容そのものにも関わらない別種の壊れ方なので、csvSchemaErrs とは独立に
   // 必ず見る。
   const citeDataFilesErrs = citeDataFilesErrors();
+  // 出生数の基準(forecast_basis)も独立。CSVスキーマ検査は text 列の中身を見ず、
+  // 描画側は未知の値でも印を出す/出さないどちらかに倒れるだけなので画面に出ない。
+  const birthsBasisErrs = birthsBasisErrors();
   // 法令番号の英語換算も、生成物の新旧にもCSVのスキーマにも掛からない別種の
   // 壊れ方(値は正しい形をしているのに換算だけ間違う)なので独立に見る。
   const hoanNumErrs = hoanLawNumErrors();
@@ -4191,6 +4643,7 @@ if (check) {
     ogFileErrs.length ||
     csvSchemaErrs.length ||
     citeDataFilesErrs.length ||
+    birthsBasisErrs.length ||
     hoanNumErrs.length ||
     hoanTransErrs.length ||
     assetVErrs.length ||
@@ -4209,6 +4662,7 @@ if (check) {
     ogFileErrs.forEach((e) => console.error(`✗ ${e}`));
     csvSchemaErrs.forEach((e) => console.error(`✗ ${e}`));
     citeDataFilesErrs.forEach((e) => console.error(`✗ ${e}`));
+    birthsBasisErrs.forEach((e) => console.error(`✗ ${e}`));
     hoanNumErrs.forEach((e) => console.error(`✗ ${e}`));
     hoanTransErrs.forEach((e) => console.error(`✗ ${e}`));
     assetVErrs.forEach((e) => console.error(`✗ ${e}`));
@@ -4219,7 +4673,7 @@ if (check) {
     process.exit(1);
   }
   console.log(
-    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 法令番号の英語換算(公布年・law_idとの突き合わせ) / 公式英訳の列(統制語彙・URLの形) / 全HTMLの?v=とASSET_Vの一致 / JAトップのcard-fallbackとINDICATOR_METAの一致 / descriptionとog:descriptionの一致 / data/*.csvの出典URLが静的HTMLから辿れることとも一致）`
+    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 出生数のforecast_basisの語彙 / 法令番号の英語換算(公布年・law_idとの突き合わせ) / 公式英訳の列(統制語彙・URLの形) / 全HTMLの?v=とASSET_Vの一致 / JAトップのcard-fallbackとINDICATOR_METAの一致 / descriptionとog:descriptionの一致 / data/*.csvの出典URLが静的HTMLから辿れることとも一致）`
   );
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -4230,7 +4684,7 @@ if (check) {
   for (const f of orphansEn) fs.unlinkSync(path.join(EN_OUT_DIR, f));
   for (const [f, html] of files) fs.writeFileSync(f, html);
   console.log(
-    `✓ ${files.size} ページを更新（chart/ ${chartKnown.size} 本 + en/chart/ ${chartKnownEn.size} 本 + fertility/hoan/about/corrections/contact(ja+en) + index.html(ja+en) + sitemap.xml）`
+    `✓ ${files.size} ページを更新（chart/ ${chartKnown.size} 本 + en/chart/ ${chartKnownEn.size} 本 + fertility/births/hoan/about/corrections/contact(ja+en) + index.html(ja+en) + sitemap.xml）`
   );
   // 生成そのものは成功しても、辿らせる側が欠けていれば索引には出ない。
   // 落ちるほどではないので警告にとどめ、デプロイは --check 側で止める。
@@ -4242,6 +4696,7 @@ if (check) {
   ogFileErrors().forEach((e) => console.warn(`⚠ ${e}`));
   csvSchemaErrors().forEach((e) => console.warn(`⚠ ${e}`));
   citeDataFilesErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  birthsBasisErrors().forEach((e) => console.warn(`⚠ ${e}`));
   // 2026-08-03〜04に足した5件も、ここに並べないとデプロイ直前の --check まで
   // 出てこない(気づくのが遅いほど直すのが面倒になる)。どれも書き出し後の
   // ファイルを読むので、この位置でなければならない。

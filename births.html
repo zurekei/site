@@ -1,0 +1,1192 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>出生数 — 歴代推計 vs 実績 — ズレ計</title>
+<meta name="description" content="社人研の歴代将来推計が置いた出生数の推計と実績を、出典つきで重ねて記録する。">
+<!-- Canonical is the extension-less URL: /x.html 308-redirects to /x, so the two
+     spellings are the same page. Without this, aggregators that key on URL (はてなブックマーク)
+     count them as separate entries and split the bookmark total. -->
+<link rel="canonical" href="https://zurekei.org/births">
+<link rel="alternate" hreflang="ja" href="https://zurekei.org/births">
+<link rel="alternate" hreflang="en" href="https://zurekei.org/en/births">
+<link rel="alternate" hreflang="x-default" href="https://zurekei.org/births">
+<meta property="og:site_name" content="ズレ計">
+<meta property="og:type" content="website">
+<meta property="og:title" content="出生数 — 歴代推計 vs 実績 — ズレ計">
+<meta property="og:description" content="社人研の歴代将来推計が置いた出生数の推計と実績を、出典つきで重ねて記録する。">
+<meta property="og:url" content="https://zurekei.org/births">
+<!-- 専用のOGカードは持たず、汎用の assets/og.png を使う(/hoan と同じ扱い)。
+     指標ごとのカードは bin/og.sh が20枚を一度に焼き直す仕組みで、1枚増やすと
+     og.html 側に描画経路を足したうえで20枚とも焼き直すことになる。ページの
+     公開はそれと切り離せるので、まず出す。専用カードを足すときは
+     bin/build.mjs の OG_CARDS / OG_INPUT_RELS と og.html を一緒に直すこと。 -->
+<meta property="og:image" content="https://zurekei.org/assets/og.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="style.css?v=20260803a">
+<!-- JSが動かないときに、中身が入らないまま残る部品（空のSVGと凡例）を畳んで、
+     案内文と入れ替える。数値表と出典行は静的に入っているので触らない。
+     詳細は fertility.html の同じ位置のコメントを参照。 -->
+<noscript><style>.chart-wrap > svg, #births-legend { display: none !important; } .chart-noscript { display: block; }</style></noscript>
+<!-- BUILD:jsonld -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "@id": "https://zurekei.org/births#dataset",
+  "name": "出生数｜歴代の将来推計と実績",
+  "description": "国立社会保障・人口問題研究所「日本の将来推計人口」が版ごとに置いた出生数の推計(出生中位)を重ねたもの。線の色が薄いほど古い推計、濃いほど新しい推計。",
+  "url": "https://zurekei.org/births",
+  "isAccessibleForFree": true,
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "inLanguage": "ja",
+  "temporalCoverage": "1980/2070",
+  "creator": {
+    "@type": "Organization",
+    "@id": "https://zurekei.org/#organization",
+    "name": "zurekei",
+    "alternateName": "ズレ計",
+    "url": "https://zurekei.org"
+  },
+  "includedInDataCatalog": {
+    "@id": "https://zurekei.org/#catalog"
+  },
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "推計（出生中位）",
+      "unitText": "人"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "実績",
+      "unitText": "人"
+    }
+  ],
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/births_forecast.csv"
+    },
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/births_actual.csv"
+    }
+  ]
+}
+</script>
+<!-- /BUILD:jsonld -->
+</head>
+<body>
+<div class="page">
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="ズレ計 トップへ">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <a id="lang-ja" class="lang-btn mono active" href="/births">JA</a>
+        <a id="lang-en" class="lang-btn mono" href="/en/births">EN</a>
+      </div>
+    </div>
+  </header>
+
+  <a class="chart-back" id="t-back" href="index.html">← 指標一覧</a>
+
+  <main>
+    <section class="chart-section">
+      <h1 class="chart-title" id="births-title">出生数 — 歴代推計 vs 実績</h1>
+      <p class="chart-desc" id="births-desc">国立社会保障・人口問題研究所「日本の将来推計人口」が版ごとに置いた出生数の推計(出生中位)を重ねたもの。線の色が薄いほど古い推計、濃いほど新しい推計。</p>
+      <p class="chart-note mono" id="births-scope-note"><!-- BUILD:scope -->このページが並べているのは年間の出生数（人数）であり、合計特殊出生率（1人の女性が生涯に産む子どもの数）ではない。出生率は「合計特殊出生率」のページにある。実績は人口動態統計の「日本における日本人」。推計のうち＊印を付けた版は日本に住む外国人を含む総人口ベースで、実績とは基準が異なる（差は2021年で約1.8万人＝出生数の約2%）。<!-- /BUILD:scope --></p>
+
+      <div class="chart-wrap">
+        <svg id="births-chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-label="出生数の歴代推計と実績"></svg>
+        <!-- グラフはJSでしか描かない。JSが無いとこの枠が空箱として残り、壊れて
+             いるようにしか見えないので、行き先を書いておく。表示の切り替えは
+             <head> の <noscript><style> が持つ。 -->
+        <p class="chart-noscript mono">グラフの描画には JavaScript が必要です。数値は下の表にあります。</p>
+      </div>
+
+      <div class="fertility-legend" id="births-legend"></div>
+
+      <div class="readout-source" id="births-source"><!-- BUILD:birthsource --><span data-en="1992 projection*">1992年推計＊</span>: <a href="https://www.ipss.go.jp/syoushika/bunken/data/pdf/101827_4.pdf" target="_blank" rel="noopener">https://www.ipss.go.jp/syoushika/bunken/data/pdf/101827_4.pdf</a> <span lang="ja">(表2-5(中位推計)。原本はスキャンPDFのため数値は目視で書き写しており1000人単位の整数で公表されている。出生-死亡=自然増加が全35年分で成り立つことをbin/build_births.pyが検算している)</span><br><span data-en="1997 projection*">1997年推計＊</span>: <a href="https://www.ipss.go.jp/pp-zenkoku/j/zenkoku1997/db_zenkoku1997/s_tables/pp1997_chu_T2_1_6.xls" target="_blank" rel="noopener">https://www.ipss.go.jp/pp-zenkoku/j/zenkoku1997/db_zenkoku1997/s_tables/pp1997_chu_T2_1_6.xls</a> <span lang="ja">(表2-1-6(中位推計)。1000人単位の整数で公表されており1000人未満は丸められている)</span><br><span data-en="2002 projection*">2002年推計＊</span>: <a href="https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2002/db_zenkoku2002/s_tables/pp2002_chu_T1_1_7.xls" target="_blank" rel="noopener">https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2002/db_zenkoku2002/s_tables/pp2002_chu_T1_1_7.xls</a> <span lang="ja">(表1-1-7(中位推計))</span><br><span data-en="2006 projection*">2006年推計＊</span>: <a href="https://www.ipss.go.jp/syoushika/tohkei/suikei07/houkoku/kekka-1/1-8.xls" target="_blank" rel="noopener">https://www.ipss.go.jp/syoushika/tohkei/suikei07/houkoku/kekka-1/1-8.xls</a> <span lang="ja">(表1-8(出生中位・死亡中位推計))</span><br><span data-en="2012 projection*">2012年推計＊</span>: <a href="https://www.ipss.go.jp/syoushika/tohkei/newest04/s-kekka/1-8.xls" target="_blank" rel="noopener">https://www.ipss.go.jp/syoushika/tohkei/newest04/s-kekka/1-8.xls</a> <span lang="ja">(表1-8(出生中位・死亡中位推計))</span><br><span data-en="2017 projection">2017年推計</span>: <a href="https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2017/db_zenkoku2017/s_tables/1-8(J).xls" target="_blank" rel="noopener">https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2017/db_zenkoku2017/s_tables/1-8(J).xls</a> <span lang="ja">(表1-8(J)(日本人人口・出生中位・死亡中位推計))</span><br><span data-en="2023 projection">2023年推計</span>: <a href="https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2023/db_zenkoku2023/s_tables/1-8(J).xlsx" target="_blank" rel="noopener">https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2023/db_zenkoku2023/s_tables/1-8(J).xlsx</a> <span lang="ja">(表1-8(J)(日本人人口・出生中位・死亡中位推計))</span><br><span data-en="Actual: ">実績: </span><a href="https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/kakutei24/xls/16_hyoR06.xlsx" target="_blank" rel="noopener">https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/kakutei24/xls/16_hyoR06.xlsx</a> <span lang="ja">(厚生労働省「令和6(2024)年 人口動態統計(確定数)の概況」統計表 第2表より。日本における日本人について)</span><br><span data-en="Actual: ">実績: </span><a href="https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/nengai25/xls/R7toukeihyou.xlsx" target="_blank" rel="noopener">https://www.mhlw.go.jp/toukei/saikin/hw/jinkou/geppo/nengai25/xls/R7toukeihyou.xlsx</a> <span lang="ja">(厚生労働省「令和7(2025)年 人口動態統計月報年計(概数)の概況」統計表 第1表より。確定数ではなく概数の段階の値で、例年9月公表の確定数で改定される見込み)</span><!-- /BUILD:birthsource --></div>
+    </section>
+
+  <!-- ここから下は bin/build.mjs が data/births_*.csv から差し込む。直接編集しない。
+       グラフはJSでしか描かれないので、JSを実行しない読み手にとっては、この表が
+       このページで数値を読める唯一の場所になる。 -->
+  <!-- BUILD:table -->
+  <section class="data-section">
+    <details class="data-details">
+      <summary data-en="Show the figures as a table (91 years)">歴代推計と実績を表で見る（91年分）</summary>
+
+      <p class="gap-head mono" data-en="Mean gap per projection, over the years where an actual figure exists">実績と重なる期間で見た、推計ごとの平均のズレ</p>
+      <ul class="gap-list mono">
+          <li><span data-en="1992 projection* | mean −280,400 over 35 overlapping years (actual below the projection in 35, above in 0)">1992年推計＊｜重なる35年で 平均 −280,400（実績が下回った 35年 / 上回った 0年）</span> <a href="https://www.ipss.go.jp/syoushika/bunken/data/pdf/101827_4.pdf" target="_blank" rel="noopener">出典</a></li>
+          <li><span data-en="1997 projection* | mean −136,664 over 30 overlapping years (actual below the projection in 30, above in 0)">1997年推計＊｜重なる30年で 平均 −136,664（実績が下回った 30年 / 上回った 0年）</span> <a href="https://www.ipss.go.jp/pp-zenkoku/j/zenkoku1997/db_zenkoku1997/s_tables/pp1997_chu_T2_1_6.xls" target="_blank" rel="noopener">出典</a></li>
+          <li><span data-en="2002 projection* | mean −42,779 over 25 overlapping years (actual below the projection in 16, above in 9)">2002年推計＊｜重なる25年で 平均 −42,779（実績が下回った 16年 / 上回った 9年）</span> <a href="https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2002/db_zenkoku2002/s_tables/pp2002_chu_T1_1_7.xls" target="_blank" rel="noopener">出典</a></li>
+          <li><span data-en="2006 projection* | mean +84,479 over 20 overlapping years (actual below the projection in 3, above in 17)">2006年推計＊｜重なる20年で 平均 +84,479（実績が下回った 3年 / 上回った 17年）</span> <a href="https://www.ipss.go.jp/syoushika/tohkei/suikei07/houkoku/kekka-1/1-8.xls" target="_blank" rel="noopener">出典</a></li>
+          <li><span data-en="2012 projection* | mean −3,859 over 15 overlapping years (actual below the projection in 6, above in 9)">2012年推計＊｜重なる15年で 平均 −3,859（実績が下回った 6年 / 上回った 9年）</span> <a href="https://www.ipss.go.jp/syoushika/tohkei/newest04/s-kekka/1-8.xls" target="_blank" rel="noopener">出典</a></li>
+          <li><span data-en="2017 projection | mean −65,447 over 10 overlapping years (actual below the projection in 9, above in 1)">2017年推計｜重なる10年で 平均 −65,447（実績が下回った 9年 / 上回った 1年）</span> <a href="https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2017/db_zenkoku2017/s_tables/1-8(J).xls" target="_blank" rel="noopener">出典</a></li>
+          <li><span data-en="2023 projection | mean −30,972 over 5 overlapping years (actual below the projection in 4, above in 1)">2023年推計｜重なる5年で 平均 −30,972（実績が下回った 4年 / 上回った 1年）</span> <a href="https://www.ipss.go.jp/pp-zenkoku/j/zenkoku2023/db_zenkoku2023/s_tables/1-8(J).xlsx" target="_blank" rel="noopener">出典</a></li>
+      </ul>
+
+      <div class="data-table-wrap">
+      <table class="data-table data-table-wide">
+        <caption data-en="Annual births — each projection (medium-fertility variant) and the actual figure">出生数｜歴代推計(出生中位)と実績</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-en="Year">年</th>
+            <th scope="col" data-en="Actual">実績</th>
+            <th scope="col" data-en="1992 projection*">1992年推計＊</th>
+            <th scope="col" data-en="1997 projection*">1997年推計＊</th>
+            <th scope="col" data-en="2002 projection*">2002年推計＊</th>
+            <th scope="col" data-en="2006 projection*">2006年推計＊</th>
+            <th scope="col" data-en="2012 projection*">2012年推計＊</th>
+            <th scope="col" data-en="2017 projection">2017年推計</th>
+            <th scope="col" data-en="2023 projection">2023年推計</th>
+          </tr>
+        </thead>
+        <tbody>
+      <tr>
+        <th scope="row" class="mono">1980</th>
+        <td class="mono">1,576,889</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1981</th>
+        <td class="mono">1,529,455</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1982</th>
+        <td class="mono">1,515,392</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1983</th>
+        <td class="mono">1,508,687</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1984</th>
+        <td class="mono">1,489,780</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1985</th>
+        <td class="mono">1,431,577</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1986</th>
+        <td class="mono">1,382,946</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1987</th>
+        <td class="mono">1,346,658</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1988</th>
+        <td class="mono">1,314,006</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1989</th>
+        <td class="mono">1,246,802</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1990</th>
+        <td class="mono">1,221,585</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1991</th>
+        <td class="mono">1,223,245</td>
+        <td class="mono">1,231,000</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1992</th>
+        <td class="mono">1,208,989</td>
+        <td class="mono">1,233,000</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1993</th>
+        <td class="mono">1,188,282</td>
+        <td class="mono">1,236,000</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1994</th>
+        <td class="mono">1,238,328</td>
+        <td class="mono">1,248,000</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1995</th>
+        <td class="mono">1,187,064</td>
+        <td class="mono">1,269,000</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1996</th>
+        <td class="mono">1,206,555</td>
+        <td class="mono">1,298,000</td>
+        <td class="mono">1,220,000</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1997</th>
+        <td class="mono">1,191,665</td>
+        <td class="mono">1,332,000</td>
+        <td class="mono">1,221,000</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1998</th>
+        <td class="mono">1,203,147</td>
+        <td class="mono">1,368,000</td>
+        <td class="mono">1,225,000</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">1999</th>
+        <td class="mono">1,177,669</td>
+        <td class="mono">1,404,000</td>
+        <td class="mono">1,231,000</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2000</th>
+        <td class="mono">1,190,547</td>
+        <td class="mono">1,438,000</td>
+        <td class="mono">1,239,000</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2001</th>
+        <td class="mono">1,170,662</td>
+        <td class="mono">1,467,000</td>
+        <td class="mono">1,246,000</td>
+        <td class="mono">1,194,051</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2002</th>
+        <td class="mono">1,153,855</td>
+        <td class="mono">1,489,000</td>
+        <td class="mono">1,251,000</td>
+        <td class="mono">1,182,816</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2003</th>
+        <td class="mono">1,123,610</td>
+        <td class="mono">1,503,000</td>
+        <td class="mono">1,254,000</td>
+        <td class="mono">1,169,511</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2004</th>
+        <td class="mono">1,110,721</td>
+        <td class="mono">1,508,000</td>
+        <td class="mono">1,254,000</td>
+        <td class="mono">1,154,213</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2005</th>
+        <td class="mono">1,062,530</td>
+        <td class="mono">1,506,000</td>
+        <td class="mono">1,251,000</td>
+        <td class="mono">1,136,984</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2006</th>
+        <td class="mono">1,092,674</td>
+        <td class="mono">1,497,000</td>
+        <td class="mono">1,245,000</td>
+        <td class="mono">1,119,141</td>
+        <td class="mono">1,089,870</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2007</th>
+        <td class="mono">1,089,818</td>
+        <td class="mono">1,482,000</td>
+        <td class="mono">1,236,000</td>
+        <td class="mono">1,101,806</td>
+        <td class="mono">1,022,168</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2008</th>
+        <td class="mono">1,091,156</td>
+        <td class="mono">1,463,000</td>
+        <td class="mono">1,225,000</td>
+        <td class="mono">1,085,263</td>
+        <td class="mono">986,916</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2009</th>
+        <td class="mono">1,070,036</td>
+        <td class="mono">1,440,000</td>
+        <td class="mono">1,212,000</td>
+        <td class="mono">1,069,494</td>
+        <td class="mono">959,950</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2010</th>
+        <td class="mono">1,071,305</td>
+        <td class="mono">1,415,000</td>
+        <td class="mono">1,198,000</td>
+        <td class="mono">1,054,862</td>
+        <td class="mono">934,629</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2011</th>
+        <td class="mono">1,050,807</td>
+        <td class="mono">1,388,000</td>
+        <td class="mono">1,182,000</td>
+        <td class="mono">1,040,727</td>
+        <td class="mono">911,130</td>
+        <td class="mono">1,059,245</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2012</th>
+        <td class="mono">1,037,232</td>
+        <td class="mono">1,360,000</td>
+        <td class="mono">1,164,000</td>
+        <td class="mono">1,026,805</td>
+        <td class="mono">889,574</td>
+        <td class="mono">1,017,985</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2013</th>
+        <td class="mono">1,029,817</td>
+        <td class="mono">1,331,000</td>
+        <td class="mono">1,146,000</td>
+        <td class="mono">1,012,799</td>
+        <td class="mono">869,963</td>
+        <td class="mono">1,007,044</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2014</th>
+        <td class="mono">1,003,609</td>
+        <td class="mono">1,303,000</td>
+        <td class="mono">1,128,000</td>
+        <td class="mono">998,908</td>
+        <td class="mono">852,201</td>
+        <td class="mono">980,195</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2015</th>
+        <td class="mono">1,005,721</td>
+        <td class="mono">1,274,000</td>
+        <td class="mono">1,109,000</td>
+        <td class="mono">984,819</td>
+        <td class="mono">836,110</td>
+        <td class="mono">952,290</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2016</th>
+        <td class="mono">977,242</td>
+        <td class="mono">1,247,000</td>
+        <td class="mono">1,090,000</td>
+        <td class="mono">970,576</td>
+        <td class="mono">821,430</td>
+        <td class="mono">924,830</td>
+        <td class="mono">977,127</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2017</th>
+        <td class="mono">946,146</td>
+        <td class="mono">1,222,000</td>
+        <td class="mono">1,072,000</td>
+        <td class="mono">955,856</td>
+        <td class="mono">807,861</td>
+        <td class="mono">898,964</td>
+        <td class="mono">952,267</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2018</th>
+        <td class="mono">918,400</td>
+        <td class="mono">1,199,000</td>
+        <td class="mono">1,054,000</td>
+        <td class="mono">941,249</td>
+        <td class="mono">795,266</td>
+        <td class="mono">875,362</td>
+        <td class="mono">927,904</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2019</th>
+        <td class="mono">865,239</td>
+        <td class="mono">1,179,000</td>
+        <td class="mono">1,038,000</td>
+        <td class="mono">927,530</td>
+        <td class="mono">783,674</td>
+        <td class="mono">854,404</td>
+        <td class="mono">904,342</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2020</th>
+        <td class="mono">840,835</td>
+        <td class="mono">1,162,000</td>
+        <td class="mono">1,022,000</td>
+        <td class="mono">914,127</td>
+        <td class="mono">773,023</td>
+        <td class="mono">836,262</td>
+        <td class="mono">885,553</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2021</th>
+        <td class="mono">811,622</td>
+        <td class="mono">1,150,000</td>
+        <td class="mono">1,008,000</td>
+        <td class="mono">901,624</td>
+        <td class="mono">763,265</td>
+        <td class="mono">820,777</td>
+        <td class="mono">868,569</td>
+        <td class="mono">813,120</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2022</th>
+        <td class="mono">770,759</td>
+        <td class="mono">1,143,000</td>
+        <td class="mono">995,000</td>
+        <td class="mono">890,585</td>
+        <td class="mono">754,355</td>
+        <td class="mono">807,705</td>
+        <td class="mono">853,982</td>
+        <td class="mono">765,765</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2023</th>
+        <td class="mono">727,288</td>
+        <td class="mono">1,139,000</td>
+        <td class="mono">985,000</td>
+        <td class="mono">880,379</td>
+        <td class="mono">746,167</td>
+        <td class="mono">796,832</td>
+        <td class="mono">842,005</td>
+        <td class="mono">739,083</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2024</th>
+        <td class="mono">686,173</td>
+        <td class="mono">1,140,000</td>
+        <td class="mono">977,000</td>
+        <td class="mono">871,129</td>
+        <td class="mono">738,569</td>
+        <td class="mono">787,838</td>
+        <td class="mono">832,523</td>
+        <td class="mono">755,263</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2025</th>
+        <td class="mono">671,236</td>
+        <td class="mono">1,144,000</td>
+        <td class="mono">970,000</td>
+        <td class="mono">862,709</td>
+        <td class="mono">731,420</td>
+        <td class="mono">780,283</td>
+        <td class="mono">825,140</td>
+        <td class="mono">748,709</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2026</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">965,000</td>
+        <td class="mono">854,712</td>
+        <td class="mono">724,534</td>
+        <td class="mono">773,672</td>
+        <td class="mono">819,189</td>
+        <td class="mono">744,077</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2027</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">961,000</td>
+        <td class="mono">847,300</td>
+        <td class="mono">717,682</td>
+        <td class="mono">767,503</td>
+        <td class="mono">813,964</td>
+        <td class="mono">743,231</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2028</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">959,000</td>
+        <td class="mono">840,421</td>
+        <td class="mono">710,647</td>
+        <td class="mono">761,410</td>
+        <td class="mono">808,883</td>
+        <td class="mono">743,536</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2029</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">957,000</td>
+        <td class="mono">833,895</td>
+        <td class="mono">703,259</td>
+        <td class="mono">755,207</td>
+        <td class="mono">803,494</td>
+        <td class="mono">742,939</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2030</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">956,000</td>
+        <td class="mono">827,544</td>
+        <td class="mono">695,367</td>
+        <td class="mono">748,805</td>
+        <td class="mono">797,532</td>
+        <td class="mono">741,449</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2031</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">954,000</td>
+        <td class="mono">821,219</td>
+        <td class="mono">686,818</td>
+        <td class="mono">742,140</td>
+        <td class="mono">790,945</td>
+        <td class="mono">738,909</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2032</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">953,000</td>
+        <td class="mono">814,765</td>
+        <td class="mono">677,494</td>
+        <td class="mono">735,143</td>
+        <td class="mono">783,824</td>
+        <td class="mono">735,149</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2033</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">951,000</td>
+        <td class="mono">808,035</td>
+        <td class="mono">667,371</td>
+        <td class="mono">727,787</td>
+        <td class="mono">776,308</td>
+        <td class="mono">729,682</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2034</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">949,000</td>
+        <td class="mono">801,022</td>
+        <td class="mono">656,491</td>
+        <td class="mono">720,093</td>
+        <td class="mono">768,550</td>
+        <td class="mono">723,376</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2035</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">946,000</td>
+        <td class="mono">793,706</td>
+        <td class="mono">644,942</td>
+        <td class="mono">712,086</td>
+        <td class="mono">760,684</td>
+        <td class="mono">716,323</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2036</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">942,000</td>
+        <td class="mono">786,053</td>
+        <td class="mono">632,851</td>
+        <td class="mono">703,760</td>
+        <td class="mono">752,788</td>
+        <td class="mono">708,631</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2037</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">937,000</td>
+        <td class="mono">778,084</td>
+        <td class="mono">620,369</td>
+        <td class="mono">695,092</td>
+        <td class="mono">744,865</td>
+        <td class="mono">700,537</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2038</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">931,000</td>
+        <td class="mono">769,837</td>
+        <td class="mono">607,674</td>
+        <td class="mono">686,060</td>
+        <td class="mono">736,885</td>
+        <td class="mono">692,163</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2039</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">924,000</td>
+        <td class="mono">761,353</td>
+        <td class="mono">594,946</td>
+        <td class="mono">676,633</td>
+        <td class="mono">728,805</td>
+        <td class="mono">683,577</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2040</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">916,000</td>
+        <td class="mono">752,689</td>
+        <td class="mono">582,357</td>
+        <td class="mono">666,787</td>
+        <td class="mono">720,578</td>
+        <td class="mono">674,816</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2041</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">907,000</td>
+        <td class="mono">743,899</td>
+        <td class="mono">570,068</td>
+        <td class="mono">656,518</td>
+        <td class="mono">712,197</td>
+        <td class="mono">665,860</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2042</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">898,000</td>
+        <td class="mono">735,024</td>
+        <td class="mono">558,216</td>
+        <td class="mono">645,857</td>
+        <td class="mono">703,688</td>
+        <td class="mono">656,665</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2043</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">887,000</td>
+        <td class="mono">726,111</td>
+        <td class="mono">546,910</td>
+        <td class="mono">634,871</td>
+        <td class="mono">695,080</td>
+        <td class="mono">647,164</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2044</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">877,000</td>
+        <td class="mono">717,204</td>
+        <td class="mono">536,214</td>
+        <td class="mono">623,649</td>
+        <td class="mono">686,402</td>
+        <td class="mono">637,289</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2045</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">866,000</td>
+        <td class="mono">708,344</td>
+        <td class="mono">526,157</td>
+        <td class="mono">612,272</td>
+        <td class="mono">677,661</td>
+        <td class="mono">626,980</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2046</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">854,000</td>
+        <td class="mono">699,576</td>
+        <td class="mono">516,755</td>
+        <td class="mono">600,823</td>
+        <td class="mono">668,843</td>
+        <td class="mono">616,209</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2047</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">843,000</td>
+        <td class="mono">690,944</td>
+        <td class="mono">508,015</td>
+        <td class="mono">589,405</td>
+        <td class="mono">659,944</td>
+        <td class="mono">605,014</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2048</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">832,000</td>
+        <td class="mono">682,492</td>
+        <td class="mono">499,920</td>
+        <td class="mono">578,145</td>
+        <td class="mono">650,972</td>
+        <td class="mono">593,492</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2049</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">822,000</td>
+        <td class="mono">674,266</td>
+        <td class="mono">492,426</td>
+        <td class="mono">567,167</td>
+        <td class="mono">641,947</td>
+        <td class="mono">581,811</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2050</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">812,000</td>
+        <td class="mono">666,901</td>
+        <td class="mono">485,478</td>
+        <td class="mono">556,581</td>
+        <td class="mono">632,939</td>
+        <td class="mono">570,193</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2051</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">479,014</td>
+        <td class="mono">546,487</td>
+        <td class="mono">624,065</td>
+        <td class="mono">558,847</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2052</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">472,966</td>
+        <td class="mono">536,973</td>
+        <td class="mono">615,457</td>
+        <td class="mono">547,999</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2053</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">467,266</td>
+        <td class="mono">528,090</td>
+        <td class="mono">607,226</td>
+        <td class="mono">537,873</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2054</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">461,843</td>
+        <td class="mono">519,857</td>
+        <td class="mono">599,452</td>
+        <td class="mono">528,602</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2055</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">456,624</td>
+        <td class="mono">512,262</td>
+        <td class="mono">592,174</td>
+        <td class="mono">520,265</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2056</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">505,265</td>
+        <td class="mono">585,383</td>
+        <td class="mono">512,892</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2057</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">498,802</td>
+        <td class="mono">579,027</td>
+        <td class="mono">506,436</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2058</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">492,791</td>
+        <td class="mono">573,032</td>
+        <td class="mono">500,828</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2059</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">487,141</td>
+        <td class="mono">567,329</td>
+        <td class="mono">495,986</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2060</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">481,760</td>
+        <td class="mono">561,859</td>
+        <td class="mono">491,776</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2061</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">556,573</td>
+        <td class="mono">488,026</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2062</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">551,416</td>
+        <td class="mono">484,567</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2063</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">546,335</td>
+        <td class="mono">481,252</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2064</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">541,280</td>
+        <td class="mono">477,946</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2065</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">536,210</td>
+        <td class="mono">474,523</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2066</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">470,887</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2067</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">466,979</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2068</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">462,763</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2069</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">458,227</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono">2070</th>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+        <td class="mono">453,380</td>
+      </tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p class="chart-note mono" data-en="Figures are numbers of births. A blank cell means that projection does not cover that year. The 1992 and 1997 projections were published in thousands, so their last three digits are zeros. Projections marked with an asterisk are on a total-population basis (see the note above).">単位は人。空欄はその推計が扱っていない年。1992年推計・1997年推計は1000人単位で公表されているため下3桁が0になる。＊印の版は総人口ベース（上の注記を参照）。</p>
+      <p class="chart-note mono"><span data-en="Source data: ">元データ: </span><a href="/data/births_forecast.csv">/data/births_forecast.csv</a> · <a href="/data/births_actual.csv">/data/births_actual.csv</a> · <a href="/cite" data-en="How to cite">引用のしかた</a></p>
+    </details>
+  </section>
+  <!-- /BUILD:table -->
+  </main>
+
+  <footer class="site-footer-row">
+    <span id="t-footer-src">src: 国立社会保障・人口問題研究所「日本の将来推計人口」</span>
+    <a class="footer-about" id="t-footer-about" href="about.html">このサイトについて</a>
+    <a class="footer-about" id="t-footer-contact" href="contact.html">お問い合わせ</a>
+  </footer>
+</div>
+<script src="csv.js?v=20260803a"></script>
+<script src="births.js?v=20260803a"></script>
+</body>
+</html>

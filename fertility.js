@@ -15,7 +15,9 @@ const T = {
     // 常設する(bin/build.mjsのfertilityScopeNote()がfertility.html/en/fertility.htmlの
     // fert-desc直後に焼き込み、ここではJS実行時に同じ文言をfert-scope-noteへ
     // 冪等に再適用するだけ。原本はこの1箇所)。
-    scopeNote: "このページが並べているのは合計特殊出生率（1人の女性が生涯に産む子どもの数を表す指標）であり、年間の出生数（人数）ではない。出生数の系列はこのサイトではまだ扱っていない。",
+    // 2026-08-04に /births を公開したので、後半を「まだ扱っていない」から
+    // 行き先の案内へ差し替えた(births.js の scopeNote と対になっている)。
+    scopeNote: "このページが並べているのは合計特殊出生率（1人の女性が生涯に産む子どもの数を表す指標）であり、年間の出生数（人数）ではない。出生数は「出生数」のページにある。",
     chartAriaLabel: "合計特殊出生率の歴代推計と実績",
     legendActual: "実績",
     vintageSuffix: "年推計",
@@ -45,7 +47,7 @@ const T = {
     title: "Total fertility rate — successive projections vs actual",
     desc: "Fertility assumptions (medium variant) from successive editions of NIPSSR's population projections, overlaid. Lighter lines are older projections; darker lines are more recent.",
     scopeNote:
-      "What this page lays out is the total fertility rate — the average number of children a woman would bear over her lifetime — not the annual number of births. A series for the number of births is not yet covered on this site.",
+      "What this page lays out is the total fertility rate — the average number of children a woman would bear over her lifetime — not the annual number of births, which has its own page.",
     chartAriaLabel: "Successive fertility-rate projections and the actual rate",
     legendActual: "Actual",
     vintageSuffix: " projection",
