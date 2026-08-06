@@ -48,32 +48,32 @@
 
   <url><loc>https://zurekei.org/chart/gdp-real</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/chart/gdp-nominal</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/chart/unemployment</loc><lastmod>2026-08-03</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/chart/current-account</loc><lastmod>2026-08-03</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/chart/tax-revenue</loc><lastmod>2026-08-03</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/chart/bond-issuance</loc><lastmod>2026-08-03</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/chart/jgb-total</loc><lastmod>2026-08-03</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/chart/unemployment</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/chart/current-account</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/chart/tax-revenue</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/chart/bond-issuance</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/chart/jgb-total</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/chart/cpi</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/chart/boj-outlook-real</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/chart/boj-outlook-cpi</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/fertility</loc><lastmod>2026-08-04</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/births</loc><lastmod>2026-08-04</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/fertility</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/births</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/boj-outlook-vintages</loc><lastmod>2026-08-06</lastmod><priority>0.8</priority></url>
-  <url><loc>https://zurekei.org/hoan</loc><lastmod>2026-08-04</lastmod><priority>0.8</priority></url>
+  <url><loc>https://zurekei.org/hoan</loc><lastmod>2026-08-06</lastmod><priority>0.8</priority></url>
   <url><loc>https://zurekei.org/en/chart/gdp-real</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/en/chart/gdp-nominal</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/en/chart/unemployment</loc><lastmod>2026-08-03</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/en/chart/current-account</loc><lastmod>2026-08-03</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/en/chart/tax-revenue</loc><lastmod>2026-08-03</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/en/chart/bond-issuance</loc><lastmod>2026-08-03</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/en/chart/jgb-total</loc><lastmod>2026-08-03</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/chart/unemployment</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/chart/current-account</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/chart/tax-revenue</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/chart/bond-issuance</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/chart/jgb-total</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/en/chart/cpi</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/en/chart/boj-outlook-real</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/en/chart/boj-outlook-cpi</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/en/fertility</loc><lastmod>2026-08-04</lastmod><priority>0.9</priority></url>
-  <url><loc>https://zurekei.org/en/births</loc><lastmod>2026-08-04</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/fertility</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
+  <url><loc>https://zurekei.org/en/births</loc><lastmod>2026-08-06</lastmod><priority>0.9</priority></url>
   <url><loc>https://zurekei.org/en/boj-outlook-vintages</loc><lastmod>2026-08-06</lastmod><priority>0.8</priority></url>
-  <url><loc>https://zurekei.org/en/hoan</loc><lastmod>2026-08-04</lastmod><priority>0.8</priority></url>
+  <url><loc>https://zurekei.org/en/hoan</loc><lastmod>2026-08-06</lastmod><priority>0.8</priority></url>
 
   <url><loc>https://zurekei.org/about</loc><lastmod>2026-08-03</lastmod><priority>0.7</priority></url>
   <url><loc>https://zurekei.org/corrections</loc><lastmod>2026-08-03</lastmod><priority>0.5</priority></url>

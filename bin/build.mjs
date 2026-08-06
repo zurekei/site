@@ -443,6 +443,31 @@ function orgNode() {
   return { "@type": "Organization", "@id": ORG_ID, name: ORG_NAME.en, alternateName: ORG_NAME.ja, url: SITE };
 }
 
+// パンくずの構造化データ(2026-08-06)。可視のナビゲーション(chart-back等の
+// 「← 指標一覧」リンク)は常にトップ(REL.home)へ直接戻る2階層構成で、
+// /chart/ ハブを経由しない。BreadcrumbListも同じ2階層(トップ→このページ)に
+// 揃える — Googleのガイドラインはページ上の可視のナビゲーションと構造化
+// データの経路が一致していることを求めており、実在しない中間階層(/chart/ハブ)
+// を挟むと不一致になる。Dataset本体とは別のscriptタグとして追加する(Dataset
+// 側の「1ページで完結する」制約に無関係な、別の@type)。
+function breadcrumbJsonLd(lang, pageUrl, pageTitle) {
+  return `
+<script type="application/ld+json">
+${JSON.stringify(
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: ORG_NAME[lang], item: abs(REL.home[lang]) },
+      { "@type": "ListItem", position: 2, name: pageTitle, item: pageUrl },
+    ],
+  },
+  null,
+  2
+)}
+</script>`;
+}
+
 // ライセンス: 2026-07-29、運営がCC BY 4.0(データ・本文)/MIT(コード)を決定。
 // それまでは「サイトのどこにも利用条件の記載がなく、ここで勝手に宣言すると
 // 出典つきで確かめられるという主旨の逆をやることになる」との理由で書いて
@@ -649,6 +674,7 @@ ${NOSCRIPT_STYLE}
 <script type="application/ld+json">
 ${buildJsonLd(key, metric, rows, lang)}
 </script>
+${breadcrumbJsonLd(lang, url, metricTitle)}
 </head>
 <body data-metric="${key}">
 <div class="page">
@@ -1173,6 +1199,7 @@ ${JSON.stringify(
   2
 )}
 </script>
+${breadcrumbJsonLd(lang, url, FERTILITY_DATASET.name[lang])}
 `;
 }
 
@@ -1522,6 +1549,7 @@ ${JSON.stringify(
   2
 )}
 </script>
+${breadcrumbJsonLd(lang, url, BIRTHS_DATASET.name[lang])}
 `;
 }
 
@@ -1733,6 +1761,10 @@ ${bojVintagesTable(d, lang)}
 
 function bojVintagesJsonLd(d, lang = "ja") {
   const url = abs(REL.bojVintages[lang]);
+  const name =
+    lang === "en"
+      ? "BOJ Outlook Report — real GDP and CPI forecast by issue"
+      : "日銀展望レポート｜号ごとの実質GDP・消費者物価見通し";
   return `
 <script type="application/ld+json">
 ${JSON.stringify(
@@ -1740,10 +1772,7 @@ ${JSON.stringify(
     "@context": "https://schema.org",
     "@type": "Dataset",
     "@id": `${url}#dataset`,
-    name:
-      lang === "en"
-        ? "BOJ Outlook Report — real GDP and CPI forecast by issue"
-        : "日銀展望レポート｜号ごとの実質GDP・消費者物価見通し",
+    name,
     description: BOJV.T[lang].desc,
     url,
     isAccessibleForFree: true,
@@ -1776,6 +1805,7 @@ ${JSON.stringify(
   2
 )}
 </script>
+${breadcrumbJsonLd(lang, url, name)}
 `;
 }
 
@@ -1998,6 +2028,7 @@ ${JSON.stringify(
   2
 )}
 </script>
+${breadcrumbJsonLd(lang, url, HOAN_DATASET.name[lang])}
 `;
 }
 
