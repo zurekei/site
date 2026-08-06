@@ -3839,6 +3839,39 @@ const CSV_COLUMNS = {
     actual_source_url: "text",
     notes: "text",
   },
+  // 日銀「経済・物価情勢の展望」(展望レポート)の当初見通し(段階1: 各年度の
+  // 4月号の大勢見通し中央値のみ。1月号のような直前の号は2000〜2015年度分の
+  // 号が半期(4月・10月)しか無く年により前倒し幅が不揃いになるため、全期間で
+  // 号のホライズンを揃えられる4月号(=FY開始月と同月)に統一している)。
+  // forecast_real_low/high は表の幅(政策委員のレンジ)で、段階1ではグラフに
+  // 帯として使わず値の保持のみ(将来、全号の推移を扇形で見せる段階2の下地)。
+  // actual_real/actual_basis/actual_source_url は data/gdp_forecast.csv の
+  // 同一年度の値をそのまま転記(BOJ自身は実績を公表しないため、実績側は
+  // 政府見通しページと同じ一次資料・同じ数値を指す。将来 gdp_forecast.csv側の
+  // 実績が改定されたら、こちらも同じ値に合わせて直すこと)。
+  "boj_outlook_real.csv": {
+    fiscal_year: "number",
+    forecast_real: "number", // 中央値。中央値非公表の号(FY2001-2002)は空欄
+    forecast_real_low: "number",
+    forecast_real_high: "number",
+    actual_real: "number",
+    forecast_source_url: "text",
+    forecast_issue: "text", // YYYY-04(常に4月号)
+    actual_source_url: "text",
+    actual_basis: "text", // 呼称は chart.js の T.basisLabels(gdp_forecast.csv と同じ語彙)
+    notes: "text",
+  },
+  "boj_outlook_cpi.csv": {
+    fiscal_year: "number",
+    forecast_cpi: "number",
+    forecast_cpi_low: "number",
+    forecast_cpi_high: "number",
+    actual_cpi: "number",
+    forecast_source_url: "text",
+    forecast_issue: "text",
+    actual_source_url: "text",
+    notes: "text",
+  },
   // データ行0のヘッダのみのファイル。行が無くても列の分類は要る
   // (--check がここで誤爆しないことは実行結果自体が確認になる)。
   "births_actual.csv": {

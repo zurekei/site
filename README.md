@@ -52,10 +52,12 @@ FY1988の名目成長率見通し(1年分)は 財務省『昭和財政史(昭和
 
 FY1989・FY1993〜FY1997の消費者物価見通し(6年分)は国会会議録から収集し反映済み(2026-08-04。これで `cpi_forecast.csv` の見通しはFY1980〜FY2025で欠測なし)。**経済演説(本会議)にはこの6年度だけ消費者物価の数値が無い**が、同じ閣議決定を**経済企画庁調整局長が予算委員会の冒頭で説明した記録**に数値が入っていた(例: FY1996は「国内総生産の実質成長率は二・五％程度に、消費者物価の上昇率は〇・五％程度になるものと見込まれます」1996-01-26 衆議院予算委員会 第1号)。**同じ一文に含まれる実質成長率が、経済演説から別途収集済みの `gdp_forecast.csv` の値と6年度すべてで一致することを裏付けとした**(FY1982〜FY1988で使ったのと同じ突き合わせ方)。FY1993・FY1994・FY1997は経済企画庁長官の所信や予算審議の質疑にも同じ数値が複数回出ており、そちらでも一致を確認している。FY1995・FY1996は会議録中この1件のみ。なおFY1994は予算成立が遅れたため説明が年度開始後(1994-05-17)になっているが、数値は当初見通しのまま。個別の出典は行ごとの `forecast_source_url` と `notes` を参照。
 
-税収見積もり(Phase 2)・出生率(Phase 3)はいずれも実装・公開済み。現在サイトが扱う指標は次の8系列 + 出生率ページ。
+税収見積もり(Phase 2)・出生率(Phase 3)はいずれも実装・公開済み。現在サイトが扱う指標は次の10系列 + 出生率・出生数ページ。
 
 - `gdp_forecast.csv`(実質・名目) / `tax_revenue_forecast.csv` / `cpi_forecast.csv` / `unemployment_forecast.csv` / `current_account_forecast.csv` / `bond_issuance_forecast.csv` / `jgb_total_issuance_forecast.csv`
+- `boj_outlook_real.csv` / `boj_outlook_cpi.csv`(日銀展望レポートの見通し。政府の経済見通しとは独立の系列。段階1として2026-08-06公開、各年度4月号の中央値のみ。詳細は `CLAUDE.md` の対応済みTODO参照)
 - `fertility_forecast.csv` + `fertility_actual.csv`(専用ページ `/fertility`)
+- `births_forecast.csv` + `births_actual.csv`(専用ページ `/births`)
 
 ---
 

@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- このファイルは bin/build.mjs が data/*.csv から生成している。直接編集しない。
+     直すのは chart.js の METRICS か data/*.csv のどちらか。 -->
+<title id="page-title">日銀展望レポートの消費者物価見通し — ズレ計</title>
+<meta name="description" content="日本銀行「経済・物価情勢の展望」(展望レポート)における政策委員の大勢見通し(消費者物価・除く生鮮食品、中央値)と、総務省統計局「消費者物価指数」による確定した実績を並べたもの。政府の経済見通しとは別に、日銀自身が四半期ごとに示す見通し。">
+<link rel="canonical" href="https://zurekei.org/chart/boj-outlook-cpi">
+<link rel="alternate" hreflang="ja" href="https://zurekei.org/chart/boj-outlook-cpi">
+<link rel="alternate" hreflang="en" href="https://zurekei.org/en/chart/boj-outlook-cpi">
+<link rel="alternate" hreflang="x-default" href="https://zurekei.org/chart/boj-outlook-cpi">
+<meta property="og:site_name" content="ズレ計">
+<meta property="og:type" content="website">
+<meta property="og:title" content="日銀展望レポートの消費者物価見通し — ズレ計">
+<meta property="og:description" content="日本銀行「経済・物価情勢の展望」(展望レポート)における政策委員の大勢見通し(消費者物価・除く生鮮食品、中央値)と、総務省統計局「消費者物価指数」による確定した実績を並べたもの。政府の経済見通しとは別に、日銀自身が四半期ごとに示す見通し。">
+<meta property="og:url" content="https://zurekei.org/chart/boj-outlook-cpi">
+<meta property="og:image" content="https://zurekei.org/assets/og-boj-outlook-cpi.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/style.css?v=20260803a">
+<noscript><style>.chart-wrap > svg, .controls, .readout, #v-notes, #v-source { display: none !important; } .chart-noscript { display: block; }</style></noscript>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "@id": "https://zurekei.org/chart/boj-outlook-cpi#dataset",
+  "name": "日銀展望レポートの消費者物価見通し｜政府の当初見通しと実績",
+  "description": "日本銀行「経済・物価情勢の展望」(展望レポート)における政策委員の大勢見通し(消費者物価・除く生鮮食品、中央値)と、総務省統計局「消費者物価指数」による確定した実績を並べたもの。政府の経済見通しとは別に、日銀自身が四半期ごとに示す見通し。",
+  "url": "https://zurekei.org/chart/boj-outlook-cpi",
+  "isAccessibleForFree": true,
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "inLanguage": "ja",
+  "temporalCoverage": "2001/2026",
+  "creator": {
+    "@type": "Organization",
+    "@id": "https://zurekei.org/#organization",
+    "name": "zurekei",
+    "alternateName": "ズレ計",
+    "url": "https://zurekei.org"
+  },
+  "includedInDataCatalog": {
+    "@id": "https://zurekei.org/#catalog"
+  },
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "見通し（当初）",
+      "unitText": "%"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "実績（確定）",
+      "unitText": "%"
+    }
+  ],
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/boj_outlook_cpi.csv"
+    }
+  ]
+}
+</script>
+</head>
+<body data-metric="boj-outlook-cpi">
+<div class="page">
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="ズレ計 トップへ">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <a id="lang-ja" class="lang-btn mono active" href="/chart/boj-outlook-cpi">JA</a>
+        <a id="lang-en" class="lang-btn mono" href="/en/chart/boj-outlook-cpi">EN</a>
+      </div>
+    </div>
+  </header>
+
+  <a class="chart-back" id="t-back" href="/">← 指標一覧</a>
+
+  <main>
+    <section class="chart-section">
+      <h1 class="chart-title" id="chart-title">日銀展望レポートの消費者物価見通し</h1>
+      <p class="chart-desc" id="chart-desc">日本銀行「経済・物価情勢の展望」(展望レポート)における政策委員の大勢見通し(消費者物価・除く生鮮食品、中央値)と、総務省統計局「消費者物価指数」による確定した実績を並べたもの。政府の経済見通しとは別に、日銀自身が四半期ごとに示す見通し。</p>
+      <p class="chart-note mono" id="chart-note">注: 採用しているのは各年度の4月号(=その年度が始まる月に公表された号)の大勢見通し中央値。展望レポートは2000〜2015年度は4月・10月の半期、2016年度以降は1月・4月・7月・10月の四半期で発行され頻度が変わるため、号のホライズン(年度開始からどれだけ前の見通しか)を全期間で揃えられる4月号に統一した。政府の経済見通しのように年度開始の約3か月前に決まったものではなく、年度開始と同時期の号である点に注意。表の見通し幅(政策委員のレンジ)はデータとして保持しているが、グラフには中央値のみを表示する。消費税率引き上げの影響を含む・除くケースが号によって併記されることがあるが、ここでは常に消費税の影響を含むケース(第1列そのまま)を使う。FY2001・FY2002は号がまだ中央値を公表しておらず空欄。FY2020(2020年4月号)は新型コロナの不確実性拡大を理由に、号全体で中央値の公表自体が見送られたため空欄(原資料の注記による)。</p>
+
+      <div class="chart-wrap">
+        <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title"></svg>
+        <!-- グラフはJSでしか描かない。JSが無いとこの枠が空箱として残り、壊れて
+             いるようにしか見えないので、行き先を書いておく。表示の切り替えは
+             <head> の <noscript><style> が持つ。 -->
+        <p class="chart-noscript mono">グラフの描画には JavaScript が必要です。数値は下の表にあります。</p>
+      </div>
+
+      <p class="chart-summary mono" id="chart-summary">実績が見通しを上回った年 9回 / 下回った年 10回 / 見通しどおり 3回 / 平均のズレ -0.1pt / 対象22年度分</p>
+
+      <div class="controls">
+        <input type="range" id="year-select" min="0" max="0" value="0" step="1">
+      </div>
+
+      <div class="readout">
+        <div class="readout-year mono" id="year-readout">----</div>
+        <div class="stat-row">
+          <div class="stat-chip">
+            <span class="stat-chip-dot stat-chip-dot-forecast"></span>
+            <span class="stat-chip-label" id="t-stat-forecast">見通し</span>
+            <span class="stat-chip-value" id="v-forecast">—</span>
+          </div>
+          <div class="stat-chip">
+            <span class="stat-chip-dot stat-chip-dot-actual"></span>
+            <span class="stat-chip-label" id="t-stat-actual">実績</span>
+            <span class="stat-chip-value" id="v-actual">—</span>
+          </div>
+          <div class="stat-chip stat-chip-diff">
+            <span class="stat-chip-label" id="t-stat-gap">ズレ</span>
+            <span class="stat-chip-value" id="v-diff">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="readout-notes" id="v-notes"></div>
+
+      <div class="readout-source" id="v-source"></div>
+
+      <p class="chart-note mono" id="archive-note">日銀の展望レポートはFY2000年度分から公表されており、それ以前の年度分は存在しない。</p>
+    </section>
+
+    <section class="data-section">
+      <details class="data-details">
+        <summary id="t-table-toggle">年度ごとの数値を表で見る（26年度分）</summary>
+      <div class="data-table-wrap">
+      <table class="data-table">
+        <caption id="t-table-caption">日銀展望レポートの消費者物価見通し｜年度ごとの見通し・実績・ズレ</caption>
+        <thead>
+          <tr>
+            <th scope="col" id="t-th-year">年度</th>
+            <th scope="col" id="t-th-forecast">見通し</th>
+            <th scope="col" id="t-th-actual">実績</th>
+            <th scope="col" id="t-th-gap">ズレ</th>
+            <th scope="col" id="t-th-source">出典</th>
+          </tr>
+        </thead>
+        <tbody>
+      <tr>
+        <th scope="row" class="mono" data-year="2001">2001年度</th>
+        <td class="mono" data-ph="gap">データ未収集</td>
+        <td class="mono">-1.0%</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor0104.htm" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2002">2002年度</th>
+        <td class="mono" data-ph="gap">データ未収集</td>
+        <td class="mono">-0.6%</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor0204.htm" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2003">2003年度</th>
+        <td class="mono">-0.4%</td>
+        <td class="mono">-0.2%</td>
+        <td class="mono">+0.2pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor0304.htm" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2004">2004年度</th>
+        <td class="mono">-0.2%</td>
+        <td class="mono">-0.1%</td>
+        <td class="mono">+0.1pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor0404.htm" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2005">2005年度</th>
+        <td class="mono">-0.1%</td>
+        <td class="mono">-0.1%</td>
+        <td class="mono">0.0pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor0504.htm" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2006">2006年度</th>
+        <td class="mono">+0.6%</td>
+        <td class="mono">+0.2%</td>
+        <td class="mono">-0.4pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor0604.htm" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2007">2007年度</th>
+        <td class="mono">+0.1%</td>
+        <td class="mono">+0.4%</td>
+        <td class="mono">+0.3pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor0704.htm" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2008">2008年度</th>
+        <td class="mono">+1.1%</td>
+        <td class="mono">+1.1%</td>
+        <td class="mono">0.0pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor0804a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">リーマンショック年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2009">2009年度</th>
+        <td class="mono">-1.5%</td>
+        <td class="mono">-1.7%</td>
+        <td class="mono">-0.2pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor0904a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2010">2010年度</th>
+        <td class="mono">-0.5%</td>
+        <td class="mono">-0.4%</td>
+        <td class="mono">+0.1pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor1004a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2011">2011年度</th>
+        <td class="mono">+0.7%</td>
+        <td class="mono">-0.1%</td>
+        <td class="mono">-0.8pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor1104a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">東日本大震災年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2012">2012年度</th>
+        <td class="mono">+0.3%</td>
+        <td class="mono">-0.3%</td>
+        <td class="mono">-0.6pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor1204a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2013">2013年度</th>
+        <td class="mono">+0.7%</td>
+        <td class="mono">+0.9%</td>
+        <td class="mono">+0.2pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor1304a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2014">2014年度</th>
+        <td class="mono">+3.3%</td>
+        <td class="mono">+2.9%</td>
+        <td class="mono">-0.4pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor1404a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">消費税率8%引き上げ年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2015">2015年度</th>
+        <td class="mono">+0.8%</td>
+        <td class="mono">+0.2%</td>
+        <td class="mono">-0.6pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor1504a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2016">2016年度</th>
+        <td class="mono">+0.5%</td>
+        <td class="mono">-0.1%</td>
+        <td class="mono">-0.6pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor1604a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2017">2017年度</th>
+        <td class="mono">+1.4%</td>
+        <td class="mono">+0.7%</td>
+        <td class="mono">-0.7pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor1704a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2018">2018年度</th>
+        <td class="mono">+1.3%</td>
+        <td class="mono">+0.7%</td>
+        <td class="mono">-0.6pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor1804a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2019">2019年度</th>
+        <td class="mono">+1.1%</td>
+        <td class="mono">+0.5%</td>
+        <td class="mono">-0.6pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor1904a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">消費税率10%引き上げ・新型コロナ発生初期年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2020">2020年度</th>
+        <td class="mono" data-ph="gap">データ未収集</td>
+        <td class="mono">-0.2%</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor2004a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">新型コロナ影響の年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2021">2021年度</th>
+        <td class="mono">+0.1%</td>
+        <td class="mono">+0.1%</td>
+        <td class="mono">0.0pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor2104a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2022">2022年度</th>
+        <td class="mono">+1.9%</td>
+        <td class="mono">+3.2%</td>
+        <td class="mono">+1.3pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor2204a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2023">2023年度</th>
+        <td class="mono">+1.8%</td>
+        <td class="mono">+3.0%</td>
+        <td class="mono">+1.2pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor2304a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">円安・輸入物価高で名実逆転が大きい年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2024">2024年度</th>
+        <td class="mono">+2.8%</td>
+        <td class="mono">+3.0%</td>
+        <td class="mono">+0.2pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor2404a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr class="data-table-note"><td colspan="5" lang="ja">本年次推計に収録された最新（現時点で最終）確定年度。</td></tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2025">2025年度</th>
+        <td class="mono">+2.2%</td>
+        <td class="mono">+2.6%</td>
+        <td class="mono">+0.4pt</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor2504a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a> <a href="https://www.e-stat.go.jp/stat-search/file-download?statInfId=000032103955&amp;fileKind=1" target="_blank" rel="noopener" data-src="actual">実績</a></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono" data-year="2026">2026年度</th>
+        <td class="mono">+2.8%</td>
+        <td class="mono" data-ph="pending">実績未確定(年度未終了)</td>
+        <td class="mono">—</td>
+        <td class="data-table-src"><a href="https://www.boj.or.jp/mopo/outlook/gor2604a.pdf" target="_blank" rel="noopener" data-src="forecast">見通し</a></td>
+      </tr>
+        </tbody>
+      </table>
+      </div>
+        <p class="chart-note mono"><span id="t-table-csv">元データ: </span><a href="/data/boj_outlook_cpi.csv">/data/boj_outlook_cpi.csv</a> · <a id="t-cite-link" href="/cite">引用のしかた</a></p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="site-footer-row">
+    <span id="t-footer-src">src: 内閣府 / 国民経済計算(SNA)</span>
+    <a class="footer-about" id="t-footer-about" href="/about.html">このサイトについて</a>
+    <a class="footer-about" id="t-footer-contact" href="/contact.html">お問い合わせ</a>
+  </footer>
+</div>
+<script src="/csv.js?v=20260803a"></script>
+<script src="/chart.js?v=20260803a"></script>
+</body>
+</html>
