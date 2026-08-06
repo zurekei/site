@@ -1,0 +1,1456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BOJ Outlook Report — convergence of forecasts across issues — zurekei</title>
+<meta name="description" content="The Bank of Japan&#39;s Outlook for Economic Activity and Prices (展望レポート) updates its Policy Board median forecast 3-4 times a year. Where /chart/boj-outlook-real and /chart/boj-outlook-cpi each pick out a single value per fiscal year (the April issue), this page lays out every issue&#39;s forecast by publication date, showing how the forecast for a given year moved from issue to issue.">
+<link rel="canonical" href="https://zurekei.org/en/boj-outlook-vintages">
+<link rel="alternate" hreflang="ja" href="https://zurekei.org/boj-outlook-vintages">
+<link rel="alternate" hreflang="en" href="https://zurekei.org/en/boj-outlook-vintages">
+<link rel="alternate" hreflang="x-default" href="https://zurekei.org/boj-outlook-vintages">
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BOJ Outlook Report — convergence of forecasts across issues — zurekei">
+<meta property="og:description" content="The Bank of Japan&#39;s Outlook for Economic Activity and Prices (展望レポート) updates its Policy Board median forecast 3-4 times a year. Where /chart/boj-outlook-real and /chart/boj-outlook-cpi each pick out a single value per fiscal year (the April issue), this page lays out every issue&#39;s forecast by publication date, showing how the forecast for a given year moved from issue to issue.">
+<meta property="og:url" content="https://zurekei.org/en/boj-outlook-vintages">
+<meta property="og:image" content="https://zurekei.org/assets/og-en.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/style.css?v=20260803a">
+<noscript><style>.chart-wrap > svg, .bojv-legend { display: none !important; } .chart-noscript { display: block; }</style></noscript>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "@id": "https://zurekei.org/en/boj-outlook-vintages#dataset",
+  "name": "BOJ Outlook Report — real GDP and CPI forecast by issue",
+  "description": "The Bank of Japan's Outlook for Economic Activity and Prices (展望レポート) updates its Policy Board median forecast 3-4 times a year. Where /chart/boj-outlook-real and /chart/boj-outlook-cpi each pick out a single value per fiscal year (the April issue), this page lays out every issue's forecast by publication date, showing how the forecast for a given year moved from issue to issue.",
+  "url": "https://zurekei.org/en/boj-outlook-vintages",
+  "isAccessibleForFree": true,
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "inLanguage": "en",
+  "temporalCoverage": "2003/2028",
+  "creator": {
+    "@type": "Organization",
+    "@id": "https://zurekei.org/#organization",
+    "name": "zurekei",
+    "alternateName": "ズレ計",
+    "url": "https://zurekei.org"
+  },
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "Real GDP forecast (Policy Board median)",
+      "unitText": "percent"
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "CPI forecast (Policy Board median)",
+      "unitText": "percent"
+    }
+  ],
+  "distribution": [
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/boj_outlook_vintages.csv"
+    },
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/boj_outlook_real.csv"
+    },
+    {
+      "@type": "DataDownload",
+      "encodingFormat": "text/csv",
+      "contentUrl": "https://zurekei.org/data/boj_outlook_cpi.csv"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<div class="page">
+  <header class="site-header">
+    <a class="brand" href="/en/" aria-label="zurekei home">
+      <svg class="brand-logo" viewBox="0 0 512 512">
+        <path d="M235,205 C245,150 295,105 365,95 C405,88 440,98 447,122 C450,138 440,148 425,145 C435,165 420,188 392,200 C355,213 285,208 235,205 Z" fill="#D4482E"></path>
+        <path d="M57,264 C90,248 135,240 180,241 L180,288 C135,286 92,280 57,264 Z" fill="#E8A13D"></path>
+        <circle cx="300" cy="290" r="130" fill="#1B2A4A"></circle>
+        <path d="M188,380 A130,130 0 0 0 400,392" fill="none" stroke="#3A4A6B" stroke-width="3" stroke-linecap="round" opacity="0.55"></path>
+        <circle cx="299" cy="245" r="35" fill="#E1DFDC"></circle>
+        <circle cx="289" cy="250" r="15" fill="#111318"></circle>
+        <circle cx="283" cy="244" r="3.5" fill="#F2EFE8"></circle>
+      </svg>
+      <div>
+        <div class="brand-name">
+          <span class="brand-name-main">zurekei</span>
+          <span class="brand-name-slash">~/</span>
+        </div>
+        <div class="brand-tag">FORECAST × ACTUAL</div>
+      </div>
+    </a>
+    <div class="header-right">
+      <div class="lang-toggle">
+        <a id="lang-ja" class="lang-btn mono" href="/boj-outlook-vintages">JA</a>
+        <a id="lang-en" class="lang-btn mono active" href="/en/boj-outlook-vintages">EN</a>
+      </div>
+    </div>
+  </header>
+
+  <a class="chart-back" id="t-back" href="/en/">← Indicators</a>
+
+  <main>
+    <section class="chart-section">
+      <h1 class="chart-title" id="bojv-title">BOJ Outlook Report — convergence of forecasts across issues</h1>
+      <p class="chart-desc" id="bojv-desc">The Bank of Japan&#39;s Outlook for Economic Activity and Prices (展望レポート) updates its Policy Board median forecast 3-4 times a year. Where /chart/boj-outlook-real and /chart/boj-outlook-cpi each pick out a single value per fiscal year (the April issue), this page lays out every issue&#39;s forecast by publication date, showing how the forecast for a given year moved from issue to issue.</p>
+      <p class="chart-note mono" id="bojv-scope-note">Each line is one fiscal year, connecting how it was forecast at each issue in publication order. Lighter lines are older target years, darker lines are more recent. A dashed segment is not a forecast — it connects the last forecast to the eventual actual figure (years without a matching actual have no dashed segment). Rows that merely restate a prior issue&#39;s figure in the body text (restated) are excluded, since they are not a new forecast from that issue. Issues that did not publish a median at all (Oct 2000 - Oct 2002, and Apr 2020) leave a gap in the line.</p>
+
+      <p class="chart-note mono"><a href="/en/chart/boj-outlook-real">See the per-fiscal-year real GDP forecast (April issue) →</a></p>
+      <h2 class="chart-title" style="font-size:1.1rem;margin-top:28px">Real GDP</h2>
+      <div class="chart-wrap">
+        <svg id="boj-vintages-chart-real" viewBox="0 0 960 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Real GDP forecast convergence, by issue"></svg>
+        <p class="chart-noscript mono">This chart requires JavaScript to draw. The figures are in the table below.</p>
+      </div>
+      <div class="fertility-legend bojv-legend" id="boj-vintages-legend-real"></div>
+
+      <p class="chart-note mono"><a href="/en/chart/boj-outlook-cpi">See the per-fiscal-year CPI forecast (April issue) →</a></p>
+      <h2 class="chart-title" style="font-size:1.1rem;margin-top:28px">CPI (all-items)</h2>
+      <div class="chart-wrap">
+        <svg id="boj-vintages-chart-cpi" viewBox="0 0 960 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="CPI forecast convergence, by issue"></svg>
+        <p class="chart-noscript mono">This chart requires JavaScript to draw. The figures are in the table below.</p>
+      </div>
+      <div class="fertility-legend bojv-legend" id="boj-vintages-legend-cpi"></div>
+    </section>
+
+
+  <section class="data-section">
+    <details class="data-details">
+      <summary>Show every issue&#39;s forecast as a table (215 rows)</summary>
+
+      <div class="data-table-wrap">
+      <table class="data-table data-table-wide">
+        <caption>BOJ Outlook Report | real GDP and CPI forecast (Policy Board median) by issue</caption>
+        <thead>
+          <tr>
+            <th scope="col">Issue</th>
+            <th scope="col">Target FY</th>
+            <th scope="col">Real GDP</th>
+            <th scope="col">CPI</th>
+          </tr>
+        </thead>
+        <tbody>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0010.htm" target="_blank" rel="noopener">2000-10</a></th>
+        <td class="mono">2000</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0104.htm" target="_blank" rel="noopener">2001-04</a></th>
+        <td class="mono">2001</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0110.htm" target="_blank" rel="noopener">2001-10</a></th>
+        <td class="mono">2001</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0110.htm" target="_blank" rel="noopener">2001-10</a></th>
+        <td class="mono">2002</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0204.htm" target="_blank" rel="noopener">2002-04</a></th>
+        <td class="mono">2002</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0210.htm" target="_blank" rel="noopener">2002-10</a></th>
+        <td class="mono">2002</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0210.htm" target="_blank" rel="noopener">2002-10</a></th>
+        <td class="mono">2003</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0304.htm" target="_blank" rel="noopener">2003-04</a></th>
+        <td class="mono">2003</td>
+        <td class="mono">1.0 (0.8〜1.1)</td>
+        <td class="mono">-0.4 (-0.5〜-0.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0310.htm" target="_blank" rel="noopener">2003-10</a></th>
+        <td class="mono">2003</td>
+        <td class="mono">2.4 (2.3〜2.6)</td>
+        <td class="mono">-0.2 (-0.3〜-0.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0310.htm" target="_blank" rel="noopener">2003-10</a></th>
+        <td class="mono">2004</td>
+        <td class="mono">2.5 (2.3〜2.6)</td>
+        <td class="mono">-0.3 (-0.5〜-0.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0404.htm" target="_blank" rel="noopener">2004-04</a></th>
+        <td class="mono">2004</td>
+        <td class="mono">3.1 (3.0〜3.2)</td>
+        <td class="mono">-0.2 (-0.2〜-0.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0410.htm" target="_blank" rel="noopener">2004-10</a></th>
+        <td class="mono">2004</td>
+        <td class="mono">3.6 (3.4〜3.7)</td>
+        <td class="mono">-0.2 (-0.2〜-0.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0410.htm" target="_blank" rel="noopener">2004-10</a></th>
+        <td class="mono">2005</td>
+        <td class="mono">2.5 (2.2〜2.6)</td>
+        <td class="mono">0.1 (-0.1〜0.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0504.htm" target="_blank" rel="noopener">2005-04</a></th>
+        <td class="mono">2005</td>
+        <td class="mono">1.3 (1.2〜1.6)</td>
+        <td class="mono">-0.1 (-0.1〜0.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0504.htm" target="_blank" rel="noopener">2005-04</a></th>
+        <td class="mono">2006</td>
+        <td class="mono">1.6 (1.3〜1.7)</td>
+        <td class="mono">0.3 (0.2〜0.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0510.htm" target="_blank" rel="noopener">2005-10</a></th>
+        <td class="mono">2005</td>
+        <td class="mono">2.2 (2.2〜2.5)</td>
+        <td class="mono">0.1 (0.0〜0.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0510.htm" target="_blank" rel="noopener">2005-10</a></th>
+        <td class="mono">2006</td>
+        <td class="mono">1.8 (1.6〜2.2)</td>
+        <td class="mono">0.5 (0.4〜0.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0604.htm" target="_blank" rel="noopener">2006-04</a></th>
+        <td class="mono">2006</td>
+        <td class="mono">2.4 (2.1〜3.0)</td>
+        <td class="mono">0.6 (0.6〜0.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0604.htm" target="_blank" rel="noopener">2006-04</a></th>
+        <td class="mono">2007</td>
+        <td class="mono">2.0 (1.8〜2.4)</td>
+        <td class="mono">0.8 (0.7〜0.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0610.htm" target="_blank" rel="noopener">2006-10</a></th>
+        <td class="mono">2006</td>
+        <td class="mono">2.4 (2.3〜2.5)</td>
+        <td class="mono">0.3 (0.2〜0.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0610.htm" target="_blank" rel="noopener">2006-10</a></th>
+        <td class="mono">2007</td>
+        <td class="mono">2.1 (1.9〜2.4)</td>
+        <td class="mono">0.5 (0.4〜0.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0704.htm" target="_blank" rel="noopener">2007-04</a></th>
+        <td class="mono">2007</td>
+        <td class="mono">2.1 (2.0〜2.1)</td>
+        <td class="mono">0.1 (0.0〜0.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0704.htm" target="_blank" rel="noopener">2007-04</a></th>
+        <td class="mono">2008</td>
+        <td class="mono">2.1 (2.0〜2.3)</td>
+        <td class="mono">0.5 (0.4〜0.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0710.htm" target="_blank" rel="noopener">2007-10</a></th>
+        <td class="mono">2007</td>
+        <td class="mono">1.8 (1.7〜1.8)</td>
+        <td class="mono">0.0 (0.0〜0.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0710.htm" target="_blank" rel="noopener">2007-10</a></th>
+        <td class="mono">2008</td>
+        <td class="mono">2.1 (1.9〜2.3)</td>
+        <td class="mono">0.4 (0.2〜0.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0804a.pdf" target="_blank" rel="noopener">2008-04</a></th>
+        <td class="mono">2008</td>
+        <td class="mono">1.5 (1.4〜1.6)</td>
+        <td class="mono">1.1 (0.9〜1.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0804a.pdf" target="_blank" rel="noopener">2008-04</a></th>
+        <td class="mono">2009</td>
+        <td class="mono">1.7 (1.6〜1.8)</td>
+        <td class="mono">1.0 (0.8〜1.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0810a.pdf" target="_blank" rel="noopener">2008-10</a></th>
+        <td class="mono">2008</td>
+        <td class="mono">0.1 (0.1〜0.2)</td>
+        <td class="mono">1.6 (1.5〜1.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0810a.pdf" target="_blank" rel="noopener">2008-10</a></th>
+        <td class="mono">2009</td>
+        <td class="mono">0.6 (0.3〜0.7)</td>
+        <td class="mono">0.0 (-0.2〜0.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0810a.pdf" target="_blank" rel="noopener">2008-10</a></th>
+        <td class="mono">2010</td>
+        <td class="mono">1.7 (1.5〜1.9)</td>
+        <td class="mono">0.3 (0.1〜0.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0904a.pdf" target="_blank" rel="noopener">2009-04</a></th>
+        <td class="mono">2008</td>
+        <td class="mono">-3.2 (-3.2〜-3.1)</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0904a.pdf" target="_blank" rel="noopener">2009-04</a></th>
+        <td class="mono">2009</td>
+        <td class="mono">-3.1 (-3.7〜-3.0)</td>
+        <td class="mono">-1.5 (-1.6〜-1.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0904a.pdf" target="_blank" rel="noopener">2009-04</a></th>
+        <td class="mono">2010</td>
+        <td class="mono">1.2 (0.8〜1.5)</td>
+        <td class="mono">-1.0 (-1.1〜-0.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0910a.pdf" target="_blank" rel="noopener">2009-10</a></th>
+        <td class="mono">2009</td>
+        <td class="mono">-3.2 (-3.3〜-3.2)</td>
+        <td class="mono">-1.5 (-1.5〜-1.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0910a.pdf" target="_blank" rel="noopener">2009-10</a></th>
+        <td class="mono">2010</td>
+        <td class="mono">1.2 (0.8〜1.3)</td>
+        <td class="mono">-0.8 (-0.9〜-0.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor0910a.pdf" target="_blank" rel="noopener">2009-10</a></th>
+        <td class="mono">2011</td>
+        <td class="mono">2.1 (1.6〜2.4)</td>
+        <td class="mono">-0.4 (-0.7〜-0.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1004a.pdf" target="_blank" rel="noopener">2010-04</a></th>
+        <td class="mono">2009</td>
+        <td class="mono">-2.2 (-2.2〜-2.1)</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1004a.pdf" target="_blank" rel="noopener">2010-04</a></th>
+        <td class="mono">2010</td>
+        <td class="mono">1.8 (1.6〜2.0)</td>
+        <td class="mono">-0.5 (-0.5〜-0.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1004a.pdf" target="_blank" rel="noopener">2010-04</a></th>
+        <td class="mono">2011</td>
+        <td class="mono">2.0 (2.0〜2.2)</td>
+        <td class="mono">0.1 (-0.1〜0.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1010a.pdf" target="_blank" rel="noopener">2010-10</a></th>
+        <td class="mono">2010</td>
+        <td class="mono">2.1 (2.0〜2.3)</td>
+        <td class="mono">-0.4 (-0.5〜-0.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1010a.pdf" target="_blank" rel="noopener">2010-10</a></th>
+        <td class="mono">2011</td>
+        <td class="mono">1.8 (1.5〜1.9)</td>
+        <td class="mono">0.1 (0.0〜0.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1010a.pdf" target="_blank" rel="noopener">2010-10</a></th>
+        <td class="mono">2012</td>
+        <td class="mono">2.1 (2.0〜2.4)</td>
+        <td class="mono">0.6 (0.2〜0.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1104a.pdf" target="_blank" rel="noopener">2011-04</a></th>
+        <td class="mono">2010</td>
+        <td class="mono">2.8 (2.8〜2.8)</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1104a.pdf" target="_blank" rel="noopener">2011-04</a></th>
+        <td class="mono">2011</td>
+        <td class="mono">0.6 (0.5〜0.9)</td>
+        <td class="mono">0.7 (0.5〜0.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1104a.pdf" target="_blank" rel="noopener">2011-04</a></th>
+        <td class="mono">2012</td>
+        <td class="mono">2.9 (2.7〜3.0)</td>
+        <td class="mono">0.7 (0.5〜0.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1110a.pdf" target="_blank" rel="noopener">2011-10</a></th>
+        <td class="mono">2011</td>
+        <td class="mono">0.3 (0.2〜0.4)</td>
+        <td class="mono">0.0 (0.0〜0.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1110a.pdf" target="_blank" rel="noopener">2011-10</a></th>
+        <td class="mono">2012</td>
+        <td class="mono">2.2 (2.1〜2.4)</td>
+        <td class="mono">0.1 (0.0〜0.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1110a.pdf" target="_blank" rel="noopener">2011-10</a></th>
+        <td class="mono">2013</td>
+        <td class="mono">1.5 (1.3〜1.6)</td>
+        <td class="mono">0.5 (0.4〜0.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1204a.pdf" target="_blank" rel="noopener">2012-04</a></th>
+        <td class="mono">2011</td>
+        <td class="mono">-0.2 (-0.2〜-0.2)</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1204a.pdf" target="_blank" rel="noopener">2012-04</a></th>
+        <td class="mono">2012</td>
+        <td class="mono">2.3 (2.1〜2.4)</td>
+        <td class="mono">0.3 (0.1〜0.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1204a.pdf" target="_blank" rel="noopener">2012-04</a></th>
+        <td class="mono">2013</td>
+        <td class="mono">1.7 (1.6〜1.8)</td>
+        <td class="mono">0.7 (0.5〜0.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1210a.pdf" target="_blank" rel="noopener">2012-10</a></th>
+        <td class="mono">2012</td>
+        <td class="mono">1.5 (1.4〜1.6)</td>
+        <td class="mono">-0.1 (-0.1〜-0.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1210a.pdf" target="_blank" rel="noopener">2012-10</a></th>
+        <td class="mono">2013</td>
+        <td class="mono">1.6 (1.3〜1.8)</td>
+        <td class="mono">0.4 (0.2〜0.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1210a.pdf" target="_blank" rel="noopener">2012-10</a></th>
+        <td class="mono">2014</td>
+        <td class="mono">0.6 (0.2〜0.7)</td>
+        <td class="mono">2.8 (2.4〜3.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1304a.pdf" target="_blank" rel="noopener">2013-04</a></th>
+        <td class="mono">2012</td>
+        <td class="mono">1.0 (1.0〜1.0)</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1304a.pdf" target="_blank" rel="noopener">2013-04</a></th>
+        <td class="mono">2013</td>
+        <td class="mono">2.9 (2.4〜3.0)</td>
+        <td class="mono">0.7 (0.4〜0.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1304a.pdf" target="_blank" rel="noopener">2013-04</a></th>
+        <td class="mono">2014</td>
+        <td class="mono">1.4 (1.0〜1.5)</td>
+        <td class="mono">3.4 (2.7〜3.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1304a.pdf" target="_blank" rel="noopener">2013-04</a></th>
+        <td class="mono">2015</td>
+        <td class="mono">1.6 (1.4〜1.9)</td>
+        <td class="mono">2.6 (1.6〜2.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1310a.pdf" target="_blank" rel="noopener">2013-10</a></th>
+        <td class="mono">2013</td>
+        <td class="mono">2.7 (2.6〜3.0)</td>
+        <td class="mono">0.7 (0.6〜1.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1310a.pdf" target="_blank" rel="noopener">2013-10</a></th>
+        <td class="mono">2014</td>
+        <td class="mono">1.5 (0.9〜1.5)</td>
+        <td class="mono">3.3 (2.8〜3.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1310a.pdf" target="_blank" rel="noopener">2013-10</a></th>
+        <td class="mono">2015</td>
+        <td class="mono">1.5 (1.3〜1.8)</td>
+        <td class="mono">2.6 (1.6〜2.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1404a.pdf" target="_blank" rel="noopener">2014-04</a></th>
+        <td class="mono">2013</td>
+        <td class="mono">2.2 (2.2〜2.3)</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1404a.pdf" target="_blank" rel="noopener">2014-04</a></th>
+        <td class="mono">2014</td>
+        <td class="mono">1.1 (0.8〜1.3)</td>
+        <td class="mono">3.3 (3.0〜3.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1404a.pdf" target="_blank" rel="noopener">2014-04</a></th>
+        <td class="mono">2015</td>
+        <td class="mono">1.5 (1.2〜1.5)</td>
+        <td class="mono">2.6 (1.9〜2.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1404a.pdf" target="_blank" rel="noopener">2014-04</a></th>
+        <td class="mono">2016</td>
+        <td class="mono">1.3 (1.0〜1.5)</td>
+        <td class="mono">2.8 (2.0〜3.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1410a.pdf" target="_blank" rel="noopener">2014-10</a></th>
+        <td class="mono">2014</td>
+        <td class="mono">0.5 (0.2〜0.7)</td>
+        <td class="mono">3.2 (3.1〜3.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1410a.pdf" target="_blank" rel="noopener">2014-10</a></th>
+        <td class="mono">2015</td>
+        <td class="mono">1.5 (1.2〜1.7)</td>
+        <td class="mono">2.4 (1.8〜2.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1410a.pdf" target="_blank" rel="noopener">2014-10</a></th>
+        <td class="mono">2016</td>
+        <td class="mono">1.2 (1.0〜1.4)</td>
+        <td class="mono">2.8 (1.9〜3.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1504a.pdf" target="_blank" rel="noopener">2015-04</a></th>
+        <td class="mono">2014</td>
+        <td class="mono">-0.9 (-1.0〜-0.8)</td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1504a.pdf" target="_blank" rel="noopener">2015-04</a></th>
+        <td class="mono">2015</td>
+        <td class="mono">2.0 (1.5〜2.1)</td>
+        <td class="mono">0.8 (0.2〜1.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1504a.pdf" target="_blank" rel="noopener">2015-04</a></th>
+        <td class="mono">2016</td>
+        <td class="mono">1.5 (1.4〜1.8)</td>
+        <td class="mono">2.0 (1.2〜2.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1504a.pdf" target="_blank" rel="noopener">2015-04</a></th>
+        <td class="mono">2017</td>
+        <td class="mono">0.2 (0.1〜0.5)</td>
+        <td class="mono">3.2 (2.7〜3.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1510a.pdf" target="_blank" rel="noopener">2015-10</a></th>
+        <td class="mono">2015</td>
+        <td class="mono">1.2 (0.8〜1.4)</td>
+        <td class="mono">0.1 (0.0〜0.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1510a.pdf" target="_blank" rel="noopener">2015-10</a></th>
+        <td class="mono">2016</td>
+        <td class="mono">1.4 (1.2〜1.6)</td>
+        <td class="mono">1.4 (0.8〜1.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1510a.pdf" target="_blank" rel="noopener">2015-10</a></th>
+        <td class="mono">2017</td>
+        <td class="mono">0.3 (0.1〜0.5)</td>
+        <td class="mono">3.1 (2.5〜3.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1601a.pdf" target="_blank" rel="noopener">2016-01</a></th>
+        <td class="mono">2015</td>
+        <td class="mono">1.1 (1.0〜1.3)</td>
+        <td class="mono">0.1 (0.0〜0.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1601a.pdf" target="_blank" rel="noopener">2016-01</a></th>
+        <td class="mono">2016</td>
+        <td class="mono">1.5 (1.0〜1.7)</td>
+        <td class="mono">0.8 (0.2〜1.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1601a.pdf" target="_blank" rel="noopener">2016-01</a></th>
+        <td class="mono">2017</td>
+        <td class="mono">0.3 (0.1〜0.5)</td>
+        <td class="mono">2.8 (2.0〜3.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1604a.pdf" target="_blank" rel="noopener">2016-04</a></th>
+        <td class="mono">2015</td>
+        <td class="mono">0.7 (0.7〜0.7)</td>
+        <td class="mono">0.0 (0.0〜0.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1604a.pdf" target="_blank" rel="noopener">2016-04</a></th>
+        <td class="mono">2016</td>
+        <td class="mono">1.2 (0.8〜1.4)</td>
+        <td class="mono">0.5 (0.0〜0.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1604a.pdf" target="_blank" rel="noopener">2016-04</a></th>
+        <td class="mono">2017</td>
+        <td class="mono">0.1 (0.0〜0.3)</td>
+        <td class="mono">2.7 (1.8〜3.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1604a.pdf" target="_blank" rel="noopener">2016-04</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">1.0 (0.6〜1.2)</td>
+        <td class="mono">1.9 (1.0〜2.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1607a.pdf" target="_blank" rel="noopener">2016-07</a></th>
+        <td class="mono">2016</td>
+        <td class="mono">1.0 (0.8〜1.0)</td>
+        <td class="mono">0.1 (0.0〜0.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1607a.pdf" target="_blank" rel="noopener">2016-07</a></th>
+        <td class="mono">2017</td>
+        <td class="mono">1.3 (1.0〜1.5)</td>
+        <td class="mono">1.7 (0.8〜1.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1607a.pdf" target="_blank" rel="noopener">2016-07</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">0.9 (0.8〜1.0)</td>
+        <td class="mono">1.9 (1.0〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1610a.pdf" target="_blank" rel="noopener">2016-10</a></th>
+        <td class="mono">2016</td>
+        <td class="mono">1.0 (0.8〜1.0)</td>
+        <td class="mono">-0.1 (-0.3〜-0.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1610a.pdf" target="_blank" rel="noopener">2016-10</a></th>
+        <td class="mono">2017</td>
+        <td class="mono">1.3 (1.0〜1.5)</td>
+        <td class="mono">1.5 (0.6〜1.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1610a.pdf" target="_blank" rel="noopener">2016-10</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">0.9 (0.8〜1.0)</td>
+        <td class="mono">1.7 (0.9〜1.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1701a.pdf" target="_blank" rel="noopener">2017-01</a></th>
+        <td class="mono">2016</td>
+        <td class="mono">1.4 (1.2〜1.5)</td>
+        <td class="mono">-0.2 (-0.2〜-0.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1701a.pdf" target="_blank" rel="noopener">2017-01</a></th>
+        <td class="mono">2017</td>
+        <td class="mono">1.5 (1.3〜1.6)</td>
+        <td class="mono">1.5 (0.8〜1.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1701a.pdf" target="_blank" rel="noopener">2017-01</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">1.1 (1.0〜1.2)</td>
+        <td class="mono">1.7 (0.9〜1.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1704a.pdf" target="_blank" rel="noopener">2017-04</a></th>
+        <td class="mono">2016</td>
+        <td class="mono">1.4 (1.4〜1.4)</td>
+        <td class="mono">-0.3 (-0.3〜-0.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1704a.pdf" target="_blank" rel="noopener">2017-04</a></th>
+        <td class="mono">2017</td>
+        <td class="mono">1.6 (1.4〜1.6)</td>
+        <td class="mono">1.4 (0.6〜1.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1704a.pdf" target="_blank" rel="noopener">2017-04</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">1.3 (1.1〜1.3)</td>
+        <td class="mono">1.7 (0.8〜1.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1704a.pdf" target="_blank" rel="noopener">2017-04</a></th>
+        <td class="mono">2019</td>
+        <td class="mono">0.7 (0.6〜0.7)</td>
+        <td class="mono">2.4 (1.4〜2.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1707a.pdf" target="_blank" rel="noopener">2017-07</a></th>
+        <td class="mono">2017</td>
+        <td class="mono">1.8 (1.5〜1.8)</td>
+        <td class="mono">1.1 (0.5〜1.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1707a.pdf" target="_blank" rel="noopener">2017-07</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">1.4 (1.1〜1.5)</td>
+        <td class="mono">1.5 (0.8〜1.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1707a.pdf" target="_blank" rel="noopener">2017-07</a></th>
+        <td class="mono">2019</td>
+        <td class="mono">0.7 (0.7〜0.8)</td>
+        <td class="mono">2.3 (1.4〜2.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1710a.pdf" target="_blank" rel="noopener">2017-10</a></th>
+        <td class="mono">2017</td>
+        <td class="mono">1.9 (1.7〜2.0)</td>
+        <td class="mono">0.8 (0.7〜1.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1710a.pdf" target="_blank" rel="noopener">2017-10</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">1.4 (1.2〜1.4)</td>
+        <td class="mono">1.4 (1.1〜1.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1710a.pdf" target="_blank" rel="noopener">2017-10</a></th>
+        <td class="mono">2019</td>
+        <td class="mono">0.7 (0.7〜0.8)</td>
+        <td class="mono">2.3 (2.0〜2.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1801a.pdf" target="_blank" rel="noopener">2018-01</a></th>
+        <td class="mono">2017</td>
+        <td class="mono">1.9 (1.8〜2.0)</td>
+        <td class="mono">0.8 (0.7〜1.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1801a.pdf" target="_blank" rel="noopener">2018-01</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">1.4 (1.3〜1.5)</td>
+        <td class="mono">1.4 (1.3〜1.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1801a.pdf" target="_blank" rel="noopener">2018-01</a></th>
+        <td class="mono">2019</td>
+        <td class="mono">0.7 (0.7〜0.9)</td>
+        <td class="mono">2.3 (2.0〜2.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1804a.pdf" target="_blank" rel="noopener">2018-04</a></th>
+        <td class="mono">2017</td>
+        <td class="mono">1.9 (1.8〜1.9)</td>
+        <td class="mono">0.7 (0.7〜0.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1804a.pdf" target="_blank" rel="noopener">2018-04</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">1.6 (1.4〜1.7)</td>
+        <td class="mono">1.3 (1.2〜1.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1804a.pdf" target="_blank" rel="noopener">2018-04</a></th>
+        <td class="mono">2019</td>
+        <td class="mono">0.8 (0.7〜0.9)</td>
+        <td class="mono">2.3 (2.0〜2.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1804a.pdf" target="_blank" rel="noopener">2018-04</a></th>
+        <td class="mono">2020</td>
+        <td class="mono">0.8 (0.6〜1.0)</td>
+        <td class="mono">2.3 (2.0〜2.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1807a.pdf" target="_blank" rel="noopener">2018-07</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">1.5 (1.3〜1.5)</td>
+        <td class="mono">1.1 (1.0〜1.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1807a.pdf" target="_blank" rel="noopener">2018-07</a></th>
+        <td class="mono">2019</td>
+        <td class="mono">0.8 (0.7〜0.9)</td>
+        <td class="mono">2.0 (1.8〜2.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1807a.pdf" target="_blank" rel="noopener">2018-07</a></th>
+        <td class="mono">2020</td>
+        <td class="mono">0.8 (0.6〜0.9)</td>
+        <td class="mono">2.1 (1.9〜2.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1810a.pdf" target="_blank" rel="noopener">2018-10</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">1.4 (1.3〜1.5)</td>
+        <td class="mono">0.9 (0.9〜1.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1810a.pdf" target="_blank" rel="noopener">2018-10</a></th>
+        <td class="mono">2019</td>
+        <td class="mono">0.8 (0.8〜0.9)</td>
+        <td class="mono">1.9 (1.8〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1810a.pdf" target="_blank" rel="noopener">2018-10</a></th>
+        <td class="mono">2020</td>
+        <td class="mono">0.8 (0.6〜0.9)</td>
+        <td class="mono">2.0 (1.9〜2.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1901a.pdf" target="_blank" rel="noopener">2019-01</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">0.9 (0.9〜1.0)</td>
+        <td class="mono">0.8 (0.8〜0.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1901a.pdf" target="_blank" rel="noopener">2019-01</a></th>
+        <td class="mono">2019</td>
+        <td class="mono">0.9 (0.7〜1.0)</td>
+        <td class="mono">1.1 (1.0〜1.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1901a.pdf" target="_blank" rel="noopener">2019-01</a></th>
+        <td class="mono">2020</td>
+        <td class="mono">1.0 (0.7〜1.0)</td>
+        <td class="mono">1.5 (1.3〜1.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1904a.pdf" target="_blank" rel="noopener">2019-04</a></th>
+        <td class="mono">2018</td>
+        <td class="mono">0.6 (0.6〜0.6)</td>
+        <td class="mono">0.8 (0.8〜0.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1904a.pdf" target="_blank" rel="noopener">2019-04</a></th>
+        <td class="mono">2019</td>
+        <td class="mono">0.8 (0.7〜0.9)</td>
+        <td class="mono">1.1 (0.9〜1.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1904a.pdf" target="_blank" rel="noopener">2019-04</a></th>
+        <td class="mono">2020</td>
+        <td class="mono">0.9 (0.8〜1.1)</td>
+        <td class="mono">1.4 (1.2〜1.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1904a.pdf" target="_blank" rel="noopener">2019-04</a></th>
+        <td class="mono">2021</td>
+        <td class="mono">1.2 (0.9〜1.2)</td>
+        <td class="mono">1.6 (1.4〜1.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1907a.pdf" target="_blank" rel="noopener">2019-07</a></th>
+        <td class="mono">2019</td>
+        <td class="mono">0.7 (0.6〜0.9)</td>
+        <td class="mono">1.0 (0.8〜1.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1907a.pdf" target="_blank" rel="noopener">2019-07</a></th>
+        <td class="mono">2020</td>
+        <td class="mono">0.9 (0.8〜1.0)</td>
+        <td class="mono">1.3 (1.1〜1.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1907a.pdf" target="_blank" rel="noopener">2019-07</a></th>
+        <td class="mono">2021</td>
+        <td class="mono">1.1 (0.9〜1.2)</td>
+        <td class="mono">1.6 (1.3〜1.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1910a.pdf" target="_blank" rel="noopener">2019-10</a></th>
+        <td class="mono">2019</td>
+        <td class="mono">0.6 (0.6〜0.7)</td>
+        <td class="mono">0.7 (0.6〜0.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1910a.pdf" target="_blank" rel="noopener">2019-10</a></th>
+        <td class="mono">2020</td>
+        <td class="mono">0.7 (0.6〜0.9)</td>
+        <td class="mono">1.1 (0.8〜1.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor1910a.pdf" target="_blank" rel="noopener">2019-10</a></th>
+        <td class="mono">2021</td>
+        <td class="mono">1.0 (0.9〜1.2)</td>
+        <td class="mono">1.5 (1.2〜1.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2001a.pdf" target="_blank" rel="noopener">2020-01</a></th>
+        <td class="mono">2019</td>
+        <td class="mono">0.8 (0.8〜0.9)</td>
+        <td class="mono">0.6 (0.6〜0.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2001a.pdf" target="_blank" rel="noopener">2020-01</a></th>
+        <td class="mono">2020</td>
+        <td class="mono">0.9 (0.8〜1.1)</td>
+        <td class="mono">1.0 (1.0〜1.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2001a.pdf" target="_blank" rel="noopener">2020-01</a></th>
+        <td class="mono">2021</td>
+        <td class="mono">1.1 (1.0〜1.3)</td>
+        <td class="mono">1.4 (1.2〜1.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2004a.pdf" target="_blank" rel="noopener">2020-04</a></th>
+        <td class="mono">2019</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2004a.pdf" target="_blank" rel="noopener">2020-04</a></th>
+        <td class="mono">2020</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2004a.pdf" target="_blank" rel="noopener">2020-04</a></th>
+        <td class="mono">2021</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2004a.pdf" target="_blank" rel="noopener">2020-04</a></th>
+        <td class="mono">2022</td>
+        <td class="mono"></td>
+        <td class="mono"></td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2007a.pdf" target="_blank" rel="noopener">2020-07</a></th>
+        <td class="mono">2020</td>
+        <td class="mono">-4.7 (-5.7〜-4.5)</td>
+        <td class="mono">-0.5 (-0.6〜-0.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2007a.pdf" target="_blank" rel="noopener">2020-07</a></th>
+        <td class="mono">2021</td>
+        <td class="mono">3.3 (3.0〜4.0)</td>
+        <td class="mono">0.3 (0.2〜0.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2007a.pdf" target="_blank" rel="noopener">2020-07</a></th>
+        <td class="mono">2022</td>
+        <td class="mono">1.5 (1.3〜1.6)</td>
+        <td class="mono">0.7 (0.5〜0.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2010a.pdf" target="_blank" rel="noopener">2020-10</a></th>
+        <td class="mono">2020</td>
+        <td class="mono">-5.5 (-5.6〜-5.3)</td>
+        <td class="mono">-0.6 (-0.7〜-0.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2010a.pdf" target="_blank" rel="noopener">2020-10</a></th>
+        <td class="mono">2021</td>
+        <td class="mono">3.6 (3.0〜3.8)</td>
+        <td class="mono">0.4 (0.2〜0.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2010a.pdf" target="_blank" rel="noopener">2020-10</a></th>
+        <td class="mono">2022</td>
+        <td class="mono">1.6 (1.5〜1.8)</td>
+        <td class="mono">0.7 (0.4〜0.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2101a.pdf" target="_blank" rel="noopener">2021-01</a></th>
+        <td class="mono">2020</td>
+        <td class="mono">-5.6 (-5.7〜-5.4)</td>
+        <td class="mono">-0.5 (-0.7〜-0.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2101a.pdf" target="_blank" rel="noopener">2021-01</a></th>
+        <td class="mono">2021</td>
+        <td class="mono">3.9 (3.3〜4.0)</td>
+        <td class="mono">0.5 (0.3〜0.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2101a.pdf" target="_blank" rel="noopener">2021-01</a></th>
+        <td class="mono">2022</td>
+        <td class="mono">1.8 (1.5〜2.0)</td>
+        <td class="mono">0.7 (0.7〜0.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2104a.pdf" target="_blank" rel="noopener">2021-04</a></th>
+        <td class="mono">2020</td>
+        <td class="mono">-4.9 (-5.0〜-4.9)</td>
+        <td class="mono">-0.4 (-0.4〜-0.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2104a.pdf" target="_blank" rel="noopener">2021-04</a></th>
+        <td class="mono">2021</td>
+        <td class="mono">4.0 (3.6〜4.4)</td>
+        <td class="mono">0.1 (0.0〜0.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2104a.pdf" target="_blank" rel="noopener">2021-04</a></th>
+        <td class="mono">2022</td>
+        <td class="mono">2.4 (2.1〜2.5)</td>
+        <td class="mono">0.8 (0.5〜0.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2104a.pdf" target="_blank" rel="noopener">2021-04</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">1.3 (1.2〜1.5)</td>
+        <td class="mono">1.0 (0.7〜1.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2107a.pdf" target="_blank" rel="noopener">2021-07</a></th>
+        <td class="mono">2021</td>
+        <td class="mono">3.8 (3.5〜4.0)</td>
+        <td class="mono">0.6 (0.3〜0.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2107a.pdf" target="_blank" rel="noopener">2021-07</a></th>
+        <td class="mono">2022</td>
+        <td class="mono">2.7 (2.6〜2.9)</td>
+        <td class="mono">0.9 (0.8〜1.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2107a.pdf" target="_blank" rel="noopener">2021-07</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">1.3 (1.2〜1.4)</td>
+        <td class="mono">1.0 (0.9〜1.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2110a.pdf" target="_blank" rel="noopener">2021-10</a></th>
+        <td class="mono">2021</td>
+        <td class="mono">3.4 (3.0〜3.6)</td>
+        <td class="mono">0.0 (0.0〜0.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2110a.pdf" target="_blank" rel="noopener">2021-10</a></th>
+        <td class="mono">2022</td>
+        <td class="mono">2.9 (2.7〜3.0)</td>
+        <td class="mono">0.9 (0.8〜1.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2110a.pdf" target="_blank" rel="noopener">2021-10</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">1.3 (1.2〜1.4)</td>
+        <td class="mono">1.0 (0.9〜1.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2201a.pdf" target="_blank" rel="noopener">2022-01</a></th>
+        <td class="mono">2021</td>
+        <td class="mono">2.8 (2.7〜2.9)</td>
+        <td class="mono">0.0 (0.0〜0.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2201a.pdf" target="_blank" rel="noopener">2022-01</a></th>
+        <td class="mono">2022</td>
+        <td class="mono">3.8 (3.3〜4.1)</td>
+        <td class="mono">1.1 (1.0〜1.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2201a.pdf" target="_blank" rel="noopener">2022-01</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">1.1 (1.0〜1.4)</td>
+        <td class="mono">1.1 (1.0〜1.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2204a.pdf" target="_blank" rel="noopener">2022-04</a></th>
+        <td class="mono">2021</td>
+        <td class="mono">2.1 (2.0〜2.2)</td>
+        <td class="mono">0.1 (0.1〜0.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2204a.pdf" target="_blank" rel="noopener">2022-04</a></th>
+        <td class="mono">2022</td>
+        <td class="mono">2.9 (2.6〜3.0)</td>
+        <td class="mono">1.9 (1.8〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2204a.pdf" target="_blank" rel="noopener">2022-04</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">1.9 (1.5〜2.1)</td>
+        <td class="mono">1.1 (0.9〜1.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2204a.pdf" target="_blank" rel="noopener">2022-04</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">1.1 (1.1〜1.3)</td>
+        <td class="mono">1.1 (1.0〜1.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2207a.pdf" target="_blank" rel="noopener">2022-07</a></th>
+        <td class="mono">2022</td>
+        <td class="mono">2.4 (2.2〜2.5)</td>
+        <td class="mono">2.3 (2.2〜2.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2207a.pdf" target="_blank" rel="noopener">2022-07</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">2.0 (1.7〜2.1)</td>
+        <td class="mono">1.4 (1.2〜1.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2207a.pdf" target="_blank" rel="noopener">2022-07</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">1.3 (1.1〜1.5)</td>
+        <td class="mono">1.3 (1.1〜1.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2210a.pdf" target="_blank" rel="noopener">2022-10</a></th>
+        <td class="mono">2022</td>
+        <td class="mono">2.0 (1.8〜2.1)</td>
+        <td class="mono">2.9 (2.8〜2.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2210a.pdf" target="_blank" rel="noopener">2022-10</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">1.9 (1.5〜2.0)</td>
+        <td class="mono">1.6 (1.5〜1.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2210a.pdf" target="_blank" rel="noopener">2022-10</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">1.5 (1.3〜1.6)</td>
+        <td class="mono">1.6 (1.5〜1.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2301a.pdf" target="_blank" rel="noopener">2023-01</a></th>
+        <td class="mono">2022</td>
+        <td class="mono">1.9 (1.9〜2.0)</td>
+        <td class="mono">3.0 (3.0〜3.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2301a.pdf" target="_blank" rel="noopener">2023-01</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">1.7 (1.5〜1.9)</td>
+        <td class="mono">1.6 (1.6〜1.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2301a.pdf" target="_blank" rel="noopener">2023-01</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">1.1 (0.9〜1.3)</td>
+        <td class="mono">1.8 (1.8〜1.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2304a.pdf" target="_blank" rel="noopener">2023-04</a></th>
+        <td class="mono">2022</td>
+        <td class="mono">1.2 (1.2〜1.2)</td>
+        <td class="mono">3.0 (3.0〜3.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2304a.pdf" target="_blank" rel="noopener">2023-04</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">1.4 (1.1〜1.5)</td>
+        <td class="mono">1.8 (1.7〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2304a.pdf" target="_blank" rel="noopener">2023-04</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">1.2 (1.0〜1.3)</td>
+        <td class="mono">2.0 (1.8〜2.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2304a.pdf" target="_blank" rel="noopener">2023-04</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">1.0 (1.0〜1.1)</td>
+        <td class="mono">1.6 (1.6〜1.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2307a.pdf" target="_blank" rel="noopener">2023-07</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">1.3 (1.2〜1.5)</td>
+        <td class="mono">2.5 (2.4〜2.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2307a.pdf" target="_blank" rel="noopener">2023-07</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">1.2 (1.0〜1.3)</td>
+        <td class="mono">1.9 (1.8〜2.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2307a.pdf" target="_blank" rel="noopener">2023-07</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">1.0 (1.0〜1.2)</td>
+        <td class="mono">1.6 (1.6〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2310a.pdf" target="_blank" rel="noopener">2023-10</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">2.0 (1.8〜2.0)</td>
+        <td class="mono">2.8 (2.7〜3.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2310a.pdf" target="_blank" rel="noopener">2023-10</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">1.0 (0.9〜1.4)</td>
+        <td class="mono">2.8 (2.7〜3.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2310a.pdf" target="_blank" rel="noopener">2023-10</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">1.0 (0.8〜1.2)</td>
+        <td class="mono">1.7 (1.6〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2401a.pdf" target="_blank" rel="noopener">2024-01</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">1.8 (1.6〜1.9)</td>
+        <td class="mono">2.8 (2.8〜2.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2401a.pdf" target="_blank" rel="noopener">2024-01</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">1.2 (1.0〜1.2)</td>
+        <td class="mono">2.4 (2.2〜2.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2401a.pdf" target="_blank" rel="noopener">2024-01</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">1.0 (1.0〜1.2)</td>
+        <td class="mono">1.8 (1.6〜1.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2404a.pdf" target="_blank" rel="noopener">2024-04</a></th>
+        <td class="mono">2023</td>
+        <td class="mono">1.3 (1.3〜1.4)</td>
+        <td class="mono">2.8 (2.8〜2.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2404a.pdf" target="_blank" rel="noopener">2024-04</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">0.8 (0.7〜1.0)</td>
+        <td class="mono">2.8 (2.6〜3.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2404a.pdf" target="_blank" rel="noopener">2024-04</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">1.0 (0.8〜1.1)</td>
+        <td class="mono">1.9 (1.7〜2.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2404a.pdf" target="_blank" rel="noopener">2024-04</a></th>
+        <td class="mono">2026</td>
+        <td class="mono">1.0 (0.8〜1.0)</td>
+        <td class="mono">1.9 (1.6〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2407a.pdf" target="_blank" rel="noopener">2024-07</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">0.6 (0.5〜0.7)</td>
+        <td class="mono">2.5 (2.5〜2.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2407a.pdf" target="_blank" rel="noopener">2024-07</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">1.0 (0.9〜1.1)</td>
+        <td class="mono">2.1 (2.0〜2.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2407a.pdf" target="_blank" rel="noopener">2024-07</a></th>
+        <td class="mono">2026</td>
+        <td class="mono">1.0 (0.8〜1.0)</td>
+        <td class="mono">1.9 (1.8〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2410a.pdf" target="_blank" rel="noopener">2024-10</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">0.6 (0.5〜0.7)</td>
+        <td class="mono">2.5 (2.4〜2.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2410a.pdf" target="_blank" rel="noopener">2024-10</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">1.1 (1.0〜1.2)</td>
+        <td class="mono">1.9 (1.7〜2.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2410a.pdf" target="_blank" rel="noopener">2024-10</a></th>
+        <td class="mono">2026</td>
+        <td class="mono">1.0 (0.8〜1.1)</td>
+        <td class="mono">1.9 (1.8〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2501a.pdf" target="_blank" rel="noopener">2025-01</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">0.5 (0.4〜0.6)</td>
+        <td class="mono">2.7 (2.6〜2.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2501a.pdf" target="_blank" rel="noopener">2025-01</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">1.1 (0.9〜1.1)</td>
+        <td class="mono">2.4 (2.2〜2.6)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2501a.pdf" target="_blank" rel="noopener">2025-01</a></th>
+        <td class="mono">2026</td>
+        <td class="mono">1.0 (0.8〜1.0)</td>
+        <td class="mono">2.0 (1.8〜2.1)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2504a.pdf" target="_blank" rel="noopener">2025-04</a></th>
+        <td class="mono">2024</td>
+        <td class="mono">0.7 (0.7〜0.7)</td>
+        <td class="mono">2.7 (2.7〜2.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2504a.pdf" target="_blank" rel="noopener">2025-04</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">0.5 (0.4〜0.6)</td>
+        <td class="mono">2.2 (2.0〜2.3)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2504a.pdf" target="_blank" rel="noopener">2025-04</a></th>
+        <td class="mono">2026</td>
+        <td class="mono">0.7 (0.6〜0.8)</td>
+        <td class="mono">1.7 (1.6〜1.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2504a.pdf" target="_blank" rel="noopener">2025-04</a></th>
+        <td class="mono">2027</td>
+        <td class="mono">1.0 (0.8〜1.0)</td>
+        <td class="mono">1.9 (1.8〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2507a.pdf" target="_blank" rel="noopener">2025-07</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">0.6 (0.5〜0.7)</td>
+        <td class="mono">2.7 (2.7〜2.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2507a.pdf" target="_blank" rel="noopener">2025-07</a></th>
+        <td class="mono">2026</td>
+        <td class="mono">0.7 (0.7〜0.9)</td>
+        <td class="mono">1.8 (1.6〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2507a.pdf" target="_blank" rel="noopener">2025-07</a></th>
+        <td class="mono">2027</td>
+        <td class="mono">1.0 (0.9〜1.0)</td>
+        <td class="mono">2.0 (1.8〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2510a.pdf" target="_blank" rel="noopener">2025-10</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">0.7 (0.6〜0.8)</td>
+        <td class="mono">2.7 (2.7〜2.9)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2510a.pdf" target="_blank" rel="noopener">2025-10</a></th>
+        <td class="mono">2026</td>
+        <td class="mono">0.7 (0.6〜0.8)</td>
+        <td class="mono">1.8 (1.6〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2510a.pdf" target="_blank" rel="noopener">2025-10</a></th>
+        <td class="mono">2027</td>
+        <td class="mono">1.0 (0.7〜1.1)</td>
+        <td class="mono">2.0 (1.8〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2601a.pdf" target="_blank" rel="noopener">2026-01</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">0.9 (0.8〜0.9)</td>
+        <td class="mono">2.7 (2.7〜2.8)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2601a.pdf" target="_blank" rel="noopener">2026-01</a></th>
+        <td class="mono">2026</td>
+        <td class="mono">1.0 (0.8〜1.0)</td>
+        <td class="mono">1.9 (1.9〜2.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2601a.pdf" target="_blank" rel="noopener">2026-01</a></th>
+        <td class="mono">2027</td>
+        <td class="mono">0.8 (0.8〜1.0)</td>
+        <td class="mono">2.0 (1.9〜2.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2604a.pdf" target="_blank" rel="noopener">2026-04</a></th>
+        <td class="mono">2025</td>
+        <td class="mono">1.0 (1.0〜1.0)</td>
+        <td class="mono">2.7 (2.7〜2.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2604a.pdf" target="_blank" rel="noopener">2026-04</a></th>
+        <td class="mono">2026</td>
+        <td class="mono">0.5 (0.4〜0.7)</td>
+        <td class="mono">2.8 (2.8〜3.0)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2604a.pdf" target="_blank" rel="noopener">2026-04</a></th>
+        <td class="mono">2027</td>
+        <td class="mono">0.7 (0.6〜0.8)</td>
+        <td class="mono">2.3 (2.3〜2.4)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2604a.pdf" target="_blank" rel="noopener">2026-04</a></th>
+        <td class="mono">2028</td>
+        <td class="mono">0.8 (0.7〜0.8)</td>
+        <td class="mono">2.0 (2.0〜2.2)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2607a.pdf" target="_blank" rel="noopener">2026-07</a></th>
+        <td class="mono">2026</td>
+        <td class="mono">0.6 (0.6〜0.7)</td>
+        <td class="mono">2.5 (2.3〜2.7)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2607a.pdf" target="_blank" rel="noopener">2026-07</a></th>
+        <td class="mono">2027</td>
+        <td class="mono">0.8 (0.7〜0.8)</td>
+        <td class="mono">2.4 (2.2〜2.5)</td>
+      </tr>
+      <tr>
+        <th scope="row" class="mono"><a href="https://www.boj.or.jp/mopo/outlook/gor2607a.pdf" target="_blank" rel="noopener">2026-07</a></th>
+        <td class="mono">2028</td>
+        <td class="mono">0.8 (0.7〜0.8)</td>
+        <td class="mono">2.0 (2.0〜2.2)</td>
+      </tr>
+        </tbody>
+      </table>
+      </div>
+
+      <p class="chart-note mono">Real GDP and CPI are both shown as &quot;median (low-high)&quot;. Issues without a published median, and restated rows, are not included in the table.</p>
+      <p class="chart-note mono"><span>Source data: </span><a href="/data/boj_outlook_vintages.csv">/data/boj_outlook_vintages.csv</a> · <a href="/en/cite">How to cite</a></p>
+    </details>
+  </section>
+  
+  </main>
+
+  <footer class="site-footer-row">
+    <span id="t-footer-src">src: Bank of Japan, Outlook for Economic Activity and Prices</span>
+    <a class="footer-about" id="t-footer-about" href="/en/about">About this site</a>
+    <a class="footer-about" id="t-footer-contact" href="/en/contact">Contact</a>
+  </footer>
+</div>
+<script src="/csv.js?v=20260803a"></script>
+<script src="/boj-outlook-vintages.js?v=20260803a"></script>
+</body>
+</html>

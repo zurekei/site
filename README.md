@@ -56,6 +56,7 @@ FY1989・FY1993〜FY1997の消費者物価見通し(6年分)は国会会議録�
 
 - `gdp_forecast.csv`(実質・名目) / `tax_revenue_forecast.csv` / `cpi_forecast.csv` / `unemployment_forecast.csv` / `current_account_forecast.csv` / `bond_issuance_forecast.csv` / `jgb_total_issuance_forecast.csv`
 - `boj_outlook_real.csv` / `boj_outlook_cpi.csv`(日銀展望レポートの見通し。政府の経済見通しとは独立の系列。段階1として2026-08-06公開、各年度4月号の中央値のみ。詳細は `CLAUDE.md` の対応済みTODO参照)
+- `boj_outlook_vintages.csv`(同・全号・全対象年度を含む段階2の生データ、専用ページ `/boj-outlook-vintages`。対象年度ごとに見通しが号を追ってどう動いたかを扇状チャートで見せる。同日2026-08-06公開)
 - `fertility_forecast.csv` + `fertility_actual.csv`(専用ページ `/fertility`)
 - `births_forecast.csv` + `births_actual.csv`(専用ページ `/births`)
 

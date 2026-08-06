@@ -112,9 +112,11 @@ const T = {
   },
 };
 
-// data/ 直下のCSV(14本、data/hoan_clauses/*.txt は法令原文であってCSVではない
+// data/ 直下のCSV(18本、data/hoan_clauses/*.txt は法令原文であってCSVではない
 // ので対象外)への直リンク表。bin/build.mjs の CSV_COLUMNS(スキーマ検査の対象
-// 一覧)と同じ14ファイルを網羅する — 増減したらこちらも直すこと。
+// 一覧)と同じ18ファイルを網羅する — 増減したらこちらも直すこと。
+// (この本数注記はコメントであり --check の検査対象外。過去にも実際の本数と
+// ズレていたことがあるので、直す際は DATA_FILES.length を数え直して確認する。)
 // bin/build.mjs の --check が citeDataFilesErrors() でこの file の集合と
 // CSV_COLUMNS のキーの集合を突き合わせるので、増減して片方だけ直すと赤くなる
 // (2026-07-31。それまでは目視で合わせるしかなく、機械的な同期は無かった)。
@@ -154,6 +156,12 @@ const DATA_FILES = [
     ja: "日銀展望レポートの消費者物価見通し(4月号・中央値)と実績",
     en: "BOJ Outlook Report's CPI forecast (April issue, median) and actual",
     pages: ["boj-outlook-cpi"],
+  },
+  {
+    file: "boj_outlook_vintages.csv",
+    ja: "日銀展望レポートの全号(2000年10月号〜)の大勢見通し(生データ。号ごとの見通しの推移を辿れる)",
+    en: "BOJ Outlook Report's forecasts from every issue since Oct 2000 (raw data behind the issue-by-issue convergence view)",
+    pages: ["boj-outlook-vintages"],
   },
   {
     file: "unemployment_forecast.csv",
@@ -234,6 +242,7 @@ const PAGE_PATH = {
   cpi: { ja: "/chart/cpi", en: "/en/chart/cpi" },
   "boj-outlook-real": { ja: "/chart/boj-outlook-real", en: "/en/chart/boj-outlook-real" },
   "boj-outlook-cpi": { ja: "/chart/boj-outlook-cpi", en: "/en/chart/boj-outlook-cpi" },
+  "boj-outlook-vintages": { ja: "/boj-outlook-vintages", en: "/en/boj-outlook-vintages" },
   unemployment: { ja: "/chart/unemployment", en: "/en/chart/unemployment" },
   "current-account": { ja: "/chart/current-account", en: "/en/chart/current-account" },
   "tax-revenue": { ja: "/chart/tax-revenue", en: "/en/chart/tax-revenue" },

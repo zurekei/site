@@ -55,7 +55,10 @@ const SITE = "https://zurekei.org";
 // 個人を特定する情報(founder等)は入れない(匿名運営を選択肢として残しているため)。
 const ORG_ID = `${SITE}/#organization`;
 
-// DataCatalog(10個の Dataset を束ねる節点)の @id。各 Dataset の
+// DataCatalog(METRICSの指標+ fertility + births + hoan の Dataset を束ねる
+// 節点。件数はMETRICSの増減に自動で追従するので、ここでは固定数を書かない
+// — 2026-08-06、8→10指標への増加時にこのコメントが「8指標=10個」のまま
+// 取り残されていた反省)の @id。各 Dataset の
 // includedInDataCatalog が参照する共通の識別子。置き場所をトップ(index.html)に
 // したのは buildHomeJsonLd のコメントを参照。
 const CATALOG_ID = `${SITE}/#catalog`;
@@ -100,6 +103,7 @@ const REL = {
   chartHub: { ja: "/chart/", en: "/en/chart/" },
   fertility: { ja: "/fertility", en: "/en/fertility" },
   births: { ja: "/births", en: "/en/births" },
+  bojVintages: { ja: "/boj-outlook-vintages", en: "/en/boj-outlook-vintages" },
   hoan: { ja: "/hoan", en: "/en/hoan" },
   about: { ja: "/about", en: "/en/about" },
   corrections: { ja: "/corrections", en: "/en/corrections" },
@@ -1600,6 +1604,261 @@ ${birthsSection(d, "en")}
 `;
 }
 
+/* ── 日銀展望レポート: 号ごとの見通し(段階2) ──────────────────────
+ * /chart/boj-outlook-real・/chart/boj-outlook-cpi(段階1)が年度ごとに1つの値
+ * (4月号)だけを切り出しているのに対し、このページは全号(issue_kind=="main")の
+ * 見通しを号の公表時点で並べる。fertility/births と形は同じ「歴代の見通し
+ * vs 実績」だが、グラフのグループ化軸が逆(あちらは1本=1つの推計版、こちらは
+ * 1本=1つの対象年度)。理由は boj-outlook-vintages.js 冒頭のコメントを参照。
+ */
+
+const BOJV = loadModule("boj-outlook-vintages.js", ["T", "issueToX"]);
+
+function bojVintagesData() {
+  const mainRows = parseCSV(read("data/boj_outlook_vintages.csv"))
+    .filter((r) => r.issue_kind === "main")
+    .map((r) => ({
+      issue: r.issue,
+      fy: Number(r.target_fiscal_year),
+      real: toNum(r.real_median),
+      realLow: toNum(r.real_low),
+      realHigh: toNum(r.real_high),
+      cpi: toNum(r.cpi_median),
+      cpiLow: toNum(r.cpi_low),
+      cpiHigh: toNum(r.cpi_high),
+      sourceUrl: r.source_url,
+    }));
+  const fysWithMedian = mainRows.filter((r) => r.real !== null || r.cpi !== null).map((r) => r.fy);
+  return {
+    mainRows,
+    fyMin: Math.min(...fysWithMedian),
+    fyMax: Math.max(...fysWithMedian),
+  };
+}
+
+const fmt1 = (v) => (v === null ? null : v.toFixed(1));
+
+// 「中央値(下限〜上限)」の1セル。レンジが無い(段階1のFY2001/2002/2020と同じ
+// 事情で、中央値だけ後年に判明しレンジが無い号は無い想定だが、念のため中央値
+// だけでも出せるようにしておく)場合は中央値のみ。
+function bojVintagesRangeCell(median, low, high) {
+  if (median === null) return "";
+  if (low === null || high === null) return fmt1(median);
+  return `${fmt1(median)} (${fmt1(low)}〜${fmt1(high)})`;
+}
+
+function bojVintagesTable(d, lang = "ja") {
+  const t = BOJV.T[lang];
+  const th = (ja, en) =>
+    lang === "ja" ? `            <th scope="col"${dual(en)}>${escapeHTML(ja)}</th>` : `            <th scope="col">${escapeHTML(en)}</th>`;
+  const head = [
+    th(BOJV.T.ja.thIssue, BOJV.T.en.thIssue),
+    th(BOJV.T.ja.thTargetYear, BOJV.T.en.thTargetYear),
+    th(BOJV.T.ja.thReal, BOJV.T.en.thReal),
+    th(BOJV.T.ja.thCpi, BOJV.T.en.thCpi),
+  ].join("\n");
+
+  const body = d.mainRows
+    .map((r) => {
+      const url = safeUrl(r.sourceUrl);
+      const issueCell = url
+        ? `<a href="${escapeHTML(url)}" target="_blank" rel="noopener">${escapeHTML(r.issue)}</a>`
+        : escapeHTML(r.issue);
+      return (
+        `      <tr>\n` +
+        `        <th scope="row" class="mono">${issueCell}</th>\n` +
+        `        <td class="mono">${r.fy}</td>\n` +
+        `        <td class="mono">${bojVintagesRangeCell(r.real, r.realLow, r.realHigh)}</td>\n` +
+        `        <td class="mono">${bojVintagesRangeCell(r.cpi, r.cpiLow, r.cpiHigh)}</td>\n` +
+        `      </tr>`
+      );
+    })
+    .join("\n");
+
+  const caption =
+    lang === "ja"
+      ? `        <caption${dual(t.tableCaption)}>${escapeHTML(BOJV.T.ja.tableCaption)}</caption>\n`
+      : `        <caption>${escapeHTML(t.tableCaption)}</caption>\n`;
+
+  return (
+    `      <div class="data-table-wrap">\n` +
+    `      <table class="data-table data-table-wide">\n` +
+    caption +
+    `        <thead>\n          <tr>\n${head}\n          </tr>\n        </thead>\n` +
+    `        <tbody>\n${body}\n        </tbody>\n` +
+    `      </table>\n` +
+    `      </div>`
+  );
+}
+
+function bojVintagesSection(d, lang = "ja") {
+  const t = BOJV.T[lang];
+  const summary =
+    lang === "ja"
+      ? `<summary${dual(t.tableToggle(d.mainRows.length))}>${escapeHTML(BOJV.T.ja.tableToggle(d.mainRows.length))}</summary>`
+      : `<summary>${escapeHTML(t.tableToggle(d.mainRows.length))}</summary>`;
+  const roundNote =
+    lang === "ja"
+      ? `<p class="chart-note mono"${dual(t.tableRoundNote)}>${escapeHTML(BOJV.T.ja.tableRoundNote)}</p>`
+      : `<p class="chart-note mono">${escapeHTML(t.tableRoundNote)}</p>`;
+  const csvLabel =
+    lang === "ja"
+      ? `<span${dual(t.tableCsvLabel)}>${escapeHTML(BOJV.T.ja.tableCsvLabel)}</span>`
+      : `<span>${escapeHTML(t.tableCsvLabel)}</span>`;
+  const citeLink =
+    lang === "ja"
+      ? `<a href="${REL.cite.ja}"${dual(T.en.citeLinkText)}>${escapeHTML(T.ja.citeLinkText)}</a>`
+      : `<a href="${REL.cite.en}">${escapeHTML(T.en.citeLinkText)}</a>`;
+
+  return `
+  <section class="data-section">
+    <details class="data-details">
+      ${summary}
+
+${bojVintagesTable(d, lang)}
+
+      ${roundNote}
+      <p class="chart-note mono">${csvLabel}<a href="/data/boj_outlook_vintages.csv">/data/boj_outlook_vintages.csv</a> · ${citeLink}</p>
+    </details>
+  </section>
+  `;
+}
+
+function bojVintagesJsonLd(d, lang = "ja") {
+  const url = abs(REL.bojVintages[lang]);
+  return `
+<script type="application/ld+json">
+${JSON.stringify(
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "@id": `${url}#dataset`,
+    name:
+      lang === "en"
+        ? "BOJ Outlook Report — real GDP and CPI forecast by issue"
+        : "日銀展望レポート｜号ごとの実質GDP・消費者物価見通し",
+    description: BOJV.T[lang].desc,
+    url,
+    isAccessibleForFree: true,
+    license: CC_BY_4,
+    inLanguage: lang,
+    temporalCoverage: `${d.fyMin}/${d.fyMax}`,
+    creator: orgNode(),
+    // fertility/births と違い、トップの card-grid にこのページへのリンクは
+    // 無い(/chart/boj-outlook-real・/chart/boj-outlook-cpiの詳細版という位置
+    // づけで、単独の指標カードにはしていない)。よってbuildHomeJsonLdの10件
+    // カタログには含めない(includedInDataCatalogを持たせない。fertilityJsonLd
+    // 直上のコメントの逆側の帰結)。
+    variableMeasured:
+      lang === "en"
+        ? [
+            { "@type": "PropertyValue", name: "Real GDP forecast (Policy Board median)", unitText: "percent" },
+            { "@type": "PropertyValue", name: "CPI forecast (Policy Board median)", unitText: "percent" },
+          ]
+        : [
+            { "@type": "PropertyValue", name: "実質GDP見通し(大勢見通し中央値)", unitText: "percent" },
+            { "@type": "PropertyValue", name: "消費者物価見通し(大勢見通し中央値)", unitText: "percent" },
+          ],
+    distribution: [
+      { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/boj_outlook_vintages.csv` },
+      { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/boj_outlook_real.csv` },
+      { "@type": "DataDownload", encodingFormat: "text/csv", contentUrl: `${SITE}/data/boj_outlook_cpi.csv` },
+    ],
+  },
+  null,
+  2
+)}
+</script>
+`;
+}
+
+function bojVintagesScopeNote(lang) {
+  return escapeHTML(BOJV.T[lang].scopeNote);
+}
+
+function buildBojVintages() {
+  const d = bojVintagesData();
+  let html = read("boj-outlook-vintages.html");
+  html = injectRegion(html, "jsonld", bojVintagesJsonLd(d, "ja"), "boj-outlook-vintages.html");
+  html = injectRegion(html, "scope", bojVintagesScopeNote("ja"), "boj-outlook-vintages.html");
+  html = injectRegion(html, "table", bojVintagesSection(d, "ja"), "boj-outlook-vintages.html");
+  return html;
+}
+
+// /en/boj-outlook-vintages.html は元ファイルが存在しないので丸ごと組み立てる
+// (buildFertilityEn/buildBirthsEnと同じ方針)。
+function buildBojVintagesEn() {
+  const d = bojVintagesData();
+  const t = BOJV.T.en;
+  const urls = REL.bojVintages;
+  const url = abs(urls.en);
+  const title = `${t.title} — zurekei`;
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeHTML(title)}</title>
+<meta name="description" content="${escapeHTML(t.desc)}">
+<link rel="canonical" href="${url}">
+${hreflangTags(urls)}
+<meta property="og:site_name" content="zurekei">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${escapeHTML(title)}">
+<meta property="og:description" content="${escapeHTML(t.desc)}">
+<meta property="og:url" content="${url}">
+<meta property="og:image" content="${SITE}/assets/og-en.png">
+<meta property="og:image:width" content="2400">
+<meta property="og:image:height" content="1260">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+<noscript><style>.chart-wrap > svg, .bojv-legend { display: none !important; } .chart-noscript { display: block; }</style></noscript>
+${bojVintagesJsonLd(d, "en")}</head>
+<body>
+<div class="page">
+${header("en", urls)}
+
+  <a class="chart-back" id="t-back" href="${REL.home.en}">${escapeHTML(t.back)}</a>
+
+  <main>
+    <section class="chart-section">
+      <h1 class="chart-title" id="bojv-title">${escapeHTML(t.title)}</h1>
+      <p class="chart-desc" id="bojv-desc">${escapeHTML(t.desc)}</p>
+      <p class="chart-note mono" id="bojv-scope-note">${bojVintagesScopeNote("en")}</p>
+
+      <p class="chart-note mono"><a href="${REL.chartHub.en}boj-outlook-real">${escapeHTML(t.seeAlsoReal)}</a></p>
+      <h2 class="chart-title" style="font-size:1.1rem;margin-top:28px">${escapeHTML(t.sectionTitleReal)}</h2>
+      <div class="chart-wrap">
+        <svg id="boj-vintages-chart-real" viewBox="0 0 960 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHTML(t.chartAriaLabelReal)}"></svg>
+        <p class="chart-noscript mono">${escapeHTML(t.chartNoscript)}</p>
+      </div>
+      <div class="fertility-legend bojv-legend" id="boj-vintages-legend-real"></div>
+
+      <p class="chart-note mono"><a href="${REL.chartHub.en}boj-outlook-cpi">${escapeHTML(t.seeAlsoCpi)}</a></p>
+      <h2 class="chart-title" style="font-size:1.1rem;margin-top:28px">${escapeHTML(t.sectionTitleCpi)}</h2>
+      <div class="chart-wrap">
+        <svg id="boj-vintages-chart-cpi" viewBox="0 0 960 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHTML(t.chartAriaLabelCpi)}"></svg>
+        <p class="chart-noscript mono">${escapeHTML(t.chartNoscript)}</p>
+      </div>
+      <div class="fertility-legend bojv-legend" id="boj-vintages-legend-cpi"></div>
+    </section>
+
+${bojVintagesSection(d, "en")}
+  </main>
+
+  <footer class="site-footer-row">
+    <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
+    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
+    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
+  </footer>
+</div>
+<script src="/csv.js?v=${ASSET_V}"></script>
+<script src="/boj-outlook-vintages.js?v=${ASSET_V}"></script>
+</body>
+</html>
+`;
+}
+
 /* ── 見直し条項 ─────────────────────────────────────────── */
 
 const HOAN = loadModule("hoan.js", ["T", "STATUS", "NOTE_LABEL", "lawNumEn", "transLinkHtml", "TENTATIVE"]);
@@ -2885,10 +3144,15 @@ function sitemapEntries(keys, files) {
       ...metricEntries,
       { loc: `${SITE}/fertility`, priority: "0.9", date: genDate(path.join(SITE_DIR, "fertility.html")) },
       { loc: `${SITE}/births`, priority: "0.9", date: genDate(path.join(SITE_DIR, "births.html")) },
+      // boj-outlook-vintages は /chart/boj-outlook-real・/chart/boj-outlook-cpi の
+      // 詳細版(号ごとの生データ)であって単独の指標カードではないため、優先度は
+      // hoan と同じ0.8(fertility/births/指標本体より低い)。
+      { loc: `${SITE}/boj-outlook-vintages`, priority: "0.8", date: genDate(path.join(SITE_DIR, "boj-outlook-vintages.html")) },
       { loc: `${SITE}/hoan`, priority: "0.8", date: genDate(path.join(SITE_DIR, "hoan.html")) },
       ...enMetricEntries,
       { loc: `${SITE}/en/fertility`, priority: "0.9", date: genDate(path.join(EN_DIR, "fertility.html")) },
       { loc: `${SITE}/en/births`, priority: "0.9", date: genDate(path.join(EN_DIR, "births.html")) },
+      { loc: `${SITE}/en/boj-outlook-vintages`, priority: "0.8", date: genDate(path.join(EN_DIR, "boj-outlook-vintages.html")) },
       { loc: `${SITE}/en/hoan`, priority: "0.8", date: genDate(path.join(EN_DIR, "hoan.html")) },
     ],
     static: [
@@ -3872,6 +4136,44 @@ const CSV_COLUMNS = {
     actual_source_url: "text",
     notes: "text",
   },
+  // 展望レポートの段階2: 4月号だけに絞らない全号(2000-10〜2026-07、74号)の
+  // 大勢見通しを収録した生データ。boj_outlook_real/cpi.csv(段階1)が「年度ごとに
+  // 1つの値」を切り出しているのに対し、こちらは「1つの年度がどう見通されて
+  // きたか」を issue(号)ごとに並べる側。/boj-outlook-vintages ページの収束図・
+  // 表が読む。
+  //
+  // issue_kind: "main"(その号が新規に示した見通し) / "restated"(前号時点の
+  // 見通しを当号の文中で再掲した値。restated_fromに再掲元の号)。restated行は
+  // 当号時点の政策委員の見通しではなく、必ずしも当時と同じ前提で書き直されて
+  // いる可能性があるため、「その時点で公表されていた値」としては使わない
+  // (収束図・表はissue_kind=="main"のみを描く。restated行はCSVには残すが
+  // 表示側でフィルタする)。
+  //
+  // real_median/cpi_median が空欄になる号: 2000-10〜2002-10(中央値非公表の
+  // 時期)、および2020-04号(新型コロナの不確実性拡大を理由に号全体で中央値
+  // 公表を見送り。原資料の注記による)。
+  //
+  // cpi_extax_* は消費税調整後の値だが、期間によって定義が違う(2014年度分
+  // までは消費税率引き上げの直接影響を除いたもの、以降は「コアコア」
+  // (生鮮食品・エネルギーを除く)を指す号がある)。同一列として扱っているが
+  // 意味的に連続していないので、跨いで比較しないこと。
+  "boj_outlook_vintages.csv": {
+    issue: "text", // YYYY-MM(号の公表月)
+    issue_kind: "text", // main / restated
+    restated_from: "text", // issue_kind=="restated"の時のみ、再掲元の号
+    target_fiscal_year: "number",
+    real_low: "number",
+    real_high: "number",
+    real_median: "number",
+    cpi_low: "number",
+    cpi_high: "number",
+    cpi_median: "number",
+    cpi_extax_low: "number",
+    cpi_extax_high: "number",
+    cpi_extax_median: "number",
+    source_url: "text",
+    notes: "text",
+  },
   // データ行0のヘッダのみのファイル。行が無くても列の分類は要る
   // (--check がここで誤爆しないことは実行結果自体が確認になる)。
   "births_actual.csv": {
@@ -4613,6 +4915,7 @@ for (const k of keys) files.set(path.join(OUT_DIR, `${k}.html`), buildPage(k, ME
 files.set(path.join(OUT_DIR, "index.html"), buildIndex(keys, "ja"));
 files.set(path.join(SITE_DIR, "fertility.html"), buildFertility());
 files.set(path.join(SITE_DIR, "births.html"), buildBirths());
+files.set(path.join(SITE_DIR, "boj-outlook-vintages.html"), buildBojVintages());
 files.set(path.join(SITE_DIR, "hoan.html"), buildHoan());
 files.set(path.join(SITE_DIR, "corrections.html"), buildCorrections());
 files.set(path.join(SITE_DIR, "index.html"), buildHome(keys));
@@ -4623,6 +4926,7 @@ for (const k of keys) files.set(path.join(EN_OUT_DIR, `${k}.html`), buildPage(k,
 files.set(path.join(EN_OUT_DIR, "index.html"), buildIndex(keys, "en"));
 files.set(path.join(EN_DIR, "fertility.html"), buildFertilityEn());
 files.set(path.join(EN_DIR, "births.html"), buildBirthsEn());
+files.set(path.join(EN_DIR, "boj-outlook-vintages.html"), buildBojVintagesEn());
 files.set(path.join(EN_DIR, "hoan.html"), buildHoanEn());
 files.set(path.join(EN_DIR, "index.html"), buildHomeEn(keys));
 files.set(path.join(EN_DIR, "about.html"), buildAboutEn());

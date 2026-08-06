@@ -1,0 +1,407 @@
+issue,issue_kind,restated_from,target_fiscal_year,real_low,real_high,real_median,cpi_low,cpi_high,cpi_median,cpi_extax_low,cpi_extax_high,cpi_extax_median,source_url,notes
+2000-10,main,,2000,1.9,2.3,,-0.4,-0.2,,,,,https://www.boj.or.jp/mopo/outlook/gor0010.htm,実HTML表(実テキスト、画像でない)を直接確認。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。当号が展望レポートの第1回のため再掲行なし。中央値表示なし(この号は中央値非公表)。
+2001-04,main,,2001,0.3,0.8,,-0.8,-0.4,,,,,https://www.boj.or.jp/mopo/outlook/gor0104.htm,実HTML表(実テキスト、画像でない)を直接確認。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。再掲行なし(本文に前回時点比較の記載なし)。中央値表示なし。
+2001-10,main,,2001,-1.2,-0.9,,-1.1,-1.0,,,,,https://www.boj.or.jp/mopo/outlook/gor0110.htm,実HTML表(実テキスト、画像でない)を直接確認。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。中央値表示なし。
+2001-10,main,,2002,-1.1,0.1,,-1.3,-0.9,,,,,https://www.boj.or.jp/mopo/outlook/gor0110.htm,実HTML表(実テキスト、画像でない)を直接確認。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。新規追加年度。中央値表示なし。
+2001-10,restated,2001-04,2001,0.3,0.8,,-0.8,-0.4,,,,,https://www.boj.or.jp/mopo/outlook/gor0110.htm,実HTML表(実テキスト、画像でない)を直接確認。2001年10月号本文中「（　）内は4月時点」再掲。2001年4月号(gor0104.htm)本文の主見通しと一致(相互検算済み)。中央値表示なし。
+2002-04,main,,2002,-0.5,0.1,,-1.0,-0.8,,,,,https://www.boj.or.jp/mopo/outlook/gor0204.htm,実HTML表(実テキスト、画像でない)を直接確認。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。中央値表示なし。
+2002-04,restated,2001-10,2002,-1.1,0.1,,-1.3,-0.9,,,,,https://www.boj.or.jp/mopo/outlook/gor0204.htm,実HTML表(実テキスト、画像でない)を直接確認。2002年4月号本文中「（　）内は昨年10月時点」再掲。2001年10月号(gor0110.htm)の主見通しと一致(相互検算済み)。中央値表示なし。
+2002-10,main,,2002,0.2,0.5,,-0.9,-0.7,,,,,https://www.boj.or.jp/mopo/outlook/gor0210.htm,実HTML表(実テキスト、画像でない)を直接確認。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。gor0210.htmは実HTML表(画像でない)。中央値表示なし。
+2002-10,main,,2003,0.4,1.0,,-0.6,-0.4,,,,,https://www.boj.or.jp/mopo/outlook/gor0210.htm,実HTML表(実テキスト、画像でない)を直接確認。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。新規追加年度。中央値表示なし。
+2002-10,restated,2002-04,2002,-0.5,0.1,,-1.0,-0.8,,,,,https://www.boj.or.jp/mopo/outlook/gor0210.htm,実HTML表(実テキスト、画像でない)を直接確認。2002年10月号本文中「（　）内は4月時点」再掲。2002年4月号の主見通しと一致(相互検算済み)。中央値表示なし。
+2003-04,main,,2003,0.8,1.1,1.0,-0.5,-0.4,-0.4,,,,https://www.boj.or.jp/mopo/outlook/gor0304.htm,実HTML表(実テキスト、画像でない)を直接確認。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。本号から中央値の公表を開始(本文に明記)。
+2003-04,restated,2002-10,2002,0.2,0.5,,-0.9,-0.7,,,,,https://www.boj.or.jp/mopo/outlook/gor0304.htm,実HTML表(実テキスト、画像でない)を直接確認。「▽昨年10月の...政策委員の大勢見通し(2002年度)と実績見込み」表の「10月時点見通し」行。2002年10月号の主見通しと一致(相互検算済み)。同表内の「実績」または「実績見込み」行は見通しではないため非収録。(実質GDP+1.8%、CPI-0.8%は非収録)。中央値表示なし。
+2003-10,main,,2003,2.3,2.6,2.4,-0.3,-0.1,-0.2,,,,https://www.boj.or.jp/mopo/outlook/gor0310.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2003-10,main,,2004,2.3,2.6,2.5,-0.5,-0.2,-0.3,,,,https://www.boj.or.jp/mopo/outlook/gor0310.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。新規追加年度。
+2003-10,restated,2003-04,2003,0.8,1.1,1.0,-0.5,-0.4,-0.4,,,,https://www.boj.or.jp/mopo/outlook/gor0310.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「４月時点の見通し」行。2003年4月号の主見通しと一致(相互検算済み)。
+2004-04,main,,2004,3.0,3.2,3.1,-0.2,-0.1,-0.2,,,,https://www.boj.or.jp/mopo/outlook/gor0404.htm,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。htm版(gor0404.htm)は表がGIF画像(gor0404a.gif/b.gif)のため、全文PDF(data/gor0404.pdf)の実テキスト表を用いた。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2004-04,restated,2003-10,2003,2.3,2.6,,-0.3,-0.1,,,,,https://www.boj.or.jp/mopo/outlook/gor0404.htm,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。「▽2003年度の政策委員の大勢見通しと実績見込み」表の「10月時点見通し」行。2003年10月号の主見通しと一致(相互検算済み)。同表内の「実績」または「実績見込み」行は見通しではないため非収録。(実質GDP+2.8%、CPI-0.2%は非収録)。再掲時は中央値非表示(原本の2003年10月号自体には中央値<+2.4>/<-0.2>が存在するが、本号での再掲表示に中央値なし)。
+2004-04,restated,2003-10,2004,2.3,2.6,2.5,-0.5,-0.2,-0.3,,,,https://www.boj.or.jp/mopo/outlook/gor0404.htm,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。「2004年度の政策委員の大勢見通し」表内の括弧書き(昨年10月時点)行。2003年10月号の主見通しと一致(相互検算済み)。
+2004-10,main,,2004,3.4,3.7,3.6,-0.2,-0.1,-0.2,,,,https://www.boj.or.jp/mopo/outlook/gor0410.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。htm版は表がGIF画像(gor0410a.gif/b.gif)のため全文PDFの実テキスト表を使用。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2004-10,main,,2005,2.2,2.6,2.5,-0.1,0.2,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor0410.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。新規追加年度。
+2004-10,restated,2004-04,2004,3.0,3.2,3.1,-0.2,-0.1,-0.2,,,,https://www.boj.or.jp/mopo/outlook/gor0410.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「４月時点の見通し」行。2004年4月号の主見通しと一致(相互検算済み)。
+2005-04,main,,2005,1.2,1.6,1.3,-0.1,0.1,-0.1,,,,https://www.boj.or.jp/mopo/outlook/gor0504.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。htm版は表がGIF画像のため全文PDFの実テキスト表を使用。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2005-04,main,,2006,1.3,1.7,1.6,0.2,0.4,0.3,,,,https://www.boj.or.jp/mopo/outlook/gor0504.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。新規追加年度。
+2005-04,restated,2004-10,2004,3.4,3.7,3.6,-0.2,-0.1,-0.2,,,,https://www.boj.or.jp/mopo/outlook/gor0504.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「▽2004年度の政策委員の大勢見通しと実績見込み」表の「10月時点の見通し」行。2004年10月号の主見通しと一致(相互検算済み)。同表内の「実績」または「実績見込み」行は見通しではないため非収録。(実質GDP+1.6%、CPI-0.2%は非収録)。
+2005-04,restated,2004-10,2005,2.2,2.6,2.5,-0.1,0.2,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor0504.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「10月時点の見通し」行。2004年10月号の主見通しと一致(相互検算済み)。
+2005-10,main,,2005,2.2,2.5,2.2,0.0,0.1,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor0510.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。htm版は表がGIF画像のため全文PDFの実テキスト表を使用。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2005-10,main,,2006,1.6,2.2,1.8,0.4,0.6,0.5,,,,https://www.boj.or.jp/mopo/outlook/gor0510.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。
+2005-10,restated,2005-04,2005,1.2,1.6,1.3,-0.1,0.1,-0.1,,,,https://www.boj.or.jp/mopo/outlook/gor0510.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「４月時点の見通し」行。2005年4月号の主見通しと一致(相互検算済み)。
+2005-10,restated,2005-04,2006,1.3,1.7,1.6,0.2,0.4,0.3,,,,https://www.boj.or.jp/mopo/outlook/gor0510.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「４月時点の見通し」行。2005年4月号の主見通しと一致(相互検算済み)。
+2006-04,main,,2006,2.1,3.0,2.4,0.6,0.6,0.6,,,,https://www.boj.or.jp/mopo/outlook/gor0604.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。htm版は表がGIF画像のため全文PDFの実テキスト表を使用。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。CPIは範囲の幅がゼロ(上下限とも+0.6)。
+2006-04,main,,2007,1.8,2.4,2.0,0.7,0.9,0.8,,,,https://www.boj.or.jp/mopo/outlook/gor0604.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。新規追加年度。
+2006-04,restated,2005-10,2005,2.2,2.5,2.2,0.0,0.1,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor0604.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「▽2005年度の政策委員の大勢見通しと実績見込み」表の「10月時点の見通し」行。2005年10月号の主見通しと一致(相互検算済み)。同表内の「実績」または「実績見込み」行は見通しではないため非収録。(実質GDP+3.2%、CPI+0.1%は非収録)。
+2006-04,restated,2005-10,2006,1.6,2.2,1.8,0.4,0.6,0.5,,,,https://www.boj.or.jp/mopo/outlook/gor0604.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「10月時点の見通し」行。2005年10月号の主見通しと一致(相互検算済み)。
+2006-10,main,,2006,2.3,2.5,2.4,0.2,0.3,0.3,,,,https://www.boj.or.jp/mopo/outlook/gor0610.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。htm版は表がGIF画像のため全文PDFの実テキスト表を使用。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2006-10,main,,2007,1.9,2.4,2.1,0.4,0.5,0.5,,,,https://www.boj.or.jp/mopo/outlook/gor0610.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。
+2006-10,restated,2006-04,2006,2.1,3.0,2.4,0.6,0.6,0.6,,,,https://www.boj.or.jp/mopo/outlook/gor0610.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「４月時点の見通し」行。2006年4月号の主見通しと一致(相互検算済み)。
+2006-10,restated,2006-04,2007,1.8,2.4,2.0,0.7,0.9,0.8,,,,https://www.boj.or.jp/mopo/outlook/gor0610.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「４月時点の見通し」行。2006年4月号の主見通しと一致(相互検算済み)。
+2007-04,main,,2007,2.0,2.1,2.1,0.0,0.2,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor0704.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。htm版は表がGIF画像のため全文PDFの実テキスト表を使用。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2007-04,main,,2008,2.0,2.3,2.1,0.4,0.6,0.5,,,,https://www.boj.or.jp/mopo/outlook/gor0704.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。新規追加年度。
+2007-04,restated,2006-10,2006,2.3,2.5,2.4,0.2,0.3,0.3,,,,https://www.boj.or.jp/mopo/outlook/gor0704.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「▽2006年度の政策委員の大勢見通しと実績」表の「10月時点の見通し」行。2006年10月号の主見通しと一致(相互検算済み)。同表内の「実績」または「実績見込み」行は見通しではないため非収録。(実質GDP+2.1%、CPI+0.1%は非収録)。
+2007-04,restated,2006-10,2007,1.9,2.4,2.1,0.4,0.5,0.5,,,,https://www.boj.or.jp/mopo/outlook/gor0704.htm,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。「10月時点の見通し」行。2006年10月号の主見通しと一致(相互検算済み)。
+2007-10,main,,2007,1.7,1.8,1.8,0.0,0.1,0.0,,,,https://www.boj.or.jp/mopo/outlook/gor0710.htm,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。htm版は表がGIF画像のため全文PDFの実テキスト表を使用。画像で再確認済み。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2007-10,main,,2008,1.9,2.3,2.1,0.2,0.4,0.4,,,,https://www.boj.or.jp/mopo/outlook/gor0710.htm,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。
+2007-10,restated,2007-04,2007,2.0,2.1,2.1,0.0,0.2,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor0710.htm,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。「４月時点の見通し」行。2007年4月号の主見通しと一致(相互検算済み)。
+2007-10,restated,2007-04,2008,2.0,2.3,2.1,0.4,0.6,0.5,,,,https://www.boj.or.jp/mopo/outlook/gor0710.htm,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。「４月時点の見通し」行。2007年4月号の主見通しと一致(相互検算済み)。
+2008-04,main,,2008,1.4,1.6,1.5,0.9,1.1,1.1,,,,https://www.boj.or.jp/mopo/outlook/gor0804a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p10)。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2008-04,main,,2009,1.6,1.8,1.7,0.8,1.0,1.0,,,,https://www.boj.or.jp/mopo/outlook/gor0804a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p10)。新規追加年度。
+2008-04,restated,2007-10,2007,1.7,1.8,1.8,0.0,0.1,0.0,,,,https://www.boj.or.jp/mopo/outlook/gor0804a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p10)。「▽2007年度の政策委員の大勢見通しと実績」表の「10月時点の見通し」行。2007年10月号の主見通しと一致(相互検算済み)。同表内の「実績」または「実績見込み」行は見通しではないため非収録。(実質GDP+1.6%、CPI+0.3%は非収録)。
+2008-04,restated,2007-10,2008,1.9,2.3,2.1,0.2,0.4,0.4,,,,https://www.boj.or.jp/mopo/outlook/gor0804a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p10)。2007年10月号の主見通しと一致(相互検算済み)。
+2008-10,main,,2008,0.1,0.2,0.1,1.5,1.6,1.6,,,,https://www.boj.or.jp/mopo/outlook/gor0810a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p10)。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2008-10,main,,2009,0.3,0.7,0.6,-0.2,0.2,0.0,,,,https://www.boj.or.jp/mopo/outlook/gor0810a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p10)。
+2008-10,main,,2010,1.5,1.9,1.7,0.1,0.5,0.3,,,,https://www.boj.or.jp/mopo/outlook/gor0810a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p10)。新規追加年度。
+2008-10,restated,2008-07,2008,1.2,1.4,1.2,1.7,1.9,1.8,,,,https://www.boj.or.jp/mopo/outlook/gor0810a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p10)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2008-10,restated,2008-07,2009,1.4,1.6,1.5,1.0,1.2,1.1,,,,https://www.boj.or.jp/mopo/outlook/gor0810a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p10)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2009-04,main,,2008,-3.2,-3.1,-3.2,1.2,1.2,,,,,https://www.boj.or.jp/mopo/outlook/gor0904a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p11)。CPIは単一値+1.2%(3月の前年同期比が2月と同じと仮定した計算値。中央値表示なし)。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2009-04,main,,2009,-3.7,-3.0,-3.1,-1.6,-1.4,-1.5,,,,https://www.boj.or.jp/mopo/outlook/gor0904a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p11)。
+2009-04,main,,2010,0.8,1.5,1.2,-1.1,-0.8,-1.0,,,,https://www.boj.or.jp/mopo/outlook/gor0904a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p11)。新規追加年度。
+2009-04,restated,2009-01,2008,-2.0,-1.7,-1.8,1.1,1.2,1.2,,,,https://www.boj.or.jp/mopo/outlook/gor0904a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p11)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2009-04,restated,2009-01,2009,-2.5,-1.9,-2.0,-1.2,-0.9,-1.1,,,,https://www.boj.or.jp/mopo/outlook/gor0904a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p11)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2009-04,restated,2009-01,2010,1.3,1.8,1.5,-0.6,0.0,-0.4,,,,https://www.boj.or.jp/mopo/outlook/gor0904a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p11)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2009-10,main,,2009,-3.3,-3.2,-3.2,-1.5,-1.5,-1.5,,,,https://www.boj.or.jp/mopo/outlook/gor0910a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p11)。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2009-10,main,,2010,0.8,1.3,1.2,-0.9,-0.7,-0.8,,,,https://www.boj.or.jp/mopo/outlook/gor0910a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p11)。
+2009-10,main,,2011,1.6,2.4,2.1,-0.7,-0.4,-0.4,,,,https://www.boj.or.jp/mopo/outlook/gor0910a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p11)。新規追加年度。
+2009-10,restated,2009-07,2009,-3.7,-3.0,-3.4,-1.5,-1.2,-1.3,,,,https://www.boj.or.jp/mopo/outlook/gor0910a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p11)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2009-10,restated,2009-07,2010,0.6,1.1,1.0,-1.2,-0.7,-1.0,,,,https://www.boj.or.jp/mopo/outlook/gor0910a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p11)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2010-04,main,,2009,-2.2,-2.1,-2.2,,,,,,,https://www.boj.or.jp/mopo/outlook/gor1004a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p11)。注3により2009年度の国内企業物価指数・消費者物価指数は実績値のため非収録(実質GDPのみ政策委員見通し)。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2010-04,main,,2010,1.6,2.0,1.8,-0.5,-0.2,-0.5,,,,https://www.boj.or.jp/mopo/outlook/gor1004a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p11)。注4:高校授業料無償化の影響(CPI前年比を約-0.5%pt押し下げ)を除いたベース。
+2010-04,main,,2011,2.0,2.2,2.0,-0.1,0.2,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor1004a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p11)。新規追加年度。
+2010-04,restated,2010-01,2009,-2.5,-2.5,-2.5,-1.5,-1.5,-1.5,,,,https://www.boj.or.jp/mopo/outlook/gor1004a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p11)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2010-04,restated,2010-01,2010,1.2,1.4,1.3,-0.6,-0.5,-0.5,,,,https://www.boj.or.jp/mopo/outlook/gor1004a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p11)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2010-04,restated,2010-01,2011,1.7,2.4,2.1,-0.3,-0.1,-0.2,,,,https://www.boj.or.jp/mopo/outlook/gor1004a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p11)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2010-10,main,,2010,2.0,2.3,2.1,-0.5,-0.3,-0.4,,,,https://www.boj.or.jp/mopo/outlook/gor1010a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p14)。注3:高校授業料無償化の影響を除いたベース。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2010-10,main,,2011,1.5,1.9,1.8,0.0,0.3,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor1010a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p14)。
+2010-10,main,,2012,2.0,2.4,2.1,0.2,0.8,0.6,,,,https://www.boj.or.jp/mopo/outlook/gor1010a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p14)。新規追加年度。
+2010-10,restated,2010-07,2010,2.5,2.7,2.6,-0.5,-0.2,-0.4,,,,https://www.boj.or.jp/mopo/outlook/gor1010a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p14)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2010-10,restated,2010-07,2011,1.8,2.1,1.9,0.0,0.2,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor1010a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p14)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2011-04,main,,2010,2.8,2.8,2.8,,,,,,,https://www.boj.or.jp/mopo/outlook/gor1104a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p16)。注3により2010年度の国内企業物価指数・消費者物価指数は実績値のため非収録(実質GDPのみ政策委員見通し)。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2011-04,main,,2011,0.5,0.9,0.6,0.5,0.8,0.7,,,,https://www.boj.or.jp/mopo/outlook/gor1104a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p16)。
+2011-04,main,,2012,2.7,3.0,2.9,0.5,0.7,0.7,,,,https://www.boj.or.jp/mopo/outlook/gor1104a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p16)。新規追加年度。
+2011-04,restated,2011-01,2010,3.3,3.4,3.3,-0.4,-0.3,-0.3,,,,https://www.boj.or.jp/mopo/outlook/gor1104a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p16)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2011-04,restated,2011-01,2011,1.4,1.7,1.6,0.0,0.4,0.3,,,,https://www.boj.or.jp/mopo/outlook/gor1104a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p16)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2011-04,restated,2011-01,2012,1.9,2.2,2.0,0.2,0.8,0.6,,,,https://www.boj.or.jp/mopo/outlook/gor1104a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p16)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2011-10,main,,2011,0.2,0.4,0.3,0.0,0.0,0.0,,,,https://www.boj.or.jp/mopo/outlook/gor1110a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p16)。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2011-10,main,,2012,2.1,2.4,2.2,0.0,0.2,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor1110a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p16)。
+2011-10,main,,2013,1.3,1.6,1.5,0.4,0.6,0.5,,,,https://www.boj.or.jp/mopo/outlook/gor1110a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p16)。新規追加年度。
+2011-10,restated,2011-07,2011,0.2,0.6,0.4,0.6,0.8,0.7,,,,https://www.boj.or.jp/mopo/outlook/gor1110a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p16)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2011-10,restated,2011-07,2012,2.5,3.0,2.9,0.6,0.7,0.7,,,,https://www.boj.or.jp/mopo/outlook/gor1110a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p16)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2012-04,main,,2011,-0.2,-0.2,-0.2,,,,,,,https://www.boj.or.jp/mopo/outlook/gor1204a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p16)。注3により2011年度の国内企業物価指数・消費者物価指数は実績値のため非収録(実質GDPのみ政策委員見通し)。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。
+2012-04,main,,2012,2.1,2.4,2.3,0.1,0.4,0.3,,,,https://www.boj.or.jp/mopo/outlook/gor1204a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p16)。
+2012-04,main,,2013,1.6,1.8,1.7,0.5,0.7,0.7,,,,https://www.boj.or.jp/mopo/outlook/gor1204a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p16)。新規追加年度。
+2012-04,restated,2012-01,2011,-0.4,-0.3,-0.4,-0.1,0.0,-0.1,,,,https://www.boj.or.jp/mopo/outlook/gor1204a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p16)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2012-04,restated,2012-01,2012,1.8,2.1,2.0,0.0,0.2,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor1204a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p16)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2012-04,restated,2012-01,2013,1.4,1.7,1.6,0.4,0.5,0.5,,,,https://www.boj.or.jp/mopo/outlook/gor1204a.pdf,背景説明を含む全文PDF(data/gorXXXX.pdf)のpdftotext -layout抽出を、同一号のhtm版(基本的見解)の実HTML表と突き合わせて確認。両者一致。PDF該当ページ(p16)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2012-10,main,,2012,1.4,1.6,1.5,-0.1,-0.1,-0.1,,,,https://www.boj.or.jp/mopo/outlook/gor1210a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p18)。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。本号よりWPI(国内企業物価指数)列は削除され表は実質GDP・CPIの2本立てに変更(消費税率引き上げの影響を除くケース列がFY2014のみ新設)。
+2012-10,main,,2013,1.3,1.8,1.6,0.2,0.6,0.4,,,,https://www.boj.or.jp/mopo/outlook/gor1210a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p18)。
+2012-10,main,,2014,0.2,0.7,0.6,2.4,3.0,2.8,0.4,1.0,0.8,https://www.boj.or.jp/mopo/outlook/gor1210a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p18)。新規追加年度。消費税率引き上げ(2014年4月8%/2015年10月10%)を織り込み。cpi列は「消費者物価指数(除く生鮮食品)」欄(引き上げの影響を含む、注4)、cpi_extax列は「消費税率引き上げの影響を除くケース」欄(注3、政策委員自身の作成ベース)。実質GDPには引き上げ影響を除くケースの記載なし(表内は斜線)。
+2012-10,restated,2012-07,2012,2.2,2.4,2.2,0.1,0.3,0.2,,,,https://www.boj.or.jp/mopo/outlook/gor1210a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p18)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2012-10,restated,2012-07,2013,1.6,1.8,1.7,0.5,0.7,0.7,,,,https://www.boj.or.jp/mopo/outlook/gor1210a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p18)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2013-04,main,,2012,1.0,1.0,1.0,-0.2,-0.2,,,,,https://www.boj.or.jp/mopo/outlook/gor1304a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p7)。CPIは単一値-0.2%(中央値表示なし)。「国内卸売物価指数」列(2002年度以前)/「国内企業物価指数」列(2003年度以降)は本スキーマ対象外のため除外。本号よりWPI列なし。
+2013-04,main,,2013,2.4,3.0,2.9,0.4,0.8,0.7,,,,https://www.boj.or.jp/mopo/outlook/gor1304a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p7)。2013年度は消費税率引き上げの対象外のため除くケース列は該当なし(表内斜線)。
+2013-04,main,,2014,1.0,1.5,1.4,2.7,3.6,3.4,0.7,1.6,1.4,https://www.boj.or.jp/mopo/outlook/gor1304a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p7)。消費税率8%への引き上げ(2014年4月)の影響を含む。cpi列=「消費者物価指数(除く生鮮食品)」欄、cpi_extax列=「消費税率引き上げの影響を除くケース」欄。
+2013-04,main,,2015,1.4,1.9,1.6,1.6,2.9,2.6,0.9,2.2,1.9,https://www.boj.or.jp/mopo/outlook/gor1304a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p7)。新規追加年度。消費税率10%への引き上げ(2015年10月予定)の影響を含む。【前回収集での既知の誤りを修正】cpi_median(消費者物価指数(除く生鮮食品)欄の中央値)は表の中列<+2.6>であり、右列「消費税率引き上げの影響を除くケース」欄の中央値<+1.9>ではない。pdftoppm -r 200 -pngで当該ページを画像化し、3列(実質GDP/消費者物価指数(除く生鮮食品)/消費税率引き上げの影響を除くケース)の位置関係を目視で確認したうえで採用。
+2013-04,restated,2013-01,2012,1.0,1.1,1.0,-0.2,-0.1,-0.2,,,,https://www.boj.or.jp/mopo/outlook/gor1304a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p7)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2013-04,restated,2013-01,2013,1.9,2.5,2.3,0.3,0.6,0.4,,,,https://www.boj.or.jp/mopo/outlook/gor1304a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p7)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2013-04,restated,2013-01,2014,0.6,1.0,0.8,2.5,3.0,2.9,0.5,1.0,0.9,https://www.boj.or.jp/mopo/outlook/gor1304a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p7)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2013-10,main,,2013,2.6,3.0,2.7,0.6,1.0,0.7,,,,https://www.boj.or.jp/mopo/outlook/gor1310a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p8)。
+2013-10,main,,2014,0.9,1.5,1.5,2.8,3.6,3.3,0.8,1.6,1.3,https://www.boj.or.jp/mopo/outlook/gor1310a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p8)。
+2013-10,main,,2015,1.3,1.8,1.5,1.6,2.9,2.6,0.9,2.2,1.9,https://www.boj.or.jp/mopo/outlook/gor1310a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p8)。
+2013-10,restated,2013-07,2013,2.5,3.0,2.8,0.5,0.8,0.6,,,,https://www.boj.or.jp/mopo/outlook/gor1310a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p8)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2013-10,restated,2013-07,2014,0.8,1.5,1.3,2.7,3.6,3.3,0.7,1.6,1.3,https://www.boj.or.jp/mopo/outlook/gor1310a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p8)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2013-10,restated,2013-07,2015,1.3,1.9,1.5,1.6,2.9,2.6,0.9,2.2,1.9,https://www.boj.or.jp/mopo/outlook/gor1310a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p8)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2014-04,main,,2013,2.2,2.3,2.2,0.8,0.8,,,,,https://www.boj.or.jp/mopo/outlook/gor1404a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。CPIは単一値+0.8%(中央値表示なし)。
+2014-04,main,,2014,0.8,1.3,1.1,3.0,3.5,3.3,1.0,1.5,1.3,https://www.boj.or.jp/mopo/outlook/gor1404a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。2014年4月の消費税率8%引き上げの影響を含む。
+2014-04,main,,2015,1.2,1.5,1.5,1.9,2.8,2.6,1.2,2.1,1.9,https://www.boj.or.jp/mopo/outlook/gor1404a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。2015年10月予定の消費税率10%引き上げの影響を含む。
+2014-04,main,,2016,1.0,1.5,1.3,2.0,3.0,2.8,1.3,2.3,2.1,https://www.boj.or.jp/mopo/outlook/gor1404a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。新規追加年度。
+2014-04,restated,2014-01,2013,2.5,2.9,2.7,0.7,0.9,0.7,,,,https://www.boj.or.jp/mopo/outlook/gor1404a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2014-04,restated,2014-01,2014,0.9,1.5,1.4,2.9,3.6,3.3,0.9,1.6,1.3,https://www.boj.or.jp/mopo/outlook/gor1404a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2014-04,restated,2014-01,2015,1.2,1.8,1.5,1.7,2.9,2.6,1.0,2.2,1.9,https://www.boj.or.jp/mopo/outlook/gor1404a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2014-10,main,,2014,0.2,0.7,0.5,3.1,3.4,3.2,1.1,1.4,1.2,https://www.boj.or.jp/mopo/outlook/gor1410a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。
+2014-10,main,,2015,1.2,1.7,1.5,1.8,2.6,2.4,1.1,1.9,1.7,https://www.boj.or.jp/mopo/outlook/gor1410a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。
+2014-10,main,,2016,1.0,1.4,1.2,1.9,3.0,2.8,1.2,2.3,2.1,https://www.boj.or.jp/mopo/outlook/gor1410a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。
+2014-10,restated,2014-07,2014,0.6,1.3,1.0,3.2,3.5,3.3,1.2,1.5,1.3,https://www.boj.or.jp/mopo/outlook/gor1410a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2014-10,restated,2014-07,2015,1.2,1.6,1.5,1.9,2.8,2.6,1.2,2.1,1.9,https://www.boj.or.jp/mopo/outlook/gor1410a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2014-10,restated,2014-07,2016,1.0,1.5,1.3,2.0,3.0,2.8,1.3,2.3,2.1,https://www.boj.or.jp/mopo/outlook/gor1410a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2015-04,main,,2014,-1.0,-0.8,-0.9,2.8,2.8,,0.8,0.8,,https://www.boj.or.jp/mopo/outlook/gor1504a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p9)。CPIは単一値+2.8%(注5:3月の前年比が2月と同じと仮定した計算値)。除くケースも単一値+0.8%として別セルに明記(前回収集ではこの値が非収録だったため追加)。ともに中央値表示なし。
+2015-04,main,,2015,1.5,2.1,2.0,0.2,1.2,0.8,,,,https://www.boj.or.jp/mopo/outlook/gor1504a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p9)。2015年10月予定だった消費税率引き上げが延期され、2015年度中に税率変更がないため「消費者物価指数(除く生鮮食品)」列と「消費税率引き上げの影響を除くケース」列が結合表示(画像で結合セルを確認)。値はcpi_low/high/medianに記録し、cpi_extaxは空欄。
+2015-04,main,,2016,1.4,1.8,1.5,1.2,2.2,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor1504a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p9)。同上の理由でCPI2列結合。cpi_extaxは空欄。
+2015-04,main,,2017,0.1,0.5,0.2,2.7,3.4,3.2,1.4,2.1,1.9,https://www.boj.or.jp/mopo/outlook/gor1504a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p9)。新規追加年度。2017年4月予定の消費税率10%引き上げの影響を含む(当時の予定。実際は2019年10月まで再延期)。
+2015-04,restated,2015-01,2014,-0.6,-0.4,-0.5,2.9,3.2,2.9,0.9,1.2,0.9,https://www.boj.or.jp/mopo/outlook/gor1504a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p9)。「１月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2015-04,restated,2015-01,2015,1.8,2.3,2.1,0.4,1.3,1.0,,,,https://www.boj.or.jp/mopo/outlook/gor1504a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p9)。「１月時点の見通し」行。CPI2列結合(理由は上記主見通し行と同じ)。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2015-04,restated,2015-01,2016,1.5,1.7,1.6,1.5,2.3,2.2,,,,https://www.boj.or.jp/mopo/outlook/gor1504a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p9)。「１月時点の見通し」行。CPI2列結合。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2015-10,main,,2015,0.8,1.4,1.2,0.0,0.4,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor1510a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。2015年度中に消費税率変更がないためCPI2列結合(画像で結合セルを確認)。cpi_extaxは空欄。
+2015-10,main,,2016,1.2,1.6,1.4,0.8,1.5,1.4,,,,https://www.boj.or.jp/mopo/outlook/gor1510a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。同上の理由でCPI2列結合。cpi_extaxは空欄。
+2015-10,main,,2017,0.1,0.5,0.3,2.5,3.4,3.1,1.2,2.1,1.8,https://www.boj.or.jp/mopo/outlook/gor1510a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。2017年4月予定の消費税率10%引き上げの影響を含む。
+2015-10,restated,2015-07,2015,1.5,1.9,1.7,0.3,1.0,0.7,,,,https://www.boj.or.jp/mopo/outlook/gor1510a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。「７月時点の見通し」行。CPI2列結合。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2015-10,restated,2015-07,2016,1.5,1.7,1.5,1.2,2.1,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor1510a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。「７月時点の見通し」行。CPI2列結合。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2015-10,restated,2015-07,2017,0.1,0.5,0.2,2.7,3.4,3.1,1.4,2.1,1.8,https://www.boj.or.jp/mopo/outlook/gor1510a.pdf,全文PDFのpdftotext -layout抽出後、pdftoppm -r 200 -pngで該当ページを画像化し目視で照合。抽出と画像は一致。PDF該当ページ(p10)。「７月時点の見通し」行。restated_fromは正式な「経済・物価情勢の展望」号ではなく中間評価(バックナンバー一覧に独立した号として掲載されていない)からの再掲。中間評価そのものは収集対象外。
+2016-01,main,,2015,1.0,1.3,1.1,0.0,0.2,0.1,0.0,0.2,0.1,https://www.boj.or.jp/mopo/outlook/gor1601a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2016-01,main,,2016,1.0,1.7,1.5,0.2,1.2,0.8,0.2,1.2,0.8,https://www.boj.or.jp/mopo/outlook/gor1601a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2016-01,main,,2017,0.1,0.5,0.3,2.0,3.1,2.8,1.0,2.1,1.8,https://www.boj.or.jp/mopo/outlook/gor1601a.pdf,
+2016-01,restated,2015-10,2015,0.8,1.4,1.2,0.0,0.4,0.1,0.0,0.4,0.1,https://www.boj.or.jp/mopo/outlook/gor1601a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2016-01,restated,2015-10,2016,1.2,1.6,1.4,0.8,1.5,1.4,0.8,1.5,1.4,https://www.boj.or.jp/mopo/outlook/gor1601a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2016-01,restated,2015-10,2017,0.1,0.5,0.3,2.5,3.4,3.1,1.2,2.1,1.8,https://www.boj.or.jp/mopo/outlook/gor1601a.pdf,
+2016-04,main,,2015,0.7,0.7,0.7,0.0,0.0,0.0,0.0,0.0,0.0,https://www.boj.or.jp/mopo/outlook/gor1604a.pdf,2015年度CPIは単一値(注5、実績値)。第3列はCPIと同一セルとして結合表示(税制影響なし)
+2016-04,main,,2016,0.8,1.4,1.2,0.0,0.8,0.5,0.0,0.8,0.5,https://www.boj.or.jp/mopo/outlook/gor1604a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2016-04,main,,2017,0.0,0.3,0.1,1.8,3.0,2.7,0.8,2.0,1.7,https://www.boj.or.jp/mopo/outlook/gor1604a.pdf,
+2016-04,main,,2018,0.6,1.2,1.0,1.0,2.1,1.9,1.0,2.1,1.9,https://www.boj.or.jp/mopo/outlook/gor1604a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。前号に無い最遠年度のため再掲行なし
+2016-04,restated,2016-01,2015,1.0,1.3,1.1,0.0,0.2,0.1,0.0,0.2,0.1,https://www.boj.or.jp/mopo/outlook/gor1604a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2016-04,restated,2016-01,2016,1.0,1.7,1.5,0.2,1.2,0.8,0.2,1.2,0.8,https://www.boj.or.jp/mopo/outlook/gor1604a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2016-04,restated,2016-01,2017,0.1,0.5,0.3,2.0,3.1,2.8,1.0,2.1,1.8,https://www.boj.or.jp/mopo/outlook/gor1604a.pdf,
+2016-07,main,,2016,0.8,1.0,1.0,0.0,0.3,0.1,0.0,0.3,0.1,https://www.boj.or.jp/mopo/outlook/gor1607a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2016-07,main,,2017,1.0,1.5,1.3,0.8,1.8,1.7,0.8,1.8,1.7,https://www.boj.or.jp/mopo/outlook/gor1607a.pdf,消費税率引き上げ延期(2019年10月へ)により第3列はCPIと同一セルとして結合表示
+2016-07,main,,2018,0.8,1.0,0.9,1.0,2.0,1.9,1.0,2.0,1.9,https://www.boj.or.jp/mopo/outlook/gor1607a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2016-07,restated,2016-04,2016,0.8,1.4,1.2,0.0,0.8,0.5,0.0,0.8,0.5,https://www.boj.or.jp/mopo/outlook/gor1607a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2016-07,restated,2016-04,2017,0.0,0.3,0.1,1.8,3.0,2.7,0.8,2.0,1.7,https://www.boj.or.jp/mopo/outlook/gor1607a.pdf,再掲行は2016年4月号時点(消費税2017年4月引き上げ想定)の値。第3列は当時別カラム表示
+2016-07,restated,2016-04,2018,0.6,1.2,1.0,1.0,2.1,1.9,1.0,2.1,1.9,https://www.boj.or.jp/mopo/outlook/gor1607a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2016-10,main,,2016,0.8,1.0,1.0,-0.3,-0.1,-0.1,,,,https://www.boj.or.jp/mopo/outlook/gor1610a.pdf,第3列なし(消費税率引き上げ延期のため)
+2016-10,main,,2017,1.0,1.5,1.3,0.6,1.6,1.5,,,,https://www.boj.or.jp/mopo/outlook/gor1610a.pdf,第3列なし(消費税率引き上げ延期のため)
+2016-10,main,,2018,0.8,1.0,0.9,0.9,1.9,1.7,,,,https://www.boj.or.jp/mopo/outlook/gor1610a.pdf,第3列なし(消費税率引き上げ延期のため)
+2016-10,restated,2016-07,2016,0.8,1.0,1.0,0.0,0.3,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor1610a.pdf,第3列なし(消費税率引き上げ延期のため)
+2016-10,restated,2016-07,2017,1.0,1.5,1.3,0.8,1.8,1.7,,,,https://www.boj.or.jp/mopo/outlook/gor1610a.pdf,第3列なし(消費税率引き上げ延期のため)
+2016-10,restated,2016-07,2018,0.8,1.0,0.9,1.0,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor1610a.pdf,第3列なし(消費税率引き上げ延期のため)
+2017-01,main,,2016,1.2,1.5,1.4,-0.2,-0.1,-0.2,,,,https://www.boj.or.jp/mopo/outlook/gor1701a.pdf,第3列なし(消費税率引き上げ延期のため)
+2017-01,main,,2017,1.3,1.6,1.5,0.8,1.6,1.5,,,,https://www.boj.or.jp/mopo/outlook/gor1701a.pdf,第3列なし(消費税率引き上げ延期のため)
+2017-01,main,,2018,1.0,1.2,1.1,0.9,1.9,1.7,,,,https://www.boj.or.jp/mopo/outlook/gor1701a.pdf,第3列なし(消費税率引き上げ延期のため)
+2017-01,restated,2016-10,2016,0.8,1.0,1.0,-0.3,-0.1,-0.1,,,,https://www.boj.or.jp/mopo/outlook/gor1701a.pdf,第3列なし(消費税率引き上げ延期のため)
+2017-01,restated,2016-10,2017,1.0,1.5,1.3,0.6,1.6,1.5,,,,https://www.boj.or.jp/mopo/outlook/gor1701a.pdf,第3列なし(消費税率引き上げ延期のため)
+2017-01,restated,2016-10,2018,0.8,1.0,0.9,0.9,1.9,1.7,,,,https://www.boj.or.jp/mopo/outlook/gor1701a.pdf,第3列なし(消費税率引き上げ延期のため)
+2017-04,main,,2016,1.4,1.4,1.4,-0.3,-0.3,-0.3,-0.3,-0.3,-0.3,https://www.boj.or.jp/mopo/outlook/gor1704a.pdf,2016年度CPIは単一値(注4、3月前年比を2月と同じと仮定して計算)。第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-04,main,,2017,1.4,1.6,1.6,0.6,1.6,1.4,0.6,1.6,1.4,https://www.boj.or.jp/mopo/outlook/gor1704a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-04,main,,2018,1.1,1.3,1.3,0.8,1.9,1.7,0.8,1.9,1.7,https://www.boj.or.jp/mopo/outlook/gor1704a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-04,main,,2019,0.6,0.7,0.7,1.4,2.5,2.4,0.9,2.0,1.9,https://www.boj.or.jp/mopo/outlook/gor1704a.pdf,前号に無い最遠年度のため再掲行なし
+2017-04,restated,2017-01,2016,1.2,1.5,1.4,-0.2,-0.1,-0.2,-0.2,-0.1,-0.2,https://www.boj.or.jp/mopo/outlook/gor1704a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-04,restated,2017-01,2017,1.3,1.6,1.5,0.8,1.6,1.5,0.8,1.6,1.5,https://www.boj.or.jp/mopo/outlook/gor1704a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-04,restated,2017-01,2018,1.0,1.2,1.1,0.9,1.9,1.7,0.9,1.9,1.7,https://www.boj.or.jp/mopo/outlook/gor1704a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-07,main,,2017,1.5,1.8,1.8,0.5,1.3,1.1,0.5,1.3,1.1,https://www.boj.or.jp/mopo/outlook/gor1707a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-07,main,,2018,1.1,1.5,1.4,0.8,1.6,1.5,0.8,1.6,1.5,https://www.boj.or.jp/mopo/outlook/gor1707a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-07,main,,2019,0.7,0.8,0.7,1.4,2.5,2.3,0.9,2.0,1.8,https://www.boj.or.jp/mopo/outlook/gor1707a.pdf,
+2017-07,restated,2017-04,2017,1.4,1.6,1.6,0.6,1.6,1.4,0.6,1.6,1.4,https://www.boj.or.jp/mopo/outlook/gor1707a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-07,restated,2017-04,2018,1.1,1.3,1.3,0.8,1.9,1.7,0.8,1.9,1.7,https://www.boj.or.jp/mopo/outlook/gor1707a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-07,restated,2017-04,2019,0.6,0.7,0.7,1.4,2.5,2.4,0.9,2.0,1.9,https://www.boj.or.jp/mopo/outlook/gor1707a.pdf,
+2017-10,main,,2017,1.7,2.0,1.9,0.7,1.0,0.8,0.7,1.0,0.8,https://www.boj.or.jp/mopo/outlook/gor1710a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-10,main,,2018,1.2,1.4,1.4,1.1,1.6,1.4,1.1,1.6,1.4,https://www.boj.or.jp/mopo/outlook/gor1710a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-10,main,,2019,0.7,0.8,0.7,2.0,2.5,2.3,1.5,2.0,1.8,https://www.boj.or.jp/mopo/outlook/gor1710a.pdf,
+2017-10,restated,2017-07,2017,1.5,1.8,1.8,0.5,1.3,1.1,0.5,1.3,1.1,https://www.boj.or.jp/mopo/outlook/gor1710a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-10,restated,2017-07,2018,1.1,1.5,1.4,0.8,1.6,1.5,0.8,1.6,1.5,https://www.boj.or.jp/mopo/outlook/gor1710a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2017-10,restated,2017-07,2019,0.7,0.8,0.7,1.4,2.5,2.3,0.9,2.0,1.8,https://www.boj.or.jp/mopo/outlook/gor1710a.pdf,
+2018-01,main,,2017,1.8,2.0,1.9,0.7,1.0,0.8,0.7,1.0,0.8,https://www.boj.or.jp/mopo/outlook/gor1801a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2018-01,main,,2018,1.3,1.5,1.4,1.3,1.6,1.4,1.3,1.6,1.4,https://www.boj.or.jp/mopo/outlook/gor1801a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2018-01,main,,2019,0.7,0.9,0.7,2.0,2.5,2.3,1.5,2.0,1.8,https://www.boj.or.jp/mopo/outlook/gor1801a.pdf,
+2018-01,restated,2017-10,2017,1.7,2.0,1.9,0.7,1.0,0.8,0.7,1.0,0.8,https://www.boj.or.jp/mopo/outlook/gor1801a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2018-01,restated,2017-10,2018,1.2,1.4,1.4,1.1,1.6,1.4,1.1,1.6,1.4,https://www.boj.or.jp/mopo/outlook/gor1801a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2018-01,restated,2017-10,2019,0.7,0.8,0.7,2.0,2.5,2.3,1.5,2.0,1.8,https://www.boj.or.jp/mopo/outlook/gor1801a.pdf,
+2018-04,main,,2017,1.8,1.9,1.9,0.7,0.7,0.7,0.7,0.7,0.7,https://www.boj.or.jp/mopo/outlook/gor1804a.pdf,単一値(実績値、注4)。第3列はCPIと同一セルとして結合表示(税制影響なし)。第3列見出しは「消費税率引き上げの影響を除くケース」(教育無償化の文言なし)
+2018-04,main,,2018,1.4,1.7,1.6,1.2,1.3,1.3,1.2,1.3,1.3,https://www.boj.or.jp/mopo/outlook/gor1804a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2018-04,main,,2019,0.7,0.9,0.8,2.0,2.3,2.3,1.5,1.8,1.8,https://www.boj.or.jp/mopo/outlook/gor1804a.pdf,
+2018-04,main,,2020,0.6,1.0,0.8,2.0,2.3,2.3,1.5,1.8,1.8,https://www.boj.or.jp/mopo/outlook/gor1804a.pdf,当号で新規に対象年度に追加(再掲行なし)
+2018-04,restated,2018-01,2017,1.8,2.0,1.9,0.7,1.0,0.8,0.7,1.0,0.8,https://www.boj.or.jp/mopo/outlook/gor1804a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2018-04,restated,2018-01,2018,1.3,1.5,1.4,1.3,1.6,1.4,1.3,1.6,1.4,https://www.boj.or.jp/mopo/outlook/gor1804a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2018-04,restated,2018-01,2019,0.7,0.9,0.7,2.0,2.5,2.3,1.5,2.0,1.8,https://www.boj.or.jp/mopo/outlook/gor1804a.pdf,
+2018-07,main,,2018,1.3,1.5,1.5,1.0,1.2,1.1,1.0,1.2,1.1,https://www.boj.or.jp/mopo/outlook/gor1807a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。第3列見出しは「消費税率引き上げの影響を除くケース」
+2018-07,main,,2019,0.7,0.9,0.8,1.8,2.1,2.0,1.3,1.6,1.5,https://www.boj.or.jp/mopo/outlook/gor1807a.pdf,
+2018-07,main,,2020,0.6,0.9,0.8,1.9,2.1,2.1,1.4,1.6,1.6,https://www.boj.or.jp/mopo/outlook/gor1807a.pdf,
+2018-07,restated,2018-04,2018,1.4,1.7,1.6,1.2,1.3,1.3,1.2,1.3,1.3,https://www.boj.or.jp/mopo/outlook/gor1807a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2018-07,restated,2018-04,2019,0.7,0.9,0.8,2.0,2.3,2.3,1.5,1.8,1.8,https://www.boj.or.jp/mopo/outlook/gor1807a.pdf,
+2018-07,restated,2018-04,2020,0.6,1.0,0.8,2.0,2.3,2.3,1.5,1.8,1.8,https://www.boj.or.jp/mopo/outlook/gor1807a.pdf,
+2018-10,main,,2018,1.3,1.5,1.4,0.9,1.0,0.9,0.9,1.0,0.9,https://www.boj.or.jp/mopo/outlook/gor1810a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。第3列見出しは「消費税率引き上げの影響を除くケース」
+2018-10,main,,2019,0.8,0.9,0.8,1.8,2.0,1.9,1.3,1.5,1.4,https://www.boj.or.jp/mopo/outlook/gor1810a.pdf,
+2018-10,main,,2020,0.6,0.9,0.8,1.9,2.1,2.0,1.4,1.6,1.5,https://www.boj.or.jp/mopo/outlook/gor1810a.pdf,
+2018-10,restated,2018-07,2018,1.3,1.5,1.5,1.0,1.2,1.1,1.0,1.2,1.1,https://www.boj.or.jp/mopo/outlook/gor1810a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2018-10,restated,2018-07,2019,0.7,0.9,0.8,1.8,2.1,2.0,1.3,1.6,1.5,https://www.boj.or.jp/mopo/outlook/gor1810a.pdf,
+2018-10,restated,2018-07,2020,0.6,0.9,0.8,1.9,2.1,2.1,1.4,1.6,1.6,https://www.boj.or.jp/mopo/outlook/gor1810a.pdf,
+2019-01,main,,2018,0.9,1.0,0.9,0.8,0.9,0.8,0.8,0.9,0.8,https://www.boj.or.jp/mopo/outlook/gor1901a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。当号(2019-01)から第3列見出しが「（参考）消費税率引き上げ・教育無償化政策の影響を除くケース」に変化(教育無償化政策の文言と「（参考）」が追加された最初の号)
+2019-01,main,,2019,0.7,1.0,0.9,1.0,1.3,1.1,0.8,1.1,0.9,https://www.boj.or.jp/mopo/outlook/gor1901a.pdf,
+2019-01,main,,2020,0.7,1.0,1.0,1.3,1.5,1.5,1.2,1.4,1.4,https://www.boj.or.jp/mopo/outlook/gor1901a.pdf,
+2019-01,restated,2018-10,2018,1.3,1.5,1.4,0.9,1.0,0.9,0.9,1.0,0.9,https://www.boj.or.jp/mopo/outlook/gor1901a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2019-01,restated,2018-10,2019,0.8,0.9,0.8,1.5,1.7,1.6,1.3,1.5,1.4,https://www.boj.or.jp/mopo/outlook/gor1901a.pdf,再掲CPIが前号(2018-10)本紙掲載値(1.8~2.0<1.9>)と異なる。教育無償化政策の効果(注3試算-0.3pt)を遡って織り込んで再計算されたとみられる(cpi-extax=0.2=+0.5tax-0.3edu)。extax値は前号と一致
+2019-01,restated,2018-10,2020,0.6,0.9,0.8,1.5,1.7,1.6,1.4,1.6,1.5,https://www.boj.or.jp/mopo/outlook/gor1901a.pdf,再掲CPIが前号(2018-10)本紙掲載値(1.9~2.1<2.0>)と異なる。教育無償化政策の効果(注3試算-0.4pt)を遡って織り込んで再計算されたとみられる(cpi-extax=0.1=+0.5tax-0.4edu)。extax値は前号と一致
+2019-04,main,,2018,0.6,0.6,0.6,0.8,0.8,0.8,0.8,0.8,0.8,https://www.boj.or.jp/mopo/outlook/gor1904a.pdf,単一値(実績値、注4)。第3列はCPIと同一セルとして結合表示(税制影響なし)。第3列見出しは「（参考）消費税率引き上げ・教育無償化政策の影響を除くケース」
+2019-04,main,,2019,0.7,0.9,0.8,0.9,1.2,1.1,0.7,1.0,0.9,https://www.boj.or.jp/mopo/outlook/gor1904a.pdf,
+2019-04,main,,2020,0.8,1.1,0.9,1.2,1.5,1.4,1.1,1.4,1.3,https://www.boj.or.jp/mopo/outlook/gor1904a.pdf,
+2019-04,main,,2021,0.9,1.2,1.2,1.4,1.7,1.6,1.4,1.7,1.6,https://www.boj.or.jp/mopo/outlook/gor1904a.pdf,当号で新規に対象年度に追加(再掲行なし)。第3列はCPIと同一セルとして結合表示(税制影響なし。増税・教育無償化とも前年度から変化なしのため)
+2019-04,restated,2019-01,2018,0.9,1.0,0.9,0.8,0.9,0.8,0.8,0.9,0.8,https://www.boj.or.jp/mopo/outlook/gor1904a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2019-04,restated,2019-01,2019,0.7,1.0,0.9,1.0,1.3,1.1,0.8,1.1,0.9,https://www.boj.or.jp/mopo/outlook/gor1904a.pdf,
+2019-04,restated,2019-01,2020,0.7,1.0,1.0,1.3,1.5,1.5,1.2,1.4,1.4,https://www.boj.or.jp/mopo/outlook/gor1904a.pdf,
+2019-07,main,,2019,0.6,0.9,0.7,0.8,1.1,1.0,0.6,0.9,0.8,https://www.boj.or.jp/mopo/outlook/gor1907a.pdf,第3列見出しは「（参考）消費税率引き上げ・教育無償化政策の影響を除くケース」
+2019-07,main,,2020,0.8,1.0,0.9,1.1,1.4,1.3,1.0,1.3,1.2,https://www.boj.or.jp/mopo/outlook/gor1907a.pdf,
+2019-07,main,,2021,0.9,1.2,1.1,1.3,1.7,1.6,1.3,1.7,1.6,https://www.boj.or.jp/mopo/outlook/gor1907a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2019-07,restated,2019-04,2019,0.7,0.9,0.8,0.9,1.2,1.1,0.7,1.0,0.9,https://www.boj.or.jp/mopo/outlook/gor1907a.pdf,
+2019-07,restated,2019-04,2020,0.8,1.1,0.9,1.2,1.5,1.4,1.1,1.4,1.3,https://www.boj.or.jp/mopo/outlook/gor1907a.pdf,
+2019-07,restated,2019-04,2021,0.9,1.2,1.2,1.4,1.7,1.6,1.4,1.7,1.6,https://www.boj.or.jp/mopo/outlook/gor1907a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2019-10,main,,2019,0.6,0.7,0.6,0.6,0.8,0.7,0.4,0.6,0.5,https://www.boj.or.jp/mopo/outlook/gor1910a.pdf,第3列見出しは「（参考）消費税率引き上げ・教育無償化政策の影響を除くケース」。注3の文言が「2019年10月に実施された消費税率引き上げ」に変化(引き上げが実施済みになったため)
+2019-10,main,,2020,0.6,0.9,0.7,0.8,1.2,1.1,0.7,1.1,1.0,https://www.boj.or.jp/mopo/outlook/gor1910a.pdf,
+2019-10,main,,2021,0.9,1.2,1.0,1.2,1.7,1.5,1.2,1.7,1.5,https://www.boj.or.jp/mopo/outlook/gor1910a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2019-10,restated,2019-07,2019,0.6,0.9,0.7,0.8,1.1,1.0,0.6,0.9,0.8,https://www.boj.or.jp/mopo/outlook/gor1910a.pdf,
+2019-10,restated,2019-07,2020,0.8,1.0,0.9,1.1,1.4,1.3,1.0,1.3,1.2,https://www.boj.or.jp/mopo/outlook/gor1910a.pdf,
+2019-10,restated,2019-07,2021,0.9,1.2,1.1,1.3,1.7,1.6,1.3,1.7,1.6,https://www.boj.or.jp/mopo/outlook/gor1910a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2020-01,main,,2019,0.8,0.9,0.8,0.6,0.7,0.6,0.4,0.5,0.4,https://www.boj.or.jp/mopo/outlook/gor2001a.pdf,第3列見出しは「（参考）消費税率引き上げ・教育無償化政策の影響を除くケース」
+2020-01,main,,2020,0.8,1.1,0.9,1.0,1.1,1.0,0.9,1.0,0.9,https://www.boj.or.jp/mopo/outlook/gor2001a.pdf,
+2020-01,main,,2021,1.0,1.3,1.1,1.2,1.6,1.4,1.2,1.6,1.4,https://www.boj.or.jp/mopo/outlook/gor2001a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2020-01,restated,2019-10,2019,0.6,0.7,0.6,0.6,0.8,0.7,0.4,0.6,0.5,https://www.boj.or.jp/mopo/outlook/gor2001a.pdf,
+2020-01,restated,2019-10,2020,0.6,0.9,0.7,0.8,1.2,1.1,0.7,1.1,1.0,https://www.boj.or.jp/mopo/outlook/gor2001a.pdf,
+2020-01,restated,2019-10,2021,0.9,1.2,1.0,1.2,1.7,1.5,1.2,1.7,1.5,https://www.boj.or.jp/mopo/outlook/gor2001a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)
+2020-04,main,,2019,-0.4,-0.1,,0.6,0.6,,0.4,0.4,,https://www.boj.or.jp/mopo/outlook/gor2004a.pdf,この号は不確実性拡大を理由に中央値<>が号全体で非掲載(注1)。CPI(除く生鮮食品)は単一値で注4により実績値。消費税・教育無償化調整後も単一値(注3の計算値)で低高に同値を代入。実質GDPは範囲のまま。
+2020-04,main,,2020,-5.0,-3.0,,-0.7,-0.3,,-0.8,-0.4,,https://www.boj.or.jp/mopo/outlook/gor2004a.pdf,中央値は号全体で非掲載(注1)。
+2020-04,main,,2021,2.8,3.9,,0.0,0.7,,0.0,0.7,,https://www.boj.or.jp/mopo/outlook/gor2004a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。中央値は号全体で非掲載(注1)。
+2020-04,main,,2022,0.8,1.6,,0.4,1.0,,0.4,1.0,,https://www.boj.or.jp/mopo/outlook/gor2004a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。この号で初めて視野に入った年度のため再掲行なし。中央値は号全体で非掲載(注1)。
+2020-04,restated,2020-01,2019,0.8,0.9,,0.6,0.7,,0.4,0.5,,https://www.boj.or.jp/mopo/outlook/gor2004a.pdf,1月時点の見通し(2020年1月号)の再掲。中央値は号全体で非掲載(注1)。
+2020-04,restated,2020-01,2020,0.8,1.1,,1.0,1.1,,0.9,1.0,,https://www.boj.or.jp/mopo/outlook/gor2004a.pdf,1月時点の見通し(2020年1月号)の再掲。中央値は号全体で非掲載(注1)。
+2020-04,restated,2020-01,2021,1.0,1.3,,1.2,1.6,,1.2,1.6,,https://www.boj.or.jp/mopo/outlook/gor2004a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。1月時点の見通し(2020年1月号)の再掲。中央値は号全体で非掲載(注1)。
+2020-07,main,,2020,-5.7,-4.5,-4.7,-0.6,-0.4,-0.5,-0.7,-0.5,-0.6,https://www.boj.or.jp/mopo/outlook/gor2007a.pdf,中央値が復活した号。
+2020-07,main,,2021,3.0,4.0,3.3,0.2,0.5,0.3,0.2,0.5,0.3,https://www.boj.or.jp/mopo/outlook/gor2007a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。
+2020-07,main,,2022,1.3,1.6,1.5,0.5,0.8,0.7,0.5,0.8,0.7,https://www.boj.or.jp/mopo/outlook/gor2007a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。
+2020-07,restated,2020-04,2020,-5.0,-3.0,,-0.7,-0.3,,-0.8,-0.4,,https://www.boj.or.jp/mopo/outlook/gor2007a.pdf,4月時点の見通し(2020年4月号)の再掲。再掲元(2020年4月号)は中央値非掲載のためこの行も中央値なし。
+2020-07,restated,2020-04,2021,2.8,3.9,,0.0,0.7,,0.0,0.7,,https://www.boj.or.jp/mopo/outlook/gor2007a.pdf,4月時点の見通し(2020年4月号)の再掲。第3列はCPIと同一セルとして結合表示(税制影響なし)。再掲元は中央値非掲載のためこの行も中央値なし。
+2020-07,restated,2020-04,2022,0.8,1.6,,0.4,1.0,,0.4,1.0,,https://www.boj.or.jp/mopo/outlook/gor2007a.pdf,4月時点の見通し(2020年4月号)の再掲。第3列はCPIと同一セルとして結合表示(税制影響なし)。再掲元は中央値非掲載のためこの行も中央値なし。
+2020-10,main,,2020,-5.6,-5.3,-5.5,-0.7,-0.5,-0.6,-0.8,-0.6,-0.7,https://www.boj.or.jp/mopo/outlook/gor2010a.pdf,
+2020-10,main,,2021,3.0,3.8,3.6,0.2,0.6,0.4,0.2,0.6,0.4,https://www.boj.or.jp/mopo/outlook/gor2010a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。
+2020-10,main,,2022,1.5,1.8,1.6,0.4,0.7,0.7,0.4,0.7,0.7,https://www.boj.or.jp/mopo/outlook/gor2010a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。中央値0.7は上限値と同値(原資料どおり)。
+2020-10,restated,2020-07,2020,-5.7,-4.5,-4.7,-0.6,-0.4,-0.5,-0.7,-0.5,-0.6,https://www.boj.or.jp/mopo/outlook/gor2010a.pdf,7月時点の見通し(2020年7月号)の再掲。
+2020-10,restated,2020-07,2021,3.0,4.0,3.3,0.2,0.5,0.3,0.2,0.5,0.3,https://www.boj.or.jp/mopo/outlook/gor2010a.pdf,7月時点の見通し(2020年7月号)の再掲。第3列はCPIと同一セルとして結合表示(税制影響なし)。
+2020-10,restated,2020-07,2022,1.3,1.6,1.5,0.5,0.8,0.7,0.5,0.8,0.7,https://www.boj.or.jp/mopo/outlook/gor2010a.pdf,7月時点の見通し(2020年7月号)の再掲。第3列はCPIと同一セルとして結合表示(税制影響なし)。
+2021-01,main,,2020,-5.7,-5.4,-5.6,-0.7,-0.5,-0.5,-0.8,-0.6,-0.6,https://www.boj.or.jp/mopo/outlook/gor2101a.pdf,
+2021-01,main,,2021,3.3,4.0,3.9,0.3,0.5,0.5,0.3,0.5,0.5,https://www.boj.or.jp/mopo/outlook/gor2101a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。中央値0.5は上限値と同値(原資料どおり)。
+2021-01,main,,2022,1.5,2.0,1.8,0.7,0.8,0.7,0.7,0.8,0.7,https://www.boj.or.jp/mopo/outlook/gor2101a.pdf,第3列はCPIと同一セルとして結合表示(税制影響なし)。中央値0.7は下限値と同値(原資料どおり)。
+2021-01,restated,2020-10,2020,-5.6,-5.3,-5.5,-0.7,-0.5,-0.6,-0.8,-0.6,-0.7,https://www.boj.or.jp/mopo/outlook/gor2101a.pdf,10月時点の見通し(2020年10月号)の再掲。
+2021-01,restated,2020-10,2021,3.0,3.8,3.6,0.2,0.6,0.4,0.2,0.6,0.4,https://www.boj.or.jp/mopo/outlook/gor2101a.pdf,10月時点の見通し(2020年10月号)の再掲。第3列はCPIと同一セルとして結合表示(税制影響なし)。
+2021-01,restated,2020-10,2022,1.5,1.8,1.6,0.4,0.7,0.7,0.4,0.7,0.7,https://www.boj.or.jp/mopo/outlook/gor2101a.pdf,10月時点の見通し(2020年10月号)の再掲。第3列はCPIと同一セルとして結合表示(税制影響なし)。中央値0.7は上限値と同値(原資料どおり)。
+2021-04,main,,2020,-5.0,-4.9,-4.9,-0.4,-0.4,-0.4,,,,https://www.boj.or.jp/mopo/outlook/gor2104a.pdf,この号から第3列(消費税・教育無償化調整)が廃止(表は2列のみ)。CPI(除く生鮮食品)は単一値で注3により実績値。
+2021-04,main,,2021,3.6,4.4,4.0,0.0,0.2,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor2104a.pdf,
+2021-04,main,,2022,2.1,2.5,2.4,0.5,0.9,0.8,,,,https://www.boj.or.jp/mopo/outlook/gor2104a.pdf,
+2021-04,main,,2023,1.2,1.5,1.3,0.7,1.0,1.0,,,,https://www.boj.or.jp/mopo/outlook/gor2104a.pdf,この号で初めて視野に入った年度のため再掲行なし。
+2021-04,restated,2021-01,2020,-5.7,-5.4,-5.6,-0.7,-0.5,-0.5,,,,https://www.boj.or.jp/mopo/outlook/gor2104a.pdf,1月時点の見通し(2021年1月号)の再掲。第3列はこの号にそもそも存在しない。
+2021-04,restated,2021-01,2021,3.3,4.0,3.9,0.3,0.5,0.5,,,,https://www.boj.or.jp/mopo/outlook/gor2104a.pdf,1月時点の見通し(2021年1月号)の再掲。
+2021-04,restated,2021-01,2022,1.5,2.0,1.8,0.7,0.8,0.7,,,,https://www.boj.or.jp/mopo/outlook/gor2104a.pdf,1月時点の見通し(2021年1月号)の再掲。
+2021-07,main,,2021,3.5,4.0,3.8,0.3,0.6,0.6,,,,https://www.boj.or.jp/mopo/outlook/gor2107a.pdf,第3列なし(2021年4月号以降廃止)。
+2021-07,main,,2022,2.6,2.9,2.7,0.8,1.0,0.9,,,,https://www.boj.or.jp/mopo/outlook/gor2107a.pdf,
+2021-07,main,,2023,1.2,1.4,1.3,0.9,1.1,1.0,,,,https://www.boj.or.jp/mopo/outlook/gor2107a.pdf,
+2021-07,restated,2021-04,2021,3.6,4.4,4.0,0.0,0.2,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor2107a.pdf,4月時点の見通し(2021年4月号)の再掲。
+2021-07,restated,2021-04,2022,2.1,2.5,2.4,0.5,0.9,0.8,,,,https://www.boj.or.jp/mopo/outlook/gor2107a.pdf,4月時点の見通し(2021年4月号)の再掲。
+2021-07,restated,2021-04,2023,1.2,1.5,1.3,0.7,1.0,1.0,,,,https://www.boj.or.jp/mopo/outlook/gor2107a.pdf,4月時点の見通し(2021年4月号)の再掲。
+2021-10,main,,2021,3.0,3.6,3.4,0.0,0.2,0.0,,,,https://www.boj.or.jp/mopo/outlook/gor2110a.pdf,第3列なし。CPI中央値0.0は原資料どおり(符号なし)。
+2021-10,main,,2022,2.7,3.0,2.9,0.8,1.0,0.9,,,,https://www.boj.or.jp/mopo/outlook/gor2110a.pdf,
+2021-10,main,,2023,1.2,1.4,1.3,0.9,1.2,1.0,,,,https://www.boj.or.jp/mopo/outlook/gor2110a.pdf,
+2021-10,restated,2021-07,2021,3.5,4.0,3.8,0.3,0.6,0.6,,,,https://www.boj.or.jp/mopo/outlook/gor2110a.pdf,7月時点の見通し(2021年7月号)の再掲。
+2021-10,restated,2021-07,2022,2.6,2.9,2.7,0.8,1.0,0.9,,,,https://www.boj.or.jp/mopo/outlook/gor2110a.pdf,7月時点の見通し(2021年7月号)の再掲。
+2021-10,restated,2021-07,2023,1.2,1.4,1.3,0.9,1.1,1.0,,,,https://www.boj.or.jp/mopo/outlook/gor2110a.pdf,7月時点の見通し(2021年7月号)の再掲。
+2022-01,main,,2021,2.7,2.9,2.8,0.0,0.1,0.0,,,,https://www.boj.or.jp/mopo/outlook/gor2201a.pdf,第3列なし。コアコア列はまだ無い号。CPI中央値0.0は原資料どおり(符号なし)。
+2022-01,main,,2022,3.3,4.1,3.8,1.0,1.2,1.1,,,,https://www.boj.or.jp/mopo/outlook/gor2201a.pdf,
+2022-01,main,,2023,1.0,1.4,1.1,1.0,1.3,1.1,,,,https://www.boj.or.jp/mopo/outlook/gor2201a.pdf,
+2022-01,restated,2021-10,2021,3.0,3.6,3.4,0.0,0.2,0.0,,,,https://www.boj.or.jp/mopo/outlook/gor2201a.pdf,10月時点の見通し(2021年10月号)の再掲。
+2022-01,restated,2021-10,2022,2.7,3.0,2.9,0.8,1.0,0.9,,,,https://www.boj.or.jp/mopo/outlook/gor2201a.pdf,10月時点の見通し(2021年10月号)の再掲。
+2022-01,restated,2021-10,2023,1.2,1.4,1.3,0.9,1.2,1.0,,,,https://www.boj.or.jp/mopo/outlook/gor2201a.pdf,10月時点の見通し(2021年10月号)の再掲。
+2022-04,main,,2021,2.0,2.2,2.1,0.1,0.1,0.1,,,,https://www.boj.or.jp/mopo/outlook/gor2204a.pdf,CPI(除く生鮮食品)は単一値(実績値、注3)。コアコア(除く生鮮食品・エネルギー)は単一値 -0.8(実績値とみられる、範囲・中央値表記なし)
+2022-04,main,,2022,2.6,3.0,2.9,1.8,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2204a.pdf,コアコア(除く生鮮食品・エネルギー): 0.8〜1.0 <0.9>
+2022-04,main,,2023,1.5,2.1,1.9,0.9,1.3,1.1,,,,https://www.boj.or.jp/mopo/outlook/gor2204a.pdf,コアコア(除く生鮮食品・エネルギー): 1.1〜1.3 <1.2>
+2022-04,main,,2024,1.1,1.3,1.1,1.0,1.3,1.1,,,,https://www.boj.or.jp/mopo/outlook/gor2204a.pdf,コアコア(除く生鮮食品・エネルギー): 1.2〜1.5 <1.5>。2022年1月号にこの年度の見通しなし(再掲行なし)
+2022-04,restated,2022-01,2021,2.7,2.9,2.8,0.0,0.1,0.0,,,,https://www.boj.or.jp/mopo/outlook/gor2204a.pdf,原資料が「――」表示(2022年1月号にコアコア列なし)
+2022-04,restated,2022-01,2022,3.3,4.1,3.8,1.0,1.2,1.1,,,,https://www.boj.or.jp/mopo/outlook/gor2204a.pdf,原資料が「――」表示(2022年1月号にコアコア列なし)
+2022-04,restated,2022-01,2023,1.0,1.4,1.1,1.0,1.3,1.1,,,,https://www.boj.or.jp/mopo/outlook/gor2204a.pdf,原資料が「――」表示(2022年1月号にコアコア列なし)
+2022-07,main,,2022,2.2,2.5,2.4,2.2,2.4,2.3,,,,https://www.boj.or.jp/mopo/outlook/gor2207a.pdf,コアコア(除く生鮮食品・エネルギー): 1.2〜1.4 <1.3>
+2022-07,main,,2023,1.7,2.1,2.0,1.2,1.5,1.4,,,,https://www.boj.or.jp/mopo/outlook/gor2207a.pdf,コアコア(除く生鮮食品・エネルギー): 1.2〜1.4 <1.4>
+2022-07,main,,2024,1.1,1.5,1.3,1.1,1.5,1.3,,,,https://www.boj.or.jp/mopo/outlook/gor2207a.pdf,コアコア(除く生鮮食品・エネルギー): 1.4〜1.7 <1.5>
+2022-07,restated,2022-04,2022,2.6,3.0,2.9,1.8,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2207a.pdf,コアコア(除く生鮮食品・エネルギー): 0.8〜1.0 <0.9>
+2022-07,restated,2022-04,2023,1.5,2.1,1.9,0.9,1.3,1.1,,,,https://www.boj.or.jp/mopo/outlook/gor2207a.pdf,コアコア(除く生鮮食品・エネルギー): 1.1〜1.3 <1.2>
+2022-07,restated,2022-04,2024,1.1,1.3,1.1,1.0,1.3,1.1,,,,https://www.boj.or.jp/mopo/outlook/gor2207a.pdf,コアコア(除く生鮮食品・エネルギー): 1.2〜1.5 <1.5>
+2022-10,main,,2022,1.8,2.1,2.0,2.8,2.9,2.9,,,,https://www.boj.or.jp/mopo/outlook/gor2210a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜1.9 <1.8>
+2022-10,main,,2023,1.5,2.0,1.9,1.5,1.8,1.6,,,,https://www.boj.or.jp/mopo/outlook/gor2210a.pdf,コアコア(除く生鮮食品・エネルギー): 1.5〜1.8 <1.6>
+2022-10,main,,2024,1.3,1.6,1.5,1.5,1.9,1.6,,,,https://www.boj.or.jp/mopo/outlook/gor2210a.pdf,コアコア(除く生鮮食品・エネルギー): 1.5〜1.8 <1.6>
+2022-10,restated,2022-07,2022,2.2,2.5,2.4,2.2,2.4,2.3,,,,https://www.boj.or.jp/mopo/outlook/gor2210a.pdf,コアコア(除く生鮮食品・エネルギー): 1.2〜1.4 <1.3>
+2022-10,restated,2022-07,2023,1.7,2.1,2.0,1.2,1.5,1.4,,,,https://www.boj.or.jp/mopo/outlook/gor2210a.pdf,コアコア(除く生鮮食品・エネルギー): 1.2〜1.4 <1.4>
+2022-10,restated,2022-07,2024,1.1,1.5,1.3,1.1,1.5,1.3,,,,https://www.boj.or.jp/mopo/outlook/gor2210a.pdf,コアコア(除く生鮮食品・エネルギー): 1.4〜1.7 <1.5>
+2023-01,main,,2022,1.9,2.0,1.9,3.0,3.0,3.0,,,,https://www.boj.or.jp/mopo/outlook/gor2301a.pdf,コアコア(除く生鮮食品・エネルギー): 2.1〜2.1 <2.1>
+2023-01,main,,2023,1.5,1.9,1.7,1.6,1.8,1.6,,,,https://www.boj.or.jp/mopo/outlook/gor2301a.pdf,コアコア(除く生鮮食品・エネルギー): 1.7〜1.9 <1.8>
+2023-01,main,,2024,0.9,1.3,1.1,1.8,1.9,1.8,,,,https://www.boj.or.jp/mopo/outlook/gor2301a.pdf,コアコア(除く生鮮食品・エネルギー): 1.5〜1.8 <1.6>
+2023-01,restated,2022-10,2022,1.8,2.1,2.0,2.8,2.9,2.9,,,,https://www.boj.or.jp/mopo/outlook/gor2301a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜1.9 <1.8>
+2023-01,restated,2022-10,2023,1.5,2.0,1.9,1.5,1.8,1.6,,,,https://www.boj.or.jp/mopo/outlook/gor2301a.pdf,コアコア(除く生鮮食品・エネルギー): 1.5〜1.8 <1.6>
+2023-01,restated,2022-10,2024,1.3,1.6,1.5,1.5,1.9,1.6,,,,https://www.boj.or.jp/mopo/outlook/gor2301a.pdf,コアコア(除く生鮮食品・エネルギー): 1.5〜1.8 <1.6>
+2023-04,main,,2022,1.2,1.2,1.2,3.0,3.0,3.0,,,,https://www.boj.or.jp/mopo/outlook/gor2304a.pdf,CPI(除く生鮮食品)は単一値(実績値、注3)。コアコア(除く生鮮食品・エネルギー)は単一値 +2.2(実績値とみられる、範囲・中央値表記なし)
+2023-04,main,,2023,1.1,1.5,1.4,1.7,2.0,1.8,,,,https://www.boj.or.jp/mopo/outlook/gor2304a.pdf,コアコア(除く生鮮食品・エネルギー): 2.5〜2.7 <2.5>
+2023-04,main,,2024,1.0,1.3,1.2,1.8,2.1,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2304a.pdf,コアコア(除く生鮮食品・エネルギー): 1.5〜1.8 <1.7>
+2023-04,main,,2025,1.0,1.1,1.0,1.6,1.9,1.6,,,,https://www.boj.or.jp/mopo/outlook/gor2304a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.0 <1.8>。2023年1月号にこの年度の見通しなし(再掲行なし)
+2023-04,restated,2023-01,2022,1.9,2.0,1.9,3.0,3.0,3.0,,,,https://www.boj.or.jp/mopo/outlook/gor2304a.pdf,コアコア(除く生鮮食品・エネルギー): 2.1〜2.1 <2.1>
+2023-04,restated,2023-01,2023,1.5,1.9,1.7,1.6,1.8,1.6,,,,https://www.boj.or.jp/mopo/outlook/gor2304a.pdf,コアコア(除く生鮮食品・エネルギー): 1.7〜1.9 <1.8>
+2023-04,restated,2023-01,2024,0.9,1.3,1.1,1.8,1.9,1.8,,,,https://www.boj.or.jp/mopo/outlook/gor2304a.pdf,コアコア(除く生鮮食品・エネルギー): 1.5〜1.8 <1.6>
+2023-07,main,,2023,1.2,1.5,1.3,2.4,2.7,2.5,,,,https://www.boj.or.jp/mopo/outlook/gor2307a.pdf,コアコア(除く生鮮食品・エネルギー): 3.1〜3.3 <3.2>
+2023-07,main,,2024,1.0,1.3,1.2,1.8,2.2,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2307a.pdf,コアコア(除く生鮮食品・エネルギー): 1.5〜2.0 <1.7>
+2023-07,main,,2025,1.0,1.2,1.0,1.6,2.0,1.6,,,,https://www.boj.or.jp/mopo/outlook/gor2307a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.2 <1.8>
+2023-07,restated,2023-04,2023,1.1,1.5,1.4,1.7,2.0,1.8,,,,https://www.boj.or.jp/mopo/outlook/gor2307a.pdf,コアコア(除く生鮮食品・エネルギー): 2.5〜2.7 <2.5>
+2023-07,restated,2023-04,2024,1.0,1.3,1.2,1.8,2.1,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2307a.pdf,コアコア(除く生鮮食品・エネルギー): 1.5〜1.8 <1.7>
+2023-07,restated,2023-04,2025,1.0,1.1,1.0,1.6,1.9,1.6,,,,https://www.boj.or.jp/mopo/outlook/gor2307a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.0 <1.8>
+2023-10,main,,2023,1.8,2.0,2.0,2.7,3.0,2.8,,,,https://www.boj.or.jp/mopo/outlook/gor2310a.pdf,コアコア(除く生鮮食品・エネルギー): 3.5〜3.9 <3.8>
+2023-10,main,,2024,0.9,1.4,1.0,2.7,3.1,2.8,,,,https://www.boj.or.jp/mopo/outlook/gor2310a.pdf,コアコア(除く生鮮食品・エネルギー): 1.6〜2.1 <1.9>
+2023-10,main,,2025,0.8,1.2,1.0,1.6,2.0,1.7,,,,https://www.boj.or.jp/mopo/outlook/gor2310a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.2 <1.9>
+2023-10,restated,2023-07,2023,1.2,1.5,1.3,2.4,2.7,2.5,,,,https://www.boj.or.jp/mopo/outlook/gor2310a.pdf,コアコア(除く生鮮食品・エネルギー): 3.1〜3.3 <3.2>
+2023-10,restated,2023-07,2024,1.0,1.3,1.2,1.8,2.2,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2310a.pdf,コアコア(除く生鮮食品・エネルギー): 1.5〜2.0 <1.7>
+2023-10,restated,2023-07,2025,1.0,1.2,1.0,1.6,2.0,1.6,,,,https://www.boj.or.jp/mopo/outlook/gor2310a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.2 <1.8>
+2024-01,main,,2023,1.6,1.9,1.8,2.8,2.9,2.8,,,,https://www.boj.or.jp/mopo/outlook/gor2401a.pdf,コアコア(除く生鮮食品・エネルギー): 3.7〜3.9 <3.8>
+2024-01,main,,2024,1.0,1.2,1.2,2.2,2.5,2.4,,,,https://www.boj.or.jp/mopo/outlook/gor2401a.pdf,コアコア(除く生鮮食品・エネルギー): 1.6〜2.1 <1.9>
+2024-01,main,,2025,1.0,1.2,1.0,1.6,1.9,1.8,,,,https://www.boj.or.jp/mopo/outlook/gor2401a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.0 <1.9>
+2024-01,restated,2023-10,2023,1.8,2.0,2.0,2.7,3.0,2.8,,,,https://www.boj.or.jp/mopo/outlook/gor2401a.pdf,コアコア(除く生鮮食品・エネルギー): 3.5〜3.9 <3.8>
+2024-01,restated,2023-10,2024,0.9,1.4,1.0,2.7,3.1,2.8,,,,https://www.boj.or.jp/mopo/outlook/gor2401a.pdf,コアコア(除く生鮮食品・エネルギー): 1.6〜2.1 <1.9>
+2024-01,restated,2023-10,2025,0.8,1.2,1.0,1.6,2.0,1.7,,,,https://www.boj.or.jp/mopo/outlook/gor2401a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.2 <1.9>
+2024-04,main,,2023,1.3,1.4,1.3,2.8,2.8,2.8,,,,https://www.boj.or.jp/mopo/outlook/gor2404a.pdf,CPI(除く生鮮食品)は単一値(実績値、注3)。コアコア(除く生鮮食品・エネルギー)は単一値 +3.9(実績値とみられる、範囲・中央値表記なし)
+2024-04,main,,2024,0.7,1.0,0.8,2.6,3.0,2.8,,,,https://www.boj.or.jp/mopo/outlook/gor2404a.pdf,コアコア(除く生鮮食品・エネルギー): 1.7〜2.1 <1.9>
+2024-04,main,,2025,0.8,1.1,1.0,1.7,2.1,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2404a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.0 <1.9>
+2024-04,main,,2026,0.8,1.0,1.0,1.6,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2404a.pdf,コアコア(除く生鮮食品・エネルギー): 1.9〜2.1 <2.1>。2024年1月号にこの年度の見通しなし(再掲行なし)
+2024-04,restated,2024-01,2023,1.6,1.9,1.8,2.8,2.9,2.8,,,,https://www.boj.or.jp/mopo/outlook/gor2404a.pdf,コアコア(除く生鮮食品・エネルギー): 3.7〜3.9 <3.8>
+2024-04,restated,2024-01,2024,1.0,1.2,1.2,2.2,2.5,2.4,,,,https://www.boj.or.jp/mopo/outlook/gor2404a.pdf,コアコア(除く生鮮食品・エネルギー): 1.6〜2.1 <1.9>
+2024-04,restated,2024-01,2025,1.0,1.2,1.0,1.6,1.9,1.8,,,,https://www.boj.or.jp/mopo/outlook/gor2404a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.0 <1.9>
+2024-07,main,,2024,0.5,0.7,0.6,2.5,2.6,2.5,,,,https://www.boj.or.jp/mopo/outlook/gor2407a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.0 <1.9>
+2024-07,main,,2025,0.9,1.1,1.0,2.0,2.3,2.1,,,,https://www.boj.or.jp/mopo/outlook/gor2407a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.0 <1.9>
+2024-07,main,,2026,0.8,1.0,1.0,1.8,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2407a.pdf,コアコア(除く生鮮食品・エネルギー): 1.9〜2.2 <2.1>
+2024-07,restated,2024-04,2024,0.7,1.0,0.8,2.6,3.0,2.8,,,,https://www.boj.or.jp/mopo/outlook/gor2407a.pdf,コアコア(除く生鮮食品・エネルギー): 1.7〜2.1 <1.9>
+2024-07,restated,2024-04,2025,0.8,1.1,1.0,1.7,2.1,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2407a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.0 <1.9>
+2024-07,restated,2024-04,2026,0.8,1.0,1.0,1.6,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2407a.pdf,コアコア(除く生鮮食品・エネルギー): 1.9〜2.1 <2.1>
+2024-10,main,,2024,0.5,0.7,0.6,2.4,2.5,2.5,,,,https://www.boj.or.jp/mopo/outlook/gor2410a.pdf,コアコア(除く生鮮食品・エネルギー): 1.9〜2.1 <2.0>
+2024-10,main,,2025,1.0,1.2,1.1,1.7,2.1,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2410a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.0 <1.9>
+2024-10,main,,2026,0.8,1.1,1.0,1.8,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2410a.pdf,コアコア(除く生鮮食品・エネルギー): 1.9〜2.2 <2.1>
+2024-10,restated,2024-07,2024,0.5,0.7,0.6,2.5,2.6,2.5,,,,https://www.boj.or.jp/mopo/outlook/gor2410a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.0 <1.9>
+2024-10,restated,2024-07,2025,0.9,1.1,1.0,2.0,2.3,2.1,,,,https://www.boj.or.jp/mopo/outlook/gor2410a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.0 <1.9>
+2024-10,restated,2024-07,2026,0.8,1.0,1.0,1.8,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2410a.pdf,コアコア(除く生鮮食品・エネルギー): 1.9〜2.2 <2.1>
+2025-01,main,,2024,0.4,0.6,0.5,2.6,2.8,2.7,,,,https://www.boj.or.jp/mopo/outlook/gor2501a.pdf,コアコア(除く生鮮食品・エネルギー): 2.1〜2.3 <2.2>
+2025-01,main,,2025,0.9,1.1,1.1,2.2,2.6,2.4,,,,https://www.boj.or.jp/mopo/outlook/gor2501a.pdf,コアコア(除く生鮮食品・エネルギー): 2.0〜2.3 <2.1>
+2025-01,main,,2026,0.8,1.0,1.0,1.8,2.1,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2501a.pdf,コアコア(除く生鮮食品・エネルギー): 1.9〜2.2 <2.1>
+2025-01,restated,2024-10,2024,0.5,0.7,0.6,2.4,2.5,2.5,,,,https://www.boj.or.jp/mopo/outlook/gor2501a.pdf,コアコア(除く生鮮食品・エネルギー): 1.9〜2.1 <2.0>
+2025-01,restated,2024-10,2025,1.0,1.2,1.1,1.7,2.1,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2501a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.0 <1.9>
+2025-01,restated,2024-10,2026,0.8,1.1,1.0,1.8,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2501a.pdf,コアコア(除く生鮮食品・エネルギー): 1.9〜2.2 <2.1>
+2025-04,main,,2024,0.7,0.7,0.7,2.7,2.7,2.7,,,,https://www.boj.or.jp/mopo/outlook/gor2504a.pdf,消費者物価指数(除く生鮮食品)は単一値(実績値、注3)。コアコア(除く生鮮食品・エネルギー)も単一値(実績値): 2.3
+2025-04,main,,2025,0.4,0.6,0.5,2.0,2.3,2.2,,,,https://www.boj.or.jp/mopo/outlook/gor2504a.pdf,コアコア(除く生鮮食品・エネルギー): 2.2〜2.4 <2.3>
+2025-04,main,,2026,0.6,0.8,0.7,1.6,1.8,1.7,,,,https://www.boj.or.jp/mopo/outlook/gor2504a.pdf,コアコア(除く生鮮食品・エネルギー): 1.7〜2.0 <1.8>
+2025-04,main,,2027,0.8,1.0,1.0,1.8,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2504a.pdf,コアコア(除く生鮮食品・エネルギー): 1.9〜2.1 <2.0>。前号(2025-01)にこの年度の見通しが無いため再掲行なし
+2025-04,restated,2025-01,2024,0.4,0.6,0.5,2.6,2.8,2.7,,,,https://www.boj.or.jp/mopo/outlook/gor2504a.pdf,コアコア(除く生鮮食品・エネルギー): 2.1〜2.3 <2.2>
+2025-04,restated,2025-01,2025,0.9,1.1,1.1,2.2,2.6,2.4,,,,https://www.boj.or.jp/mopo/outlook/gor2504a.pdf,コアコア(除く生鮮食品・エネルギー): 2.0〜2.3 <2.1>
+2025-04,restated,2025-01,2026,0.8,1.0,1.0,1.8,2.1,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2504a.pdf,コアコア(除く生鮮食品・エネルギー): 1.9〜2.2 <2.1>
+2025-07,main,,2025,0.5,0.7,0.6,2.7,2.8,2.7,,,,https://www.boj.or.jp/mopo/outlook/gor2507a.pdf,コアコア(除く生鮮食品・エネルギー): 2.8〜3.0 <2.8>
+2025-07,main,,2026,0.7,0.9,0.7,1.6,2.0,1.8,,,,https://www.boj.or.jp/mopo/outlook/gor2507a.pdf,コアコア(除く生鮮食品・エネルギー): 1.7〜2.1 <1.9>
+2025-07,main,,2027,0.9,1.0,1.0,1.8,2.0,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2507a.pdf,コアコア(除く生鮮食品・エネルギー): 2.0〜2.1 <2.0>
+2025-07,restated,2025-04,2025,0.4,0.6,0.5,2.0,2.3,2.2,,,,https://www.boj.or.jp/mopo/outlook/gor2507a.pdf,コアコア(除く生鮮食品・エネルギー): 2.2〜2.4 <2.3>
+2025-07,restated,2025-04,2026,0.6,0.8,0.7,1.6,1.8,1.7,,,,https://www.boj.or.jp/mopo/outlook/gor2507a.pdf,コアコア(除く生鮮食品・エネルギー): 1.7〜2.0 <1.8>
+2025-07,restated,2025-04,2027,0.8,1.0,1.0,1.8,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2507a.pdf,コアコア(除く生鮮食品・エネルギー): 1.9〜2.1 <2.0>
+2025-10,main,,2025,0.6,0.8,0.7,2.7,2.9,2.7,,,,https://www.boj.or.jp/mopo/outlook/gor2510a.pdf,コアコア(除く生鮮食品・エネルギー): 2.8〜3.0 <2.8>
+2025-10,main,,2026,0.6,0.8,0.7,1.6,2.0,1.8,,,,https://www.boj.or.jp/mopo/outlook/gor2510a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.2 <2.0>。(注3)ガソリン税旧暫定税率廃止は本見通しに未織り込み(廃止時CPI前年比を年間-0.2%pt程度押し下げと試算)
+2025-10,main,,2027,0.7,1.1,1.0,1.8,2.0,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2510a.pdf,コアコア(除く生鮮食品・エネルギー): 2.0〜2.2 <2.0>。(注3)ガソリン税旧暫定税率廃止は本見通しに未織り込み
+2025-10,restated,2025-07,2025,0.5,0.7,0.6,2.7,2.8,2.7,,,,https://www.boj.or.jp/mopo/outlook/gor2510a.pdf,コアコア(除く生鮮食品・エネルギー): 2.8〜3.0 <2.8>
+2025-10,restated,2025-07,2026,0.7,0.9,0.7,1.6,2.0,1.8,,,,https://www.boj.or.jp/mopo/outlook/gor2510a.pdf,コアコア(除く生鮮食品・エネルギー): 1.7〜2.1 <1.9>
+2025-10,restated,2025-07,2027,0.9,1.0,1.0,1.8,2.0,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2510a.pdf,コアコア(除く生鮮食品・エネルギー): 2.0〜2.1 <2.0>
+2026-01,main,,2025,0.8,0.9,0.9,2.7,2.8,2.7,,,,https://www.boj.or.jp/mopo/outlook/gor2601a.pdf,コアコア(除く生鮮食品・エネルギー): 2.9〜3.1 <3.0>
+2026-01,main,,2026,0.8,1.0,1.0,1.9,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2601a.pdf,コアコア(除く生鮮食品・エネルギー): 2.0〜2.3 <2.2>
+2026-01,main,,2027,0.8,1.0,0.8,1.9,2.2,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2601a.pdf,コアコア(除く生鮮食品・エネルギー): 2.0〜2.3 <2.1>
+2026-01,restated,2025-10,2025,0.6,0.8,0.7,2.7,2.9,2.7,,,,https://www.boj.or.jp/mopo/outlook/gor2601a.pdf,コアコア(除く生鮮食品・エネルギー): 2.8〜3.0 <2.8>
+2026-01,restated,2025-10,2026,0.6,0.8,0.7,1.6,2.0,1.8,,,,https://www.boj.or.jp/mopo/outlook/gor2601a.pdf,コアコア(除く生鮮食品・エネルギー): 1.8〜2.2 <2.0>
+2026-01,restated,2025-10,2027,0.7,1.1,1.0,1.8,2.0,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2601a.pdf,コアコア(除く生鮮食品・エネルギー): 2.0〜2.2 <2.0>
+2026-04,main,,2025,1.0,1.0,1.0,2.7,2.7,2.7,,,,https://www.boj.or.jp/mopo/outlook/gor2604a.pdf,消費者物価指数(除く生鮮食品)は単一値(実績値、注3)。コアコア(除く生鮮食品・エネルギー)も単一値(実績値): 3.0
+2026-04,main,,2026,0.4,0.7,0.5,2.8,3.0,2.8,,,,https://www.boj.or.jp/mopo/outlook/gor2604a.pdf,コアコア(除く生鮮食品・エネルギー): 2.5〜2.7 <2.6>
+2026-04,main,,2027,0.6,0.8,0.7,2.3,2.4,2.3,,,,https://www.boj.or.jp/mopo/outlook/gor2604a.pdf,コアコア(除く生鮮食品・エネルギー): 2.6〜2.7 <2.6>
+2026-04,main,,2028,0.7,0.8,0.8,2.0,2.2,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2604a.pdf,コアコア(除く生鮮食品・エネルギー): 2.1〜2.4 <2.2>。前号(2026-01)にこの年度の見通しが無いため再掲行なし
+2026-04,restated,2026-01,2025,0.8,0.9,0.9,2.7,2.8,2.7,,,,https://www.boj.or.jp/mopo/outlook/gor2604a.pdf,コアコア(除く生鮮食品・エネルギー): 2.9〜3.1 <3.0>
+2026-04,restated,2026-01,2026,0.8,1.0,1.0,1.9,2.0,1.9,,,,https://www.boj.or.jp/mopo/outlook/gor2604a.pdf,コアコア(除く生鮮食品・エネルギー): 2.0〜2.3 <2.2>
+2026-04,restated,2026-01,2027,0.8,1.0,0.8,1.9,2.2,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2604a.pdf,コアコア(除く生鮮食品・エネルギー): 2.0〜2.3 <2.1>
+2026-07,main,,2026,0.6,0.7,0.6,2.3,2.7,2.5,,,,https://www.boj.or.jp/mopo/outlook/gor2607a.pdf,コアコア(除く生鮮食品・エネルギー): 2.3〜2.6 <2.5>
+2026-07,main,,2027,0.7,0.8,0.8,2.2,2.5,2.4,,,,https://www.boj.or.jp/mopo/outlook/gor2607a.pdf,コアコア(除く生鮮食品・エネルギー): 2.2〜2.7 <2.6>
+2026-07,main,,2028,0.7,0.8,0.8,2.0,2.2,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2607a.pdf,コアコア(除く生鮮食品・エネルギー): 2.1〜2.3 <2.2>
+2026-07,restated,2026-04,2026,0.4,0.7,0.5,2.8,3.0,2.8,,,,https://www.boj.or.jp/mopo/outlook/gor2607a.pdf,コアコア(除く生鮮食品・エネルギー): 2.5〜2.7 <2.6>
+2026-07,restated,2026-04,2027,0.6,0.8,0.7,2.3,2.4,2.3,,,,https://www.boj.or.jp/mopo/outlook/gor2607a.pdf,コアコア(除く生鮮食品・エネルギー): 2.6〜2.7 <2.6>
+2026-07,restated,2026-04,2028,0.7,0.8,0.8,2.0,2.2,2.0,,,,https://www.boj.or.jp/mopo/outlook/gor2607a.pdf,コアコア(除く生鮮食品・エネルギー): 2.1〜2.4 <2.2>
