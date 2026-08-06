@@ -84,6 +84,10 @@ const T = {
     // 2026-07-29にここへ移した(文言の出所を1箇所にする、という他のキーと
     // 同じ理由)。
     chartNoscript: "グラフの描画には JavaScript が必要です。数値は下の表にあります。",
+    // 段階1(4月号の中央値のみ)から段階2(全号・扇状チャート)への内部リンク。
+    // metric.seeVintages を持つ指標(boj-outlook-real/cpi)だけがbuild.mjs側で
+    // 描画する(2026-08-06)。
+    seeVintagesLink: "→ 号ごとの見通しの推移を見る(全号・詳細版)",
   },
   en: {
     back: "← Indicators",
@@ -137,6 +141,7 @@ const T = {
     tableCsvLabel: "Source data: ",
     citeLinkText: "How to cite",
     chartNoscript: "This chart requires JavaScript to draw. The figures are in the table below.",
+    seeVintagesLink: "→ See how the forecast moved issue by issue (full detail)",
   },
 };
 
@@ -315,6 +320,7 @@ const METRICS = {
     actualSourceCol: "actual_source_url",
     actualSourceLabel: "実質",
     unit: "%",
+    seeVintages: true,
   },
   "boj-outlook-cpi": {
     title: "日銀展望レポートの消費者物価見通し",
@@ -331,6 +337,7 @@ const METRICS = {
     forecastSourceCol: "forecast_source_url",
     actualSourceCol: "actual_source_url",
     unit: "%",
+    seeVintages: true,
   },
 };
 

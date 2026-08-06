@@ -605,6 +605,13 @@ function buildPage(key, metric, lang) {
   // 静的HTMLに出す。帯そのものはJSでしか描かないが、出典はJSを実行しない
   // 相手にも届かなければならない(CLAUDE.md「出典も静的HTMLに入れる」)。
   const vintageSource = metric.vintageCsv ? `\n${vintageSourceHtml(metric, lang)}` : "";
+  // 段階1(4月号の中央値のみ)から段階2(全号・扇状チャート)への内部リンク
+  // (2026-08-06)。metric.seeVintages を持つ指標(boj-outlook-real/cpi)だけ。
+  // /boj-outlook-vintages はホームカード・DataCatalogを持たないため、この
+  // リンクが無いとsitemap以外に発見経路が無くなる。
+  const seeVintages = metric.seeVintages
+    ? `\n      <p class="chart-note mono"><a href="${REL.bojVintages[lang]}">${escapeHTML(t.seeVintagesLink)}</a></p>`
+    : "";
   // OGP画像は指標ごとに専用のカード(2026-07-30、og.html?m=<key>で焼く)。
   // ja: og-<key>.png / en: og-<key>-en.png。/chart(指標一覧)・トップ等の
   // 汎用ページは対象外(そちらは buildIndex 等で従来どおり og.png/og-en.png)。
@@ -693,7 +700,7 @@ ${summary}
 
       <div class="readout-source" id="v-source"></div>
 
-${archive}${vintageSource}
+${archive}${vintageSource}${seeVintages}
     </section>
 
     <section class="data-section">
@@ -3244,6 +3251,60 @@ ${body}
 `;
 }
 
+// llms.txt(llmstxt.org の非公式な慣習。まだ標準化されていないので効果は
+// 未確証だが、コストが低く、robots.txt の Content-Signal(ai-input=yes)で
+// 既に表明している「AI引用は歓迎」の姿勢と整合するため設置する。英語で
+// 書くのは llmstxt.org の実例がほぼ英語であるのに倣ったもので、各リンクは
+// JA/EN両方のURLを併記する。sitemap.xml と同じ理由で生成物にする
+// (METRICS/REL から機械的に導けば、指標を足したときの書き忘れが構造的に
+// 起きない)。2026-08-06追加。
+function llmsTxtContent(keys) {
+  const line = (m) => {
+    const url = abs(chartRel(m.key).en);
+    const urlJa = abs(chartRel(m.key).ja);
+    return `- [${m.titleEn}](${url}) (JA: ${urlJa}): ${m.descEn}`;
+  };
+  const metricLines = keys
+    .filter((k) => !METRICS[k].seeVintages) // 段階1(boj-outlook-real/cpi)は下の「詳細版」節にまとめて出す
+    .map((k) => line({ key: k, titleEn: METRICS[k].titleEn, descEn: METRICS[k].descEn }));
+  const bojLines = keys
+    .filter((k) => METRICS[k].seeVintages)
+    .map((k) => line({ key: k, titleEn: METRICS[k].titleEn, descEn: METRICS[k].descEn }));
+
+  return `# zurekei (ズレ計)
+
+> A static instrument that tracks Japanese government and public-institution forecasts against confirmed actuals, one fiscal year at a time, with a primary source linked for every figure. Deliberately free of evaluative language — figures and citations only, no commentary.
+
+Operated by an individual, not an organization or company. Data and text are CC BY 4.0 (${abs("/LICENSE-DATA")}); code is MIT (${abs("/LICENSE")}). This site welcomes AI systems referencing its content when answering questions, and does not permit its use as training/fine-tuning data — see ${abs("/robots.txt")} (Content-Signal: ai-input=yes, ai-train=no).
+
+## Indicators (forecast vs. actual, by fiscal year)
+
+${metricLines.join("\n")}
+
+## BOJ Outlook Report (forecast vs. actual, plus full issue-by-issue detail)
+
+${bojLines.join("\n")}
+- [BOJ Outlook Report — every issue's forecast, by publication date](${abs(REL.bojVintages.en)}) (JA: ${abs(REL.bojVintages.ja)}): ${BOJV.T.en.desc}
+
+## Population projections (successive projection vintages vs. actual)
+
+- [Total fertility rate](${abs(REL.fertility.en)}) (JA: ${abs(REL.fertility.ja)}): ${FERT.T.en.desc}
+- [Number of births](${abs(REL.births.en)}) (JA: ${abs(REL.births.ja)}): ${BIRTH.T.en.desc}
+
+## Other
+
+- [Statutory review clause tracker](${abs(REL.hoan.en)}) (JA: ${abs(REL.hoan.ja)}): ${HOAN.T.en.desc}
+- [About / why this site exists](${abs(REL.about.en)}) (JA: ${abs(REL.about.ja)})
+- [How to cite](${abs(REL.cite.en)}) (JA: ${abs(REL.cite.ja)})
+- [Correction history](${abs(REL.corrections.en)}) (JA: ${abs(REL.corrections.ja)})
+- [Contact](${abs(REL.contact.en)}) (JA: ${abs(REL.contact.ja)})
+
+## Data
+
+Raw CSV source files live under ${abs("/data/")}; column schema is documented at ${abs("/data/README.md")}. Full URL list: ${abs("/sitemap.xml")}.
+`;
+}
+
 /* ── 実行 ────────────────────────────────────────────────── */
 
 /* ── 参照側の取りこぼし検査 ──────────────────────────────────
@@ -4938,6 +4999,7 @@ files.set(path.join(EN_DIR, "cite.html"), buildCiteEn());
 // 持つ: files に他の全ページが積み終わったあとで呼ぶ必要がある(このMapに
 // まだ無いパスを buildSitemap が要求したら genDate() が例外で止める)。
 files.set(path.join(SITE_DIR, "sitemap.xml"), buildSitemap(keys, files));
+files.set(path.join(SITE_DIR, "llms.txt"), llmsTxtContent(keys));
 
 // 指標ディレクトリの余分ファイル(置き土産)検出を chart/ と en/chart/ の両方で
 // 行う共通ヘルパー。

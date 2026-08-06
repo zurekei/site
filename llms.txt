@@ -1,0 +1,39 @@
+# zurekei (ズレ計)
+
+> A static instrument that tracks Japanese government and public-institution forecasts against confirmed actuals, one fiscal year at a time, with a primary source linked for every figure. Deliberately free of evaluative language — figures and citations only, no commentary.
+
+Operated by an individual, not an organization or company. Data and text are CC BY 4.0 (https://zurekei.org/LICENSE-DATA); code is MIT (https://zurekei.org/LICENSE). This site welcomes AI systems referencing its content when answering questions, and does not permit its use as training/fine-tuning data — see https://zurekei.org/robots.txt (Content-Signal: ai-input=yes, ai-train=no).
+
+## Indicators (forecast vs. actual, by fiscal year)
+
+- [Real GDP growth](https://zurekei.org/en/chart/gdp-real) (JA: https://zurekei.org/chart/gdp-real): The government's initial forecast (real) laid alongside the confirmed actual. Also called the real economic growth rate.
+- [Nominal GDP growth](https://zurekei.org/en/chart/gdp-nominal) (JA: https://zurekei.org/chart/gdp-nominal): The government's initial forecast (nominal) laid alongside the confirmed actual. Also called the nominal economic growth rate.
+- [Unemployment rate](https://zurekei.org/en/chart/unemployment) (JA: https://zurekei.org/chart/unemployment): The government's initial forecast laid alongside the confirmed actual.
+- [Current account](https://zurekei.org/en/chart/current-account) (JA: https://zurekei.org/chart/current-account): The government's initial forecast laid alongside the confirmed actual.
+- [Tax revenue](https://zurekei.org/en/chart/tax-revenue) (JA: https://zurekei.org/chart/tax-revenue): The Ministry of Finance's initial budget estimate for tax revenue, laid alongside the confirmed settlement figure.
+- [Government bond issuance](https://zurekei.org/en/chart/bond-issuance) (JA: https://zurekei.org/chart/bond-issuance): The Ministry of Finance's initial budget plan for new government bond issuance, laid alongside the actual issuance recorded in the settlement. Bonds tracked in separate categories, such as reconstruction bonds or pension special-issue bonds, are not included, following the classification used in the primary source.
+- [Total JGB issuance](https://zurekei.org/en/chart/jgb-total) (JA: https://zurekei.org/chart/jgb-total): The Ministry of Finance's initial JGB issuance plan (total), laid alongside actual total issuance. Includes construction bonds, deficit-financing bonds, reconstruction and other special bonds, FILP bonds, and refunding bonds (revenue basis, following the classification used in the primary source).
+- [Consumer price inflation (CPI)](https://zurekei.org/en/chart/cpi) (JA: https://zurekei.org/chart/cpi): The government's initial forecast for the rate of consumer price inflation, laid alongside the confirmed year-on-year change published by the Ministry of Internal Affairs and Communications' Statistics Bureau.
+
+## BOJ Outlook Report (forecast vs. actual, plus full issue-by-issue detail)
+
+- [BOJ Outlook Report — real GDP forecast](https://zurekei.org/en/chart/boj-outlook-real) (JA: https://zurekei.org/chart/boj-outlook-real): The Bank of Japan's median Policy Board forecast for real GDP growth, from its quarterly Outlook Report, laid alongside the confirmed actual from the Cabinet Office's national accounts. A separate forecast from the government's own economic outlook.
+- [BOJ Outlook Report — CPI forecast](https://zurekei.org/en/chart/boj-outlook-cpi) (JA: https://zurekei.org/chart/boj-outlook-cpi): The Bank of Japan's median Policy Board forecast for consumer price inflation (excluding fresh food), from its quarterly Outlook Report, laid alongside the confirmed actual from the Ministry of Internal Affairs and Communications' Statistics Bureau. A separate forecast from the government's own economic outlook.
+- [BOJ Outlook Report — every issue's forecast, by publication date](https://zurekei.org/en/boj-outlook-vintages) (JA: https://zurekei.org/boj-outlook-vintages): The Bank of Japan's Outlook for Economic Activity and Prices (展望レポート) updates its Policy Board median forecast 3-4 times a year. Where /chart/boj-outlook-real and /chart/boj-outlook-cpi each pick out a single value per fiscal year (the April issue), this page lays out every issue's forecast by publication date, showing how the forecast for a given year moved from issue to issue.
+
+## Population projections (successive projection vintages vs. actual)
+
+- [Total fertility rate](https://zurekei.org/en/fertility) (JA: https://zurekei.org/fertility): Fertility assumptions (medium variant) from successive editions of NIPSSR's population projections, overlaid. Lighter lines are older projections; darker lines are more recent.
+- [Number of births](https://zurekei.org/en/births) (JA: https://zurekei.org/births): Projected annual births (medium-fertility variant) from successive editions of NIPSSR's population projections, overlaid. Lighter lines are older projections; darker lines are more recent.
+
+## Other
+
+- [Statutory review clause tracker](https://zurekei.org/en/hoan) (JA: https://zurekei.org/hoan): Many laws place a review clause in their supplementary provisions: "review shall be undertaken within N years of enforcement." The deadline is derived mechanically as enforcement date plus N years. Rows are ordered by deadline, with laws whose deadline has passed placed on top. Only figures, clause text, and sources are shown; no evaluation is added.
+- [About / why this site exists](https://zurekei.org/en/about) (JA: https://zurekei.org/about)
+- [How to cite](https://zurekei.org/en/cite) (JA: https://zurekei.org/cite)
+- [Correction history](https://zurekei.org/en/corrections) (JA: https://zurekei.org/corrections)
+- [Contact](https://zurekei.org/en/contact) (JA: https://zurekei.org/contact)
+
+## Data
+
+Raw CSV source files live under https://zurekei.org/data/; column schema is documented at https://zurekei.org/data/README.md. Full URL list: https://zurekei.org/sitemap.xml.
