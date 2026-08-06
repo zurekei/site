@@ -245,31 +245,76 @@ function cellGap(metric, r, lang) {
   return `${diff > 0 ? "+" : ""}${diff.toFixed(1)}${R.gapUnitSuffix(metric, lang)}`;
 }
 
-function sourceCell(r, lang) {
+function sourceCell(r, lang, firstRelease) {
   const parts = [];
   const f = safeUrl(r.forecastSourceUrl);
   const a = safeUrl(r.actualSourceUrl);
   if (f) parts.push(`<a href="${escapeHTML(f)}" target="_blank" rel="noopener" data-src="forecast">${escapeHTML(T[lang].forecast)}</a>`);
   if (a) parts.push(`<a href="${escapeHTML(a)}" target="_blank" rel="noopener" data-src="actual">${escapeHTML(T[lang].actual)}</a>`);
+  // 初回確報の出典は年版(確報)ごとに別ファイルなので、基準ごとに1本へ畳める
+  // 包絡帯(vintageSourceHtml)と違って行ごとに出すしかない。ここに出ることで
+  // data/gdp_first_release.csv のURLが静的HTMLに現れ、sourceUrlReachErrors()
+  // の要求も満たす(実質の23本はこのページ、名目の23本は名目GDPのページ)。
+  const fr = firstRelease && safeUrl(firstRelease.url);
+  if (fr) {
+    parts.push(
+      `<a href="${escapeHTML(fr)}" target="_blank" rel="noopener" data-src="first-release">${escapeHTML(T[lang].firstRelease)}</a>`
+    );
+  }
   return parts.join(" ");
+}
+
+// data/gdp_first_release.csv を年度で引ける形にする。初回確報を持たない指標では
+// 空の Map を返し、呼び出し側は列そのものを出さない。
+function firstReleaseByYear(metric) {
+  const map = new Map();
+  if (!metric.firstReleaseCsv) return map;
+  const urlCol = `${metric.firstReleaseCol}_source_url`;
+  for (const r of parseCSV(read(metric.firstReleaseCsv.replace(/^\//, "")))) {
+    const v = toNum(r[metric.firstReleaseCol]);
+    if (v === null) continue;
+    // **知らない basis は落とす。** vintageSourceHtml と同じ理由で、呼称の追加漏れ
+    // (英語ページに生の識別子が出る/訳が無い)を誰にも気づかれないまま公開しない。
+    if (!T.ja.basisLabels[r.release_basis] || !T.en.basisLabels[r.release_basis]) {
+      throw new Error(
+        `data/gdp_first_release.csv の release_basis "${r.release_basis}" に呼称が無い(chart.js の T.ja/T.en の basisLabels に追加すること)`
+      );
+    }
+    map.set(Number(r.fiscal_year), { val: v, url: r[urlCol] || "", basis: r.release_basis || "" });
+  }
+  if (!map.size) throw new Error(`${metric.firstReleaseCsv} から ${metric.firstReleaseCol} を1件も取り出せなかった`);
+  return map;
 }
 
 function buildTable(metric, rows, lang) {
   const actuals = rows.filter((r) => r.actualVal !== null);
   const lastActualYear = actuals.length ? actuals[actuals.length - 1].year : -Infinity;
+  const frMap = firstReleaseByYear(metric);
+  const hasFR = frMap.size > 0;
+  // 列数は 年度/見通し/実績/ズレ/出典 の5つ。初回確報を持つ指標だけ6つになる。
+  const colCount = hasFR ? 6 : 5;
 
   const body = rows
     .map((r) => {
       const f = cellForecast(metric, r, lang);
       const a = cellActual(metric, r, lastActualYear, lang);
+      const fr = frMap.get(r.year) || null;
       const phAttr = (c) => (c.ph ? ` data-ph="${c.ph}"` : "");
+      // 収録の無い年度(FY1999〜2002の年版はウェブ上に残っていない、FY1997以前は
+      // 年版そのものが無い)は「—」。実績側の「未公表」「取得できず」と違って
+      // 語彙を分けていないのは、ここが空なのは年度の新旧ではなく資料の有無
+      // だけによるため。
+      const frCell = hasFR
+        ? `        <td class="mono">${escapeHTML(fr ? R.fmtVal(fr.val, R.metricUnit(metric, lang), metric.signed) : "—")}</td>\n`
+        : "";
       const tr =
         `      <tr>\n` +
         `        <th scope="row" class="mono" data-year="${r.year}">${escapeHTML(R.fmtFY(r.year, lang))}</th>\n` +
         `        <td class="mono"${phAttr(f)}>${escapeHTML(f.text)}</td>\n` +
+        frCell +
         `        <td class="mono"${phAttr(a)}>${escapeHTML(a.text)}</td>\n` +
         `        <td class="mono">${escapeHTML(cellGap(metric, r, lang))}</td>\n` +
-        `        <td class="data-table-src">${sourceCell(r, lang)}</td>\n` +
+        `        <td class="data-table-src">${sourceCell(r, lang, fr)}</td>\n` +
         `      </tr>`;
       // 実績側の注記だけを出す（[見通し原文] 等は転記者向けの控えなので出さない）。
       // chart.js の readout と同じ extractEventNote に判断を委ねている。
@@ -278,7 +323,7 @@ function buildTable(metric, rows, lang) {
       // 注記は一次資料からの転記そのままなので常に日本語(EN表でも訳さない。
       // 訳を用意していないのに訳したふりをしない)。lang="ja" は表自体の言語が
       // enでも、この1セルだけ日本語であることを明示する(かつ元からの規約)。
-      return `${tr}\n      <tr class="data-table-note"><td colspan="5" lang="ja">${escapeHTML(note)}</td></tr>`;
+      return `${tr}\n      <tr class="data-table-note"><td colspan="${colCount}" lang="ja">${escapeHTML(note)}</td></tr>`;
     })
     .join("\n");
 
@@ -293,6 +338,7 @@ function buildTable(metric, rows, lang) {
     `          <tr>\n` +
     `            <th scope="col" id="t-th-year">${escapeHTML(t.thYear)}</th>\n` +
     `            <th scope="col" id="t-th-forecast">${escapeHTML(t.forecast)}</th>\n` +
+    (hasFR ? `            <th scope="col" id="t-th-first-release">${escapeHTML(t.firstRelease)}</th>\n` : "") +
     `            <th scope="col" id="t-th-actual">${escapeHTML(t.actual)}</th>\n` +
     `            <th scope="col" id="t-th-gap">${escapeHTML(t.gap)}</th>\n` +
     `            <th scope="col" id="t-th-source">${escapeHTML(t.thSource)}</th>\n` +
@@ -3820,6 +3866,19 @@ const CSV_COLUMNS = {
     after: "text",
     reason: "text",
     url: "text",
+  },
+  "gdp_first_release.csv": {
+    fiscal_year: "number",
+    first_real: "number",
+    first_nominal: "number",
+    // 統制語彙(1990base … 2020base)。呼称は chart.js の T.basisLabels から引き、
+    // 辞書に無い値はビルドを止める(gdp_vintages.csv の basis と同じ扱い)。
+    // 接尾辞の無い形が「その基準の公表当時の系列」、`-ref` が遡及参考系列、
+    // `-final` が最新確報。初回確報は定義上いつも接尾辞なしになる。
+    release_basis: "text",
+    first_real_source_url: "text",
+    first_nominal_source_url: "text",
+    notes: "text",
   },
   "cpi_forecast.csv": {
     fiscal_year: "number",

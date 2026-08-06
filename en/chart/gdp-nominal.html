@@ -101,7 +101,7 @@
     <section class="chart-section">
       <h1 class="chart-title" id="chart-title">Nominal GDP growth</h1>
       <p class="chart-desc" id="chart-desc">The government&#39;s initial forecast (nominal) laid alongside the confirmed actual. Also called the nominal economic growth rate.</p>
-      <p class="chart-note mono" id="chart-note">Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases).</p>
+      <p class="chart-note mono" id="chart-note">Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases). The fine dotted line is the first release — the figure first published as that year&#39;s actual — so its distance from the actual line is how much the actual moved after publication. Reading the two together separates the part of the gap that was a forecasting miss from the part that was the actual moving. The line breaks for FY1999–2002, whose editions are no longer on the Cabinet Office&#39;s site, and before FY1998, for which no edition exists online.</p>
 
       <div class="chart-wrap">
         <svg id="chart" viewBox="0 0 960 480" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="chart-title"></svg>
@@ -155,6 +155,7 @@
           <tr>
             <th scope="col" id="t-th-year">Fiscal year</th>
             <th scope="col" id="t-th-forecast">Forecast</th>
+            <th scope="col" id="t-th-first-release">First release</th>
             <th scope="col" id="t-th-actual">Actual</th>
             <th scope="col" id="t-th-gap">Gap</th>
             <th scope="col" id="t-th-source">Source</th>
@@ -164,14 +165,16 @@
       <tr>
         <th scope="row" class="mono" data-year="1980">FY1980</th>
         <td class="mono">+9.4%</td>
+        <td class="mono">—</td>
         <td class="mono" data-ph="unavailable">No actual value</td>
         <td class="mono">—</td>
         <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/109105254X00219800125/9" target="_blank" rel="noopener" data-src="forecast">Forecast</a></td>
       </tr>
-      <tr class="data-table-note"><td colspan="5" lang="ja">1980年度は接続元系列の起点で前年度データがなく、成長率は算出不能（一次資料でも空欄）。実績値は確認できず。</td></tr>
+      <tr class="data-table-note"><td colspan="6" lang="ja">1980年度は接続元系列の起点で前年度データがなく、成長率は算出不能（一次資料でも空欄）。実績値は確認できず。</td></tr>
       <tr>
         <th scope="row" class="mono" data-year="1981">FY1981</th>
         <td class="mono">+9.1%</td>
+        <td class="mono">—</td>
         <td class="mono">+6.4%</td>
         <td class="mono">-2.7pt</td>
         <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/109405254X00219810126/17" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -179,6 +182,7 @@
       <tr>
         <th scope="row" class="mono" data-year="1982">FY1982</th>
         <td class="mono">+8.4%</td>
+        <td class="mono">—</td>
         <td class="mono">+4.7%</td>
         <td class="mono">-3.7pt</td>
         <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/109604629X02319820707/45" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -186,6 +190,7 @@
       <tr>
         <th scope="row" class="mono" data-year="1983">FY1983</th>
         <td class="mono">+5.6%</td>
+        <td class="mono">—</td>
         <td class="mono">+4.9%</td>
         <td class="mono">-0.7pt</td>
         <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/109805063X00319830304/58" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -193,6 +198,7 @@
       <tr>
         <th scope="row" class="mono" data-year="1984">FY1984</th>
         <td class="mono">+5.9%</td>
+        <td class="mono">—</td>
         <td class="mono">+6.2%</td>
         <td class="mono">+0.3pt</td>
         <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/110104430X00119840709/5" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -200,6 +206,7 @@
       <tr>
         <th scope="row" class="mono" data-year="1985">FY1985</th>
         <td class="mono">+6.1%</td>
+        <td class="mono">—</td>
         <td class="mono">+6.6%</td>
         <td class="mono">+0.5pt</td>
         <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/110204461X00319850222/175" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -207,6 +214,7 @@
       <tr>
         <th scope="row" class="mono" data-year="1986">FY1986</th>
         <td class="mono">+5.1%</td>
+        <td class="mono">—</td>
         <td class="mono">+4.1%</td>
         <td class="mono">-1.0pt</td>
         <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/110405063X00419860306/88" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -214,6 +222,7 @@
       <tr>
         <th scope="row" class="mono" data-year="1987">FY1987</th>
         <td class="mono">+4.6%</td>
+        <td class="mono">—</td>
         <td class="mono">+5.9%</td>
         <td class="mono">+1.3pt</td>
         <td class="data-table-src"><a href="https://kokkai.ndl.go.jp/txt/110805254X00419870202/16" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -221,6 +230,7 @@
       <tr>
         <th scope="row" class="mono" data-year="1988">FY1988</th>
         <td class="mono">+4.8%</td>
+        <td class="mono">—</td>
         <td class="mono">+6.9%</td>
         <td class="mono">+2.1pt</td>
         <td class="data-table-src"><a href="https://web.archive.org/web/20220216161614/https://www.mof.go.jp/pri/publication/policy_history/series/s49-63/02/02_1_3_15.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -228,6 +238,7 @@
       <tr>
         <th scope="row" class="mono" data-year="1989">FY1989</th>
         <td class="mono">+5.2%</td>
+        <td class="mono">—</td>
         <td class="mono">+6.7%</td>
         <td class="mono">+1.5pt</td>
         <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_1_5.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -235,14 +246,16 @@
       <tr>
         <th scope="row" class="mono" data-year="1990">FY1990</th>
         <td class="mono">+5.2%</td>
+        <td class="mono">—</td>
         <td class="mono">+8.3%</td>
         <td class="mono">+3.1pt</td>
         <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_1_5.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
-      <tr class="data-table-note"><td colspan="5" lang="ja">バブル期のピーク。</td></tr>
+      <tr class="data-table-note"><td colspan="6" lang="ja">バブル期のピーク。</td></tr>
       <tr>
         <th scope="row" class="mono" data-year="1991">FY1991</th>
         <td class="mono">+5.5%</td>
+        <td class="mono">—</td>
         <td class="mono">+5.3%</td>
         <td class="mono">-0.2pt</td>
         <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_1_5.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -250,6 +263,7 @@
       <tr>
         <th scope="row" class="mono" data-year="1992">FY1992</th>
         <td class="mono">+5.0%</td>
+        <td class="mono">—</td>
         <td class="mono">+2.0%</td>
         <td class="mono">-3.0pt</td>
         <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_1_6.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -257,6 +271,7 @@
       <tr>
         <th scope="row" class="mono" data-year="1993">FY1993</th>
         <td class="mono">+4.9%</td>
+        <td class="mono">—</td>
         <td class="mono">-0.3%</td>
         <td class="mono">-5.2pt</td>
         <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_1_6.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -264,14 +279,16 @@
       <tr>
         <th scope="row" class="mono" data-year="1994">FY1994</th>
         <td class="mono">+3.8%</td>
+        <td class="mono">—</td>
         <td class="mono">+1.5%</td>
         <td class="mono">-2.3pt</td>
         <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_1_6.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/h27_retroactive/tables/ritu-mfy_2780.csv" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
-      <tr class="data-table-note"><td colspan="5" lang="ja">1994年度で1995年度以降の正式系列（2020年基準）と接続する境目。基準が異なるため直接接続はしていない。</td></tr>
+      <tr class="data-table-note"><td colspan="6" lang="ja">1994年度で1995年度以降の正式系列（2020年基準）と接続する境目。基準が異なるため直接接続はしていない。</td></tr>
       <tr>
         <th scope="row" class="mono" data-year="1995">FY1995</th>
         <td class="mono">+3.6%</td>
+        <td class="mono">—</td>
         <td class="mono">+2.4%</td>
         <td class="mono">-1.2pt</td>
         <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_2_1.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -279,6 +296,7 @@
       <tr>
         <th scope="row" class="mono" data-year="1996">FY1996</th>
         <td class="mono">+2.7%</td>
+        <td class="mono">—</td>
         <td class="mono">+2.7%</td>
         <td class="mono">0.0pt</td>
         <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_2_1.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -286,21 +304,24 @@
       <tr>
         <th scope="row" class="mono" data-year="1997">FY1997</th>
         <td class="mono">+3.1%</td>
+        <td class="mono">—</td>
         <td class="mono">+0.5%</td>
         <td class="mono">-2.6pt</td>
         <td class="data-table-src"><a href="https://www.mof.go.jp/pri/publication/policy_history/series/h1-12/1_2_2.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
       </tr>
-      <tr class="data-table-note"><td colspan="5" lang="ja">消費税率引き上げ・アジア通貨危機の年度。</td></tr>
+      <tr class="data-table-note"><td colspan="6" lang="ja">消費税率引き上げ・アジア通貨危機の年度。</td></tr>
       <tr>
         <th scope="row" class="mono" data-year="1998">FY1998</th>
         <td class="mono">+2.4%</td>
         <td class="mono">-2.0%</td>
+        <td class="mono">-2.0%</td>
         <td class="mono">-4.4pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/1998/19980119mitoshi.html" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/1998/19980119mitoshi.html" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h10/tables/55ffm1n.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="1999">FY1999</th>
         <td class="mono">+0.5%</td>
+        <td class="mono">—</td>
         <td class="mono">-0.8%</td>
         <td class="mono">-1.3pt</td>
         <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/1999/19990118b-mitoshi.html" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -308,6 +329,7 @@
       <tr>
         <th scope="row" class="mono" data-year="2000">FY2000</th>
         <td class="mono">+0.8%</td>
+        <td class="mono">—</td>
         <td class="mono">+1.7%</td>
         <td class="mono">+0.9pt</td>
         <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2000/0128b-mitoshi.html" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -315,6 +337,7 @@
       <tr>
         <th scope="row" class="mono" data-year="2001">FY2001</th>
         <td class="mono">+1.0%</td>
+        <td class="mono">—</td>
         <td class="mono">-1.9%</td>
         <td class="mono">-2.9pt</td>
         <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2001/0131b-mitoshi.html" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -322,6 +345,7 @@
       <tr>
         <th scope="row" class="mono" data-year="2002">FY2002</th>
         <td class="mono">-0.9%</td>
+        <td class="mono">—</td>
         <td class="mono">-0.9%</td>
         <td class="mono">0.0pt</td>
         <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2002/0125mitoshi.html" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
@@ -329,167 +353,190 @@
       <tr>
         <th scope="row" class="mono" data-year="2003">FY2003</th>
         <td class="mono">-0.2%</td>
+        <td class="mono">+0.8%</td>
         <td class="mono">+0.4%</td>
         <td class="mono">+0.6pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2003/h150124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2003/h150124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h15/tables/n80ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2004">FY2004</th>
         <td class="mono">+0.5%</td>
+        <td class="mono">+0.5%</td>
         <td class="mono">+0.4%</td>
         <td class="mono">-0.1pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2004/h160119mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2004/h160119mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h16/tables/94ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2005">FY2005</th>
         <td class="mono">+1.3%</td>
+        <td class="mono">+1.0%</td>
         <td class="mono">+0.8%</td>
         <td class="mono">-0.5pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2005/h170121mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2005/h170121mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h17/tables/17ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2006">FY2006</th>
         <td class="mono">+2.0%</td>
+        <td class="mono">+1.6%</td>
         <td class="mono">+0.7%</td>
         <td class="mono">-1.3pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2006/h180120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2006/h180120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h18/tables/18ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2007">FY2007</th>
         <td class="mono">+2.2%</td>
+        <td class="mono">+1.0%</td>
         <td class="mono">+0.2%</td>
         <td class="mono">-2.0pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2007/h190125mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2007/h190125mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h19/tables/19ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2008">FY2008</th>
         <td class="mono">+2.1%</td>
+        <td class="mono">-4.2%</td>
         <td class="mono">-3.9%</td>
         <td class="mono">-6.0pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2008/h200118mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2008/h200118mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h20/tables/20ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
-      <tr class="data-table-note"><td colspan="5" lang="ja">リーマンショック年度。</td></tr>
+      <tr class="data-table-note"><td colspan="6" lang="ja">リーマンショック年度。</td></tr>
       <tr>
         <th scope="row" class="mono" data-year="2009">FY2009</th>
         <td class="mono">+0.1%</td>
+        <td class="mono">-3.7%</td>
         <td class="mono">-4.1%</td>
         <td class="mono">-4.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2009/0119mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2009/0119mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h21/tables/21ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2010">FY2010</th>
         <td class="mono">+0.4%</td>
+        <td class="mono">+1.1%</td>
         <td class="mono">+1.7%</td>
         <td class="mono">+1.3pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2010/h220122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2010/h220122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h22/tables/22ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2011">FY2011</th>
         <td class="mono">+1.0%</td>
+        <td class="mono">-1.4%</td>
         <td class="mono">-1.0%</td>
         <td class="mono">-2.0pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2011/h230124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2011/h230124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h23/tables/23ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
-      <tr class="data-table-note"><td colspan="5" lang="ja">東日本大震災年度。</td></tr>
+      <tr class="data-table-note"><td colspan="6" lang="ja">東日本大震災年度。</td></tr>
       <tr>
         <th scope="row" class="mono" data-year="2012">FY2012</th>
         <td class="mono">+2.0%</td>
+        <td class="mono">-0.2%</td>
         <td class="mono">+0.1%</td>
         <td class="mono">-1.9pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2012/h240124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2012/h240124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h24/tables/24ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2013">FY2013</th>
         <td class="mono">+2.7%</td>
+        <td class="mono">+1.8%</td>
         <td class="mono">+2.9%</td>
         <td class="mono">+0.2pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2013/h250228mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2013/h250228mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h25/tables/25ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2014">FY2014</th>
         <td class="mono">+3.3%</td>
+        <td class="mono">+1.5%</td>
         <td class="mono">+2.8%</td>
         <td class="mono">-0.5pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2014/h260124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2014/h260124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h26/tables/26ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
-      <tr class="data-table-note"><td colspan="5" lang="ja">消費税率8%引き上げ年度。</td></tr>
+      <tr class="data-table-note"><td colspan="6" lang="ja">消費税率8%引き上げ年度。</td></tr>
       <tr>
         <th scope="row" class="mono" data-year="2015">FY2015</th>
         <td class="mono">+2.7%</td>
+        <td class="mono">+2.8%</td>
         <td class="mono">+3.4%</td>
         <td class="mono">+0.7pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2015/h270212mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2015/h270212mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h27/tables/27ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2016">FY2016</th>
         <td class="mono">+3.1%</td>
+        <td class="mono">+1.0%</td>
         <td class="mono">+0.8%</td>
         <td class="mono">-2.3pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2016/h280122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2016/h280122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h28/tables/28ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2017">FY2017</th>
         <td class="mono">+2.5%</td>
         <td class="mono">+2.0%</td>
+        <td class="mono">+2.0%</td>
         <td class="mono">-0.5pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2017/h290120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2017/h290120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h29/tables/29ffm1n_jp.xls" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2018">FY2018</th>
         <td class="mono">+2.5%</td>
+        <td class="mono">+0.1%</td>
         <td class="mono">+0.4%</td>
         <td class="mono">-2.1pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2018/h300122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2018/h300122mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/h30/tables/30ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2019">FY2019</th>
         <td class="mono">+2.4%</td>
+        <td class="mono">+0.5%</td>
         <td class="mono">+0.1%</td>
         <td class="mono">-2.3pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2019/h310128mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2019/h310128mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2019/tables/2019ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
-      <tr class="data-table-note"><td colspan="5" lang="ja">消費税率10%引き上げ・新型コロナ発生初期年度。</td></tr>
+      <tr class="data-table-note"><td colspan="6" lang="ja">消費税率10%引き上げ・新型コロナ発生初期年度。</td></tr>
       <tr>
         <th scope="row" class="mono" data-year="2020">FY2020</th>
         <td class="mono">+2.1%</td>
+        <td class="mono">-3.9%</td>
         <td class="mono">-2.9%</td>
         <td class="mono">-5.0pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2019/r020120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2019/r020120mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2020/tables/2020ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
-      <tr class="data-table-note"><td colspan="5" lang="ja">新型コロナ影響の年度。</td></tr>
+      <tr class="data-table-note"><td colspan="6" lang="ja">新型コロナ影響の年度。</td></tr>
       <tr>
         <th scope="row" class="mono" data-year="2021">FY2021</th>
         <td class="mono">+4.4%</td>
+        <td class="mono">+2.4%</td>
         <td class="mono">+4.0%</td>
         <td class="mono">-0.4pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2020/r030118mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2020/r030118mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2021/tables/2021ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2022">FY2022</th>
         <td class="mono">+3.6%</td>
+        <td class="mono">+2.3%</td>
         <td class="mono">+2.6%</td>
         <td class="mono">-1.0pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2021/r040117mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2021/r040117mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2022/tables/2022ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
       <tr>
         <th scope="row" class="mono" data-year="2023">FY2023</th>
         <td class="mono">+2.1%</td>
+        <td class="mono">+4.9%</td>
         <td class="mono">+4.7%</td>
         <td class="mono">+2.6pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2022/r050123mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2022/r050123mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2023/tables/2023ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
-      <tr class="data-table-note"><td colspan="5" lang="ja">円安・輸入物価高で名実逆転が大きい年度。</td></tr>
+      <tr class="data-table-note"><td colspan="6" lang="ja">円安・輸入物価高で名実逆転が大きい年度。</td></tr>
       <tr>
         <th scope="row" class="mono" data-year="2024">FY2024</th>
         <td class="mono">+3.0%</td>
         <td class="mono">+3.7%</td>
+        <td class="mono">+3.7%</td>
         <td class="mono">+0.7pt</td>
-        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2023/r060126mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a></td>
+        <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2023/r060126mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="actual">Actual</a> <a href="https://www.esri.cao.go.jp/jp/sna/data/data_list/kakuhou/files/2024/tables/2024ffm1n_jp.xlsx" target="_blank" rel="noopener" data-src="first-release">First release</a></td>
       </tr>
-      <tr class="data-table-note"><td colspan="5" lang="ja">本年次推計に収録された最新（現時点で最終）確定年度。</td></tr>
+      <tr class="data-table-note"><td colspan="6" lang="ja">本年次推計に収録された最新（現時点で最終）確定年度。</td></tr>
       <tr>
         <th scope="row" class="mono" data-year="2025">FY2025</th>
         <td class="mono">+2.7%</td>
+        <td class="mono">—</td>
         <td class="mono" data-ph="pending">Actual not yet finalized (fiscal year in progress)</td>
         <td class="mono">—</td>
         <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/2024/r070124mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a></td>
@@ -497,6 +544,7 @@
       <tr>
         <th scope="row" class="mono" data-year="2026">FY2026</th>
         <td class="mono">+3.4%</td>
+        <td class="mono">—</td>
         <td class="mono" data-ph="pending">Actual not yet finalized (fiscal year in progress)</td>
         <td class="mono">—</td>
         <td class="data-table-src"><a href="https://www5.cao.go.jp/keizai1/mitoshi/r080123mitoshi.pdf" target="_blank" rel="noopener" data-src="forecast">Forecast</a></td>

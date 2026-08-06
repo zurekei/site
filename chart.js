@@ -38,6 +38,10 @@ const T = {
       "1990base": "1990年基準",
       "1995base": "1995年基準",
       "2000base": "2000年基準",
+      "2005base": "2005年基準",
+      "2011base": "2011年基準",
+      "2015base": "2015年基準",
+      "2020base": "2020年基準",
       "2005base-ref": "2005年基準・参考系列",
       "2011base-ref": "2011年基準・参考系列",
       "2015base-ref": "2015年基準・参考系列",
@@ -53,6 +57,11 @@ const T = {
     // 帯は基準別の系列を束ねたもので、行ごとの出典は data/gdp_vintages.csv が
     // 持つ。ここに置くのは基準ごとに1行へ畳んで見せるための文言だけ。
     vintageSourcePrefix: "背景の帯(実績の改定幅)の出典 — 基準別の系列:",
+    // 初回確報(その年度の実績として最初に公表された値)。表の見出しと、年ごとの
+    // 読み出しの両方で使う。
+    firstRelease: "初回確報",
+    firstReleasePrefix: "初回確報: ",
+    firstReleaseDriftPrefix: "改定ドリフト(初回確報→実績): ",
     footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
     footerAbout: "このサイトについて",
     footerContact: "お問い合わせ",
@@ -99,6 +108,10 @@ const T = {
       "1990base": "1990 base",
       "1995base": "1995 base",
       "2000base": "2000 base",
+      "2005base": "2005 base",
+      "2011base": "2011 base",
+      "2015base": "2015 base",
+      "2020base": "2020 base",
       "2005base-ref": "2005 base, reference series",
       "2011base-ref": "2011 base, reference series",
       "2015base-ref": "2015 base, reference series",
@@ -111,6 +124,9 @@ const T = {
     vintageRangePrefix: "Revision range across bases: ",
     vintageSeriesSuffix: " vintages",
     vintageSourcePrefix: "Sources for the background band (the revision range), one series per statistical base year:",
+    firstRelease: "First release",
+    firstReleasePrefix: "First release: ",
+    firstReleaseDriftPrefix: "Revision drift (first release → actual): ",
     footerSrc: "src: Cabinet Office of Japan / SNA",
     footerAbout: "About this site",
     footerContact: "Contact",
@@ -136,8 +152,8 @@ const METRICS = {
     titleEn: "Real GDP growth",
     desc: "内閣府「経済見通しと経済財政運営の基本的態度」の当初見通し(実質)と、同じく内閣府「国民経済計算(SNA)」の確定した実績を並べたもの。実質経済成長率とも呼ぶ。",
     descEn: "The government's initial forecast (real) laid alongside the confirmed actual. Also called the real economic growth rate.",
-    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。",
-    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases).",
+    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。細い点線は初回確報、すなわちその年度の実績として最初に公表された値で、実績線との差が公表後の改定で動いた分にあたる。見通しとのズレのうち、どこまでが予測を外した分でどこからが実績が動いた分かは、この2本を見比べて読む。FY1999〜2002は当時の年版が内閣府のサイトに残っておらず、FY1997以前は年版そのものが無いため、この線は途切れる。",
+    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases). The fine dotted line is the first release — the figure first published as that year's actual — so its distance from the actual line is how much the actual moved after publication. Reading the two together separates the part of the gap that was a forecasting miss from the part that was the actual moving. The line breaks for FY1999–2002, whose editions are no longer on the Cabinet Office's site, and before FY1998, for which no edition exists online.",
     archiveNote: "FY1997以前の実質GDP見通しは内閣府の見通しアーカイブ(FY1998年度分〜)には存在しない。経済企画庁長官の経済演説(国会会議録・衆議院本会議)から、FY1980〜1997の18年分を独自に収集した。",
     archiveNoteEn: "The real GDP forecast for FY1997 and earlier is not in the Cabinet Office's online forecast archive, which begins at FY1998. It was collected independently from the Diet record of the Director-General of the Economic Planning Agency's economic address to the House of Representatives, covering all 18 fiscal years from FY1980 through FY1997.",
     csv: "/data/gdp_forecast.csv",
@@ -153,6 +169,12 @@ const METRICS = {
     // `<vintageCol>_source_url` として機械的に導く(bin/build.mjs の
     // vintageSourceHtml)。基準が増えても行が増えるだけで、ここは変わらない。
     vintageCol: "actual_real",
+    // 初回確報(その年度の成長率として最初に公表された値)。vintageCsv が
+    // 「後年に基準別へ推計し直した幅」なのに対し、こちらは「当時公表された値」
+    // そのもので、実績線との差が改定ドリフトにあたる。出典URLの列名は
+    // `<firstReleaseCol>_source_url` として機械的に導く(vintageCol と同じ規約)。
+    firstReleaseCsv: "/data/gdp_first_release.csv",
+    firstReleaseCol: "first_real",
     unit: "%",
   },
   "gdp-nominal": {
@@ -160,8 +182,8 @@ const METRICS = {
     titleEn: "Nominal GDP growth",
     desc: "内閣府「経済見通しと経済財政運営の基本的態度」の当初見通し(名目)と、同じく内閣府「国民経済計算(SNA)」の確定した実績を並べたもの。名目経済成長率とも呼ぶ。",
     descEn: "The government's initial forecast (nominal) laid alongside the confirmed actual. Also called the nominal economic growth rate.",
-    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。",
-    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases).",
+    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。細い点線は初回確報、すなわちその年度の実績として最初に公表された値で、実績線との差が公表後の改定で動いた分にあたる。見通しとのズレのうち、どこまでが予測を外した分でどこからが実績が動いた分かは、この2本を見比べて読む。FY1999〜2002は当時の年版が内閣府のサイトに残っておらず、FY1997以前は年版そのものが無いため、この線は途切れる。",
+    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases). The fine dotted line is the first release — the figure first published as that year's actual — so its distance from the actual line is how much the actual moved after publication. Reading the two together separates the part of the gap that was a forecasting miss from the part that was the actual moving. The line breaks for FY1999–2002, whose editions are no longer on the Cabinet Office's site, and before FY1998, for which no edition exists online.",
     archiveNote: "FY1997以前の名目GDP見通しも内閣府の見通しアーカイブには存在しない。FY1982〜1987は国会会議録の委員会質疑・政府答弁から、FY1989〜1997は財務省『平成財政史』の記述から、FY1988は同じく財務省『昭和財政史(昭和49〜63年度)』の記述から収集した。",
     archiveNoteEn: "The nominal GDP forecast for FY1997 and earlier is likewise absent from the Cabinet Office's archive. FY1982–1987 was collected from Diet committee questioning and government responses, FY1989–1997 from the Ministry of Finance's Heisei Zaisei-shi (Fiscal History of the Heisei Era), and FY1988 from the same ministry's Showa Zaisei-shi (Fiscal History of the Showa Era, FY1974–1988).",
     csv: "/data/gdp_forecast.csv",
@@ -173,6 +195,8 @@ const METRICS = {
     actualSourceLabel: "名目",
     vintageCsv: "/data/gdp_vintages.csv",
     vintageCol: "actual_nominal",
+    firstReleaseCsv: "/data/gdp_first_release.csv",
+    firstReleaseCol: "first_nominal",
     unit: "%",
   },
   "unemployment": {
@@ -431,6 +455,20 @@ async function main() {
     });
   }
 
+  // first-release data (optional, per-metric): the growth rate as it was first
+  // published for that fiscal year. Keyed by year.
+  // 年版(確報)ごとに1行なので畳む処理は要らない。収録が飛ぶ年度があるため
+  // (FY1999〜2002の年版はウェブ上に残っていない)、線は連続しているとは限らない。
+  const firstReleaseByYear = new Map();
+  if (metric.firstReleaseCsv) {
+    const frows = await loadCSV(metric.firstReleaseCsv);
+    frows.forEach((fr) => {
+      const v = toNum(fr[metric.firstReleaseCol]);
+      if (v === null) return;
+      firstReleaseByYear.set(Number(fr.fiscal_year), { val: v, basis: fr.release_basis || "" });
+    });
+  }
+
   const actualPoints = rows.filter((r) => r.actualVal !== null);
   const forecastYears = rows.filter((r) => r.forecastVal !== null);
 
@@ -444,7 +482,11 @@ async function main() {
   const xMax = Math.max(...allYears);
 
   const vintageExtremes = [...vintageByYear.values()].flatMap((v) => [v.min, v.max]);
-  const allValues = rows.flatMap((r) => [r.forecastVal, r.actualVal]).filter((v) => v !== null).concat(vintageExtremes);
+  const firstReleaseValues = [...firstReleaseByYear.values()].map((f) => f.val);
+  const allValues = rows
+    .flatMap((r) => [r.forecastVal, r.actualVal])
+    .filter((v) => v !== null)
+    .concat(vintageExtremes, firstReleaseValues);
   const yMin = Math.min(...allValues, 0);
   const yMax = Math.max(...allValues, 0);
   const yPad = (yMax - yMin) * 0.12 || 1;
@@ -556,6 +598,24 @@ async function main() {
       svg.appendChild(label);
       gapLabelEls.push(label);
     }
+  }
+
+  // 初回確報の線。実績線より先に描いて下に敷く(手前に来るべきなのは今の実績で、
+  // これはその手前の姿)。収録の飛び(FY1999〜2002)は buildSegments が分割するので、
+  // 繋がっていない年度が繋がって見えることはない。
+  if (firstReleaseByYear.size > 0) {
+    const frPoints = [...firstReleaseByYear.entries()]
+      .map(([year, f]) => ({ year, firstVal: f.val }))
+      .sort((a, b) => a.year - b.year);
+    const frSegments = buildSegments(frPoints);
+    svg.appendChild(svgEl("path", { class: "line-first-release", d: pathFromSegments(frSegments, "firstVal") }));
+    frSegments
+      .filter((seg) => seg.length === 1)
+      .forEach((seg) => {
+        svg.appendChild(
+          svgEl("circle", { class: "line-first-release-dot", cx: xScale(seg[0].year), cy: yScale(seg[0].firstVal), r: 1.75 })
+        );
+      });
   }
 
   if (forecastYears.length > 0) {
@@ -739,6 +799,20 @@ async function main() {
     if (r.forecastBasis && T[lang].forecastBasisLabels[r.forecastBasis]) links.push(`${T[lang].forecastBasisPrefix}${T[lang].forecastBasisLabels[r.forecastBasis]}`);
     if (actualUrl) links.push(`${T[lang].actualSourcePrefix}<a href="${escapeHTML(actualUrl)}" target="_blank" rel="noopener">${escapeHTML(actualUrl)}</a>`);
     if (r.basis && T[lang].basisLabels[r.basis]) links.push(`${T[lang].actualBasisPrefix}${T[lang].basisLabels[r.basis]}`);
+    // 初回確報と、そこから今の実績までの動き(改定ドリフト)。見通しとのズレが
+    // 「予測を外した分」と「実績が動いた分」のどちらなのかは、この2つを並べて
+    // 初めて読める。
+    const fr = firstReleaseByYear.get(r.year);
+    if (fr) {
+      const u = metricUnit(metric, lang);
+      links.push(`${T[lang].firstReleasePrefix}${fmtVal(fr.val, u, metric.signed)}`);
+      if (r.actualVal !== null) {
+        const drift = r.actualVal - fr.val;
+        links.push(
+          `${T[lang].firstReleaseDriftPrefix}${drift > 0 ? "+" : ""}${drift.toFixed(1)}${gapUnitSuffix(metric, lang)}`
+        );
+      }
+    }
     const vRange = vintageByYear.get(r.year);
     if (vRange) {
       const u = metricUnit(metric, lang);
@@ -803,8 +877,9 @@ async function main() {
     dataTable.querySelectorAll("[data-ph]").forEach((el) => {
       el.textContent = placeholder[el.dataset.ph] ?? el.textContent;
     });
+    const srcLabel = { forecast: t.forecast, actual: t.actual, "first-release": t.firstRelease };
     dataTable.querySelectorAll("a[data-src]").forEach((el) => {
-      el.textContent = el.dataset.src === "forecast" ? t.forecast : t.actual;
+      el.textContent = srcLabel[el.dataset.src] ?? el.textContent;
     });
   }
 

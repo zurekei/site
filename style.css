@@ -869,6 +869,21 @@ a.card:hover {
   stroke-linecap: round;
   opacity: 0.5;
 }
+/* 初回確報(当時公表された実績)。実績と同じ navy の系統に置くのは、これも実績
+   だからで、違うのは「いつ時点の実績か」だけ。ただし .line-actual-ref(遡及の
+   参考系列)と取り違えられては困るので、あちらの太い破線に対してこちらは
+   細い点線にしてある。両者は年度が重ならない(refはFY1994以前、初回確報は
+   FY1998以降)が、凡例では並ぶので見た目で区別が付く必要がある。 */
+.line-first-release {
+  fill: none;
+  stroke: var(--navy);
+  stroke-width: 1.25;
+  stroke-dasharray: 1 2.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+.line-first-release-dot { fill: var(--navy); opacity: 0.5; }
 .seam-line {
   stroke: var(--line);
   stroke-width: 1;

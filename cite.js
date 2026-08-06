@@ -132,6 +132,12 @@ const DATA_FILES = [
     pages: ["gdp-real", "gdp-nominal"],
   },
   {
+    file: "gdp_first_release.csv",
+    ja: "実質GDP・名目GDP成長率の初回確報（その年度の実績として最初に公表された値）",
+    en: "Real/nominal GDP growth as first released (the figure first published for that fiscal year)",
+    pages: ["gdp-real", "gdp-nominal"],
+  },
+  {
     file: "cpi_forecast.csv",
     ja: "消費者物価(総合)の上昇率の見通しと実績",
     en: "Consumer price inflation — forecast and actual",
