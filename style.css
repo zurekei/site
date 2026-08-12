@@ -688,6 +688,10 @@ a.card:hover {
 
 .site-footer-row {
   display: flex;
+  /* 2026-08-13: 姉妹サイトへのリンクで5項目になった。折り返しを許さないと
+     狭い画面で溢れる(足す前から index は4項目で窮屈だった)。 */
+  flex-wrap: wrap;
+  gap: 8px 16px;
   justify-content: space-between;
   border-top: 1px solid var(--line);
   margin-top: 36px;

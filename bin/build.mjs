@@ -123,7 +123,7 @@ function hreflangTags(pair) {
 }
 
 // style.css / chart.js のキャッシュバスター。ページ側の ?v= と揃える。
-const ASSET_V = "20260803a";
+const ASSET_V = "20260813a";
 
 const read = (f) => fs.readFileSync(path.join(SITE_DIR, f), "utf8");
 
@@ -592,6 +592,7 @@ function footer(lang) {
     <span id="t-footer-src">${t.src}</span>
     <a class="footer-about" id="t-footer-about" href="${t.aboutHref}">${t.about}</a>
     <a class="footer-about" id="t-footer-contact" href="${t.contactHref}">${t.contact}</a>
+    <a class="footer-about" href="https://onrecord.zurekei.org/"${lang === "en" ? ' lang="ja"' : ""} target="_blank" rel="noopener">言質OnRecord</a>
   </footer>`;
 }
 
@@ -871,6 +872,7 @@ ${items}
     <span${lang === "ja" ? dual(HUB_TEXT.en.footerSrc) : ""}>${escapeHTML(h.footerSrc)}</span>
     <a class="footer-about" href="${lang === "ja" ? "/about.html" : REL.about.en}"${lang === "ja" ? dual(HUB_TEXT.en.footerAbout) : ""}>${escapeHTML(h.footerAbout)}</a>
     <a class="footer-about" href="${lang === "ja" ? "/contact.html" : REL.contact.en}"${lang === "ja" ? dual(HUB_TEXT.en.footerContact) : ""}>${escapeHTML(h.footerContact)}</a>
+    <a class="footer-about" href="https://onrecord.zurekei.org/"${lang === "en" ? ' lang="ja"' : ""} target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
 <script>
@@ -1317,6 +1319,7 @@ ${fertilitySection(d, "en")}
     <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
     <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
     <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
+    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
@@ -1659,6 +1662,7 @@ ${birthsSection(d, "en")}
     <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
     <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
     <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
+    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
@@ -1916,6 +1920,7 @@ ${bojVintagesSection(d, "en")}
     <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
     <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
     <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
+    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
@@ -2154,6 +2159,7 @@ ${rows.map((r) => hoanRowHtml(r, "en")).join("\n")}
     <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
     <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
     <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
+    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
@@ -2522,6 +2528,7 @@ ${cardFallback}
     <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.correctionsLink)}</a>
     <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.aboutLink)}</a>
     <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.contactLink)}</a>
+    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
@@ -2653,6 +2660,7 @@ ${header("en", urls)}
     <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
     <a class="footer-about" id="t-footer-index" href="${REL.home.en}">${escapeHTML(t.footerIndex)}</a>
     <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
+    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
 <script src="/about.js?v=${ASSET_V}"></script>
@@ -2773,6 +2781,7 @@ ${header("en", urls)}
     <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
     <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
     <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
+    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
@@ -2868,6 +2877,7 @@ ${header("en", urls)}
     <a class="footer-about" id="t-footer-index" href="${REL.home.en}">${escapeHTML(t.footerIndex)}</a>
     <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
     <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
+    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
 
@@ -2984,6 +2994,7 @@ ${header("en", urls)}
     <a class="footer-about" id="t-footer-index" href="${REL.home.en}">${escapeHTML(t.footerIndex)}</a>
     <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
     <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
+    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
 

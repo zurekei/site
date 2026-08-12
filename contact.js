@@ -6,7 +6,7 @@ const T = {
   ja: {
     back: "← 指標一覧",
     title: "お問い合わせ",
-    lead: "ズレ計についてのご質問、データの誤りご指摘、見通し値・実績値の修正提案などはこちらから。",
+    lead: "ズレ計と言質OnRecordについてのご質問、データや引用の誤りのご指摘、見通し値・実績値の修正提案などはこちらから。",
     labelName: "お名前",
     labelEmail: "メールアドレス",
     labelAffiliation: "所属・肩書",
@@ -26,7 +26,7 @@ const T = {
   en: {
     back: "← Indicators",
     title: "Contact",
-    lead: "Questions about this site, corrections to the data, and proposed revisions to forecast or actual figures all go here.",
+    lead: "Questions about zurekei or its sister site OnRecord, corrections to the data or to a quoted statement, and proposed revisions to forecast or actual figures all go here.",
     labelName: "Name",
     labelEmail: "Email",
     labelAffiliation: "Affiliation or title",
