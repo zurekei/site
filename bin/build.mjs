@@ -581,13 +581,28 @@ function footer(lang) {
   </footer>`;
 }
 
+// favicon。2026-08-12まで、置いてあるのに <link rel="icon"> がどのページにも
+// 無かった(ブラウザは /favicon.ico を暗黙に取りにいくが、そのファイルは存在せず、
+// Cloudflare Pages は存在しないパスにトップのHTMLを200で返すので、画像として
+// 壊れたものを掴む)。兄弟サイト archives.zurekei.org ができてタブでの識別が
+// 意味を持つようになったので明示する。
+//
+// SVGを先に書くのは、対応するブラウザにそちらを使わせるため(拡大に強い)。
+// PNGは非対応ブラウザ向けの控えで、apple-touch-icon はホーム画面追加用。
+// ここもルート絶対で書く(理由は下の assetHead() のコメントと同じ。
+// /chart/ 配下から相対で書くと /chart/zurekei_icon.svg を指す)。
+const FAVICON_HEAD =
+  `<link rel="icon" type="image/svg+xml" href="/zurekei_icon.svg">\n` +
+  `<link rel="icon" type="image/png" sizes="512x512" href="/zurekei_icon_512.png">\n` +
+  `<link rel="apple-touch-icon" href="/zurekei_icon_512.png">`;
+
 // このディレクトリのページは / ではなく /chart/ に置かれる。相対パスのままだと
 // style.css が /chart/style.css を指し、Pages は存在しないパスにもトップページの
 // HTML を 200 で返すので「CSSのつもりでHTMLを読み込む」壊れ方になる（気づきにくい）。
 // ルート絶対で書くこと。<base> で誤魔化さないのは、ここを読んだ人が理由ごと
 // 分かるようにするため。
 function assetHead() {
-  return `<link rel="stylesheet" href="/style.css?v=${ASSET_V}">`;
+  return `${FAVICON_HEAD}\n<link rel="stylesheet" href="/style.css?v=${ASSET_V}">`;
 }
 
 // JSが動かないときに、中身が入らないまま残る部品を畳んで、案内文と入れ替える。
@@ -1252,7 +1267,7 @@ ${hreflangTags(urls)}
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+${assetHead()}
 <!-- JAの fertility.html と同じ規則。#fertility-source をここに入れないのは、
      中身をビルドがHTMLに埋めてあり、JSが動かない相手にこそ見せたいものだから
      (隠すと出典が届かなくなる)。#fertility-legend はJSが描くSVGの凡例なので
@@ -1596,7 +1611,7 @@ ${hreflangTags(urls)}
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+${assetHead()}
 <!-- JAの births.html と同じ規則。#births-source をここに入れないのは、中身を
      ビルドがHTMLに埋めてあり、JSが動かない相手にこそ見せたいものだから。 -->
 <noscript><style>.chart-wrap > svg, #births-legend { display: none !important; } .chart-noscript { display: block; }</style></noscript>
@@ -1848,7 +1863,7 @@ ${hreflangTags(urls)}
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+${assetHead()}
 <noscript><style>.chart-wrap > svg, .bojv-legend { display: none !important; } .chart-noscript { display: block; }</style></noscript>
 ${bojVintagesJsonLd(d, "en")}</head>
 <body>
@@ -2070,7 +2085,7 @@ ${hreflangTags(urls)}
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+${assetHead()}
 ${hoanJsonLd(rows, "en")}</head>
 <body>
 <div class="page">
@@ -2415,7 +2430,7 @@ ${hreflangTags(REL.home)}
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+${assetHead()}
 ${buildHomeJsonLd(desc, keys, "en")}
 </head>
 <body>
@@ -2536,7 +2551,7 @@ ${hreflangTags(urls)}
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+${assetHead()}
 </head>
 <body>
 <div class="page">
@@ -2722,7 +2737,7 @@ ${hreflangTags(urls)}
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+${assetHead()}
 </head>
 <body>
 <div class="page">
@@ -2782,7 +2797,7 @@ ${hreflangTags(urls)}
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/assets/og-en.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+${assetHead()}
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 ${CONTACT_STYLE}
 </head>
@@ -2874,7 +2889,7 @@ ${hreflangTags(urls)}
 <meta property="og:url" content="${url}">
 <meta property="og:image" content="${SITE}/assets/og-en.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="stylesheet" href="/style.css?v=${ASSET_V}">
+${assetHead()}
 ${CITE_STYLE}
 </head>
 <body>
@@ -4763,6 +4778,40 @@ function assetVersionErrors() {
   return errs;
 }
 
+// favicon が全ページに入っているかを見る(2026-08-12)。
+//
+// 生成物側は FAVICON_HEAD から作られるので自動で揃うが、手書きJA(index/about/
+// cite/contact/corrections/fertility/hoan/births/boj-outlook-vintages)は同じ
+// 文字列を書き写している。?v= と同じ「手書き側だけが取り残される」構図なので、
+// 同じように機械で揃いを守る。片方のページだけタブのアイコンが出ない壊れ方は
+// 目視で気づきにくい(そのページを開いた人にしか見えない)。
+//
+// og.html は対象外。OGP画像を焼くための元ページでサイト本体からリンクせず、
+// ブラウザのタブに出ることが無いため(?v= を付けない理由と同じ筋)。
+//
+// fail-closed: 対象が0件になった場合もエラーにする(walkHtml() が壊れたときに
+// 黙って通らないようにする。assetVersionErrors() と同じ考え方)。
+function faviconErrors() {
+  const errs = [];
+  let seen = 0;
+  const want = FAVICON_HEAD.split("\n");
+  for (const file of walkHtml()) {
+    const rel = path.relative(SITE_DIR, file);
+    if (rel === "og.html") continue;
+    seen++;
+    const html = fs.readFileSync(file, "utf8");
+    for (const tag of want) {
+      if (!html.includes(tag)) {
+        errs.push(`favicon 欠落: ${rel} に ${tag} が無い(FAVICON_HEAD と揃えること)`);
+      }
+    }
+  }
+  if (seen === 0) {
+    errs.push("favicon の検査: 対象HTMLを1件も見つけられなかった(0件はありえない)");
+  }
+  return errs;
+}
+
 // index.html の .card-fallback(JSを実行しないクローラにとってトップから各指標へ
 // 辿れる唯一の経路)が、home.js の INDICATOR_META と一致することを見る(2026-08-04)。
 //
@@ -5155,6 +5204,8 @@ if (check) {
   // ?v=(ASSET_V)の揃いも、生成物の新旧・CSV・法令番号のいずれとも関係しない
   // 別種の壊れ方(HTMLは最新でも、参照先のバージョンだけが古い)なので独立に見る。
   const assetVErrs = assetVersionErrors();
+  // favicon の揃いも独立(?v= が合っていてもタグごと欠けていれば効かない)。
+  const faviconErrs = faviconErrors();
   // JAトップの .card-fallback ↔ INDICATOR_META も独立(生成物は最新・?v=も揃って
   // いる状態で、手書きのリンク文字列だけが取り残される壊れ方)。
   const cardFbErrs = cardFallbackErrors();
@@ -5180,6 +5231,7 @@ if (check) {
     hoanNumErrs.length ||
     hoanTransErrs.length ||
     assetVErrs.length ||
+    faviconErrs.length ||
     cardFbErrs.length ||
     ogDescErrs.length ||
     srcReachErrs.length
@@ -5199,6 +5251,7 @@ if (check) {
     hoanNumErrs.forEach((e) => console.error(`✗ ${e}`));
     hoanTransErrs.forEach((e) => console.error(`✗ ${e}`));
     assetVErrs.forEach((e) => console.error(`✗ ${e}`));
+    faviconErrs.forEach((e) => console.error(`✗ ${e}`));
     cardFbErrs.forEach((e) => console.error(`✗ ${e}`));
     ogDescErrs.forEach((e) => console.error(`✗ ${e}`));
     srcReachErrs.forEach((e) => console.error(`✗ ${e}`));
@@ -5206,7 +5259,7 @@ if (check) {
     process.exit(1);
   }
   console.log(
-    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 出生数のforecast_basisの語彙 / 法令番号の英語換算(公布年・law_idとの突き合わせ) / 公式英訳の列(統制語彙・URLの形) / 全HTMLの?v=とASSET_Vの一致 / JAトップのcard-fallbackとINDICATOR_METAの一致 / descriptionとog:descriptionの一致 / data/*.csvの出典URLが静的HTMLから辿れることとも一致）`
+    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 出生数のforecast_basisの語彙 / 法令番号の英語換算(公布年・law_idとの突き合わせ) / 公式英訳の列(統制語彙・URLの形) / 全HTMLの?v=とASSET_Vの一致 / 全HTMLのfaviconの有無 / JAトップのcard-fallbackとINDICATOR_METAの一致 / descriptionとog:descriptionの一致 / data/*.csvの出典URLが静的HTMLから辿れることとも一致）`
   );
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -5236,6 +5289,7 @@ if (check) {
   hoanLawNumErrors().forEach((e) => console.warn(`⚠ ${e}`));
   hoanTranslationErrors().forEach((e) => console.warn(`⚠ ${e}`));
   assetVersionErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  faviconErrors().forEach((e) => console.warn(`⚠ ${e}`));
   cardFallbackErrors().forEach((e) => console.warn(`⚠ ${e}`));
   ogDescriptionErrors().forEach((e) => console.warn(`⚠ ${e}`));
   sourceUrlReachErrors().forEach((e) => console.warn(`⚠ ${e}`));
