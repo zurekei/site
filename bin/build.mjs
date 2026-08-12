@@ -439,8 +439,22 @@ const ORG_NAME = { ja: "ズレ計", en: "zurekei" };
 // 理由が無い正式な日本語名なので)。og:site_name(ページ単位のメタタグ)や
 // WebSite.name(WebSite自体はJA/ENで@idが別なので言語ごとに変えてよい)は
 // ORG_NAME[lang]のまま(ここでの整理と対象が違う)。
+//
+// logo は 2026-08-12 に追加(faviconを全ページに宣言したのと同じ回)。PNGの方を
+// 指すのは、Googleのロゴの要件が「112x112px以上」というラスタ前提の寸法で
+// 書かれており、SVGだと寸法を持たない場合があるため。favicon側でSVGを先に
+// 書いているのとは判断が別で、あちらは表示するブラウザ、こちらは読み取る
+// クローラが相手。参照先は favicon と同じ実体(zurekei_icon_512.png)にして
+// おり、タブのアイコンと検索結果に出るロゴが食い違わないようにしている。
 function orgNode() {
-  return { "@type": "Organization", "@id": ORG_ID, name: ORG_NAME.en, alternateName: ORG_NAME.ja, url: SITE };
+  return {
+    "@type": "Organization",
+    "@id": ORG_ID,
+    name: ORG_NAME.en,
+    alternateName: ORG_NAME.ja,
+    url: SITE,
+    logo: `${SITE}/zurekei_icon_512.png`,
+  };
 }
 
 // パンくずの構造化データ(2026-08-06)。可視のナビゲーション(chart-back等の

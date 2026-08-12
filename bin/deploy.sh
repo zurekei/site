@@ -107,11 +107,76 @@ set +a
 
 cd "$ROOT"
 
+# 配信するのは「リポジトリそのもの」ではなく「除外を適用した複製」にする（2026-08-12）。
+#
+# きっかけ: bin/ 配下のビルド道具6本（build.mjs 283KB・deploy.sh・og.sh・
+# indexnow.sh・build_*.py）が https://zurekei.org/bin/... としてそのまま配信されて
+# いた。これ自体は漏洩ではない（全部 public repo に入っていてGitHub上で読める内容で、
+# 禁止文字列もアカウントIDも含まない）。直す理由は、ビルド道具がサイトの一部として
+# 配信されている状態が単に筋が悪いことと、毎回280KB超を本番に上げていること。
+#
+# ⚠ .assetsignore は使えない。あれは Workers Assets（syncAssets）の仕組みで、
+# `wrangler pages deploy` のアップローダ（validate/walk）は .assetsignore も
+# .gitignore も一切見ず、固定の IGNORE_LIST（_worker.js / _redirects / _headers /
+# _routes.json / functions / .DS_Store / node_modules / .git / .wrangler）だけを
+# 除く。wrangler 4.104.0 の実装を読んで確認した。置いても黙って無視されるので、
+# 「置いたから安全」という思い込みだけが残る（このリポジトリが一番嫌う壊れ方）。
+# よって除外はwranglerに頼らず、こちら側で対象ディレクトリを作って渡す。
+#
+# 除外は「サイトから辿れないもの」だけに絞る。LICENSE / LICENSE-DATA / NOTICE /
+# data/README.md は cite ページから実際にリンクしているので配信対象のまま
+# （消すとリンク切れになる。about.md は誰も取得しないがサイズが小さいので触らない）。
+DEPLOY_EXCLUDE=(
+  bin        # ビルド・デプロイ道具。サイトからは一切参照しない
+  .git       # wrangler も無視するが、16MBを複製する意味が無いので先に外す
+  .wrangler  # 同上
+)
+
+STAGE="$(mktemp -d "${TMPDIR:-/tmp}/zurekei-deploy.XXXXXX")"
+trap 'rm -rf "$STAGE"' EXIT
+
+TAR_EXCLUDE=()
+for e in "${DEPLOY_EXCLUDE[@]}"; do
+  TAR_EXCLUDE+=(--exclude="./$e")
+done
+tar -cf - "${TAR_EXCLUDE[@]}" -C "$ROOT" . | tar -xf - -C "$STAGE"
+
+# 複製が意図どおりかを、複製とは別の手段（find）で数え直す。
+# tar の --exclude のパターン解釈を信用しないための独立検算で、
+# 「除外し過ぎて配信物が欠ける」方向も「除外できていない」方向も両方見る。
+# 片方向だけの検査だと、除外に失敗しても静かに通ってしまう。
+expected="$(cd "$ROOT" && find . -type f -print | while IFS= read -r f; do
+  rel="${f#./}"
+  top="${rel%%/*}"
+  skip=""
+  for e in "${DEPLOY_EXCLUDE[@]}"; do
+    [[ "$top" == "$e" ]] && skip=1
+  done
+  [[ -n "$skip" ]] || printf '%s\n' "$rel"
+done | sort)"
+actual="$(cd "$STAGE" && find . -type f -print | sed 's|^\./||' | sort)"
+
+if [[ "$expected" != "$actual" ]]; then
+  echo "エラー: 配信用の複製が意図と一致しません（除外の実装が壊れています）。" >&2
+  diff <(printf '%s\n' "$expected") <(printf '%s\n' "$actual") >&2 || true
+  exit 1
+fi
+
+if (( ${#expected} == 0 )); then
+  echo "エラー: 配信対象が0件です。" >&2
+  exit 1
+fi
+
+echo "配信対象: $(printf '%s\n' "$expected" | wc -l | tr -d ' ') ファイル（除外: ${DEPLOY_EXCLUDE[*]}）"
+
 # DRY_RUN=1 bin/deploy.sh で、実際に配信せず上のチェックだけを回せる。
 # チェック自体を「本番デプロイを1回撃たないと確かめられない」状態にしないための口。
+# 複製の作成と検算もDRY_RUNの対象に入れてある（除外の実装を確かめるのに本番
+# デプロイが要る状態にしない）。
 if [[ "${DRY_RUN:-}" == "1" ]]; then
   echo "DRY_RUN: チェックのみ通過。デプロイは実行しません。"
   exit 0
 fi
 
-exec npx wrangler pages deploy . --project-name=zurekei-site
+# exec にしない: trap で $STAGE を消す必要がある。
+npx wrangler pages deploy "$STAGE" --project-name=zurekei-site
