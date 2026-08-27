@@ -2775,6 +2775,14 @@ ${header("en", urls)}
     </p>
 
     <div id="corrections-list">${listHtml}</div>
+
+    <section class="about-contact corrections-policy">
+      <h2 class="about-contact-title" id="corrections-policy-title">${escapeHTML(t.policyTitle)}</h2>
+      <p id="corrections-policy-recorded">${escapeHTML(t.policyRecorded)}</p>
+      <p id="corrections-policy-not-recorded">${escapeHTML(t.policyNotRecorded)}</p>
+      <p id="corrections-policy-keep">${escapeHTML(t.policyKeep)}</p>
+      <p id="corrections-policy-report">${t.policyReport}</p>
+    </section>
   </main>
 
   <footer class="site-footer-row">

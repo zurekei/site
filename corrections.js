@@ -9,6 +9,11 @@ const T = {
     lead: "このサイトは、誤りを見つけたときに黙って直すのではなく、記録を残して訂正します。データの転記ミス・出典の誤り・計算式の誤りなどを、発見次第ここに記載します。",
     detailLink: "詳細 →",
     empty: "現時点で訂正の記録はありません。",
+    policyTitle: "訂正の方針",
+    policyRecorded: "記録するのは、このサイトの側の誤りです。CSVへの転記ミス、出典URLの誤り、年度や単位の取り違え、計算の誤り、グラフの描画が元データと食い違っていた場合が該当します。誤りが見つかったときは、値を直すのと同時に、日付・対象・変更前の値・変更後の値・理由を1件としてこのページに残します。変更前の値は消しません。",
+    policyNotRecorded: "出典の側が数値を改めた場合は、訂正ではなくデータの更新として扱います。実績値の確報化や基準改定がこれにあたり、元の値も改定後の値も、それぞれの時点の公表としては正しいためです。掲載している数値と出典が変わらない修正(誤字の直し・表記の統一・リンク先の張り替え)も記録しません。",
+    policyKeep: "一度記録した訂正は削除しません。訂正そのものに誤りがあった場合も、過去の記録は書き換えず、新しい1件として追加します。",
+    policyReport: '誤りにお気づきの場合は、<a href="contact.html">お問い合わせフォーム</a>からご連絡ください。該当ページと、正しいと考えられる値の出典を添えていただけると確認が早くなります。',
     footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
     footerAbout: "このサイトについて",
     footerContact: "お問い合わせ",
@@ -19,6 +24,11 @@ const T = {
     lead: "When this site finds an error, it doesn't fix it quietly — it keeps a record and corrects it. Transcription mistakes, sourcing errors, and calculation errors are listed here as soon as they're found.",
     detailLink: "Details →",
     empty: "No corrections have been recorded yet.",
+    policyTitle: "How corrections are handled",
+    policyRecorded: "What is recorded here are this site's own errors: transcription mistakes in the CSVs, wrong source URLs, a fiscal year or a unit taken for another, arithmetic errors, and charts that disagree with the data behind them. When one is found, the value is fixed and, at the same time, an entry is added here with the date, what it affected, the old value, the new value, and the reason. The old value is never removed.",
+    policyNotRecorded: "When the source itself revises a figure, that is treated as a data update rather than a correction. Provisional figures becoming final, and rebasing, fall into this category: the original figure and the revised one were each correct as published at the time. Fixes that leave the published figures and sources unchanged (typos, wording, replacing a dead link) are not recorded either.",
+    policyKeep: "Entries are never deleted. If a correction itself turns out to be wrong, the existing entry is left as it is and a new one is added.",
+    policyReport: 'If you spot an error, please get in touch via the <a href="contact.html">contact form</a>. Naming the page, and giving a source for the figure you believe to be correct, makes it quicker to check.',
     footerSrc: "src: Cabinet Office of Japan / SNA",
     footerAbout: "About this site",
     footerContact: "Contact",
@@ -51,6 +61,11 @@ function applyStatic(lang) {
   set("t-back", t.back);
   set("corrections-title", t.title);
   set("corrections-lead", t.lead);
+  set("corrections-policy-title", t.policyTitle);
+  set("corrections-policy-recorded", t.policyRecorded);
+  set("corrections-policy-not-recorded", t.policyNotRecorded);
+  set("corrections-policy-keep", t.policyKeep);
+  document.getElementById("corrections-policy-report").innerHTML = t.policyReport;
   set("t-footer-src", t.footerSrc);
   set("t-footer-about", t.footerAbout);
   set("t-footer-contact", t.footerContact);
