@@ -15,12 +15,16 @@
 このプロジェクトの文書は、公開範囲に応じて3段階に分けて管理する。
 
 1. **検討過程**: 設計や表現の迷い・比較検討そのもの。コミットしない(会話・作業メモのみ)。
-2. **思想・動機**(多くの人に読んでほしい): なぜこのサイトを作るか。`about.md`に集約し、サイトのAboutページの原稿とする。
+2. **思想・動機**(多くの人に読んでほしい): なぜこのサイトを作るか。**正はサイトの `/about`**(`about.html` と `about.js`)。`about.md` は最初の下書きで、原稿ではない。
 3. **実装・データの詳細**(監査・貢献者向け): フェーズ計画・データ設計・技術構成など、このCLAUDE.md本体や`data/README.md`のような形式仕様。一般読者向けの文章ではないが、検証可能性のために公開する。
 
-## Aboutページ原稿
+## Aboutページ
 
-→ `about.md` を参照(確定済みドラフト)。
+**正は `about.html` / `about.js`。** 文言を変えるときはそこを直す。
+
+`about.md` は2026-07-31までの下書きで、**ページの方が先に進んでいる**(CC BYの対象列挙・「データと方法」の節・「政府見通しと実績の乖離が…」の一文がページ側だけにある)。2026-09-30まで `https://zurekei.org/about.md` として配信されていて、**同じ文章の2か月前の版が、履歴表示も日付も無しに `/about` と並んで読める状態だった**。末尾の「※一人称は「私」」という執筆メモまで読者に見えていた。`bin/deploy.sh` の `DEPLOY_EXCLUDE` で配信から外し、ルート直下の `.md` はまとめて止めるようにした。
+
+下書きとしての価値はあるので repo には残すが、**ここを直してページが変わることはない。**
 
 ## フェーズ計画
 
@@ -68,7 +72,7 @@
   ```
   **`npx wrangler pages deploy .` を直接叩かないこと。** 素の wrangler は `.gitignore` も `.assetsignore` も一切見ないので、`bin/` や `.gitignore` まで丸ごと配信されるうえ、生成物の陳腐化・秘密ファイルの混入・`_headers` の欠落といった検査を全部飛ばす。`bin/deploy.sh` はそれらを通した**除外済みの複製**を作って wrangler に渡している(中で `npx wrangler pages deploy <複製> --project-name=zurekei-site` を呼ぶ)
   (Deployments画面にブランチ名とコミットメッセージが出るのはwranglerがgitメタデータを付けているだけで、Git連携ではない)
-- **配信するファイルは「サイトがそれを参照するか」で選ぶ**(機密かどうかではない)。参照しないものは置かない — 現在の除外は `bin` / `CLAUDE.md` / `.gitignore` / `.git` / `.wrangler`(`bin/deploy.sh` の `DEPLOY_EXCLUDE`)。**除外リストを触るときは、除外しない側の一覧も同じ基準で読み直すこと。** 「リンクしているから残す」は到達性しか見ておらず、`LICENSE` / `LICENSE-DATA` / `NOTICE` は拡張子が無いため `application/octet-stream` で返り、cite ページのリンクを押すと**表示ではなくダウンロード**になっていた(2026-09-30に発覚)。手当てが `_headers` で、この4つ(＋`data/README.md`)を `text/plain` にしている
+- **配信するファイルは「サイトがそれを参照するか」で選ぶ**(機密かどうかではない)。参照しないものは置かない — 現在の除外は `bin` / `CLAUDE.md` / `.gitignore` / `README.md` / `about.md` / `.git` / `.wrangler`(`bin/deploy.sh` の `DEPLOY_EXCLUDE`)。**ルート直下の `.md` は名前を1つずつ足すのをやめて形で止めている**(CLAUDE.md・README.md・about.md の3つが順に同じ穴に落ちたため)。読ませたい `.md` は `data/` 配下に置く。**除外リストを触るときは、除外しない側の一覧も同じ基準で読み直すこと。** 「リンクしているから残す」は到達性しか見ておらず、`LICENSE` / `LICENSE-DATA` / `NOTICE` は拡張子が無いため `application/octet-stream` で返り、cite ページのリンクを押すと**表示ではなくダウンロード**になっていた(2026-09-30に発覚)。手当てが `_headers` で、この4つ(＋`data/README.md`)を `text/plain` にしている
 - **`_headers` と `functions/` は静的ファイルとしては配信されない。** wrangler のアップローダは固定の IGNORE_LIST(`_worker.js` / `_redirects` / `_headers` / `_routes.json` / `functions` / `.DS_Store` / `node_modules` / `.git` / `.wrangler`)を除くため、Pages が設定として読むだけで `/_headers` を叩いても出ない。**つまり複製から落ちても画面には何も出ない**(content-type が既定に戻ってリンクがダウンロードになる/`/api/contact` が消えてフォームの送信だけが失敗する)。`bin/deploy.sh` が複製の中にあることと `_headers` の指定行数を検査している
 - アクセス解析: Cloudflare Web Analytics。Pagesプロジェクトの Metrics タブで有効化済みで、ビーコンは配信時に全HTMLへ自動挿入される。**有効化・設定変更は次回デプロイから反映される**ためデプロイを1回挟む
 - フレームワーク: シンプル優先。Vite + React または素のHTML+JS。ビルドが複雑になるなら素のHTMLでよい

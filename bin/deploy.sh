@@ -125,7 +125,7 @@ cd "$ROOT"
 #
 # 除外は「サイトから辿れないもの」だけに絞る。LICENSE / LICENSE-DATA / NOTICE /
 # data/README.md は cite ページから実際にリンクしているので配信対象のまま
-# （消すとリンク切れになる。about.md は誰も取得しないがサイズが小さいので触らない）。
+# （消すとリンク切れになる）。
 #
 # ⚠ ここに書く名前だけが落ちる。上の 1. の2つの網は**どちらも .gitignore を捕まえない**:
 #   秘密ファイル検査は名前の形（*.env / *secret* 等）でしか見ず、git 管理外検査は
@@ -139,10 +139,22 @@ cd "$ROOT"
 #   リンクしているので残す」は到達性しか見ておらず、残した4つが**開いて読めるか**を
 #   一度も見ていなかった（実測すると3つが octet-stream で、リンクを押すと表示ではなく
 #   ダウンロードになっていた）。その手当てが _headers で、下で複製にあることを検査する。
+#
+# ⚠ **「小さいから触らない」を理由にしないこと。** ここには 2026-09-30 まで
+#   「about.md は誰も取得しないがサイズが小さいので触らない」と書いてあった。
+#   サイズは配信するかどうかの根拠にならないし、「誰も取得しない」は測っていない。
+#   実際に起きていたのはリンク切れより悪いことで、about.md は 7/31 で止まった
+#   **/about の旧版**なのに、9/29 に書き足したページと**同時に配信されていた**
+#   （CC BY の対象列挙も「データと方法」の節も無い版が、履歴表示も日付も無しに読めた）。
+#   末尾の「※一人称は「私」」という**自分向けの執筆指示**まで読者に見えていた。
+#   「訂正するときは黙って直さず履歴を残す」と書いているサイトが、その文章自身の
+#   旧版を黙って併置していたことになる。**同じ文章の第2の複製を置かない。**
 DEPLOY_EXCLUDE=(
   bin        # ビルド・デプロイ道具。サイトからは一切参照しない
   CLAUDE.md  # 開発用の仕様書。サイトからリンクしておらず、GitHub で読めれば足りる
   .gitignore # repo の道具。サイトからは参照しない（LICENSE 等は読者向けなので残す）
+  README.md  # repo の入口。サイト側はリポジトリ文書の読み場所として GitHub を指している
+  about.md   # /about の下書き。正は about.html / about.js（下の .md 検査も参照）
   .git       # wrangler も無視するが、16MBを複製する意味が無いので先に外す
   .wrangler  # 同上
 )
@@ -150,16 +162,28 @@ DEPLOY_EXCLUDE=(
 STAGE="$(mktemp -d "${TMPDIR:-/tmp}/zurekei-deploy.XXXXXX")"
 trap 'rm -rf "$STAGE"' EXIT
 
-TAR_EXCLUDE=()
-for e in "${DEPLOY_EXCLUDE[@]}"; do
-  TAR_EXCLUDE+=(--exclude="./$e")
-done
-tar -cf - "${TAR_EXCLUDE[@]}" -C "$ROOT" . | tar -xf - -C "$STAGE"
+# 上のリストは**トップレベルの名前**の一覧なので、複製もトップレベルの項目を
+# 選んで作る。ここは以前 `tar --exclude=./NAME` でやっていたが、**bsdtar は
+# `./` を付けてもパターンをアンカーしない**（実測: bsdtar 3.5.3 / libarchive 3.7.4）。
+# `README.md` をリストに足した回に `data/README.md` まで巻き添えで落ちた。
+# つまり cite ページからリンクしている列の定義が消え、直前のコミットで _headers を
+# 足して「開いて読める」ようにしたばかりのリンクが、そのまま壊れるところだった。
+# 下の検算が止めたので配信には出ていない。**除外の意味と実装を同じ粒度で書く。**
+while IFS= read -r -d '' entry; do
+  name="${entry##*/}"
+  skip=""
+  for e in "${DEPLOY_EXCLUDE[@]}"; do
+    [[ "$name" == "$e" ]] && skip=1
+  done
+  [[ -n "$skip" ]] || cp -R "$entry" "$STAGE/"
+done < <(find "$ROOT" -mindepth 1 -maxdepth 1 -print0)
 
 # 複製が意図どおりかを、複製とは別の手段（find）で数え直す。
-# tar の --exclude のパターン解釈を信用しないための独立検算で、
 # 「除外し過ぎて配信物が欠ける」方向も「除外できていない」方向も両方見る。
 # 片方向だけの検査だと、除外に失敗しても静かに通ってしまう。
+# **この検算は実際に事故を止めている**（すぐ上の bsdtar の件）。複製の作り方を
+# 変えてもここは残すこと: cp が途中で失敗した・シンボリックリンクが実体として
+# 入った・数え上げの間にファイルが増えた、はどれもここでしか見えない。
 expected="$(cd "$ROOT" && find . -type f -print | while IFS= read -r f; do
   rel="${f#./}"
   top="${rel%%/*}"
@@ -210,6 +234,22 @@ if [[ "$HEADER_RULES" != "4" ]]; then
   exit 1
 fi
 echo "_headers: LICENSE / LICENSE-DATA / NOTICE / data/README.md を text/plain で返す指定あり"
+
+# ルート直下に .md を置かない。上の除外リストは**名前を書いたものしか落ちない**ので、
+# ルートに新しい .md を足した人は、それが配信されることに気づかないまま気づかない。
+# 実際に CLAUDE.md・README.md・about.md の3つが順にそうなっていた（3回とも別の日に
+# 別の理由で見つけた）。**名前を1つずつ足して回るのをやめて、形で止める。**
+# data/README.md のような「読ませたい .md」は data/ 配下にあるので対象外。
+# ここで止まったら、除外リストに足すか、読ませたいなら data/ 側へ置くかを決めること。
+STRAY_MD="$(find "$STAGE" -maxdepth 1 -name '*.md' -type f -exec basename {} \;)"
+if [[ -n "$STRAY_MD" ]]; then
+  echo "エラー: 配信用の複製のルートに .md があります:" >&2
+  echo "$STRAY_MD" | sed 's/^/  /' >&2
+  echo "  ルート直下の .md はサイトからリンクされない。DEPLOY_EXCLUDE に足すか、" >&2
+  echo "  読ませたいものなら data/ 配下に置いて _headers で text/plain にすること。" >&2
+  exit 1
+fi
+echo "ルート直下の .md: なし（サイトが参照しない文書を配信しないため）"
 
 # DRY_RUN=1 bin/deploy.sh で、実際に配信せず上のチェックだけを回せる。
 # チェック自体を「本番デプロイを1回撃たないと確かめられない」状態にしないための口。
