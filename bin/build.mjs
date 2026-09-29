@@ -123,7 +123,7 @@ function hreflangTags(pair) {
 }
 
 // style.css / chart.js のキャッシュバスター。ページ側の ?v= と揃える。
-const ASSET_V = "20260929a";
+const ASSET_V = "20260929b";
 
 const read = (f) => fs.readFileSync(path.join(SITE_DIR, f), "utf8");
 
@@ -183,6 +183,36 @@ const { METRICS, T, escapeHTML, safeUrl, toNum, parseCSV, computeGapStats } = R;
 // 出すので、data-en が要る場面はJA側の静的ページのみ）。
 function dual(en) {
   return ` data-en="${escapeHTML(en)}"`;
+}
+
+/* ── フッターの共通リンク(2026-09-29) ──────────────────────────
+   並びは全ページ共通(指標一覧へ → 訂正履歴 → このサイトについて → お問い合わせ
+   → 言質OnRecord)で、自ページへのリンクだけを抜く。以前はページごとに手で並べて
+   いて、指標ページには訂正履歴が、cite にはお問い合わせが無く、about と contact
+   では順序も違っていた(UIレビュー指摘)。生成するページはここを通す。手書きの
+   JAページ(index/about/contact/corrections/cite/hoan/fertility/births/
+   boj-outlook-vintages)は同じ並びで手で書いてあり、footerErrors() が全ページの
+   並びと文言をこの表と突き合わせる。文言は各ページの .js の辞書(footerAbout
+   など)と同じ語で、あちらを変えたらここも変える(footerErrors() が食い違いを拾う)。
+   id は全リンクに t-footer-<key> を付ける。JSが書き換えるidと書き換えないidが
+   混ざるが、JA/ENで同じidの集合になっていれば idCoverageErrors() は通る。 */
+const FOOTER_LINKS = [
+  { key: "index", ja: "指標一覧へ", en: "Indicators", jaHref: "/", enHref: REL.home.en },
+  { key: "corrections", ja: "訂正履歴", en: "Corrections", jaHref: "/corrections.html", enHref: REL.corrections.en },
+  { key: "about", ja: "このサイトについて", en: "About this site", jaHref: "/about.html", enHref: REL.about.en },
+  { key: "contact", ja: "お問い合わせ", en: "Contact", jaHref: "/contact.html", enHref: REL.contact.en },
+];
+
+// current: 自ページのキー(FOOTER_LINKS の key)。該当しないページは null。
+// dualEn: JAページの中で data-en による切り替えをする場合(/chart/ 一覧)だけ true。
+function footerLinks(lang, current, { dualEn = false } = {}) {
+  const links = FOOTER_LINKS.filter((l) => l.key !== current).map((l) => {
+    const href = lang === "en" ? l.enHref : l.jaHref;
+    const extra = dualEn ? dual(l.en) : "";
+    return `    <a class="footer-about" id="t-footer-${l.key}" href="${href}"${extra}>${escapeHTML(l[lang])}</a>`;
+  });
+  links.push(`    <a class="footer-about" href="https://onrecord.zurekei.org/"${lang === "en" ? ' lang="ja"' : ""} target="_blank" rel="noopener">言質OnRecord</a>`);
+  return links.join("\n");
 }
 
 // /en/ ページの生成に要る4ファイルぶんの取り込み。手書きページ(index/about/
@@ -574,8 +604,8 @@ function header(lang, urls) {
     </a>
     <div class="header-right">
       <div class="lang-toggle">
-        <a id="lang-ja" class="lang-btn mono${lang === "ja" ? " active" : ""}" href="${urls.ja}">JA</a>
-        <a id="lang-en" class="lang-btn mono${lang === "en" ? " active" : ""}" href="${urls.en}">EN</a>
+        <a id="lang-ja" class="lang-btn mono${lang === "ja" ? ' active" aria-current="true' : ""}" href="${urls.ja}">JA</a>
+        <a id="lang-en" class="lang-btn mono${lang === "en" ? ' active" aria-current="true' : ""}" href="${urls.en}">EN</a>
       </div>
     </div>
   </header>`;
@@ -589,14 +619,9 @@ function header(lang, urls) {
 function footer(lang, key, metric) {
   const src = lang === "en" ? metric.footerSrcEn : metric.footerSrc;
   if (!src) throw new Error(`chart.js の METRICS["${key}"] に footerSrc${lang === "en" ? "En" : ""} が無い`);
-  const t = lang === "en"
-    ? { src, about: T.en.footerAbout, contact: T.en.footerContact, aboutHref: REL.about.en, contactHref: REL.contact.en }
-    : { src, about: T.ja.footerAbout, contact: T.ja.footerContact, aboutHref: "/about.html", contactHref: "/contact.html" };
   return `  <footer class="site-footer-row">
-    <span id="t-footer-src">${escapeHTML(t.src)}</span>
-    <a class="footer-about" id="t-footer-about" href="${t.aboutHref}">${t.about}</a>
-    <a class="footer-about" id="t-footer-contact" href="${t.contactHref}">${t.contact}</a>
-    <a class="footer-about" href="https://onrecord.zurekei.org/"${lang === "en" ? ' lang="ja"' : ""} target="_blank" rel="noopener">言質OnRecord</a>
+    <span id="t-footer-src">${escapeHTML(src)}</span>
+${footerLinks(lang, null)}
   </footer>`;
 }
 
@@ -874,9 +899,7 @@ ${items}
 
   <footer class="site-footer-row">
     <span${lang === "ja" ? dual(HUB_TEXT.en.footerSrc) : ""}>${escapeHTML(h.footerSrc)}</span>
-    <a class="footer-about" href="${lang === "ja" ? "/about.html" : REL.about.en}"${lang === "ja" ? dual(HUB_TEXT.en.footerAbout) : ""}>${escapeHTML(h.footerAbout)}</a>
-    <a class="footer-about" href="${lang === "ja" ? "/contact.html" : REL.contact.en}"${lang === "ja" ? dual(HUB_TEXT.en.footerContact) : ""}>${escapeHTML(h.footerContact)}</a>
-    <a class="footer-about" href="https://onrecord.zurekei.org/"${lang === "en" ? ' lang="ja"' : ""} target="_blank" rel="noopener">言質OnRecord</a>
+${footerLinks(lang, null, { dualEn: lang === "ja" })}
   </footer>
 </div>
 <script>
@@ -1321,9 +1344,7 @@ ${fertilitySection(d, "en")}
 
   <footer class="site-footer-row">
     <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
-    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
-    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
-    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
+${footerLinks("en", null)}
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
@@ -1664,9 +1685,7 @@ ${birthsSection(d, "en")}
 
   <footer class="site-footer-row">
     <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
-    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
-    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
-    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
+${footerLinks("en", null)}
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
@@ -1901,7 +1920,7 @@ ${header("en", urls)}
       <p class="chart-note mono" id="bojv-scope-note">${bojVintagesScopeNote("en")}</p>
 
       <p class="chart-note mono"><a href="${REL.chartHub.en}boj-outlook-real">${escapeHTML(t.seeAlsoReal)}</a></p>
-      <h2 class="chart-title" style="font-size:1.1rem;margin-top:28px">${escapeHTML(t.sectionTitleReal)}</h2>
+      <h2 class="chart-title chart-title-sub">${escapeHTML(t.sectionTitleReal)}</h2>
       <div class="chart-wrap">
         <svg id="boj-vintages-chart-real" viewBox="0 0 960 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHTML(t.chartAriaLabelReal)}"></svg>
         <p class="chart-noscript mono">${escapeHTML(t.chartNoscript)}</p>
@@ -1909,7 +1928,7 @@ ${header("en", urls)}
       <div class="fertility-legend bojv-legend" id="boj-vintages-legend-real"></div>
 
       <p class="chart-note mono"><a href="${REL.chartHub.en}boj-outlook-cpi">${escapeHTML(t.seeAlsoCpi)}</a></p>
-      <h2 class="chart-title" style="font-size:1.1rem;margin-top:28px">${escapeHTML(t.sectionTitleCpi)}</h2>
+      <h2 class="chart-title chart-title-sub">${escapeHTML(t.sectionTitleCpi)}</h2>
       <div class="chart-wrap">
         <svg id="boj-vintages-chart-cpi" viewBox="0 0 960 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHTML(t.chartAriaLabelCpi)}"></svg>
         <p class="chart-noscript mono">${escapeHTML(t.chartNoscript)}</p>
@@ -1922,9 +1941,7 @@ ${bojVintagesSection(d, "en")}
 
   <footer class="site-footer-row">
     <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
-    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
-    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
-    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
+${footerLinks("en", null)}
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
@@ -2160,10 +2177,7 @@ ${rows.map((r) => hoanRowHtml(r, "en")).join("\n")}
          hoan.js が差し替える文言でもないので id も持たせない(idを付けると
          idCoverageErrors() が hoan.html 側にも同じidを要求する)。 -->
     <a class="footer-src" href="${escapeHTML(HOAN_TRANS_SITE)}" target="_blank" rel="noopener">${escapeHTML(t.footerSrcTrans)}</a>
-    <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
-    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
-    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
-    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
+${footerLinks("en", null)}
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
@@ -2473,10 +2487,10 @@ ${buildHomeJsonLd(desc, keys, "en")}
     <div class="header-right">
       <div class="lang-toggle">
         <a id="lang-ja" class="lang-btn mono" href="/">JA</a>
-        <a id="lang-en" class="lang-btn mono active" href="/en/">EN</a>
+        <a id="lang-en" class="lang-btn mono active" aria-current="true" href="/en/">EN</a>
       </div>
       <nav class="site-nav">
-        <a class="nav-link nav-current" id="t-nav" href="${REL.home.en}">${escapeHTML(t.nav)}</a>
+        <a class="nav-link nav-current" aria-current="page" id="t-nav" href="${REL.home.en}">${escapeHTML(t.nav)}</a>
         <a class="nav-link" id="t-nav-hoan" href="${REL.hoan.en}">${escapeHTML(t.navHoan)}</a>
         <a class="nav-link" id="t-nav-data" href="https://github.com/zurekei/site/tree/main/data" target="_blank" rel="noopener">${escapeHTML(t.navData)}</a>
         <a class="nav-link" id="t-nav-about" href="${REL.about.en}">${escapeHTML(t.navAbout)}</a>
@@ -2531,10 +2545,7 @@ ${cardFallback}
 
   <footer class="site-footer-row">
     <a class="footer-src" id="t-footer-src" href="${REL.about.en}#methods-title">${escapeHTML(t.src)}</a>
-    <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.correctionsLink)}</a>
-    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.aboutLink)}</a>
-    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.contactLink)}</a>
-    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
+${footerLinks("en", "index")}
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
@@ -2663,10 +2674,7 @@ ${header("en", urls)}
 
   <footer class="site-footer-row">
     <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
-    <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
-    <a class="footer-about" id="t-footer-index" href="${REL.home.en}">${escapeHTML(t.footerIndex)}</a>
-    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
-    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
+${footerLinks("en", "about")}
   </footer>
 </div>
 <script src="/about.js?v=${ASSET_V}"></script>
@@ -2793,9 +2801,7 @@ ${header("en", urls)}
 
   <footer class="site-footer-row">
     <span id="t-footer-src">${escapeHTML(t.footerSrc)}</span>
-    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
-    <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.footerContact)}</a>
-    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
+${footerLinks("en", "corrections")}
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
@@ -2844,9 +2850,9 @@ ${header("en", urls)}
 
   <a class="chart-back" id="t-back" href="${REL.home.en}">${escapeHTML(t.back)}</a>
 
-  <div class="contact-page-wrap">
-    <h1 id="contact-title">${escapeHTML(t.title)}</h1>
-    <p class="lead" id="contact-lead">
+  <main class="about-body contact-page-wrap">
+    <h1 class="about-title" id="contact-title">${escapeHTML(t.title)}</h1>
+    <p class="about-lead" id="contact-lead">
       ${escapeHTML(t.lead)}
     </p>
 
@@ -2885,13 +2891,10 @@ ${header("en", urls)}
         ${escapeHTML(t.error)}
       </div>
     </form>
-  </div>
+  </main>
 
   <footer class="site-footer-row">
-    <a class="footer-about" id="t-footer-index" href="${REL.home.en}">${escapeHTML(t.footerIndex)}</a>
-    <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
-    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
-    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
+${footerLinks("en", "contact")}
   </footer>
 </div>
 
@@ -3005,10 +3008,7 @@ ${header("en", urls)}
   </main>
 
   <footer class="site-footer-row">
-    <a class="footer-about" id="t-footer-index" href="${REL.home.en}">${escapeHTML(t.footerIndex)}</a>
-    <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.footerCorrections)}</a>
-    <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.footerAbout)}</a>
-    <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
+${footerLinks("en", null)}
   </footer>
 </div>
 
@@ -4851,6 +4851,54 @@ function faviconErrors() {
   return errs;
 }
 
+// 全ページのフッターが FOOTER_LINKS の並びと文言どおりかを見る(2026-09-29)。
+// 生成するページは footerLinks() を通るので揃うが、手書きのJAページ9枚は
+// 手で並べているので、ここで突き合わせないと1枚だけ取り残されても気づけない
+// (揃える前は、指標ページに訂正履歴が無い・cite にお問い合わせが無い・about と
+// contact で順序が違う、の3種類のばらつきがあった)。自ページへのリンクだけは
+// 抜くのが規則なので、ページのURLから自分のキーを割り出して期待値から外す。
+// href は "about.html" "/about.html" "/en/about" のどれで書かれていても同じキーに
+// なるよう正規化してから比べる。
+function footerErrors() {
+  const errs = [];
+  let seen = 0;
+  const keyOfHref = (href) => {
+    if (href === "https://onrecord.zurekei.org/") return "onrecord";
+    const p = href.replace(/[#?].*$/, "").replace(/^\//, "").replace(/^en\/?/, "").replace(/\.html$/, "");
+    return p === "" || p === "index" ? "index" : p;
+  };
+  const selfKey = (rel) => {
+    const p = rel.replace(/^en\//, "").replace(/\.html$/, "");
+    return FOOTER_LINKS.some((l) => l.key === p) ? p : null;
+  };
+  for (const file of walkHtml()) {
+    const rel = path.relative(SITE_DIR, file);
+    if (rel === "og.html") continue;
+    seen++;
+    const lang = rel.startsWith("en/") ? "en" : "ja";
+    const html = fs.readFileSync(file, "utf8");
+    const foot = html.match(/<footer class="site-footer-row">([\s\S]*?)<\/footer>/);
+    if (!foot) {
+      errs.push(`フッター: ${rel} に <footer class="site-footer-row"> が無い`);
+      continue;
+    }
+    const got = [...foot[1].matchAll(/<a class="footer-about"[^>]*href="([^"]*)"[^>]*>([^<]*)<\/a>/g)].map((m) => ({
+      key: keyOfHref(m[1]),
+      text: m[2].trim(),
+    }));
+    const self = selfKey(rel);
+    const want = FOOTER_LINKS.filter((l) => l.key !== self)
+      .map((l) => ({ key: l.key, text: l[lang] }))
+      .concat([{ key: "onrecord", text: "言質OnRecord" }]);
+    const fmt = (xs) => xs.map((x) => `${x.key}「${x.text}」`).join(" → ");
+    if (fmt(got) !== fmt(want)) {
+      errs.push(`フッター: ${rel} の並びか文言が FOOTER_LINKS と違う\n    実際: ${fmt(got)}\n    期待: ${fmt(want)}`);
+    }
+  }
+  if (seen === 0) errs.push("フッターの検査: 対象HTMLを1件も見つけられなかった(0件はありえない)");
+  return errs;
+}
+
 // index.html の .card-fallback(JSを実行しないクローラにとってトップから各指標へ
 // 辿れる唯一の経路)が、home.js の INDICATOR_META と一致することを見る(2026-08-04)。
 //
@@ -5245,6 +5293,8 @@ if (check) {
   const assetVErrs = assetVersionErrors();
   // favicon の揃いも独立(?v= が合っていてもタグごと欠けていれば効かない)。
   const faviconErrs = faviconErrors();
+  // フッターの並び・文言も独立(手書きJAページの1枚だけが取り残される壊れ方)。
+  const footerErrs = footerErrors();
   // JAトップの .card-fallback ↔ INDICATOR_META も独立(生成物は最新・?v=も揃って
   // いる状態で、手書きのリンク文字列だけが取り残される壊れ方)。
   const cardFbErrs = cardFallbackErrors();
@@ -5271,6 +5321,7 @@ if (check) {
     hoanTransErrs.length ||
     assetVErrs.length ||
     faviconErrs.length ||
+    footerErrs.length ||
     cardFbErrs.length ||
     ogDescErrs.length ||
     srcReachErrs.length
@@ -5291,6 +5342,7 @@ if (check) {
     hoanTransErrs.forEach((e) => console.error(`✗ ${e}`));
     assetVErrs.forEach((e) => console.error(`✗ ${e}`));
     faviconErrs.forEach((e) => console.error(`✗ ${e}`));
+    footerErrs.forEach((e) => console.error(`✗ ${e}`));
     cardFbErrs.forEach((e) => console.error(`✗ ${e}`));
     ogDescErrs.forEach((e) => console.error(`✗ ${e}`));
     srcReachErrs.forEach((e) => console.error(`✗ ${e}`));
@@ -5298,7 +5350,7 @@ if (check) {
     process.exit(1);
   }
   console.log(
-    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 出生数のforecast_basisの語彙 / 法令番号の英語換算(公布年・law_idとの突き合わせ) / 公式英訳の列(統制語彙・URLの形) / 全HTMLの?v=とASSET_Vの一致 / 全HTMLのfaviconの有無 / JAトップのcard-fallbackとINDICATOR_METAの一致 / descriptionとog:descriptionの一致 / data/*.csvの出典URLが静的HTMLから辿れることとも一致）`
+    `✓ ${files.size} ページは最新（sitemap / トップのリンク / idの対応 / 手書きJAページのT.jaとの対応 / HOME_FILLSとhome.jsの対応 / OGP画像の焼き直しとassets/の過不足 / data/*.csvのスキーマ(列の型・網羅性・行の列数・数値セル) / cite.jsのDATA_FILESとCSV_COLUMNSの対応 / 出生数のforecast_basisの語彙 / 法令番号の英語換算(公布年・law_idとの突き合わせ) / 公式英訳の列(統制語彙・URLの形) / 全HTMLの?v=とASSET_Vの一致 / 全HTMLのfaviconの有無 / 全HTMLのフッターの並びと文言 / JAトップのcard-fallbackとINDICATOR_METAの一致 / descriptionとog:descriptionの一致 / data/*.csvの出典URLが静的HTMLから辿れることとも一致）`
   );
 } else {
   fs.mkdirSync(OUT_DIR, { recursive: true });
@@ -5328,6 +5380,7 @@ if (check) {
   hoanLawNumErrors().forEach((e) => console.warn(`⚠ ${e}`));
   hoanTranslationErrors().forEach((e) => console.warn(`⚠ ${e}`));
   assetVersionErrors().forEach((e) => console.warn(`⚠ ${e}`));
+  footerErrors().forEach((e) => console.warn(`⚠ ${e}`));
   faviconErrors().forEach((e) => console.warn(`⚠ ${e}`));
   cardFallbackErrors().forEach((e) => console.warn(`⚠ ${e}`));
   ogDescriptionErrors().forEach((e) => console.warn(`⚠ ${e}`));

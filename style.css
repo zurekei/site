@@ -447,7 +447,9 @@ a { color: inherit; }
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* 1fr のままだと列の最小幅がカードの中身の最小幅になり、英語版の 768px 前後で
+     長い語や数値に押されて3列が画面から11px はみ出していた */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -457,6 +459,7 @@ a { color: inherit; }
 
 .card {
   display: block;
+  container-type: inline-size;
   text-decoration: none;
   color: inherit;
   border: 1px solid var(--line);
@@ -475,6 +478,7 @@ a.card:hover {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .card-name {
@@ -501,6 +505,7 @@ a.card:hover {
 .card-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  column-gap: 10px;
   margin: 12px 0 14px;
   padding-top: 12px;
   border-top: 1px solid var(--line-soft);
@@ -526,6 +531,12 @@ a.card:hover {
 }
 
 .stat-value-gap { color: var(--amber-text); font-weight: 600; }
+
+/* 3列のカードが細いとき(英語版の 768px 前後で約236px)、"31.0tn yen" のような
+   値が列幅いっぱいに詰まり、隣の値と間なしに並んで「31.0tn34.6tn」と読めていた */
+@container (max-width: 260px) {
+  .stat-value { font-size: 15px; }
+}
 
 /* the fiscal year the government is currently on, whose actual has not landed
    yet. Sits between the settled gap and the sparkline as a single muted line so
@@ -841,6 +852,8 @@ a.card:hover {
 .chart-section { margin-top: 1.5rem; }
 
 .chart-title { margin: 0; font-size: 1.3rem; font-weight: 600; }
+/* 1ページに複数のグラフを並べるときの節見出し(日銀見通しページ) */
+.chart-title-sub { font-size: 1.1rem; margin-top: 28px; }
 
 .chart-desc {
   margin: 0.3rem 0 0;
@@ -882,6 +895,27 @@ a.card:hover {
 
 .axis-line { stroke: var(--line); stroke-width: 1; }
 .axis-label { fill: var(--muted-2); font-size: 11px; font-family: "IBM Plex Mono", monospace; }
+/* 狭い幅の描き方(chart.js の CHART_LAYOUTS.compact)。viewBox が 400 まで縮むので、
+   ここの 12px は幅333pxの画面で実寸約10px になる。 */
+.chart-compact .axis-label,
+.chart-compact .end-label { font-size: 12px; }
+.chart-compact .basis-band-label,
+.chart-compact .gap-label,
+.chart-compact .vintage-label { font-size: 11px; }
+/* ヒーローは紺の枠の内側の余白ぶん描画幅が狭い(375px で約300px)ので1段大きく */
+#hero-chart.chart-compact .axis-label,
+#hero-chart.chart-compact .end-label { font-size: 13px; }
+/* HTML に書いてある viewBox は広いほう(960幅)なので、JS が狭いほうに描き替える
+   までのあいだ高さが違い、描いた瞬間にページが縦にずれる。狭い画面では先に
+   狭いほうの縦横比で場所を取っておく(値は各 .js の compact の w:h と同じ)。 */
+@media (max-width: 640px) {
+  #chart,
+  #fertility-chart,
+  #births-chart,
+  #boj-vintages-chart-real,
+  #boj-vintages-chart-cpi { aspect-ratio: 400 / 300; }
+  #hero-chart { aspect-ratio: 400 / 240; }
+}
 .grid-line-y { stroke: var(--line-soft); stroke-width: 1; }
 .zero-line { stroke: var(--line); stroke-width: 1; }
 .end-label { font-size: 11px; font-family: "IBM Plex Mono", monospace; font-weight: 600; }
@@ -1604,4 +1638,42 @@ a.card:hover {
      日付の列を細くする。 */
   .hoan-table .col-title { min-width: 11em; }
   .hoan-staged { display: table; margin: 3px 0 0; }
+}
+
+/* ---- 指で押す端末の押せる範囲(2026-09-29 UIレビュー) ----
+   375px で実測すると JA/EN は 32×25、ナビ・「← 指標一覧」・フッターのリンクは
+   高さ19px、法案のフィルタは27px、開閉の summary は20〜22px しかなかった。
+   マウスでは今の詰まった見た目のままにしたいので、指で押す端末に限って
+   上下に余白を足し、押せる高さを約44px にする。フッターは折り返すと行と行の
+   間が8px しかなく隣を押しやすかったので、余白を足したぶん行間を詰める。 */
+@media (pointer: coarse) {
+  .lang-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 14px;
+  }
+  .nav-link,
+  .footer-about,
+  .footer-src {
+    display: inline-block;
+    padding: 13px 0;
+  }
+  .site-footer-row {
+    row-gap: 0;
+    padding-top: 4px;
+  }
+  .chart-back {
+    padding: 13px 0;
+    margin-top: 6px;
+  }
+  .data-details > summary,
+  .about-more > summary,
+  .hoan-detail-static summary {
+    padding: 12px 0;
+  }
+  .hoan-fbtn {
+    min-height: 44px;
+    padding: 0 14px;
+  }
 }

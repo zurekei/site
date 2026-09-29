@@ -21,7 +21,7 @@
 <link rel="icon" type="image/svg+xml" href="/zurekei_icon.svg">
 <link rel="icon" type="image/png" sizes="512x512" href="/zurekei_icon_512.png">
 <link rel="apple-touch-icon" href="/zurekei_icon_512.png">
-<link rel="stylesheet" href="/style.css?v=20260929a">
+<link rel="stylesheet" href="/style.css?v=20260929b">
 <noscript><style>.chart-wrap > svg, .bojv-legend { display: none !important; } .chart-noscript { display: block; }</style></noscript>
 
 <script type="application/ld+json">
@@ -121,7 +121,7 @@
     <div class="header-right">
       <div class="lang-toggle">
         <a id="lang-ja" class="lang-btn mono" href="/boj-outlook-vintages">JA</a>
-        <a id="lang-en" class="lang-btn mono active" href="/en/boj-outlook-vintages">EN</a>
+        <a id="lang-en" class="lang-btn mono active" aria-current="true" href="/en/boj-outlook-vintages">EN</a>
       </div>
     </div>
   </header>
@@ -135,7 +135,7 @@
       <p class="chart-note mono" id="bojv-scope-note">Each line is one fiscal year, connecting how it was forecast at each issue in publication order. Lighter lines are older target years, darker lines are more recent. A dashed segment is not a forecast — it connects the last forecast to the eventual actual figure (years without a matching actual have no dashed segment). Rows that merely restate a prior issue&#39;s figure in the body text (restated) are excluded, since they are not a new forecast from that issue. Issues that did not publish a median at all (Oct 2000 - Oct 2002, and Apr 2020) leave a gap in the line.</p>
 
       <p class="chart-note mono"><a href="/en/chart/boj-outlook-real">See the per-fiscal-year real GDP forecast (April issue) →</a></p>
-      <h2 class="chart-title" style="font-size:1.1rem;margin-top:28px">Real GDP</h2>
+      <h2 class="chart-title chart-title-sub">Real GDP</h2>
       <div class="chart-wrap">
         <svg id="boj-vintages-chart-real" viewBox="0 0 960 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Real GDP forecast convergence, by issue"></svg>
         <p class="chart-noscript mono">This chart requires JavaScript to draw. The figures are in the table below.</p>
@@ -143,7 +143,7 @@
       <div class="fertility-legend bojv-legend" id="boj-vintages-legend-real"></div>
 
       <p class="chart-note mono"><a href="/en/chart/boj-outlook-cpi">See the per-fiscal-year CPI forecast (April issue) →</a></p>
-      <h2 class="chart-title" style="font-size:1.1rem;margin-top:28px">CPI (all-items)</h2>
+      <h2 class="chart-title chart-title-sub">CPI (all-items)</h2>
       <div class="chart-wrap">
         <svg id="boj-vintages-chart-cpi" viewBox="0 0 960 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="CPI forecast convergence, by issue"></svg>
         <p class="chart-noscript mono">This chart requires JavaScript to draw. The figures are in the table below.</p>
@@ -1471,12 +1471,14 @@
 
   <footer class="site-footer-row">
     <span id="t-footer-src">src: Bank of Japan, Outlook for Economic Activity and Prices</span>
+    <a class="footer-about" id="t-footer-index" href="/en/">Indicators</a>
+    <a class="footer-about" id="t-footer-corrections" href="/en/corrections">Corrections</a>
     <a class="footer-about" id="t-footer-about" href="/en/about">About this site</a>
     <a class="footer-about" id="t-footer-contact" href="/en/contact">Contact</a>
     <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
-<script src="/csv.js?v=20260929a"></script>
-<script src="/boj-outlook-vintages.js?v=20260929a"></script>
+<script src="/csv.js?v=20260929b"></script>
+<script src="/boj-outlook-vintages.js?v=20260929b"></script>
 </body>
 </html>

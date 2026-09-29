@@ -40,9 +40,14 @@
   }[lang];
 
   const SVG_NS = "http://www.w3.org/2000/svg";
-  const W = 960;
-  const H = 340;
-  const PAD = { top: 18, right: 64, bottom: 30, left: 44 };
+  // 描き方を横幅で2通り持つ(chart.js の CHART_LAYOUTS と同じ考え方。2026-09-29)。
+  // viewBox を 960 に固定すると、幅333pxのスマホで文字が約3.4px まで縮んでいた。
+  // 文字の大きさは style.css の .chart-compact 側。
+  const LAYOUTS = {
+    wide: { w: 960, h: 340, pad: { top: 18, right: 64, bottom: 30, left: 44 }, xStep: 5, xLabelDy: 16 },
+    compact: { w: 400, h: 240, pad: { top: 14, right: 52, bottom: 26, left: 36 }, xStep: 10, xLabelDy: 17 },
+  };
+  const compactMQ = window.matchMedia("(max-width: 640px)");
 
   function el(tag, attrs) {
     const e = document.createElementNS(SVG_NS, tag);
@@ -72,12 +77,6 @@
   const yMin = Math.min(...vals, 0) - pad;
   const yMax = Math.max(...vals, 0) + pad;
 
-  const x = (yr) => PAD.left + ((yr - xMin) / (xMax - xMin)) * (W - PAD.left - PAD.right);
-  const y = (v) => PAD.top + (H - PAD.top - PAD.bottom) * (1 - (v - yMin) / (yMax - yMin));
-
-  // FY1988は名目見通しが未収集(一次資料未特定)のため forecast_nominal が
-  // 欠損する。欠損年をまたいで直線で繋がず、パスを分割(M で新規サブパス)
-  // して途切れを正直に描く。実績側も同じ関数で同様の耐性を持たせる。
   function buildSegments(points) {
     const segments = [];
     let current = [];
@@ -92,6 +91,8 @@
     return segments;
   }
 
+  let W, H, PAD, x, y;
+
   function pathFromSegments(segments, valKey) {
     return segments.map((seg) => `M ${seg.map((r) => `${x(r.year)},${y(r[valKey])}`).join(" L ")}`).join(" ");
   }
@@ -99,173 +100,216 @@
   svg.setAttribute("aria-label", HERO_STR.ariaLabel(xMin, xMax));
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  // --- axes ---
-  const axesGroup = el("g", { opacity: reduceMotion ? 1 : 0 });
-  axesGroup.appendChild(el("line", { class: "zero-line", x1: PAD.left, x2: W - PAD.right, y1: y(0), y2: y(0) }));
-  for (let yr = Math.ceil(xMin / 5) * 5; yr <= xMax; yr += 5) {
-    axesGroup.appendChild(el("line", { class: "axis-line", x1: x(yr), x2: x(yr), y1: PAD.top, y2: H - PAD.bottom }));
-    const t = el("text", { class: "axis-label", x: x(yr), y: H - PAD.bottom + 16, "text-anchor": "middle" });
-    t.textContent = yr;
-    axesGroup.appendChild(t);
-  }
-  // gridline step scales with the y-domain's span so it stays readable
-  // whichever series (real or nominal — nominal swings wider) is plotted
-  const yRange = yMax - yMin;
-  const yStep = yRange > 15 ? 5 : yRange > 8 ? 2 : 1;
-  for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) {
-    if (v !== 0) axesGroup.appendChild(el("line", { class: "grid-line-y", x1: PAD.left, x2: W - PAD.right, y1: y(v), y2: y(v) }));
-    const t = el("text", { class: "axis-label", x: PAD.left - 8, y: y(v) + 3, "text-anchor": "end" });
-    t.textContent = `${v}%`;
-    axesGroup.appendChild(t);
-  }
-  svg.appendChild(axesGroup);
-
-  // --- 描画の「時間の進み」はクリップ矩形の右端で表す。2本の線の先端位置を
-  //     同じ座標系で独立に制御できるよう、stroke-dashoffsetではなくclipを使う ---
-  const defs = el("defs", {});
-  const forecastClipRect = el("rect", { x: 0, y: 0, width: reduceMotion ? W : 0, height: H });
-  const actualClipRect = el("rect", { x: 0, y: 0, width: reduceMotion ? W : 0, height: H });
-  const fClip = el("clipPath", { id: "hero-clip-forecast" });
-  fClip.appendChild(forecastClipRect);
-  const aClip = el("clipPath", { id: "hero-clip-actual" });
-  aClip.appendChild(actualClipRect);
-  defs.appendChild(fClip);
-  defs.appendChild(aClip);
-  svg.appendChild(defs);
-
-  // --- forecast line (見通しを繋いだ線。FY1988の欠損でサブパスが分かれる) ---
-  const forecastPts = rows.filter((r) => r.f !== null);
-  const forecastPath = el("path", {
-    class: "line-forecast",
-    d: pathFromSegments(buildSegments(forecastPts), "f"),
-    "clip-path": "url(#hero-clip-forecast)",
-  });
-  svg.appendChild(forecastPath);
-
-  // --- actual line (同様に欠損耐性を持たせる。現状は連続しているため見た目は変わらない) ---
-  const actualPts = rows.filter((r) => r.a !== null);
-  const actualPath = el("path", {
-    class: "line-actual",
-    d: pathFromSegments(buildSegments(actualPts), "a"),
-    "clip-path": "url(#hero-clip-actual)",
-  });
-  svg.appendChild(actualPath);
-
-  // --- sparks (ズレが大きい年は、実績線の通過後ずっと明滅し続ける) ---
-  // 対象は |実績-見通し| が平均+1標準偏差を超える年。統計的な基準のみで選び、
-  // 色や形で善悪は示唆しない。reduce-motion時は明滅させず静的なリングを置く
-  const diffs = rows
-    .filter((r) => r.f !== null && r.a !== null)
-    .map((r) => ({ year: r.year, a: r.a, gap: Math.abs(r.a - r.f) }));
-  const gapMean = diffs.reduce((s, d) => s + d.gap, 0) / diffs.length;
-  const gapSd = Math.sqrt(diffs.reduce((s, d) => s + (d.gap - gapMean) ** 2, 0) / diffs.length);
-  const sparks = diffs
-    .filter((d) => d.gap > gapMean + gapSd)
-    .map((d) => {
-      const node = el("circle", {
-        class: "hero-spark",
-        cx: x(d.year),
-        cy: y(d.a),
-        r: reduceMotion ? 6 : 3.5,
-        opacity: reduceMotion ? 0.55 : 0,
-      });
-      svg.appendChild(node);
-      return { year: d.year, node, triggered: reduceMotion };
-    });
-
-  const lastForecast = forecastPts[forecastPts.length - 1];
-  const forecastLabel = el("text", {
-    class: "end-label end-label-forecast",
-    x: x(lastForecast.year) + 8,
-    y: y(lastForecast.f) + 4,
-    opacity: reduceMotion ? 1 : 0,
-  });
-  forecastLabel.id = "hero-label-forecast";
-  forecastLabel.textContent = HERO_STR.forecast;
-  svg.appendChild(forecastLabel);
-
-  const lastActual = actualPts[actualPts.length - 1];
-  const actualLabel = el("text", {
-    class: "end-label end-label-actual",
-    x: x(lastActual.year) + 8,
-    y: y(lastActual.a) + 4,
-    opacity: reduceMotion ? 1 : 0,
-  });
-  actualLabel.id = "hero-label-actual";
-  actualLabel.textContent = HERO_STR.actual;
-  svg.appendChild(actualLabel);
-
-  if (reduceMotion) return;
-
-  // コピーはCSS上デフォルトで見える状態(reduce-motion時の静的表示のため)。
-  // 演出時のみJSで初期非表示にしてフェードインさせる
   const copyEl = document.getElementById("hero-copy");
-  if (copyEl) {
-    copyEl.style.opacity = 0;
-    copyEl.style.transform = "translateY(10px)";
-  }
 
-  const LAG_YEARS = 3;
-  const YEAR_MS = 110;
-  const START_DELAY = 400;
+  // animate が false なら描き終えた状態で出す(reduce-motion と、幅の区切りを
+  // またいで描き直すとき)。以下の本体は演出ありの前提で書かれているので、
+  // reduceMotion という名前のまま「演出しない」の意味で読み替える。
+  function draw(animate) {
+    const reduceMotion = !animate;
+    const layout = compactMQ.matches ? LAYOUTS.compact : LAYOUTS.wide;
+    W = layout.w;
+    H = layout.h;
+    PAD = layout.pad;
+    x = (yr) => PAD.left + ((yr - xMin) / (xMax - xMin)) * (W - PAD.left - PAD.right);
+    y = (v) => PAD.top + (H - PAD.top - PAD.bottom) * (1 - (v - yMin) / (yMax - yMin));
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.classList.toggle("chart-compact", compactMQ.matches);
 
-  function startSequence() {
-    axesGroup.style.transition = "opacity 0.4s ease";
-    setTimeout(() => (axesGroup.style.opacity = 1), 20);
+    // --- axes ---
+    const axesGroup = el("g", { opacity: reduceMotion ? 1 : 0 });
+    axesGroup.appendChild(el("line", { class: "zero-line", x1: PAD.left, x2: W - PAD.right, y1: y(0), y2: y(0) }));
+    for (let yr = Math.ceil(xMin / layout.xStep) * layout.xStep; yr <= xMax; yr += layout.xStep) {
+      axesGroup.appendChild(el("line", { class: "axis-line", x1: x(yr), x2: x(yr), y1: PAD.top, y2: H - PAD.bottom }));
+      const t = el("text", { class: "axis-label", x: x(yr), y: H - PAD.bottom + layout.xLabelDy, "text-anchor": "middle" });
+      t.textContent = yr;
+      axesGroup.appendChild(t);
+    }
+    // gridline step scales with the y-domain's span so it stays readable
+    // whichever series (real or nominal — nominal swings wider) is plotted
+    const yRange = yMax - yMin;
+    const yStep = yRange > 15 ? 5 : yRange > 8 ? 2 : 1;
+    for (let v = Math.ceil(yMin / yStep) * yStep; v <= yMax; v += yStep) {
+      if (v !== 0) axesGroup.appendChild(el("line", { class: "grid-line-y", x1: PAD.left, x2: W - PAD.right, y1: y(v), y2: y(v) }));
+      const t = el("text", { class: "axis-label", x: PAD.left - 8, y: y(v) + 3, "text-anchor": "end" });
+      t.textContent = `${v}%`;
+      axesGroup.appendChild(t);
+    }
+    svg.appendChild(axesGroup);
 
-    let t0 = null;
-    function frame(now) {
-      if (t0 === null) t0 = now;
-      const elapsed = now - t0 - START_DELAY;
-      if (elapsed < 0) {
-        requestAnimationFrame(frame);
-        return;
-      }
-      // 「いま何年か」: 見通し線の先端。実績線はLAG_YEARS遅れて追う
-      const cursor = xMin + elapsed / YEAR_MS;
-      const fFront = Math.min(cursor, xMax);
-      const aFront = Math.min(cursor - LAG_YEARS, xMax);
+    // --- 描画の「時間の進み」はクリップ矩形の右端で表す。2本の線の先端位置を
+    //     同じ座標系で独立に制御できるよう、stroke-dashoffsetではなくclipを使う ---
+    const defs = el("defs", {});
+    const forecastClipRect = el("rect", { x: 0, y: 0, width: reduceMotion ? W : 0, height: H });
+    const actualClipRect = el("rect", { x: 0, y: 0, width: reduceMotion ? W : 0, height: H });
+    const fClip = el("clipPath", { id: "hero-clip-forecast" });
+    fClip.appendChild(forecastClipRect);
+    const aClip = el("clipPath", { id: "hero-clip-actual" });
+    aClip.appendChild(actualClipRect);
+    defs.appendChild(fClip);
+    defs.appendChild(aClip);
+    svg.appendChild(defs);
 
-      forecastClipRect.setAttribute("width", Math.max(0, x(fFront)));
-      actualClipRect.setAttribute("width", Math.max(0, x(aFront)));
+    // --- forecast line (見通しを繋いだ線。FY1988の欠損でサブパスが分かれる) ---
+    const forecastPts = rows.filter((r) => r.f !== null);
+    const forecastPath = el("path", {
+      class: "line-forecast",
+      d: pathFromSegments(buildSegments(forecastPts), "f"),
+      "clip-path": "url(#hero-clip-forecast)",
+    });
+    svg.appendChild(forecastPath);
 
-      sparks.forEach((s) => {
-        if (!s.triggered && aFront >= s.year) {
-          s.triggered = true;
-          s.node.classList.add("on");
-        }
+    // --- actual line (同様に欠損耐性を持たせる。現状は連続しているため見た目は変わらない) ---
+    const actualPts = rows.filter((r) => r.a !== null);
+    const actualPath = el("path", {
+      class: "line-actual",
+      d: pathFromSegments(buildSegments(actualPts), "a"),
+      "clip-path": "url(#hero-clip-actual)",
+    });
+    svg.appendChild(actualPath);
+
+    // --- sparks (ズレが大きい年は、実績線の通過後ずっと明滅し続ける) ---
+    // 対象は |実績-見通し| が平均+1標準偏差を超える年。統計的な基準のみで選び、
+    // 色や形で善悪は示唆しない。reduce-motion時は明滅させず静的なリングを置く
+    const diffs = rows
+      .filter((r) => r.f !== null && r.a !== null)
+      .map((r) => ({ year: r.year, a: r.a, gap: Math.abs(r.a - r.f) }));
+    const gapMean = diffs.reduce((s, d) => s + d.gap, 0) / diffs.length;
+    const gapSd = Math.sqrt(diffs.reduce((s, d) => s + (d.gap - gapMean) ** 2, 0) / diffs.length);
+    const sparks = diffs
+      .filter((d) => d.gap > gapMean + gapSd)
+      .map((d) => {
+        const node = el("circle", {
+          class: "hero-spark",
+          cx: x(d.year),
+          cy: y(d.a),
+          r: reduceMotion ? 6 : 3.5,
+          opacity: reduceMotion ? 0.55 : 0,
+        });
+        svg.appendChild(node);
+        return { year: d.year, node, triggered: reduceMotion };
       });
 
-      if (cursor < xMax + LAG_YEARS) {
-        requestAnimationFrame(frame);
-      } else {
-        forecastLabel.style.transition = "opacity 0.5s ease";
-        forecastLabel.style.opacity = 1;
-        actualLabel.style.transition = "opacity 0.5s ease";
-        actualLabel.style.opacity = 1;
-        if (copyEl) {
-          setTimeout(() => {
-            copyEl.style.transition = "opacity 0.9s ease, transform 0.9s ease";
-            copyEl.style.opacity = 1;
-            copyEl.style.transform = "translateY(0)";
-          }, 300);
+    // 2本の端ラベルは最終年度の値が近いと重なる(狭い画面では実際に重なって
+    // 「実績通し」と読めた)。縦に近すぎるときは中点から上下へ押し分ける。
+    const lastForecast = forecastPts[forecastPts.length - 1];
+    const lastActual = actualPts[actualPts.length - 1];
+    let forecastLabelY = y(lastForecast.f) + 4;
+    let actualLabelY = y(lastActual.a) + 4;
+    const MIN_LABEL_GAP = 14;
+    if (Math.abs(forecastLabelY - actualLabelY) < MIN_LABEL_GAP) {
+      const mid = (forecastLabelY + actualLabelY) / 2;
+      const forecastAbove = lastForecast.f >= lastActual.a;
+      forecastLabelY = mid + (forecastAbove ? -1 : 1) * (MIN_LABEL_GAP / 2);
+      actualLabelY = mid + (forecastAbove ? 1 : -1) * (MIN_LABEL_GAP / 2);
+    }
+    const forecastLabel = el("text", {
+      class: "end-label end-label-forecast",
+      x: x(lastForecast.year) + 8,
+      y: forecastLabelY,
+      opacity: reduceMotion ? 1 : 0,
+    });
+    forecastLabel.id = "hero-label-forecast";
+    forecastLabel.textContent = HERO_STR.forecast;
+    svg.appendChild(forecastLabel);
+
+    const actualLabel = el("text", {
+      class: "end-label end-label-actual",
+      x: x(lastActual.year) + 8,
+      y: actualLabelY,
+      opacity: reduceMotion ? 1 : 0,
+    });
+    actualLabel.id = "hero-label-actual";
+    actualLabel.textContent = HERO_STR.actual;
+    svg.appendChild(actualLabel);
+
+    if (reduceMotion) return;
+
+    // コピーはCSS上デフォルトで見える状態(reduce-motion時の静的表示のため)。
+    // 演出時のみJSで初期非表示にしてフェードインさせる。ただし狭い画面では
+    // 隠さない: コピーはグラフの上の普通の流れに置いてあり(style.css の
+    // .hero-copy の 640px 以下)、演出が終わるまでの約6秒、見出しの位置が空白の
+    // まま待たされていた(2026-09-29 UIレビュー)。
+    const hideCopy = copyEl && !compactMQ.matches;
+    if (hideCopy) {
+      copyEl.style.opacity = 0;
+      copyEl.style.transform = "translateY(10px)";
+    }
+
+    const LAG_YEARS = 3;
+    const YEAR_MS = 110;
+    const START_DELAY = 400;
+
+    function startSequence() {
+      axesGroup.style.transition = "opacity 0.4s ease";
+      setTimeout(() => (axesGroup.style.opacity = 1), 20);
+
+      let t0 = null;
+      function frame(now) {
+        if (t0 === null) t0 = now;
+        const elapsed = now - t0 - START_DELAY;
+        if (elapsed < 0) {
+          requestAnimationFrame(frame);
+          return;
+        }
+        // 「いま何年か」: 見通し線の先端。実績線はLAG_YEARS遅れて追う
+        const cursor = xMin + elapsed / YEAR_MS;
+        const fFront = Math.min(cursor, xMax);
+        const aFront = Math.min(cursor - LAG_YEARS, xMax);
+
+        forecastClipRect.setAttribute("width", Math.max(0, x(fFront)));
+        actualClipRect.setAttribute("width", Math.max(0, x(aFront)));
+
+        sparks.forEach((s) => {
+          if (!s.triggered && aFront >= s.year) {
+            s.triggered = true;
+            s.node.classList.add("on");
+          }
+        });
+
+        if (cursor < xMax + LAG_YEARS) {
+          requestAnimationFrame(frame);
+        } else {
+          forecastLabel.style.transition = "opacity 0.5s ease";
+          forecastLabel.style.opacity = 1;
+          actualLabel.style.transition = "opacity 0.5s ease";
+          actualLabel.style.opacity = 1;
+          if (hideCopy) {
+            setTimeout(() => {
+              copyEl.style.transition = "opacity 0.9s ease, transform 0.9s ease";
+              copyEl.style.opacity = 1;
+              copyEl.style.transform = "translateY(0)";
+            }, 300);
+          }
         }
       }
+      requestAnimationFrame(frame);
     }
-    requestAnimationFrame(frame);
+
+    // バックグラウンドタブで開かれた場合、見られないまま演出が終わらないよう
+    // タブが見えるまで開始を遅らせる(rAF駆動なので非表示中は自然に停止する)
+    if (document.visibilityState === "hidden") {
+      document.addEventListener("visibilitychange", function onVis() {
+        if (document.visibilityState === "visible") {
+          document.removeEventListener("visibilitychange", onVis);
+          startSequence();
+        }
+      });
+    } else {
+      startSequence();
+    }
   }
 
-  // バックグラウンドタブで開かれた場合、見られないまま演出が終わらないよう
-  // タブが見えるまで開始を遅らせる(rAF駆動なので非表示中は自然に停止する)
-  if (document.visibilityState === "hidden") {
-    document.addEventListener("visibilitychange", function onVis() {
-      if (document.visibilityState === "visible") {
-        document.removeEventListener("visibilitychange", onVis);
-        startSequence();
-      }
-    });
-  } else {
-    startSequence();
-  }
+  draw(!reduceMotion);
+  // 幅の区切りをまたいだら(スマホを横に倒したときなど)、演出なしで描き直す。
+  // 演出の途中だった場合も、古い要素は外れているので残りのコマは空振りする。
+  // 隠れたままのコピーだけは戻しておく。
+  compactMQ.addEventListener("change", () => {
+    draw(false);
+    if (copyEl) {
+      copyEl.style.opacity = "";
+      copyEl.style.transform = "";
+    }
+  });
 })();

@@ -1,7 +1,12 @@
 const SVG_NS = "http://www.w3.org/2000/svg";
-const CHART_W = 960;
-const CHART_H = 480;
-const PAD = { top: 20, right: 72, bottom: 32, left: 60 };
+// 描き方を横幅で2通り持つ(chart.js の CHART_LAYOUTS と同じ考え方。2026-09-29)。
+// viewBox を 960 に固定すると、幅333pxのスマホで文字が約3px まで縮んでいた。
+// 文字の大きさは style.css の .chart-compact 側。
+const CHART_LAYOUTS = {
+  wide: { w: 960, h: 480, pad: { top: 20, right: 72, bottom: 32, left: 60 }, xStep: 10, xLabelDy: 16, labelGap: 12 },
+  compact: { w: 400, h: 300, pad: { top: 16, right: 44, bottom: 28, left: 46 }, xStep: 20, xLabelDy: 17, labelGap: 13 },
+};
+const CHART_COMPACT_QUERY = "(max-width: 640px)";
 
 // ⚠ 描画まわり(svgEl / buildSegments / pathFromSegments と main() の軸・
 // ラベル衝突回避・描き込みアニメーション)は fertility.js とほぼ同じものが
@@ -177,31 +182,7 @@ async function main() {
     Math.ceil(Math.max(...allValues) / yStep) * yStep,
   ];
 
-  const innerW = CHART_W - PAD.left - PAD.right;
-  const innerH = CHART_H - PAD.top - PAD.bottom;
-  const xScale = (year) => PAD.left + ((year - xMin) / (xMax - xMin)) * innerW;
-  const yScale = (val) => PAD.top + innerH - ((val - yDomain[0]) / (yDomain[1] - yDomain[0])) * innerH;
-
   const svg = document.getElementById("births-chart");
-  svg.setAttribute("viewBox", `0 0 ${CHART_W} ${CHART_H}`);
-
-  for (let y = Math.ceil(xMin / 10) * 10; y <= xMax; y += 10) {
-    const x = xScale(y);
-    svg.appendChild(svgEl("line", { class: "axis-line", x1: x, x2: x, y1: PAD.top, y2: CHART_H - PAD.bottom }));
-    const label = svgEl("text", { class: "axis-label", x, y: CHART_H - PAD.bottom + 16, "text-anchor": "middle" });
-    label.textContent = y;
-    svg.appendChild(label);
-  }
-
-  const yLabels = [];
-  for (let v = yDomain[0]; v <= yDomain[1]; v += yStep) {
-    const y = yScale(v);
-    svg.appendChild(svgEl("line", { class: "grid-line-y", x1: PAD.left, x2: CHART_W - PAD.right, y1: y, y2: y }));
-    const label = svgEl("text", { class: "axis-label", x: PAD.left - 8, y: y + 3, "text-anchor": "end" });
-    yLabels.push({ el: label, man: v / 10000 });
-    svg.appendChild(label);
-  }
-
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // opacity scales with vintage age — same rule as /fertility: it says "how
@@ -212,78 +193,118 @@ async function main() {
     return 0.2 + (idx / span) * 0.4;
   };
 
-  const actualSegments = buildSegments(actualRows, "year");
-  const actualPath = svgEl("path", {
-    class: "line-actual",
-    d: pathFromSegments(actualSegments, xScale, yScale, "year", "births"),
-  });
-  svg.appendChild(actualPath);
-  actualSegments
-    .filter((seg) => seg.length === 1)
-    .forEach((seg) =>
-      svg.appendChild(svgEl("circle", { class: "line-actual-dot", cx: xScale(seg[0].year), cy: yScale(seg[0].births), r: 1.75 }))
-    );
+  const yLabels = [];
 
-  // end-of-line labels can land within a few px of each other — push
-  // overlapping labels apart vertically so they stay legible
-  const labelTargets = byVintage.map(({ vintageYear, rows }) => {
-    const last = rows[rows.length - 1];
-    return { vintageYear, x: xScale(last.targetYear) + 6, y: yScale(last.births) + 3 };
-  });
-  labelTargets.sort((a, b) => a.y - b.y);
-  const MIN_LABEL_GAP = 12;
-  for (let i = 1; i < labelTargets.length; i++) {
-    if (labelTargets[i].y - labelTargets[i - 1].y < MIN_LABEL_GAP) {
-      labelTargets[i].y = labelTargets[i - 1].y + MIN_LABEL_GAP;
+  // 幅の区切り(CHART_COMPACT_QUERY)をまたいだら描き直す(スマホを横に倒したときなど)。
+  // 描き直しでは描き込みの演出をしない。
+  function drawChart(animate) {
+    const compact = window.matchMedia(CHART_COMPACT_QUERY).matches;
+    const layout = compact ? CHART_LAYOUTS.compact : CHART_LAYOUTS.wide;
+    const CHART_W = layout.w;
+    const CHART_H = layout.h;
+    const PAD = layout.pad;
+    const innerW = CHART_W - PAD.left - PAD.right;
+    const innerH = CHART_H - PAD.top - PAD.bottom;
+    const xScale = (year) => PAD.left + ((year - xMin) / (xMax - xMin)) * innerW;
+    const yScale = (val) => PAD.top + innerH - ((val - yDomain[0]) / (yDomain[1] - yDomain[0])) * innerH;
+
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", `0 0 ${CHART_W} ${CHART_H}`);
+    svg.classList.toggle("chart-compact", compact);
+
+    for (let y = Math.ceil(xMin / layout.xStep) * layout.xStep; y <= xMax; y += layout.xStep) {
+      const x = xScale(y);
+      svg.appendChild(svgEl("line", { class: "axis-line", x1: x, x2: x, y1: PAD.top, y2: CHART_H - PAD.bottom }));
+      const label = svgEl("text", { class: "axis-label", x, y: CHART_H - PAD.bottom + layout.xLabelDy, "text-anchor": "middle" });
+      label.textContent = y;
+      svg.appendChild(label);
+    }
+
+    yLabels.length = 0;
+    for (let v = yDomain[0]; v <= yDomain[1]; v += yStep) {
+      const y = yScale(v);
+      svg.appendChild(svgEl("line", { class: "grid-line-y", x1: PAD.left, x2: CHART_W - PAD.right, y1: y, y2: y }));
+      const label = svgEl("text", { class: "axis-label", x: PAD.left - 8, y: y + 3, "text-anchor": "end" });
+      yLabels.push({ el: label, man: v / 10000 });
+      svg.appendChild(label);
+    }
+
+
+    const actualSegments = buildSegments(actualRows, "year");
+    const actualPath = svgEl("path", {
+      class: "line-actual",
+      d: pathFromSegments(actualSegments, xScale, yScale, "year", "births"),
+    });
+    svg.appendChild(actualPath);
+    actualSegments
+      .filter((seg) => seg.length === 1)
+      .forEach((seg) =>
+        svg.appendChild(svgEl("circle", { class: "line-actual-dot", cx: xScale(seg[0].year), cy: yScale(seg[0].births), r: 1.75 }))
+      );
+
+    // end-of-line labels can land within a few px of each other — push
+    // overlapping labels apart vertically so they stay legible
+    const labelTargets = byVintage.map(({ vintageYear, rows }) => {
+      const last = rows[rows.length - 1];
+      return { vintageYear, x: xScale(last.targetYear) + 6, y: yScale(last.births) + 3 };
+    });
+    labelTargets.sort((a, b) => a.y - b.y);
+    const MIN_LABEL_GAP = layout.labelGap;
+    for (let i = 1; i < labelTargets.length; i++) {
+      if (labelTargets[i].y - labelTargets[i - 1].y < MIN_LABEL_GAP) {
+        labelTargets[i].y = labelTargets[i - 1].y + MIN_LABEL_GAP;
+      }
+    }
+    const maxLabelY = CHART_H - PAD.bottom - 4;
+    const overflow = labelTargets[labelTargets.length - 1].y - maxLabelY;
+    if (overflow > 0) labelTargets.forEach((l) => (l.y -= overflow));
+    const labelYByVintage = new Map(labelTargets.map((l) => [l.vintageYear, l.y]));
+
+    const vintagePaths = byVintage.map(({ vintageYear, rows }) => {
+      const path = svgEl("path", {
+        class: "line-forecast-vintage",
+        d: `M ${rows.map((r) => `${xScale(r.targetYear)},${yScale(r.births)}`).join(" L ")}`,
+        opacity: animate ? 0 : opacityFor(vintageYear),
+      });
+      svg.appendChild(path);
+      const last = rows[rows.length - 1];
+      const label = svgEl("text", {
+        class: "vintage-label",
+        x: xScale(last.targetYear) + 6,
+        y: labelYByVintage.get(vintageYear),
+        opacity: animate ? 0 : opacityFor(vintageYear),
+      });
+      label.textContent = `${vintageYear}`;
+      svg.appendChild(label);
+      return { vintageYear, path, label };
+    });
+
+    if (animate) {
+      const actualLen = actualPath.getTotalLength();
+      actualPath.style.strokeDasharray = `${actualLen}`;
+      actualPath.style.strokeDashoffset = `${actualLen}`;
+      // force the browser to commit the dashoffset above as a real starting
+      // state before the transition is attached (see fertility.js)
+      actualPath.getBoundingClientRect();
+      requestAnimationFrame(() => {
+        actualPath.style.transition = "stroke-dashoffset 1.4s ease";
+        actualPath.style.strokeDashoffset = "0";
+      });
+
+      const ACTUAL_DRAW_MS = 1400;
+      vintagePaths.forEach(({ vintageYear, path, label }, i) => {
+        const delay = ACTUAL_DRAW_MS + i * 220;
+        setTimeout(() => {
+          path.style.transition = "opacity 0.5s ease";
+          path.style.opacity = opacityFor(vintageYear);
+          label.style.transition = "opacity 0.5s ease";
+          label.style.opacity = opacityFor(vintageYear);
+        }, delay);
+      });
     }
   }
-  const maxLabelY = CHART_H - PAD.bottom - 4;
-  const overflow = labelTargets[labelTargets.length - 1].y - maxLabelY;
-  if (overflow > 0) labelTargets.forEach((l) => (l.y -= overflow));
-  const labelYByVintage = new Map(labelTargets.map((l) => [l.vintageYear, l.y]));
 
-  const vintagePaths = byVintage.map(({ vintageYear, rows }) => {
-    const path = svgEl("path", {
-      class: "line-forecast-vintage",
-      d: `M ${rows.map((r) => `${xScale(r.targetYear)},${yScale(r.births)}`).join(" L ")}`,
-      opacity: reduceMotion ? opacityFor(vintageYear) : 0,
-    });
-    svg.appendChild(path);
-    const last = rows[rows.length - 1];
-    const label = svgEl("text", {
-      class: "vintage-label",
-      x: xScale(last.targetYear) + 6,
-      y: labelYByVintage.get(vintageYear),
-      opacity: reduceMotion ? opacityFor(vintageYear) : 0,
-    });
-    label.textContent = `${vintageYear}`;
-    svg.appendChild(label);
-    return { vintageYear, path, label };
-  });
-
-  if (!reduceMotion) {
-    const actualLen = actualPath.getTotalLength();
-    actualPath.style.strokeDasharray = `${actualLen}`;
-    actualPath.style.strokeDashoffset = `${actualLen}`;
-    // force the browser to commit the dashoffset above as a real starting
-    // state before the transition is attached (see fertility.js)
-    actualPath.getBoundingClientRect();
-    requestAnimationFrame(() => {
-      actualPath.style.transition = "stroke-dashoffset 1.4s ease";
-      actualPath.style.strokeDashoffset = "0";
-    });
-
-    const ACTUAL_DRAW_MS = 1400;
-    vintagePaths.forEach(({ vintageYear, path, label }, i) => {
-      const delay = ACTUAL_DRAW_MS + i * 220;
-      setTimeout(() => {
-        path.style.transition = "opacity 0.5s ease";
-        path.style.opacity = opacityFor(vintageYear);
-        label.style.transition = "opacity 0.5s ease";
-        label.style.opacity = opacityFor(vintageYear);
-      }, delay);
-    });
-  }
+  drawChart(!reduceMotion);
 
   function buildLegendHtml() {
     return (
@@ -328,6 +349,10 @@ async function main() {
   // 通常のナビゲーションに任せる(home.js の同じ変更のコメントを参照)。
 
   applyI18n();
+  window.matchMedia(CHART_COMPACT_QUERY).addEventListener("change", () => {
+    drawChart(false);
+    applyI18n();
+  });
 }
 
 main();

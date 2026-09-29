@@ -21,7 +21,7 @@
 <link rel="icon" type="image/svg+xml" href="/zurekei_icon.svg">
 <link rel="icon" type="image/png" sizes="512x512" href="/zurekei_icon_512.png">
 <link rel="apple-touch-icon" href="/zurekei_icon_512.png">
-<link rel="stylesheet" href="style.css?v=20260929a">
+<link rel="stylesheet" href="style.css?v=20260929b">
 <!-- fertility.html と同じ規則(NOSCRIPT_STYLEのコメントを参照)。JSが動かない
      ときは空のSVGと凡例を畳んで案内文と入れ替え、数値表と出典(表内リンク)は
      静的に入っているので触らない。 -->
@@ -124,7 +124,7 @@
     </a>
     <div class="header-right">
       <div class="lang-toggle">
-        <a id="lang-ja" class="lang-btn mono active" href="/boj-outlook-vintages">JA</a>
+        <a id="lang-ja" class="lang-btn mono active" aria-current="true" href="/boj-outlook-vintages">JA</a>
         <a id="lang-en" class="lang-btn mono" href="/en/boj-outlook-vintages">EN</a>
       </div>
     </div>
@@ -139,7 +139,7 @@
       <p class="chart-note mono" id="bojv-scope-note"><!-- BUILD:scope -->各線は1つの年度を指し、その年度をその時点でどう見通していたかを号の公表順に結ぶ。線の色が薄いほど古い年度、濃いほど新しい年度。破線は見通しではなく確定した実績への接続(対応する実績が無い年度は破線が出ない)。前号時点の見通しを本文中で再掲しただけの行(restated)は、その号が新たに示した見通しではないため対象外にしている。中央値そのものが非公表だった号(2000年10月号〜2002年10月号、および2020年4月号)は線が途切れる。<!-- /BUILD:scope --></p>
 
       <p class="chart-note mono"><a href="/chart/boj-outlook-real">年度ごとの実質GDP見通し(4月号)を見る →</a></p>
-      <h2 class="chart-title" style="font-size:1.1rem;margin-top:28px">実質GDP</h2>
+      <h2 class="chart-title chart-title-sub">実質GDP</h2>
       <div class="chart-wrap">
         <svg id="boj-vintages-chart-real" viewBox="0 0 960 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="実質GDP見通しの、号ごとの収束"></svg>
         <p class="chart-noscript mono">グラフの描画には JavaScript が必要です。数値は下の表にあります。</p>
@@ -147,7 +147,7 @@
       <div class="fertility-legend bojv-legend" id="boj-vintages-legend-real"></div>
 
       <p class="chart-note mono"><a href="/chart/boj-outlook-cpi">年度ごとの消費者物価見通し(4月号)を見る →</a></p>
-      <h2 class="chart-title" style="font-size:1.1rem;margin-top:28px">消費者物価(CPI、総合)</h2>
+      <h2 class="chart-title chart-title-sub">消費者物価(CPI、総合)</h2>
       <div class="chart-wrap">
         <svg id="boj-vintages-chart-cpi" viewBox="0 0 960 380" preserveAspectRatio="xMidYMid meet" role="img" aria-label="消費者物価見通しの、号ごとの収束"></svg>
         <p class="chart-noscript mono">グラフの描画には JavaScript が必要です。数値は下の表にあります。</p>
@@ -1479,12 +1479,14 @@
 
   <footer class="site-footer-row">
     <span id="t-footer-src">src: 日本銀行「経済・物価情勢の展望」</span>
+    <a class="footer-about" id="t-footer-index" href="index.html">指標一覧へ</a>
+    <a class="footer-about" id="t-footer-corrections" href="corrections.html">訂正履歴</a>
     <a class="footer-about" id="t-footer-about" href="about.html">このサイトについて</a>
     <a class="footer-about" id="t-footer-contact" href="contact.html">お問い合わせ</a>
     <a class="footer-about" href="https://onrecord.zurekei.org/" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
-<script src="csv.js?v=20260929a"></script>
-<script src="boj-outlook-vintages.js?v=20260929a"></script>
+<script src="csv.js?v=20260929b"></script>
+<script src="boj-outlook-vintages.js?v=20260929b"></script>
 </body>
 </html>

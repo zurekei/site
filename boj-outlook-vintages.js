@@ -1,7 +1,14 @@
 const SVG_NS = "http://www.w3.org/2000/svg";
-const CHART_W = 960;
-const CHART_H = 380;
-const PAD = { top: 20, right: 64, bottom: 32, left: 44 };
+// 描き方を横幅で2通り持つ(chart.js の CHART_LAYOUTS と同じ考え方。2026-09-29)。
+// viewBox を 960 に固定すると、幅333pxのスマホで文字が約3px まで縮んでいた。
+// 文字の大きさは style.css の .chart-compact 側。狭いほうは線の端の年度ラベルが
+// 横に詰まるので、5年おきの年度にだけ付け(labelEvery)、下2桁('15)に縮める。
+// 26本全部に付けると、押し分けた結果が枠の外まで溢れていた。
+const CHART_LAYOUTS = {
+  wide: { w: 960, h: 380, pad: { top: 20, right: 64, bottom: 32, left: 44 }, xLabelDy: 16, xCluster: 34, labelGap: 11, labelEvery: 1 },
+  compact: { w: 400, h: 300, pad: { top: 16, right: 30, bottom: 28, left: 30 }, xLabelDy: 17, xCluster: 34, labelGap: 12, labelEvery: 5 },
+};
+const CHART_COMPACT_QUERY = "(max-width: 640px)";
 
 // UI strings for this page. Structurally this is the same "successive
 // estimates vs actual" pattern as fertility.js/births.js, but the axes are
@@ -105,9 +112,17 @@ function pathFromPoints(points) {
 
 // Renders one metric's chart (real or cpi) into the given <svg>/legend pair.
 // `groups`: array of { fy, points: [{x, y}], actual: {x, y} | null }, fy ascending.
-function renderChart(svg, legendEl, groups, lang, ariaLabel) {
+// `animate`: false のときは描き込みの演出をせず、最初から描き終えた状態で出す
+// (prefers-reduced-motion のときと、幅の区切りをまたいで描き直すとき)。
+function renderChart(svg, legendEl, groups, lang, ariaLabel, animate) {
+  const compact = window.matchMedia(CHART_COMPACT_QUERY).matches;
+  const layout = compact ? CHART_LAYOUTS.compact : CHART_LAYOUTS.wide;
+  const CHART_W = layout.w;
+  const CHART_H = layout.h;
+  const PAD = layout.pad;
   svg.innerHTML = "";
   svg.setAttribute("viewBox", `0 0 ${CHART_W} ${CHART_H}`);
+  svg.classList.toggle("chart-compact", compact);
   svg.setAttribute("aria-label", ariaLabel);
 
   const allPoints = groups.flatMap((g) => g.points.concat(g.actual ? [g.actual] : []));
@@ -127,7 +142,7 @@ function renderChart(svg, legendEl, groups, lang, ariaLabel) {
   for (let y = Math.ceil(xMin / 5) * 5; y <= xMax; y += 5) {
     const x = xScale(y);
     svg.appendChild(svgEl("line", { class: "axis-line", x1: x, x2: x, y1: PAD.top, y2: CHART_H - PAD.bottom }));
-    const label = svgEl("text", { class: "axis-label", x, y: CHART_H - PAD.bottom + 16, "text-anchor": "middle" });
+    const label = svgEl("text", { class: "axis-label", x, y: CHART_H - PAD.bottom + layout.xLabelDy, "text-anchor": "middle" });
     label.textContent = Math.round(y);
     svg.appendChild(label);
   }
@@ -146,8 +161,6 @@ function renderChart(svg, legendEl, groups, lang, ariaLabel) {
     svg.appendChild(label);
   }
 
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
   const opacityFor = (idx, span) => 0.25 + (idx / (span || 1)) * 0.55;
 
   const entries = [];
@@ -158,7 +171,7 @@ function renderChart(svg, legendEl, groups, lang, ariaLabel) {
     const path = svgEl("path", {
       class: "line-forecast-vintage",
       d: pathFromPoints(px),
-      opacity: reduceMotion ? opacity : 0,
+      opacity: animate ? 0 : opacity,
     });
     svg.appendChild(path);
 
@@ -168,7 +181,7 @@ function renderChart(svg, legendEl, groups, lang, ariaLabel) {
       tailPath = svgEl("path", {
         class: "line-actual-ref",
         d: `M ${xScale(last.x)},${yScale(last.y)} L ${xScale(actual.x)},${yScale(actual.y)}`,
-        opacity: reduceMotion ? opacity : 0,
+        opacity: animate ? 0 : opacity,
       });
       svg.appendChild(tailPath);
       tailPath._dot = svgEl("circle", {
@@ -176,7 +189,7 @@ function renderChart(svg, legendEl, groups, lang, ariaLabel) {
         cx: xScale(actual.x),
         cy: yScale(actual.y),
         r: 2,
-        opacity: reduceMotion ? opacity : 0,
+        opacity: animate ? 0 : opacity,
       });
       svg.appendChild(tailPath._dot);
     }
@@ -185,7 +198,7 @@ function renderChart(svg, legendEl, groups, lang, ariaLabel) {
     const endY = actual ? actual.y : points[points.length - 1].y;
     const entry = { path, tailPath, opacity, label: null };
     entries.push(entry);
-    labelTargets.push({ fy, x: xScale(endX) + 6, y: yScale(endY) + 3, entry });
+    if (fy % layout.labelEvery === 0) labelTargets.push({ fy, x: xScale(endX) + 6, y: yScale(endY) + 3, entry });
   });
 
   // End-of-line labels can land within a few px of each other, but — unlike
@@ -196,8 +209,8 @@ function renderChart(svg, legendEl, groups, lang, ariaLabel) {
   // distant label happens to share a similar y. So collisions are only
   // resolved within local x-clusters: group labels whose x is within
   // X_CLUSTER of each other, then push-apart only inside each cluster.
-  const X_CLUSTER = 34;
-  const MIN_LABEL_GAP = 11;
+  const X_CLUSTER = layout.xCluster;
+  const MIN_LABEL_GAP = layout.labelGap;
   const byX = [...labelTargets].sort((a, b) => a.x - b.x);
   const clusters = [];
   let current = [];
@@ -231,14 +244,14 @@ function renderChart(svg, legendEl, groups, lang, ariaLabel) {
       class: "vintage-label",
       x,
       y,
-      opacity: reduceMotion ? entry.opacity : 0,
+      opacity: animate ? 0 : entry.opacity,
     });
-    label.textContent = `${fy}`;
+    label.textContent = compact ? `'${String(fy).slice(2)}` : `${fy}`;
     svg.appendChild(label);
     entry.label = label;
   });
 
-  if (!reduceMotion) {
+  if (animate) {
     entries.forEach(({ path, tailPath, label, opacity }, i) => {
       const delay = i * 60;
       setTimeout(() => {
@@ -250,8 +263,10 @@ function renderChart(svg, legendEl, groups, lang, ariaLabel) {
           tailPath._dot.style.transition = "opacity 0.5s ease";
           tailPath._dot.style.opacity = opacity;
         }
-        label.style.transition = "opacity 0.5s ease";
-        label.style.opacity = opacity;
+        if (label) {
+          label.style.transition = "opacity 0.5s ease";
+          label.style.opacity = opacity;
+        }
       }, delay);
     });
   }
@@ -304,20 +319,28 @@ async function main() {
     });
   }
 
-  renderChart(
-    document.getElementById("boj-vintages-chart-real"),
-    document.getElementById("boj-vintages-legend-real"),
-    groupsFor("real"),
-    lang,
-    t.chartAriaLabelReal
-  );
-  renderChart(
-    document.getElementById("boj-vintages-chart-cpi"),
-    document.getElementById("boj-vintages-legend-cpi"),
-    groupsFor("cpi"),
-    lang,
-    t.chartAriaLabelCpi
-  );
+  // 幅の区切り(CHART_COMPACT_QUERY)をまたいだら描き直す(スマホを横に倒したときなど)。
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function renderCharts(animate) {
+    renderChart(
+      document.getElementById("boj-vintages-chart-real"),
+      document.getElementById("boj-vintages-legend-real"),
+      groupsFor("real"),
+      lang,
+      t.chartAriaLabelReal,
+      animate
+    );
+    renderChart(
+      document.getElementById("boj-vintages-chart-cpi"),
+      document.getElementById("boj-vintages-legend-cpi"),
+      groupsFor("cpi"),
+      lang,
+      t.chartAriaLabelCpi,
+      animate
+    );
+  }
+  renderCharts(!reduceMotion);
+  window.matchMedia(CHART_COMPACT_QUERY).addEventListener("change", () => renderCharts(false));
 
   // 静的な数値表・出典は bin/build.mjs が data/*.csv から HTML に埋め込む(JSでは
   // 組み直さない。fertility.js の applyBuiltI18n と同じ理由)。

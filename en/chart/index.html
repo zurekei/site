@@ -19,7 +19,7 @@
 <link rel="icon" type="image/svg+xml" href="/zurekei_icon.svg">
 <link rel="icon" type="image/png" sizes="512x512" href="/zurekei_icon_512.png">
 <link rel="apple-touch-icon" href="/zurekei_icon_512.png">
-<link rel="stylesheet" href="/style.css?v=20260929a">
+<link rel="stylesheet" href="/style.css?v=20260929b">
 </head>
 <body>
 <div class="page">
@@ -45,7 +45,7 @@
     <div class="header-right">
       <div class="lang-toggle">
         <a id="lang-ja" class="lang-btn mono" href="/chart/">JA</a>
-        <a id="lang-en" class="lang-btn mono active" href="/en/chart/">EN</a>
+        <a id="lang-en" class="lang-btn mono active" aria-current="true" href="/en/chart/">EN</a>
       </div>
     </div>
   </header>
@@ -103,8 +103,10 @@
 
   <footer class="site-footer-row">
     <span>src: listed on each indicator page</span>
-    <a class="footer-about" href="/en/about">About this site</a>
-    <a class="footer-about" href="/en/contact">Contact</a>
+    <a class="footer-about" id="t-footer-index" href="/en/">Indicators</a>
+    <a class="footer-about" id="t-footer-corrections" href="/en/corrections">Corrections</a>
+    <a class="footer-about" id="t-footer-about" href="/en/about">About this site</a>
+    <a class="footer-about" id="t-footer-contact" href="/en/contact">Contact</a>
     <a class="footer-about" href="https://onrecord.zurekei.org/" lang="ja" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>

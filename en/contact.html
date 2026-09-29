@@ -19,27 +19,18 @@
 <link rel="icon" type="image/svg+xml" href="/zurekei_icon.svg">
 <link rel="icon" type="image/png" sizes="512x512" href="/zurekei_icon_512.png">
 <link rel="apple-touch-icon" href="/zurekei_icon_512.png">
-<link rel="stylesheet" href="/style.css?v=20260929a">
+<link rel="stylesheet" href="/style.css?v=20260929b">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
+  /* 枠・見出し・リードは about / corrections と共通の .about-body / .about-title /
+     .about-lead に任せ、ここにはフォーム固有のものだけを置く。色は style.css のトークン */
   .contact-page-wrap {
     max-width: 680px;
-    margin: 60px auto 120px;
-    padding: 0 24px;
+    margin-bottom: 3rem;
   }
 
-  .contact-page-wrap h1 {
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-
-  .contact-page-wrap .lead {
-    font-size: 15px;
-    /* 以前の #888 は白地で 3.54:1。本文用のトークンに揃えて AA(4.5:1)を満たす */
-    color: var(--muted);
-    line-height: 1.8;
-    margin-bottom: 48px;
+  .contact-page-wrap .about-lead {
+    margin: 0 0 2.5rem;
   }
 
   .form-group {
@@ -51,11 +42,11 @@
     font-size: 13px;
     font-weight: 500;
     margin-bottom: 6px;
-    color: #333;
+    color: var(--ink);
   }
 
   .form-group label span {
-    color: #d32f2f;
+    color: var(--red);
     margin-left: 2px;
   }
 
@@ -65,18 +56,20 @@
   .form-group textarea {
     width: 100%;
     padding: 12px 16px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--line);
     border-radius: 2px;
-    font-size: 15px;
+    /* 16px 未満だと iOS Safari がフォーカス時にページを拡大する */
+    font-size: 16px;
     font-family: inherit;
-    background: #fff;
-    color: #101010;
+    background: var(--bg);
+    color: var(--ink);
     transition: border-color 0.2s;
   }
 
   .form-group input:focus,
   .form-group textarea:focus {
-    border-color: #1976d2;
+    border-color: var(--navy);
+    outline: 1px solid var(--navy);
   }
 
   .form-group textarea {
@@ -89,9 +82,10 @@
   }
 
   .submit-btn {
-    background: #101010;
+    background: var(--navy);
     color: #fff;
     border: none;
+    min-height: 44px;
     padding: 12px 36px;
     font-size: 14px;
     font-family: inherit;
@@ -101,11 +95,11 @@
   }
 
   .submit-btn:hover {
-    background: #333;
+    background: var(--navy-soft);
   }
 
   .submit-btn:disabled {
-    background: #aaa;
+    background: var(--muted);
     cursor: not-allowed;
   }
 
@@ -115,32 +109,14 @@
     border-radius: 2px;
     font-size: 14px;
     display: none;
-  }
-
-  .form-msg.success {
-    background: #f1f8e9;
-    border: 1px solid #c5e1a5;
-    color: #33691e;
-  }
-
-  .form-msg.error {
-    background: #ffebee;
-    border: 1px solid #ef9a9a;
-    color: #c62828;
+    /* 成否で色を変えない(色で善悪を示唆しない方針)。区別は文言の ✓ / × で付く */
+    background: var(--hover-bg);
+    border: 1px solid var(--line);
+    color: var(--ink);
   }
 
   .form-msg.show {
     display: block;
-  }
-
-  @media (max-width: 768px) {
-    .contact-page-wrap {
-      margin: 40px auto 80px;
-    }
-
-    .contact-page-wrap h1 {
-      font-size: 24px;
-    }
   }
 </style>
 </head>
@@ -168,16 +144,16 @@
     <div class="header-right">
       <div class="lang-toggle">
         <a id="lang-ja" class="lang-btn mono" href="/contact">JA</a>
-        <a id="lang-en" class="lang-btn mono active" href="/en/contact">EN</a>
+        <a id="lang-en" class="lang-btn mono active" aria-current="true" href="/en/contact">EN</a>
       </div>
     </div>
   </header>
 
   <a class="chart-back" id="t-back" href="/en/">← Indicators</a>
 
-  <div class="contact-page-wrap">
-    <h1 id="contact-title">Contact</h1>
-    <p class="lead" id="contact-lead">
+  <main class="about-body contact-page-wrap">
+    <h1 class="about-title" id="contact-title">Contact</h1>
+    <p class="about-lead" id="contact-lead">
       Questions about zurekei or its sister site OnRecord, corrections to the data or to a quoted statement, and proposed revisions to forecast or actual figures all go here.
     </p>
 
@@ -216,7 +192,7 @@
         × Sending failed. Please try again later.
       </div>
     </form>
-  </div>
+  </main>
 
   <footer class="site-footer-row">
     <a class="footer-about" id="t-footer-index" href="/en/">Indicators</a>
@@ -226,6 +202,6 @@
   </footer>
 </div>
 
-<script src="/contact.js?v=20260929a"></script>
+<script src="/contact.js?v=20260929b"></script>
 </body>
 </html>

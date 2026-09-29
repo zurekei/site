@@ -1,7 +1,15 @@
 const SVG_NS = "http://www.w3.org/2000/svg";
-const CHART_W = 960;
-const CHART_H = 480;
-const PAD = { top: 20, right: 64, bottom: 32, left: 58 };
+// 描き方を横幅で2通り持つ。viewBox を 960 に固定したままだと、幅333pxのスマホでは
+// 11px の軸ラベルが約3.8px まで縮んで読めなかった(2026-09-29 UIレビュー)。
+// 狭いときは viewBox そのものを小さく取り、文字が実寸で約10px 残るようにする。
+// 文字の大きさは style.css の .chart-compact 側。x 軸の目盛りは間引く(xStep)。
+// y 軸の目盛りは数字だけにして、単位は左上に1回だけ書く。単位まで目盛りに付けると
+// 英語の "-10tn yen" が左端からはみ出し、負号が切れて正の値に読めていた。
+const CHART_LAYOUTS = {
+  wide: { w: 960, h: 480, pad: { top: 24, right: 64, bottom: 32, left: 50 }, xStep: 5, xLabelDy: 16 },
+  compact: { w: 400, h: 300, pad: { top: 24, right: 66, bottom: 28, left: 34 }, xStep: 10, xLabelDy: 17 },
+};
+const CHART_COMPACT_QUERY = "(max-width: 640px)";
 
 // UI strings for this page. Indicator names (title/titleEn) are kept in sync
 // with home.js's INDICATOR_META nameEn by hand — no shared import, so check
@@ -559,187 +567,227 @@ async function main() {
   const yPad = (yMax - yMin) * 0.12 || 1;
   const yDomain = [yMin - yPad, yMax + yPad];
 
-  const innerW = CHART_W - PAD.left - PAD.right;
-  const innerH = CHART_H - PAD.top - PAD.bottom;
-
-  const xScale = (year) => PAD.left + ((year - xMin) / (xMax - xMin)) * innerW;
-  const yScale = (val) => PAD.top + innerH - ((val - yDomain[0]) / (yDomain[1] - yDomain[0])) * innerH;
-
   const svg = document.getElementById("chart");
-  svg.setAttribute("viewBox", `0 0 ${CHART_W} ${CHART_H}`);
+  const controlsEl = document.querySelector(".controls");
+  const compactMQ = window.matchMedia(CHART_COMPACT_QUERY);
 
-  // background band marking the era whose forecasts are on a different conceptual
-  // basis (GNP vs GDP) — data-driven via forecast_basis, so metrics without the
-  // distinction draw no band. Drawn first so grid and data lines sit on top.
+  // drawChart() が描き直すたびに入れ替わるもの。render() と applyI18n() はここを見る。
+  let xScale, yScale;
   let basisBandLabel = null;
-  const gnpForecastYears = forecastYears.filter((p) => p.forecastBasis === "gnp");
-  if (gnpForecastYears.length > 0) {
-    const halfYearPx = innerW / (xMax - xMin) / 2;
-    const bandX1 = Math.max(PAD.left, xScale(gnpForecastYears[0].year) - halfYearPx);
-    const bandX2 = xScale(gnpForecastYears[gnpForecastYears.length - 1].year) + halfYearPx;
-    svg.appendChild(svgEl("rect", { class: "basis-band", x: bandX1, y: PAD.top, width: bandX2 - bandX1, height: innerH }));
-    basisBandLabel = svgEl("text", { class: "basis-band-label", x: bandX1 + 6, y: PAD.top + 12, "text-anchor": "start" });
-    basisBandLabel.textContent = T[lang].forecastEraBandLabel;
-    svg.appendChild(basisBandLabel);
-  }
-
-  // vintage envelope: how much the actual itself has been revised across
-  // statistical base-years. A faint min–max ribbon drawn behind the grid and
-  // data lines, over contiguous runs of years that have >=2 base vintages.
-  if (vintageByYear.size > 0) {
-    const vYears = [...vintageByYear.keys()].sort((a, b) => a - b);
-    const runs = [];
-    let run = [];
-    vYears.forEach((y) => {
-      if (run.length && y - run[run.length - 1] > 1) { runs.push(run); run = []; }
-      run.push(y);
-    });
-    if (run.length) runs.push(run);
-    runs.forEach((r) => {
-      if (r.length < 2) return;
-      const top = r.map((y) => `${xScale(y)},${yScale(vintageByYear.get(y).max)}`);
-      const bottom = r.slice().reverse().map((y) => `${xScale(y)},${yScale(vintageByYear.get(y).min)}`);
-      svg.appendChild(svgEl("path", { class: "vintage-band", d: `M ${top.join(" L ")} L ${bottom.join(" L ")} Z` }));
-    });
-  }
-
-  svg.appendChild(
-    svgEl("line", { class: "zero-line", x1: PAD.left, x2: CHART_W - PAD.right, y1: yScale(0), y2: yScale(0) })
-  );
-
-  for (let y = Math.ceil(xMin / 5) * 5; y <= xMax; y += 5) {
-    const x = xScale(y);
-    svg.appendChild(svgEl("line", { class: "axis-line", x1: x, x2: x, y1: PAD.top, y2: CHART_H - PAD.bottom }));
-    const label = svgEl("text", { class: "axis-label", x, y: CHART_H - PAD.bottom + 16, "text-anchor": "middle" });
-    label.textContent = y;
-    svg.appendChild(label);
-  }
-
-  const yRange = yDomain[1] - yDomain[0];
-  const yStep = yRange > 60 ? 10 : yRange > 15 ? 5 : 2;
-  for (let v = Math.ceil(yDomain[0] / yStep) * yStep; v <= yDomain[1]; v += yStep) {
-    const y = yScale(v);
-    if (v !== 0) {
-      svg.appendChild(svgEl("line", { class: "grid-line-y", x1: PAD.left, x2: CHART_W - PAD.right, y1: y, y2: y }));
-    }
-    const label = svgEl("text", { class: "axis-label", x: PAD.left - 8, y: y + 3, "text-anchor": "end" });
-    label.textContent = `${v}${metricUnit(metric, lang)}`;
-    svg.appendChild(label);
-  }
-
-  function buildSegments(points) {
-    const segments = [];
-    let current = [];
-    points.forEach((r) => {
-      if (current.length > 0 && r.year - current[current.length - 1].year > 1) {
-        segments.push(current);
-        current = [];
-      }
-      current.push(r);
-    });
-    if (current.length > 0) segments.push(current);
-    return segments;
-  }
-
-  function pathFromSegments(segments, valKey) {
-    return segments
-      .map((seg) => `M ${seg.map((r) => `${xScale(r.year)},${yScale(r[valKey])}`).join(" L ")}`)
-      .join(" ");
-  }
-
-  // years never covered by a published forecast (gaps > 1yr between forecastYears
-  // entries) get a neutral factual label instead of a fabricated straight-line trend.
-  // labels are collected into gapLabelEls so applyI18n() can retranslate them later.
-  const gapLabelEls = [];
-  function drawGapLabels(segments) {
-    for (let i = 1; i < segments.length; i++) {
-      const prevYear = segments[i - 1][segments[i - 1].length - 1].year;
-      const nextYear = segments[i][0].year;
-      const label = svgEl("text", {
-        class: "gap-label",
-        x: (xScale(prevYear) + xScale(nextYear)) / 2,
-        y: CHART_H - PAD.bottom - 10,
-        "text-anchor": "middle",
-      });
-      label.textContent = gapLabelText(metric, lang);
-      svg.appendChild(label);
-      gapLabelEls.push(label);
-    }
-  }
-
-  // 初回確報の線。実績線より先に描いて下に敷く(手前に来るべきなのは今の実績で、
-  // これはその手前の姿)。収録の飛び(FY1999〜2002)は buildSegments が分割するので、
-  // 繋がっていない年度が繋がって見えることはない。
-  if (firstReleaseByYear.size > 0) {
-    const frPoints = [...firstReleaseByYear.entries()]
-      .map(([year, f]) => ({ year, firstVal: f.val }))
-      .sort((a, b) => a.year - b.year);
-    const frSegments = buildSegments(frPoints);
-    svg.appendChild(svgEl("path", { class: "line-first-release", d: pathFromSegments(frSegments, "firstVal") }));
-    frSegments
-      .filter((seg) => seg.length === 1)
-      .forEach((seg) => {
-        svg.appendChild(
-          svgEl("circle", { class: "line-first-release-dot", cx: xScale(seg[0].year), cy: yScale(seg[0].firstVal), r: 1.75 })
-        );
-      });
-  }
-
-  if (forecastYears.length > 0) {
-    const forecastSegments = buildSegments(forecastYears);
-    svg.appendChild(svgEl("path", { class: "line-forecast", d: pathFromSegments(forecastSegments, "forecastVal") }));
-    forecastSegments
-      .filter((seg) => seg.length === 1)
-      .forEach((seg) => {
-        svg.appendChild(svgEl("circle", { class: "line-forecast-dot", cx: xScale(seg[0].year), cy: yScale(seg[0].forecastVal), r: 1.75 }));
-      });
-    drawGapLabels(forecastSegments);
-  }
-
   let actualLabel = null;
-  if (actualPoints.length > 0) {
-    // actual series may stitch multiple statistical vintages (e.g. GDP: a
-    // 2015-base reference series through FY1994, then the 2020-base final
-    // series from FY1995). Draw each vintage separately so the basis change
-    // reads as a break rather than a smooth—and misleading—continuous line.
-    const refPoints = actualPoints.filter((p) => p.basis === "2015base-ref");
-    const mainPoints = actualPoints.filter((p) => p.basis !== "2015base-ref");
-    if (mainPoints.length > 0) {
-      svg.appendChild(svgEl("path", { class: "line-actual", d: pathFromSegments(buildSegments(mainPoints), "actualVal") }));
-    }
-    if (refPoints.length > 0) {
-      svg.appendChild(svgEl("path", { class: "line-actual-ref", d: pathFromSegments(buildSegments(refPoints), "actualVal") }));
-    }
-    // faint seam marker at the basis boundary
-    if (refPoints.length > 0 && mainPoints.length > 0) {
-      const seamX = (xScale(refPoints[refPoints.length - 1].year) + xScale(mainPoints[0].year)) / 2;
-      svg.appendChild(svgEl("line", { class: "seam-line", x1: seamX, x2: seamX, y1: PAD.top, y2: CHART_H - PAD.bottom }));
+  let forecastLabel, linkLine, forecastPoint, actualPoint;
+  const gapLabelEls = [];
+
+  // 幅の区切り(CHART_COMPACT_QUERY)をまたいだら描き直す(スマホを横に倒したときなど)。
+  function drawChart() {
+    const compact = compactMQ.matches;
+    const layout = compact ? CHART_LAYOUTS.compact : CHART_LAYOUTS.wide;
+    const CHART_W = layout.w;
+    const CHART_H = layout.h;
+    const PAD = layout.pad;
+    const innerW = CHART_W - PAD.left - PAD.right;
+    const innerH = CHART_H - PAD.top - PAD.bottom;
+
+    xScale = (year) => PAD.left + ((year - xMin) / (xMax - xMin)) * innerW;
+    yScale = (val) => PAD.top + innerH - ((val - yDomain[0]) / (yDomain[1] - yDomain[0])) * innerH;
+
+    svg.replaceChildren();
+    svg.setAttribute("viewBox", `0 0 ${CHART_W} ${CHART_H}`);
+    svg.classList.toggle("chart-compact", compact);
+    basisBandLabel = null;
+    actualLabel = null;
+    gapLabelEls.length = 0;
+
+    // background band marking the era whose forecasts are on a different conceptual
+    // basis (GNP vs GDP) — data-driven via forecast_basis, so metrics without the
+    // distinction draw no band. Drawn first so grid and data lines sit on top.
+    const gnpForecastYears = forecastYears.filter((p) => p.forecastBasis === "gnp");
+    if (gnpForecastYears.length > 0) {
+      const halfYearPx = innerW / (xMax - xMin) / 2;
+      const bandX1 = Math.max(PAD.left, xScale(gnpForecastYears[0].year) - halfYearPx);
+      const bandX2 = xScale(gnpForecastYears[gnpForecastYears.length - 1].year) + halfYearPx;
+      svg.appendChild(svgEl("rect", { class: "basis-band", x: bandX1, y: PAD.top, width: bandX2 - bandX1, height: innerH }));
+      basisBandLabel = svgEl("text", { class: "basis-band-label", x: bandX1 + 6, y: PAD.top + 12, "text-anchor": "start" });
+      basisBandLabel.textContent = T[lang].forecastEraBandLabel;
+      svg.appendChild(basisBandLabel);
     }
 
-    actualPoints.forEach((r) => {
-      svg.appendChild(svgEl("circle", { class: "line-actual-dot", cx: xScale(r.year), cy: yScale(r.actualVal), r: 1.75 }));
-    });
+    // vintage envelope: how much the actual itself has been revised across
+    // statistical base-years. A faint min–max ribbon drawn behind the grid and
+    // data lines, over contiguous runs of years that have >=2 base vintages.
+    if (vintageByYear.size > 0) {
+      const vYears = [...vintageByYear.keys()].sort((a, b) => a - b);
+      const runs = [];
+      let run = [];
+      vYears.forEach((y) => {
+        if (run.length && y - run[run.length - 1] > 1) { runs.push(run); run = []; }
+        run.push(y);
+      });
+      if (run.length) runs.push(run);
+      runs.forEach((r) => {
+        if (r.length < 2) return;
+        const top = r.map((y) => `${xScale(y)},${yScale(vintageByYear.get(y).max)}`);
+        const bottom = r.slice().reverse().map((y) => `${xScale(y)},${yScale(vintageByYear.get(y).min)}`);
+        svg.appendChild(svgEl("path", { class: "vintage-band", d: `M ${top.join(" L ")} L ${bottom.join(" L ")} Z` }));
+      });
+    }
 
-    const lastActual = actualPoints[actualPoints.length - 1];
-    actualLabel = svgEl("text", {
-      class: "end-label end-label-actual",
-      x: xScale(lastActual.year) + 8,
-      y: yScale(lastActual.actualVal) + 4,
-    });
-    actualLabel.textContent = T[lang].actual;
-    svg.appendChild(actualLabel);
+    svg.appendChild(
+      svgEl("line", { class: "zero-line", x1: PAD.left, x2: CHART_W - PAD.right, y1: yScale(0), y2: yScale(0) })
+    );
+
+    for (let y = Math.ceil(xMin / layout.xStep) * layout.xStep; y <= xMax; y += layout.xStep) {
+      const x = xScale(y);
+      svg.appendChild(svgEl("line", { class: "axis-line", x1: x, x2: x, y1: PAD.top, y2: CHART_H - PAD.bottom }));
+      const label = svgEl("text", { class: "axis-label", x, y: CHART_H - PAD.bottom + layout.xLabelDy, "text-anchor": "middle" });
+      label.textContent = y;
+      svg.appendChild(label);
+    }
+
+    const yRange = yDomain[1] - yDomain[0];
+    const yStep = yRange > 60 ? 10 : yRange > 15 ? 5 : 2;
+    for (let v = Math.ceil(yDomain[0] / yStep) * yStep; v <= yDomain[1]; v += yStep) {
+      const y = yScale(v);
+      if (v !== 0) {
+        svg.appendChild(svgEl("line", { class: "grid-line-y", x1: PAD.left, x2: CHART_W - PAD.right, y1: y, y2: y }));
+      }
+      const label = svgEl("text", { class: "axis-label", x: PAD.left - 8, y: y + 3, "text-anchor": "end" });
+      label.textContent = v;
+      svg.appendChild(label);
+    }
+    const unitLabel = svgEl("text", { class: "axis-label axis-unit", x: 4, y: PAD.top - 10, "text-anchor": "start" });
+    unitLabel.textContent = metricUnit(metric, lang);
+    svg.appendChild(unitLabel);
+
+    function buildSegments(points) {
+      const segments = [];
+      let current = [];
+      points.forEach((r) => {
+        if (current.length > 0 && r.year - current[current.length - 1].year > 1) {
+          segments.push(current);
+          current = [];
+        }
+        current.push(r);
+      });
+      if (current.length > 0) segments.push(current);
+      return segments;
+    }
+
+    function pathFromSegments(segments, valKey) {
+      return segments
+        .map((seg) => `M ${seg.map((r) => `${xScale(r.year)},${yScale(r[valKey])}`).join(" L ")}`)
+        .join(" ");
+    }
+
+    // years never covered by a published forecast (gaps > 1yr between forecastYears
+    // entries) get a neutral factual label instead of a fabricated straight-line trend.
+    // labels are collected into gapLabelEls so applyI18n() can retranslate them later.
+    function drawGapLabels(segments) {
+      for (let i = 1; i < segments.length; i++) {
+        const prevYear = segments[i - 1][segments[i - 1].length - 1].year;
+        const nextYear = segments[i][0].year;
+        const label = svgEl("text", {
+          class: "gap-label",
+          x: (xScale(prevYear) + xScale(nextYear)) / 2,
+          y: CHART_H - PAD.bottom - 10,
+          "text-anchor": "middle",
+        });
+        label.textContent = gapLabelText(metric, lang);
+        svg.appendChild(label);
+        gapLabelEls.push(label);
+      }
+    }
+
+    // 初回確報の線。実績線より先に描いて下に敷く(手前に来るべきなのは今の実績で、
+    // これはその手前の姿)。収録の飛び(FY1999〜2002)は buildSegments が分割するので、
+    // 繋がっていない年度が繋がって見えることはない。
+    if (firstReleaseByYear.size > 0) {
+      const frPoints = [...firstReleaseByYear.entries()]
+        .map(([year, f]) => ({ year, firstVal: f.val }))
+        .sort((a, b) => a.year - b.year);
+      const frSegments = buildSegments(frPoints);
+      svg.appendChild(svgEl("path", { class: "line-first-release", d: pathFromSegments(frSegments, "firstVal") }));
+      frSegments
+        .filter((seg) => seg.length === 1)
+        .forEach((seg) => {
+          svg.appendChild(
+            svgEl("circle", { class: "line-first-release-dot", cx: xScale(seg[0].year), cy: yScale(seg[0].firstVal), r: 1.75 })
+          );
+        });
+    }
+
+    if (forecastYears.length > 0) {
+      const forecastSegments = buildSegments(forecastYears);
+      svg.appendChild(svgEl("path", { class: "line-forecast", d: pathFromSegments(forecastSegments, "forecastVal") }));
+      forecastSegments
+        .filter((seg) => seg.length === 1)
+        .forEach((seg) => {
+          svg.appendChild(svgEl("circle", { class: "line-forecast-dot", cx: xScale(seg[0].year), cy: yScale(seg[0].forecastVal), r: 1.75 }));
+        });
+      drawGapLabels(forecastSegments);
+    }
+
+    if (actualPoints.length > 0) {
+      // actual series may stitch multiple statistical vintages (e.g. GDP: a
+      // 2015-base reference series through FY1994, then the 2020-base final
+      // series from FY1995). Draw each vintage separately so the basis change
+      // reads as a break rather than a smooth—and misleading—continuous line.
+      const refPoints = actualPoints.filter((p) => p.basis === "2015base-ref");
+      const mainPoints = actualPoints.filter((p) => p.basis !== "2015base-ref");
+      if (mainPoints.length > 0) {
+        svg.appendChild(svgEl("path", { class: "line-actual", d: pathFromSegments(buildSegments(mainPoints), "actualVal") }));
+      }
+      if (refPoints.length > 0) {
+        svg.appendChild(svgEl("path", { class: "line-actual-ref", d: pathFromSegments(buildSegments(refPoints), "actualVal") }));
+      }
+      // faint seam marker at the basis boundary
+      if (refPoints.length > 0 && mainPoints.length > 0) {
+        const seamX = (xScale(refPoints[refPoints.length - 1].year) + xScale(mainPoints[0].year)) / 2;
+        svg.appendChild(svgEl("line", { class: "seam-line", x1: seamX, x2: seamX, y1: PAD.top, y2: CHART_H - PAD.bottom }));
+      }
+
+      actualPoints.forEach((r) => {
+        svg.appendChild(svgEl("circle", { class: "line-actual-dot", cx: xScale(r.year), cy: yScale(r.actualVal), r: 1.75 }));
+      });
+
+      const lastActual = actualPoints[actualPoints.length - 1];
+      actualLabel = svgEl("text", {
+        class: "end-label end-label-actual",
+        x: xScale(lastActual.year) + 8,
+        y: yScale(lastActual.actualVal) + 4,
+      });
+      actualLabel.textContent = T[lang].actual;
+      svg.appendChild(actualLabel);
+    }
+
+    forecastLabel = svgEl("text", { class: "end-label end-label-forecast", opacity: 0 });
+    forecastLabel.textContent = T[lang].forecast;
+    svg.appendChild(forecastLabel);
+
+    linkLine = svgEl("line", { class: "link-line", opacity: 0 });
+    forecastPoint = svgEl("circle", { class: "line-forecast-point", r: 5, opacity: 0 });
+    actualPoint = svgEl("circle", { class: "line-actual-point", r: 5, opacity: 0 });
+    svg.appendChild(linkLine);
+    svg.appendChild(forecastPoint);
+    svg.appendChild(actualPoint);
+
+    // the slider only steps through years that HAVE a forecast (forecastYears),
+    // which can start well after xMin (e.g. nominal GDP has actuals back to 1981
+    // but no forecast for 1982-1997) — so the slider's own value range covers a
+    // narrower span than the chart's x-axis. Inset the track by exactly the
+    // pixel fraction the chart itself would place those start/end years at, so
+    // the thumb always sits directly under the year it represents. The slider's
+    // value is the calendar year rather than an index into forecastYears, which
+    // keeps the thumb linear in year — and therefore aligned with the x-axis —
+    // even for metrics whose forecasts have interior gaps.
+    if (controlsEl && forecastYears.length > 1) {
+      const fracLeft = xScale(forecastYears[0].year) / CHART_W;
+      const fracRight = 1 - xScale(forecastYears[forecastYears.length - 1].year) / CHART_W;
+      controlsEl.style.padding = `0 ${(fracRight * 100).toFixed(3)}% 0 ${(fracLeft * 100).toFixed(3)}%`;
+    }
   }
 
-  const forecastLabel = svgEl("text", { class: "end-label end-label-forecast", opacity: 0 });
-  forecastLabel.textContent = T[lang].forecast;
-  svg.appendChild(forecastLabel);
-
-  const linkLine = svgEl("line", { class: "link-line", opacity: 0 });
-  const forecastPoint = svgEl("circle", { class: "line-forecast-point", r: 5, opacity: 0 });
-  const actualPoint = svgEl("circle", { class: "line-actual-point", r: 5, opacity: 0 });
-  svg.appendChild(linkLine);
-  svg.appendChild(forecastPoint);
-  svg.appendChild(actualPoint);
+  drawChart();
 
   const slider = document.getElementById("year-select");
   const yearReadout = document.getElementById("year-readout");
@@ -749,21 +797,6 @@ async function main() {
   const vNotes = document.getElementById("v-notes");
   const vSource = document.getElementById("v-source");
 
-  // the slider only steps through years that HAVE a forecast (forecastYears),
-  // which can start well after xMin (e.g. nominal GDP has actuals back to 1981
-  // but no forecast for 1982-1997) — so the slider's own value range covers a
-  // narrower span than the chart's x-axis. Inset the track by exactly the
-  // pixel fraction the chart itself would place those start/end years at, so
-  // the thumb always sits directly under the year it represents. The slider's
-  // value is the calendar year rather than an index into forecastYears, which
-  // keeps the thumb linear in year — and therefore aligned with the x-axis —
-  // even for metrics whose forecasts have interior gaps.
-  const controlsEl = document.querySelector(".controls");
-  if (controlsEl && forecastYears.length > 1) {
-    const fracLeft = xScale(forecastYears[0].year) / CHART_W;
-    const fracRight = 1 - xScale(forecastYears[forecastYears.length - 1].year) / CHART_W;
-    controlsEl.style.padding = `0 ${(fracRight * 100).toFixed(3)}% 0 ${(fracLeft * 100).toFixed(3)}%`;
-  }
 
   slider.min = forecastYears[0].year;
   slider.max = forecastYears[forecastYears.length - 1].year;
@@ -1000,6 +1033,10 @@ async function main() {
   // ため2026-07-30に削除。詳細はhome.jsの同じ変更のコメントを参照)。
 
   applyI18n();
+  compactMQ.addEventListener("change", () => {
+    drawChart();
+    render(currentIdx);
+  });
 }
 
 main();
