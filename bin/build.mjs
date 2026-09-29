@@ -186,7 +186,7 @@ function dual(en) {
 }
 
 /* ── フッターの共通リンク(2026-09-29) ──────────────────────────
-   並びは全ページ共通(指標一覧へ → 訂正履歴 → このサイトについて → お問い合わせ
+   並びは全ページ共通(指標一覧へ → 法律の見直し条項 → 訂正履歴 → このサイトについて → お問い合わせ
    → 言質OnRecord)で、自ページへのリンクだけを抜く。以前はページごとに手で並べて
    いて、指標ページには訂正履歴が、cite にはお問い合わせが無く、about と contact
    では順序も違っていた(UIレビュー指摘)。生成するページはここを通す。手書きの
@@ -198,6 +198,7 @@ function dual(en) {
    混ざるが、JA/ENで同じidの集合になっていれば idCoverageErrors() は通る。 */
 const FOOTER_LINKS = [
   { key: "index", ja: "指標一覧へ", en: "Indicators", jaHref: "/", enHref: REL.home.en },
+  { key: "hoan", ja: "法律の見直し条項", en: "Statutory review clauses", jaHref: "/hoan.html", enHref: REL.hoan.en },
   { key: "corrections", ja: "訂正履歴", en: "Corrections", jaHref: "/corrections.html", enHref: REL.corrections.en },
   { key: "about", ja: "このサイトについて", en: "About this site", jaHref: "/about.html", enHref: REL.about.en },
   { key: "contact", ja: "お問い合わせ", en: "Contact", jaHref: "/contact.html", enHref: REL.contact.en },
@@ -2177,7 +2178,7 @@ ${rows.map((r) => hoanRowHtml(r, "en")).join("\n")}
          hoan.js が差し替える文言でもないので id も持たせない(idを付けると
          idCoverageErrors() が hoan.html 側にも同じidを要求する)。 -->
     <a class="footer-src" href="${escapeHTML(HOAN_TRANS_SITE)}" target="_blank" rel="noopener">${escapeHTML(t.footerSrcTrans)}</a>
-${footerLinks("en", null)}
+${footerLinks("en", "hoan")}
   </footer>
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
