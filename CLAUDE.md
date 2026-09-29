@@ -63,9 +63,13 @@
 - ドメイン: zurekei.org をCloudflare Registrarで取得(取得〜DNS〜Pagesまで全部Cloudflareで完結)
 - **デプロイはGitHub連携ではなくwranglerからの直接アップロード**。GitHubへのpushではデプロイされない。反映するには必ず下記を実行する
   ```
-  npx wrangler pages deploy . --project-name=zurekei-site
+  bin/deploy.sh          # 本番に出す
+  DRY_RUN=1 bin/deploy.sh # チェックだけ回す(配信しない)
   ```
+  **`npx wrangler pages deploy .` を直接叩かないこと。** 素の wrangler は `.gitignore` も `.assetsignore` も一切見ないので、`bin/` や `.gitignore` まで丸ごと配信されるうえ、生成物の陳腐化・秘密ファイルの混入・`_headers` の欠落といった検査を全部飛ばす。`bin/deploy.sh` はそれらを通した**除外済みの複製**を作って wrangler に渡している(中で `npx wrangler pages deploy <複製> --project-name=zurekei-site` を呼ぶ)
   (Deployments画面にブランチ名とコミットメッセージが出るのはwranglerがgitメタデータを付けているだけで、Git連携ではない)
+- **配信するファイルは「サイトがそれを参照するか」で選ぶ**(機密かどうかではない)。参照しないものは置かない — 現在の除外は `bin` / `CLAUDE.md` / `.gitignore` / `.git` / `.wrangler`(`bin/deploy.sh` の `DEPLOY_EXCLUDE`)。**除外リストを触るときは、除外しない側の一覧も同じ基準で読み直すこと。** 「リンクしているから残す」は到達性しか見ておらず、`LICENSE` / `LICENSE-DATA` / `NOTICE` は拡張子が無いため `application/octet-stream` で返り、cite ページのリンクを押すと**表示ではなくダウンロード**になっていた(2026-09-30に発覚)。手当てが `_headers` で、この4つ(＋`data/README.md`)を `text/plain` にしている
+- **`_headers` と `functions/` は静的ファイルとしては配信されない。** wrangler のアップローダは固定の IGNORE_LIST(`_worker.js` / `_redirects` / `_headers` / `_routes.json` / `functions` / `.DS_Store` / `node_modules` / `.git` / `.wrangler`)を除くため、Pages が設定として読むだけで `/_headers` を叩いても出ない。**つまり複製から落ちても画面には何も出ない**(content-type が既定に戻ってリンクがダウンロードになる/`/api/contact` が消えてフォームの送信だけが失敗する)。`bin/deploy.sh` が複製の中にあることと `_headers` の指定行数を検査している
 - アクセス解析: Cloudflare Web Analytics。Pagesプロジェクトの Metrics タブで有効化済みで、ビーコンは配信時に全HTMLへ自動挿入される。**有効化・設定変更は次回デプロイから反映される**ためデプロイを1回挟む
 - フレームワーク: シンプル優先。Vite + React または素のHTML+JS。ビルドが複雑になるなら素のHTMLでよい
 - グラフ: インタラクティブ必須(下記)
