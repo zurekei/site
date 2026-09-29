@@ -289,7 +289,7 @@ function sourceCell(r, lang, firstRelease) {
   // 初回確報の出典は年版(確報)ごとに別ファイルなので、基準ごとに1本へ畳める
   // 包絡帯(vintageSourceHtml)と違って行ごとに出すしかない。ここに出ることで
   // data/gdp_first_release.csv のURLが静的HTMLに現れ、sourceUrlReachErrors()
-  // の要求も満たす(実質の23本はこのページ、名目の23本は名目GDPのページ)。
+  // の要求も満たす(実質の出典はこのページ、名目の出典は名目GDPのページ)。
   const fr = firstRelease && safeUrl(firstRelease.url);
   if (fr) {
     parts.push(
@@ -335,7 +335,7 @@ function buildTable(metric, rows, lang) {
       const a = cellActual(metric, r, lastActualYear, lang);
       const fr = frMap.get(r.year) || null;
       const phAttr = (c) => (c.ph ? ` data-ph="${c.ph}"` : "");
-      // 収録の無い年度(FY1997以前は年版そのものがウェブに無い)は「—」。実績側の「未公表」「取得できず」と違って
+      // 収録の無い年度(FY1980以前。見通し側がFY1980から始まるのに対し、初回確報はFY1981から)は「—」。実績側の「未公表」「取得できず」と違って
       // 語彙を分けていないのは、ここが空なのは年度の新旧ではなく資料の有無
       // だけによるため。
       const frCell = hasFR
@@ -4352,7 +4352,7 @@ const CSV_COLUMNS = {
     fiscal_year: "number",
     first_real: "number",
     first_nominal: "number",
-    // 統制語彙(1990base … 2020base)。呼称は chart.js の T.basisLabels から引き、
+    // 統制語彙(1975base … 2020base)。呼称は chart.js の T.basisLabels から引き、
     // 辞書に無い値はビルドを止める(gdp_vintages.csv の basis と同じ扱い)。
     // 接尾辞の無い形が「その基準の公表当時の系列」、`-ref` が遡及参考系列、
     // `-final` が最新確報。初回確報は定義上いつも接尾辞なしになる。
