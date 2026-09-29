@@ -1,0 +1,33 @@
+# Cloudflare Pages が返すヘッダの上書き。
+#
+# cite ページからリンクしている読み物が、ブラウザで開けずダウンロードになるのを
+# 直すためだけのファイル。実測した既定の content-type は次のとおり:
+#
+#   /LICENSE /LICENSE-DATA /NOTICE   application/octet-stream  ← 拡張子が無いため
+#   /data/README.md                  text/markdown; charset=utf-8
+#
+# octet-stream は確実にダウンロードになる。text/markdown は画面で開くとは限らず
+# ブラウザ依存。どちらも cite.html が target="_blank" で「参照してください」と
+# 書いてリンクしている先なので、**表示が保証される text/plain に寄せる**。
+# /data/README.md は llms.txt からも指している(列の意味の定義元)。
+#
+# ⚠ このファイルは静的ファイルとしては上がらない(wrangler の IGNORE_LIST に
+#   入っている)。Pages が設定として読むだけなので、/_headers を叩いても出ない。
+#   functions/ と同じ性質で、**複製から落ちても画面には何も出ない**
+#   (content-type が黙って元に戻り、リンクがダウンロードになるだけ)。
+#   だから bin/deploy.sh が複製の中にあることと行数を検査している。
+#
+# ⚠ ここに足すのは「サイトがリンクしていて、かつ読ませたいもの」だけ。
+#   /data/*.csv は落として使うものなので text/csv のままにする。
+
+/LICENSE
+  Content-Type: text/plain; charset=utf-8
+
+/LICENSE-DATA
+  Content-Type: text/plain; charset=utf-8
+
+/NOTICE
+  Content-Type: text/plain; charset=utf-8
+
+/data/README.md
+  Content-Type: text/plain; charset=utf-8

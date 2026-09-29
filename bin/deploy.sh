@@ -126,9 +126,23 @@ cd "$ROOT"
 # 除外は「サイトから辿れないもの」だけに絞る。LICENSE / LICENSE-DATA / NOTICE /
 # data/README.md は cite ページから実際にリンクしているので配信対象のまま
 # （消すとリンク切れになる。about.md は誰も取得しないがサイズが小さいので触らない）。
+#
+# ⚠ ここに書く名前だけが落ちる。上の 1. の2つの網は**どちらも .gitignore を捕まえない**:
+#   秘密ファイル検査は名前の形（*.env / *secret* 等）でしか見ず、git 管理外検査は
+#   `ls-files --others --ignored` なので**git 管理下のファイルを一切報告しない**。
+#   .gitignore はその隙間に落ちていて、2026-09-30 まで 91 バイトの実体が
+#   https://zurekei.org/.gitignore として配信されていた。中身は無害だが、
+#   **「ここには置かないことにした」ファイル名の一覧**がそこに並んでいる。
+#   **「機密か」ではなく「サイトがそれを参照するか」で選ぶ。** 参照しないものは置かない。
+#
+# ⚠ そして同じ基準で、**除外しない側の一覧も読み直すこと**。すぐ上の「cite から
+#   リンクしているので残す」は到達性しか見ておらず、残した4つが**開いて読めるか**を
+#   一度も見ていなかった（実測すると3つが octet-stream で、リンクを押すと表示ではなく
+#   ダウンロードになっていた）。その手当てが _headers で、下で複製にあることを検査する。
 DEPLOY_EXCLUDE=(
   bin        # ビルド・デプロイ道具。サイトからは一切参照しない
   CLAUDE.md  # 開発用の仕様書。サイトからリンクしておらず、GitHub で読めれば足りる
+  .gitignore # repo の道具。サイトからは参照しない（LICENSE 等は読者向けなので残す）
   .git       # wrangler も無視するが、16MBを複製する意味が無いので先に外す
   .wrangler  # 同上
 )
@@ -169,6 +183,33 @@ if (( ${#expected} == 0 )); then
 fi
 
 echo "配信対象: $(printf '%s\n' "$expected" | wc -l | tr -d ' ') ファイル（除外: ${DEPLOY_EXCLUDE[*]}）"
+
+# 上の検算は「除外リストどおりか」しか見ない。除外リスト自体に書き足してしまえば
+# expected も一緒に動くので、**静かに消えても通る**ものが2つある。どちらも
+# wrangler の IGNORE_LIST に入っていて静的ファイルとしては上がらず、Pages が
+# 設定として読むだけなので、**落ちても画面には何も出ない**。だから名前で検査する。
+if [[ ! -f "$STAGE/functions/api/contact.js" ]]; then
+  echo "エラー: functions/api/contact.js が配信用の複製にありません。" >&2
+  echo "  /api/contact が消え、問い合わせフォームの送信だけが失敗します（画面には何も出ません）。" >&2
+  exit 1
+fi
+echo "functions: api/contact.js あり（問い合わせフォームの送信先）"
+
+# _headers が落ちると LICENSE / LICENSE-DATA / NOTICE / data/README.md の
+# content-type が既定に戻り、cite ページのリンクが**表示ではなくダウンロード**になる。
+# 行の数も見る: コメントだけ残って指定が消えた状態を「ある」と読まないため。
+if [[ ! -f "$STAGE/_headers" ]]; then
+  echo "エラー: _headers が配信用の複製にありません。" >&2
+  echo "  cite ページの LICENSE / NOTICE / data/README.md のリンクがダウンロードに戻ります。" >&2
+  exit 1
+fi
+HEADER_RULES="$(grep -c '^  Content-Type: text/plain' "$STAGE/_headers" || true)"
+if [[ "$HEADER_RULES" != "4" ]]; then
+  echo "エラー: _headers の text/plain 指定が 4 件ではありません（${HEADER_RULES} 件）。" >&2
+  echo "  LICENSE / LICENSE-DATA / NOTICE / data/README.md の4つに要ります。" >&2
+  exit 1
+fi
+echo "_headers: LICENSE / LICENSE-DATA / NOTICE / data/README.md を text/plain で返す指定あり"
 
 # DRY_RUN=1 bin/deploy.sh で、実際に配信せず上のチェックだけを回せる。
 # チェック自体を「本番デプロイを1回撃たないと確かめられない」状態にしないための口。
