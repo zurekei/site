@@ -19,6 +19,10 @@ const T = {
     submitting: "送信中...",
     success: "✓ お問い合わせを受け付けました。ご返信までお待たせする場合がございます。",
     error: "× 送信に失敗しました。時間をおいて再度お試しください。",
+    // Turnstile のトークンが無いまま送ろうとしたとき。送信は試みていないので「送信に
+    // 失敗」とは別の文言にする(広告ブロッカー等でウィジェット自体が読めていない場合が
+    // 多く、時間をおいても直らない)。
+    turnstileMissing: "× 確認ウィジェットが読み込めませんでした。ページを再読み込みするか、広告ブロッカー等を一時的に無効にしてお試しください。",
     footerIndex: "指標一覧へ",
     footerCorrections: "訂正履歴",
     footerAbout: "このサイトについて",
@@ -39,6 +43,7 @@ const T = {
     submitting: "Sending...",
     success: "✓ Your message has been received. A reply may take some time.",
     error: "× Sending failed. Please try again later.",
+    turnstileMissing: "× The verification widget failed to load. Please reload the page, or temporarily disable any ad blocker, and try again.",
     footerIndex: "Indicators",
     footerCorrections: "Corrections",
     footerAbout: "About this site",
@@ -102,17 +107,23 @@ function main() {
     const successMsg = document.getElementById('successMsg');
     const errorMsg = document.getElementById('errorMsg');
 
+    // 前回の成功・失敗の表示は、どちらの経路に進む前にも両方消す。以前はトークン
+    // 無しの経路が消さずに return していたため、成功表示と失敗表示が同時に出ていた。
+    // 失敗の文言も毎回入れ直す(トークン無しの文言が次の本物の失敗に残らないように)。
+    successMsg.classList.remove('show');
+    errorMsg.classList.remove('show');
+
     const turnstileToken = document.querySelector('[name="cf-turnstile-response"]')?.value;
     if (!turnstileToken) {
+      errorMsg.textContent = T[lang].turnstileMissing;
       errorMsg.classList.add('show');
       return;
     }
+    errorMsg.textContent = T[lang].error;
 
     btn.disabled = true;
     const originalText = btn.dataset.text;
     btn.textContent = T[lang].submitting;
-    successMsg.classList.remove('show');
-    errorMsg.classList.remove('show');
 
     try {
       const res = await fetch(ENDPOINT, {

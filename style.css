@@ -144,14 +144,23 @@
   --bg: #ffffff;
   --ink: #14161a;
   --muted: #6b7280;
-  --muted-2: #9aa1ab;
+  /* muted-2 / desc-2 は白地で AA(4.5:1)を満たす値にしてある(2026-09-29)。
+     以前の #9aa1ab / #8b929b は 2.61:1 / 3.14:1 で、年度・注記・表の見出しなど
+     「読まないと数字の意味が取れない」文字に使われていた。muted との差はほぼ
+     無くなったが、補助的な文字であることは大きさと位置で示している。 */
+  --muted-2: #6c727c;
   --desc: #4a4f57;
-  --desc-2: #8b929b;
+  --desc-2: #686e78;
   --line: #e3e5e8;
   --line-soft: #f0f1f3;
   --navy: #1b2a4a;
   --navy-soft: #3a4a6b;
   --amber: #e8a13d;
+  /* 琥珀の文字用。--amber は白地で 2.19:1 しかなく、線・点・罫には足りても文字には
+     読めない。文字(ズレの値・見出しラベル・グラフ内の注記)にだけこちらを使い、
+     線・点・罫・「+」の記号は --amber のまま残す(見通しの色としての同一性は
+     線の側が担う)。白地 5.28:1 / callout の #fbfbfa 地 5.10:1。 */
+  --amber-text: #96600f;
   --red: #d4482e;
   --actual: var(--navy);
   --forecast: var(--amber);
@@ -171,6 +180,14 @@ html, body {
 }
 
 a { color: inherit; }
+
+/* キーボード操作で今どこにいるかを全ページで見えるようにする。以前はどこにも
+   :focus-visible の指定が無く、contact の入力欄と年度スライダーは outline:none で
+   ブラウザ既定の枠まで消していた。マウスのクリックでは出ない(:focus-visible)。 */
+:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
 
 .mono {
   font-family: "IBM Plex Mono", monospace;
@@ -295,7 +312,9 @@ a { color: inherit; }
   color: #f4f5f8;
 }
 
+/* トップの h1(ページに見出しが1つも無かったため、見た目はそのままで昇格させた) */
 .hero-copy-headline {
+  margin: 0;
   font-size: clamp(1.4rem, 4.4vw, 3rem);
   font-weight: 700;
   line-height: 1.45;
@@ -314,12 +333,33 @@ a { color: inherit; }
   text-shadow: 0 0 14px rgba(27, 42, 74, 0.95), 0 0 5px rgba(27, 42, 74, 0.95);
 }
 
+/* 狭い画面ではコピーをグラフの上に重ねない。グラフの高さは幅に比例して縮む
+   (375px で約120px)のに見出しは clamp の下限 1.4rem で止まるため、重ねたままだと
+   紺の枠の上端から白地へはみ出し、白文字が白地に乗って読めなくなっていた。
+   要約文もキャプションと重なっていた。ここではコピーを普通の流れに戻し、
+   グラフの上に置く(見出し→グラフ→キャプションの順)。 */
+@media (max-width: 640px) {
+  .hero {
+    display: flex;
+    flex-direction: column;
+  }
+  .hero-copy {
+    position: static;
+    order: -1;
+    max-width: none;
+    margin: 4px 0 12px;
+  }
+  .hero-copy-headline { font-size: clamp(1.25rem, 6vw, 1.6rem); }
+}
+
 .hero .zero-line { stroke: rgba(255, 255, 255, 0.35); }
 .hero .axis-line { stroke: rgba(255, 255, 255, 0.1); }
 .hero .grid-line-y { stroke: rgba(255, 255, 255, 0.07); }
 .hero .axis-label { fill: rgba(255, 255, 255, 0.5); }
 .hero .line-actual { stroke: #e6e9f0; }
 .hero .end-label-actual { fill: #e6e9f0; }
+/* 紺地の上では明るい --amber のほうが読める(文字用の濃い琥珀は白地向け) */
+.hero .end-label-forecast { fill: var(--amber); }
 
 /* 見通しも実線で描く(色は通常チャートと同じ琥珀/白の区別のみ) */
 .hero .line-forecast { stroke-opacity: 0.9; stroke-dasharray: none; }
@@ -366,7 +406,7 @@ a { color: inherit; }
   font-family: "IBM Plex Mono", monospace;
   font-size: 11px;
   letter-spacing: 0.14em;
-  color: var(--amber);
+  color: var(--amber-text);
   white-space: nowrap;
   padding-top: 2px;
 }
@@ -478,14 +518,14 @@ a.card:hover {
   text-align: left;
 }
 
-.stat-label-gap { color: var(--amber); }
+.stat-label-gap { color: var(--amber-text); }
 
 .stat-value {
   font-size: 18px;
   margin-top: 2px;
 }
 
-.stat-value-gap { color: var(--amber); font-weight: 600; }
+.stat-value-gap { color: var(--amber-text); font-weight: 600; }
 
 /* the fiscal year the government is currently on, whose actual has not landed
    yet. Sits between the settled gap and the sparkline as a single muted line so
@@ -745,7 +785,7 @@ a.card:hover {
 
 .stat-chip-diff .stat-chip-label,
 .stat-chip-diff .stat-chip-value {
-  color: var(--amber);
+  color: var(--amber-text);
 }
 .stat-chip-diff .stat-chip-value { font-weight: 700; }
 
@@ -762,9 +802,14 @@ a.card:hover {
   appearance: none;
   height: 2px;
   background: var(--line);
-  outline: none;
   margin: 0;
 }
+
+/* 以前はここで outline:none にしていて、キーボードで年度を動かしても
+   フォーカスが見えなかった。ID セレクタは :focus-visible より強いので、
+   消す指定を残したままでは全体の既定が効かない。トラックは高さ2pxなので、
+   つまみ(16px)を囲むぶん外側に離して描く。 */
+#year-select:focus-visible { outline-offset: 8px; }
 
 #year-select::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -842,7 +887,7 @@ a.card:hover {
 .end-label { font-size: 11px; font-family: "IBM Plex Mono", monospace; font-weight: 600; }
 .end-label-actual { fill: var(--navy); }
 .end-label-forecast {
-  fill: var(--amber);
+  fill: var(--amber-text);
   transition: transform 0.4s ease, opacity 0.3s ease;
 }
 
@@ -908,7 +953,7 @@ a.card:hover {
   stroke-linejoin: round;
   stroke-linecap: round;
 }
-.vintage-label { fill: var(--amber); font-size: 9px; font-family: "IBM Plex Mono", monospace; }
+.vintage-label { fill: var(--amber-text); font-size: 9px; font-family: "IBM Plex Mono", monospace; }
 
 /* fertility.html only: the actual line was getting lost among 7 overlapping
    vintage lines. Bolden the actual line and thin/dim the vintage lines,
@@ -1319,7 +1364,7 @@ a.card:hover {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.78rem;
   letter-spacing: 0.04em;
-  color: var(--amber);
+  color: var(--amber-text);
   margin-top: 1.4rem;
 }
 
@@ -1451,7 +1496,18 @@ a.card:hover {
   margin-bottom: 10px;
 }
 
-.hoan-table-wrap { overflow-x: auto; }
+/* 狭い画面では表を横に流す。流れることに気づけるよう、続きがある側の端に
+   影を出す(background-attachment: local の覆いがスクロールと一緒に動き、
+   端まで来ると影を隠す)。表が縦に長いので影は放射状ではなく線形にする(放射状だと
+   表の高さに引き伸ばされ、画面に見えている範囲ではほぼ消える)。行には背景色を持たせていないので影が透けて見える。 */
+.hoan-table-wrap {
+  overflow-x: auto;
+  background:
+    linear-gradient(to right, var(--bg) 30%, rgba(255, 255, 255, 0)) left / 40px 100% no-repeat local,
+    linear-gradient(to left, var(--bg) 30%, rgba(255, 255, 255, 0)) right / 40px 100% no-repeat local,
+    linear-gradient(to right, rgba(20, 22, 26, 0.16), rgba(20, 22, 26, 0)) left / 14px 100% no-repeat scroll,
+    linear-gradient(to left, rgba(20, 22, 26, 0.16), rgba(20, 22, 26, 0)) right / 14px 100% no-repeat scroll;
+}
 .hoan-table {
   width: 100%;
   border-collapse: collapse;
@@ -1542,4 +1598,10 @@ a.card:hover {
   .hoan-table { font-size: 13px; }
   .hoan-table .col-date { width: auto; }
   .hoan-table .col-status { width: auto; }
+  /* 日付と状況バッジは折り返さないので、幅が足りないと法令名の列だけが削られ
+     1〜2文字幅の縦書き状態になっていた。法令名に最低幅を持たせ、足りない分は
+     上の .hoan-table-wrap の横スクロールに回す。段階施行の札は日付の下に回して
+     日付の列を細くする。 */
+  .hoan-table .col-title { min-width: 11em; }
+  .hoan-staged { display: table; margin: 3px 0 0; }
 }

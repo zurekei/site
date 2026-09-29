@@ -62,7 +62,6 @@ const T = {
     firstRelease: "初回確報",
     firstReleasePrefix: "初回確報: ",
     firstReleaseDriftPrefix: "改定ドリフト(初回確報→実績): ",
-    footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
     footerAbout: "このサイトについて",
     footerContact: "お問い合わせ",
     // 静的な数値表(bin/build.mjs が生成)の見出し。見通し/実績/ズレ の3つは
@@ -84,6 +83,9 @@ const T = {
     // 2026-07-29にここへ移した(文言の出所を1箇所にする、という他のキーと
     // 同じ理由)。
     chartNoscript: "グラフの描画には JavaScript が必要です。数値は下の表にあります。",
+    // 年度スライダーの名前(スクリーンリーダー向け)。値の読み上げは render() が
+    // aria-valuetext に年度表記を入れる(素の値だと「2024」とだけ読まれる)。
+    yearSelectLabel: "年度",
     // 段階1(4月号の中央値のみ)から段階2(全号・扇状チャート)への内部リンク。
     // metric.seeVintages を持つ指標(boj-outlook-real/cpi)だけがbuild.mjs側で
     // 描画する(2026-08-06)。
@@ -131,7 +133,6 @@ const T = {
     firstRelease: "First release",
     firstReleasePrefix: "First release: ",
     firstReleaseDriftPrefix: "Revision drift (first release → actual): ",
-    footerSrc: "src: Cabinet Office of Japan / SNA",
     footerAbout: "About this site",
     footerContact: "Contact",
     thYear: "Fiscal year",
@@ -141,6 +142,7 @@ const T = {
     tableCsvLabel: "Source data: ",
     citeLinkText: "How to cite",
     chartNoscript: "This chart requires JavaScript to draw. The figures are in the table below.",
+    yearSelectLabel: "Fiscal year",
     seeVintagesLink: "→ See how the forecast moved issue by issue (full detail)",
   },
 };
@@ -157,6 +159,13 @@ const METRICS = {
     titleEn: "Real GDP growth",
     desc: "内閣府「経済見通しと経済財政運営の基本的態度」の当初見通し(実質)と、同じく内閣府「国民経済計算(SNA)」の確定した実績を並べたもの。実質経済成長率とも呼ぶ。",
     descEn: "The government's initial forecast (real) laid alongside the confirmed actual. Also called the real economic growth rate.",
+    // フッターの出典は指標ごとに持つ。以前は T の共通文言「内閣府 / 国民経済計算(SNA)」
+    // 1つを全指標で使っており、CPI・失業率・税収・国債・日銀のページでは本文の出典と
+    // 食い違っていた(2026-09-29)。資料名は about.js の METHODS_ROWS(サイトの出典表)と
+    // 各指標の desc に書かれているものから取り、ここで新しく名付けない。見通し側・実績側の
+    // 順に「・」(EN は " / ")で並べる。bin/build.mjs の静的フッターもこれを読む。
+    footerSrc: "src: 内閣府「経済見通しと経済財政運営の基本的態度」・内閣府「国民経済計算(SNA)」",
+    footerSrcEn: "src: Cabinet Office, Economic Outlook and Basic Stance for Economic and Fiscal Management / Cabinet Office, System of National Accounts (SNA)",
     note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。細い点線は初回確報、すなわちその年度の実績として最初に公表された値で、実績線との差が公表後の改定で動いた分にあたる。見通しとのズレのうち、どこまでが予測を外した分でどこからが実績が動いた分かは、この2本を見比べて読む。FY1999〜2002は当時の年版が内閣府のサイトに残っておらず、FY1997以前は年版そのものが無いため、この線は途切れる。",
     noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases). The fine dotted line is the first release — the figure first published as that year's actual — so its distance from the actual line is how much the actual moved after publication. Reading the two together separates the part of the gap that was a forecasting miss from the part that was the actual moving. The line breaks for FY1999–2002, whose editions are no longer on the Cabinet Office's site, and before FY1998, for which no edition exists online.",
     archiveNote: "FY1997以前の実質GDP見通しは内閣府の見通しアーカイブ(FY1998年度分〜)には存在しない。経済企画庁長官の経済演説(国会会議録・衆議院本会議)から、FY1980〜1997の18年分を独自に収集した。",
@@ -187,6 +196,8 @@ const METRICS = {
     titleEn: "Nominal GDP growth",
     desc: "内閣府「経済見通しと経済財政運営の基本的態度」の当初見通し(名目)と、同じく内閣府「国民経済計算(SNA)」の確定した実績を並べたもの。名目経済成長率とも呼ぶ。",
     descEn: "The government's initial forecast (nominal) laid alongside the confirmed actual. Also called the nominal economic growth rate.",
+    footerSrc: "src: 内閣府「経済見通しと経済財政運営の基本的態度」・内閣府「国民経済計算(SNA)」",
+    footerSrcEn: "src: Cabinet Office, Economic Outlook and Basic Stance for Economic and Fiscal Management / Cabinet Office, System of National Accounts (SNA)",
     note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。細い点線は初回確報、すなわちその年度の実績として最初に公表された値で、実績線との差が公表後の改定で動いた分にあたる。見通しとのズレのうち、どこまでが予測を外した分でどこからが実績が動いた分かは、この2本を見比べて読む。FY1999〜2002は当時の年版が内閣府のサイトに残っておらず、FY1997以前は年版そのものが無いため、この線は途切れる。",
     noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases). The fine dotted line is the first release — the figure first published as that year's actual — so its distance from the actual line is how much the actual moved after publication. Reading the two together separates the part of the gap that was a forecasting miss from the part that was the actual moving. The line breaks for FY1999–2002, whose editions are no longer on the Cabinet Office's site, and before FY1998, for which no edition exists online.",
     archiveNote: "FY1997以前の名目GDP見通しも内閣府の見通しアーカイブには存在しない。FY1982〜1987は国会会議録の委員会質疑・政府答弁から、FY1989〜1997は財務省『平成財政史』の記述から、FY1988は同じく財務省『昭和財政史(昭和49〜63年度)』の記述から収集した。",
@@ -209,6 +220,8 @@ const METRICS = {
     titleEn: "Unemployment rate",
     desc: "内閣府の経済見通しにおける完全失業率の見込みと、総務省統計局「労働力調査」年度平均による確定した実績を並べたもの。",
     descEn: "The government's initial forecast laid alongside the confirmed actual.",
+    footerSrc: "src: 内閣府「経済見通しと経済財政運営の基本的態度」・総務省統計局「労働力調査」",
+    footerSrcEn: "src: Cabinet Office, Economic Outlook and Basic Stance for Economic and Fiscal Management / Ministry of Internal Affairs and Communications, Statistics Bureau, Labour Force Survey",
     csv: "/data/unemployment_forecast.csv",
     forecastCol: "forecast_rate",
     actualCol: "actual_rate",
@@ -222,6 +235,8 @@ const METRICS = {
     titleEn: "Current account",
     desc: "内閣府の経済見通しにおける経常収支の見込みと、財務省「国際収支状況」年度別時系列による確定した実績を並べたもの。",
     descEn: "The government's initial forecast laid alongside the confirmed actual.",
+    footerSrc: "src: 内閣府「経済見通しと経済財政運営の基本的態度」・財務省「国際収支状況」",
+    footerSrcEn: "src: Cabinet Office, Economic Outlook and Basic Stance for Economic and Fiscal Management / Ministry of Finance, Balance of Payments statistics",
     csv: "/data/current_account_forecast.csv",
     forecastCol: "forecast_tn",
     actualCol: "actual_tn",
@@ -239,6 +254,8 @@ const METRICS = {
     titleEn: "Tax revenue",
     desc: "財務省「一般会計税収の予算額と決算額の推移」の当初予算額と、同資料による決算額(直近年度は確定前の概数)を並べたもの。",
     descEn: "The Ministry of Finance's initial budget estimate for tax revenue, laid alongside the confirmed settlement figure.",
+    footerSrc: "src: 財務省「一般会計税収の予算額と決算額の推移」",
+    footerSrcEn: "src: Ministry of Finance, Trends in Budgeted and Settled General Account Tax Revenue",
     csv: "/data/tax_revenue_forecast.csv",
     forecastCol: "forecast_tn",
     actualCol: "actual_tn",
@@ -254,6 +271,8 @@ const METRICS = {
     titleEn: "Government bond issuance",
     desc: "財務省の当初予算における公債発行予定額(いわゆる新規国債発行額)と、決算における実績発行額を並べたもの。復興債・年金特例公債など別枠区分の公債は含まない(原資料の区分に従う)。",
     descEn: "The Ministry of Finance's initial budget plan for new government bond issuance, laid alongside the actual issuance recorded in the settlement. Bonds tracked in separate categories, such as reconstruction bonds or pension special-issue bonds, are not included, following the classification used in the primary source.",
+    footerSrc: "src: 財務省「一般会計公債発行額の推移」",
+    footerSrcEn: "src: Ministry of Finance, Trends in General Account Bond Issuance",
     csv: "/data/bond_issuance_forecast.csv",
     forecastCol: "forecast_tn",
     actualCol: "actual_tn",
@@ -280,6 +299,8 @@ const METRICS = {
     titleEn: "Total JGB issuance",
     desc: "財務省の当初の国債発行計画(総額)と、実績の発行総額を並べたもの。建設国債・特例国債・復興債等・財投債・借換債を含む(収入金ベース、原資料の区分に従う)。",
     descEn: "The Ministry of Finance's initial JGB issuance plan (total), laid alongside actual total issuance. Includes construction bonds, deficit-financing bonds, reconstruction and other special bonds, FILP bonds, and refunding bonds (revenue basis, following the classification used in the primary source).",
+    footerSrc: "src: 財務省「国債発行計画」・財務省「国債発行額の推移(実績ベース)」",
+    footerSrcEn: "src: Ministry of Finance, JGB issuance plan / Ministry of Finance, JGB Issuance Amounts (Actual)",
     csv: "/data/jgb_total_issuance_forecast.csv",
     forecastCol: "forecast_tn",
     actualCol: "actual_tn",
@@ -295,6 +316,8 @@ const METRICS = {
     titleEn: "Consumer price inflation (CPI)",
     desc: "内閣府の経済見通しにおける消費者物価(総合)の上昇率の見込みと、総務省統計局「消費者物価指数」年度平均の前年度比による確定した実績を並べたもの。いわゆる物価上昇率。",
     descEn: "The government's initial forecast for the rate of consumer price inflation, laid alongside the confirmed year-on-year change published by the Ministry of Internal Affairs and Communications' Statistics Bureau.",
+    footerSrc: "src: 内閣府「経済見通しと経済財政運営の基本的態度」・総務省統計局「消費者物価指数」",
+    footerSrcEn: "src: Cabinet Office, Economic Outlook and Basic Stance for Economic and Fiscal Management / Ministry of Internal Affairs and Communications, Statistics Bureau, Consumer Price Index",
     archiveNote: "FY1997以前の消費者物価見通しも内閣府の見通しアーカイブには存在しないため、同じ経済演説から収集した。演説が消費者物価にふれない年度(FY1989、FY1993〜1997)は、同じ閣議決定を予算委員会で説明した経済企画庁調整局長の発言から収集している。",
     archiveNoteEn: "The consumer price forecast for FY1997 and earlier is likewise absent from the Cabinet Office's archive; it was collected from the same economic addresses. For years the address did not mention consumer prices (FY1989, FY1993–1997), the figure comes from the Economic Planning Agency's presentation of the same Cabinet decision to the Diet's Budget Committee.",
     csv: "/data/cpi_forecast.csv",
@@ -309,6 +332,8 @@ const METRICS = {
     titleEn: "BOJ Outlook Report — real GDP forecast",
     desc: "日本銀行「経済・物価情勢の展望」(展望レポート)における政策委員の大勢見通し(実質GDP、中央値)と、内閣府「国民経済計算(SNA)」の確定した実績を並べたもの。政府の経済見通しとは別に、日銀自身が四半期ごとに示す見通し。",
     descEn: "The Bank of Japan's median Policy Board forecast for real GDP growth, from its quarterly Outlook Report, laid alongside the confirmed actual from the Cabinet Office's national accounts. A separate forecast from the government's own economic outlook.",
+    footerSrc: "src: 日本銀行「経済・物価情勢の展望」・内閣府「国民経済計算(SNA)」",
+    footerSrcEn: "src: Bank of Japan, Outlook for Economic Activity and Prices / Cabinet Office, System of National Accounts (SNA)",
     note: "注: 採用しているのは各年度の4月号(=その年度が始まる月に公表された号)の大勢見通し中央値。展望レポートは2000〜2015年度は4月・10月の半期、2016年度以降は1月・4月・7月・10月の四半期で発行され頻度が変わるため、号のホライズン(年度開始からどれだけ前の見通しか)を全期間で揃えられる4月号に統一した。政府の経済見通しのように年度開始の約3か月前に決まったものではなく、年度開始と同時期の号である点に注意。表の見通し幅(政策委員のレンジ)はデータとして保持しているが、グラフには中央値のみを表示する。FY2001・FY2002は号がまだ中央値を公表しておらず空欄。FY2020(2020年4月号)は新型コロナの不確実性拡大を理由に、号全体で中央値の公表自体が見送られたため空欄(原資料の注記による)。",
     noteEn: "Note: each fiscal year uses the median forecast from the April issue — the report published the same month the fiscal year begins. The Outlook Report was published semi-annually (April/October) through FY2015 and quarterly (January/April/July/October) from FY2016, so the April issue is the one horizon available consistently across the whole period. Unlike the government's own economic outlook, which is fixed about three months before the fiscal year starts, this is concurrent with the fiscal year's start. The published range (the Policy Board's low–high band) is kept in the data but not yet drawn as a band on this chart. FY2001 and FY2002 have no median (not published that early); FY2020 (the April 2020 issue) has no median either — the Bank withheld it Report-wide, citing the exceptional uncertainty from COVID-19 (per the original document's note). Both are left blank.",
     archiveNote: "日銀の展望レポートはFY2000年度分から公表されており、それ以前の年度分は存在しない。",
@@ -327,6 +352,8 @@ const METRICS = {
     titleEn: "BOJ Outlook Report — CPI forecast",
     desc: "日本銀行「経済・物価情勢の展望」(展望レポート)における政策委員の大勢見通し(消費者物価・除く生鮮食品、中央値)と、総務省統計局「消費者物価指数」による確定した実績を並べたもの。政府の経済見通しとは別に、日銀自身が四半期ごとに示す見通し。",
     descEn: "The Bank of Japan's median Policy Board forecast for consumer price inflation (excluding fresh food), from its quarterly Outlook Report, laid alongside the confirmed actual from the Ministry of Internal Affairs and Communications' Statistics Bureau. A separate forecast from the government's own economic outlook.",
+    footerSrc: "src: 日本銀行「経済・物価情勢の展望」・総務省統計局「消費者物価指数」",
+    footerSrcEn: "src: Bank of Japan, Outlook for Economic Activity and Prices / Ministry of Internal Affairs and Communications, Statistics Bureau, Consumer Price Index",
     note: "注: 採用しているのは各年度の4月号(=その年度が始まる月に公表された号)の大勢見通し中央値。展望レポートは2000〜2015年度は4月・10月の半期、2016年度以降は1月・4月・7月・10月の四半期で発行され頻度が変わるため、号のホライズン(年度開始からどれだけ前の見通しか)を全期間で揃えられる4月号に統一した。政府の経済見通しのように年度開始の約3か月前に決まったものではなく、年度開始と同時期の号である点に注意。表の見通し幅(政策委員のレンジ)はデータとして保持しているが、グラフには中央値のみを表示する。消費税率引き上げの影響を含む・除くケースが号によって併記されることがあるが、ここでは常に消費税の影響を含むケース(第1列そのまま)を使う。FY2001・FY2002は号がまだ中央値を公表しておらず空欄。FY2020(2020年4月号)は新型コロナの不確実性拡大を理由に、号全体で中央値の公表自体が見送られたため空欄(原資料の注記による)。",
     noteEn: "Note: each fiscal year uses the median forecast from the April issue — the report published the same month the fiscal year begins. The Outlook Report was published semi-annually (April/October) through FY2015 and quarterly (January/April/July/October) from FY2016, so the April issue is the one horizon available consistently across the whole period. Unlike the government's own economic outlook, which is fixed about three months before the fiscal year starts, this is concurrent with the fiscal year's start. The published range (the Policy Board's low–high band) is kept in the data but not yet drawn as a band on this chart. Some issues additionally publish a figure excluding the effect of a consumption-tax hike; this chart always uses the including-tax-effect figure. FY2001 and FY2002 have no median (not published that early); FY2020 (the April 2020 issue) has no median either — the Bank withheld it Report-wide, citing the exceptional uncertainty from COVID-19 (per the original document's note). Both are left blank.",
     archiveNote: "日銀の展望レポートはFY2000年度分から公表されており、それ以前の年度分は存在しない。",
@@ -769,6 +796,7 @@ async function main() {
   function render(idx) {
     const r = forecastYears[idx];
     yearReadout.textContent = fmtFY(r.year, lang);
+    slider.setAttribute("aria-valuetext", fmtFY(r.year, lang));
     if (vNotes) vNotes.textContent = extractEventNote(r.notes);
 
     const yearX = xScale(r.year);
@@ -939,7 +967,8 @@ async function main() {
     document.getElementById("t-stat-forecast").textContent = t.forecast;
     document.getElementById("t-stat-actual").textContent = t.actual;
     document.getElementById("t-stat-gap").textContent = t.gap;
-    document.getElementById("t-footer-src").textContent = t.footerSrc;
+    slider.setAttribute("aria-label", t.yearSelectLabel);
+    document.getElementById("t-footer-src").textContent = lang === "ja" ? metric.footerSrc : metric.footerSrcEn;
     document.getElementById("t-footer-about").textContent = t.footerAbout;
     document.getElementById("t-footer-contact").textContent = t.footerContact;
     const summaryEl = document.getElementById("chart-summary");

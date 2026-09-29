@@ -24,7 +24,11 @@ const T = {
     heroCopy: "見通しと実績のズレを、\n記録し続ける。",
     heroCaption: (min, max) => `名目GDP成長率 — 当初見通しと実績 ${min}–${max}年度`,
     heroGapBelow: (below, total) => `名目GDP成長率: ${total}年度中、実績が見通しを下回った年 ${below}回`,
-    src: "src: 内閣府 / 国民経済計算(SNA)",
+    // トップ・about・訂正履歴・/chart/ 一覧のフッターはサイト全体を指すので、特定の
+    // 統計名を出さない。以前は全ページ「内閣府 / 国民経済計算(SNA)」で、税収や日銀の
+    // 指標まで SNA が出典に見えていた(2026-09-29)。指標ごとの出典は chart.js の
+    // METRICS.footerSrc、一覧は about の「データと方法」(リンク先)にある。
+    src: "src: 各指標ページに記載",
     aboutLink: "このサイトについて",
     contactLink: "お問い合わせ",
     correctionsLink: "訂正履歴",
@@ -58,7 +62,7 @@ const T = {
     heroCopy: "A running record of the gap\nbetween forecast and actual.",
     heroCaption: (min, max) => `Nominal GDP growth — initial forecast vs actual, FY${min}–${max}`,
     heroGapBelow: (below, total) => `Nominal GDP growth: actual came in below forecast in ${below} of ${total} fiscal years`,
-    src: "src: Cabinet Office of Japan / SNA",
+    src: "src: listed on each indicator page",
     aboutLink: "About this site",
     contactLink: "Contact",
     correctionsLink: "Corrections",

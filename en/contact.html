@@ -19,7 +19,7 @@
 <link rel="icon" type="image/svg+xml" href="/zurekei_icon.svg">
 <link rel="icon" type="image/png" sizes="512x512" href="/zurekei_icon_512.png">
 <link rel="apple-touch-icon" href="/zurekei_icon_512.png">
-<link rel="stylesheet" href="/style.css?v=20260813a">
+<link rel="stylesheet" href="/style.css?v=20260929a">
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
   .contact-page-wrap {
@@ -36,7 +36,8 @@
 
   .contact-page-wrap .lead {
     font-size: 15px;
-    color: #888;
+    /* 以前の #888 は白地で 3.54:1。本文用のトークンに揃えて AA(4.5:1)を満たす */
+    color: var(--muted);
     line-height: 1.8;
     margin-bottom: 48px;
   }
@@ -71,7 +72,6 @@
     background: #fff;
     color: #101010;
     transition: border-color 0.2s;
-    outline: none;
   }
 
   .form-group input:focus,
@@ -120,7 +120,7 @@
   .form-msg.success {
     background: #f1f8e9;
     border: 1px solid #c5e1a5;
-    color: #558b2f;
+    color: #33691e;
   }
 
   .form-msg.error {
@@ -183,22 +183,22 @@
 
     <form id="contactForm">
       <div class="form-group">
-        <label id="label-name">Name<span>*</span></label>
-        <input type="text" id="name" placeholder="e.g. Taro Yamada" required>
+        <label id="label-name" for="name">Name<span>*</span></label>
+        <input type="text" id="name" autocomplete="name" placeholder="e.g. Taro Yamada" required>
       </div>
 
       <div class="form-group">
-        <label id="label-email">Email<span>*</span></label>
-        <input type="email" id="email" placeholder="example@email.com" required>
+        <label id="label-email" for="email">Email<span>*</span></label>
+        <input type="email" id="email" autocomplete="email" placeholder="example@email.com" required>
       </div>
 
       <div class="form-group">
-        <label id="label-affiliation">Affiliation or title</label>
+        <label id="label-affiliation" for="affiliation">Affiliation or title</label>
         <input type="text" id="affiliation" placeholder="e.g. University of Tokyo, Faculty of Economics (optional)">
       </div>
 
       <div class="form-group">
-        <label id="label-message">Message<span>*</span></label>
+        <label id="label-message" for="message">Message<span>*</span></label>
         <textarea id="message" placeholder="Your question or correction" required></textarea>
       </div>
 
@@ -209,10 +209,10 @@
 
       <button type="submit" class="submit-btn" id="submitBtn" data-text="Send">Send</button>
 
-      <div class="form-msg success" id="successMsg">
+      <div class="form-msg success" id="successMsg" role="status">
         ✓ Your message has been received. A reply may take some time.
       </div>
-      <div class="form-msg error" id="errorMsg">
+      <div class="form-msg error" id="errorMsg" role="alert">
         × Sending failed. Please try again later.
       </div>
     </form>
@@ -226,6 +226,6 @@
   </footer>
 </div>
 
-<script src="/contact.js?v=20260813a"></script>
+<script src="/contact.js?v=20260929a"></script>
 </body>
 </html>

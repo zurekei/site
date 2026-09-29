@@ -123,7 +123,7 @@ function hreflangTags(pair) {
 }
 
 // style.css / chart.js のキャッシュバスター。ページ側の ?v= と揃える。
-const ASSET_V = "20260813a";
+const ASSET_V = "20260929a";
 
 const read = (f) => fs.readFileSync(path.join(SITE_DIR, f), "utf8");
 
@@ -584,12 +584,16 @@ function header(lang, urls) {
 // about/contact へのリンクは、JA側は元から .html 付きの root-absolute
 // ("/about.html")なので、そのバイト列は変えない(このファイルの他の変更と同じ
 // 「JAは触らない」制約)。EN側は新規リンクなので REL の規約(拡張子なし)に従う。
-function footer(lang) {
+// 出典は指標ごと(METRICS の footerSrc/footerSrcEn)。全指標共通の文言に戻すと
+// CPI・税収・日銀などのページで本文の出典と食い違うので、欠けていたら止める。
+function footer(lang, key, metric) {
+  const src = lang === "en" ? metric.footerSrcEn : metric.footerSrc;
+  if (!src) throw new Error(`chart.js の METRICS["${key}"] に footerSrc${lang === "en" ? "En" : ""} が無い`);
   const t = lang === "en"
-    ? { src: T.en.footerSrc, about: T.en.footerAbout, contact: T.en.footerContact, aboutHref: REL.about.en, contactHref: REL.contact.en }
-    : { src: T.ja.footerSrc, about: T.ja.footerAbout, contact: T.ja.footerContact, aboutHref: "/about.html", contactHref: "/contact.html" };
+    ? { src, about: T.en.footerAbout, contact: T.en.footerContact, aboutHref: REL.about.en, contactHref: REL.contact.en }
+    : { src, about: T.ja.footerAbout, contact: T.ja.footerContact, aboutHref: "/about.html", contactHref: "/contact.html" };
   return `  <footer class="site-footer-row">
-    <span id="t-footer-src">${t.src}</span>
+    <span id="t-footer-src">${escapeHTML(t.src)}</span>
     <a class="footer-about" id="t-footer-about" href="${t.aboutHref}">${t.about}</a>
     <a class="footer-about" id="t-footer-contact" href="${t.contactHref}">${t.contact}</a>
     <a class="footer-about" href="https://onrecord.zurekei.org/"${lang === "en" ? ' lang="ja"' : ""} target="_blank" rel="noopener">言質OnRecord</a>
@@ -729,7 +733,7 @@ ${note}
 ${summary}
 
       <div class="controls">
-        <input type="range" id="year-select" min="0" max="0" value="0" step="1">
+        <input type="range" id="year-select" min="0" max="0" value="0" step="1" aria-label="${escapeHTML(t.yearSelectLabel)}">
       </div>
 
       <div class="readout">
@@ -768,7 +772,7 @@ ${buildTable(metric, rows, lang)}
     </section>
   </main>
 
-${footer(lang)}
+${footer(lang, key, metric)}
 </div>
 <script src="/csv.js?v=${ASSET_V}"></script>
 <script src="/chart.js?v=${ASSET_V}"></script>
@@ -795,7 +799,7 @@ const HUB_TEXT = {
     desc: "政府が年度の初めに置いた見通しと、後から確定した実績を、指標ごとに並べています。",
     metaDesc: "政府の当初見通しと確定した実績を並べた指標の一覧。",
     back: "← トップ",
-    footerSrc: "src: 内閣府 / 国民経済計算(SNA)",
+    footerSrc: "src: 各指標ページに記載",
     footerAbout: "このサイトについて",
     footerContact: "お問い合わせ",
   },
@@ -804,7 +808,7 @@ const HUB_TEXT = {
     desc: "The forecast the government set at the start of each fiscal year, laid alongside the actual figure confirmed later — one page per indicator.",
     metaDesc: "The government's initial forecast laid alongside the confirmed actual, one page per indicator.",
     back: "← Home",
-    footerSrc: "src: Cabinet Office of Japan / SNA",
+    footerSrc: "src: listed on each indicator page",
     footerAbout: "About this site",
     footerContact: "Contact",
   },
@@ -2480,10 +2484,11 @@ ${buildHomeJsonLd(desc, keys, "en")}
     </div>
   </header>
 
+  <main>
   <section class="hero">
     <svg id="hero-chart" viewBox="0 0 960 340" preserveAspectRatio="xMidYMid meet" role="img" aria-label="${escapeHTML(gdpNominal.titleEn)} — government's initial forecast and confirmed actual"></svg>
     <div class="hero-copy" id="hero-copy">
-      <div class="hero-copy-headline" id="hero-copy-headline">${escapeHTML(t.heroCopy)}</div>
+      <h1 class="hero-copy-headline" id="hero-copy-headline">${escapeHTML(t.heroCopy)}</h1>
       <div class="hero-copy-summary mono" id="hero-copy-summary">${escapeHTML(heroSummary)}</div>
     </div>
     <div class="hero-caption mono" id="hero-caption">${escapeHTML(heroCaption)}</div>
@@ -2522,9 +2527,10 @@ ${cardFallback}
   </a>
 
   <div class="next-update mono" id="t-next-update">${escapeHTML(t.nextUpdate)}</div>
+  </main>
 
   <footer class="site-footer-row">
-    <a class="footer-src" id="t-footer-src" href="https://www5.cao.go.jp/keizai1/mitoshi/mitoshikako.html" target="_blank" rel="noopener">${escapeHTML(t.src)}</a>
+    <a class="footer-src" id="t-footer-src" href="${REL.about.en}#methods-title">${escapeHTML(t.src)}</a>
     <a class="footer-about" id="t-footer-corrections" href="${REL.corrections.en}">${escapeHTML(t.correctionsLink)}</a>
     <a class="footer-about" id="t-footer-about" href="${REL.about.en}">${escapeHTML(t.aboutLink)}</a>
     <a class="footer-about" id="t-footer-contact" href="${REL.contact.en}">${escapeHTML(t.contactLink)}</a>
@@ -2846,22 +2852,22 @@ ${header("en", urls)}
 
     <form id="contactForm">
       <div class="form-group">
-        <label id="label-name">${escapeHTML(t.labelName)}<span>*</span></label>
-        <input type="text" id="name" placeholder="${escapeHTML(t.phName)}" required>
+        <label id="label-name" for="name">${escapeHTML(t.labelName)}<span>*</span></label>
+        <input type="text" id="name" autocomplete="name" placeholder="${escapeHTML(t.phName)}" required>
       </div>
 
       <div class="form-group">
-        <label id="label-email">${escapeHTML(t.labelEmail)}<span>*</span></label>
-        <input type="email" id="email" placeholder="${escapeHTML(t.phEmail)}" required>
+        <label id="label-email" for="email">${escapeHTML(t.labelEmail)}<span>*</span></label>
+        <input type="email" id="email" autocomplete="email" placeholder="${escapeHTML(t.phEmail)}" required>
       </div>
 
       <div class="form-group">
-        <label id="label-affiliation">${escapeHTML(t.labelAffiliation)}</label>
+        <label id="label-affiliation" for="affiliation">${escapeHTML(t.labelAffiliation)}</label>
         <input type="text" id="affiliation" placeholder="${escapeHTML(t.phAffiliation)}">
       </div>
 
       <div class="form-group">
-        <label id="label-message">${escapeHTML(t.labelMessage)}<span>*</span></label>
+        <label id="label-message" for="message">${escapeHTML(t.labelMessage)}<span>*</span></label>
         <textarea id="message" placeholder="${escapeHTML(t.phMessage)}" required></textarea>
       </div>
 
@@ -2872,10 +2878,10 @@ ${header("en", urls)}
 
       <button type="submit" class="submit-btn" id="submitBtn" data-text="${escapeHTML(t.submit)}">${escapeHTML(t.submit)}</button>
 
-      <div class="form-msg success" id="successMsg">
+      <div class="form-msg success" id="successMsg" role="status">
         ${escapeHTML(t.success)}
       </div>
-      <div class="form-msg error" id="errorMsg">
+      <div class="form-msg error" id="errorMsg" role="alert">
         ${escapeHTML(t.error)}
       </div>
     </form>
