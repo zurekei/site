@@ -335,7 +335,7 @@ function buildTable(metric, rows, lang) {
       const a = cellActual(metric, r, lastActualYear, lang);
       const fr = frMap.get(r.year) || null;
       const phAttr = (c) => (c.ph ? ` data-ph="${c.ph}"` : "");
-      // 収録の無い年度(FY1999〜2002の年版はウェブ上に残っていない、FY1997以前は
+      // 収録の無い年度(FY1999は年度の表がウェブ上に残っていない、FY1997以前は
       // 年版そのものが無い)は「—」。実績側の「未公表」「取得できず」と違って
       // 語彙を分けていないのは、ここが空なのは年度の新旧ではなく資料の有無
       // だけによるため。
