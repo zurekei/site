@@ -73,6 +73,11 @@ const T = {
     firstRelease: "初回確報",
     firstReleasePrefix: "初回確報: ",
     firstReleaseDriftPrefix: "改定ドリフト(初回確報→実績): ",
+    // FY1988以前の初回確報はGNPで公表されている(release_concept)。表のセルには
+    // 短い印、読み出しには概念の名前と、ドリフトに概念差が含まれることを添える。
+    firstReleaseGnpMark: "(GNP)",
+    firstReleaseGnpSuffix: "(GNPベース)",
+    firstReleaseDriftGnpSuffix: "(GNP→GDPの概念差を含む)",
     footerAbout: "このサイトについて",
     footerContact: "お問い合わせ",
     // 静的な数値表(bin/build.mjs が生成)の見出し。見通し/実績/ズレ の3つは
@@ -147,6 +152,9 @@ const T = {
     firstRelease: "First release",
     firstReleasePrefix: "First release: ",
     firstReleaseDriftPrefix: "Revision drift (first release → actual): ",
+    firstReleaseGnpMark: " (GNP)",
+    firstReleaseGnpSuffix: " (GNP basis)",
+    firstReleaseDriftGnpSuffix: " (includes the GNP→GDP difference in concept)",
     footerAbout: "About this site",
     footerContact: "Contact",
     thYear: "Fiscal year",
@@ -180,8 +188,8 @@ const METRICS = {
     // 順に「・」(EN は " / ")で並べる。bin/build.mjs の静的フッターもこれを読む。
     footerSrc: "src: 内閣府「経済見通しと経済財政運営の基本的態度」・内閣府「国民経済計算(SNA)」",
     footerSrcEn: "src: Cabinet Office, Economic Outlook and Basic Stance for Economic and Fiscal Management / Cabinet Office, System of National Accounts (SNA)",
-    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。細い点線は初回確報、すなわちその年度の実績として最初に公表された値で、実績線との差が公表後の改定で動いた分にあたる。見通しとのズレのうち、どこまでが予測を外した分でどこからが実績が動いた分かは、この2本を見比べて読む。FY1997以前は年版がウェブに無いため、小巻泰之「Real-Time Database」が収録する当時の四半期速報から年度値を算出した(FY1981〜)。",
-    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases). The fine dotted line is the first release — the figure first published as that year's actual — so its distance from the actual line is how much the actual moved after publication. Reading the two together separates the part of the gap that was a forecasting miss from the part that was the actual moving. Editions for FY1997 and earlier are not online, so those years are computed from the quarterly releases of the time as recorded in Yasuyuki Komaki's Real-Time Database (from FY1981).",
+    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。細い点線は初回確報、すなわちその年度の実績として最初に公表された値で、実績線との差が公表後の改定で動いた分にあたる。見通しとのズレのうち、どこまでが予測を外した分でどこからが実績が動いた分かは、この2本を見比べて読む。FY1997以前は年版がウェブに無いため、小巻泰之「Real-Time Database」が収録する当時の四半期速報から年度値を算出した(FY1981〜)。FY1988以前の初回確報は、当時の主要指標だったGNP(国民総生産)の値で、実績のGDPとは概念が異なる。",
+    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases). The fine dotted line is the first release — the figure first published as that year's actual — so its distance from the actual line is how much the actual moved after publication. Reading the two together separates the part of the gap that was a forecasting miss from the part that was the actual moving. Editions for FY1997 and earlier are not online, so those years are computed from the quarterly releases of the time as recorded in Yasuyuki Komaki's Real-Time Database (from FY1981). First releases for FY1988 and earlier are GNP figures — the headline measure at the time — and so differ in concept from the GDP actuals.",
     archiveNote: "FY1997以前の実質GDP見通しは内閣府の見通しアーカイブ(FY1998年度分〜)には存在しない。経済企画庁長官の経済演説(国会会議録・衆議院本会議)から、FY1980〜1997の18年分を独自に収集した。",
     archiveNoteEn: "The real GDP forecast for FY1997 and earlier is not in the Cabinet Office's online forecast archive, which begins at FY1998. It was collected independently from the Diet record of the Director-General of the Economic Planning Agency's economic address to the House of Representatives, covering all 18 fiscal years from FY1980 through FY1997.",
     csv: "/data/gdp_forecast.csv",
@@ -212,8 +220,8 @@ const METRICS = {
     descEn: "The government's initial forecast (nominal) laid alongside the confirmed actual. Also called the nominal economic growth rate.",
     footerSrc: "src: 内閣府「経済見通しと経済財政運営の基本的態度」・内閣府「国民経済計算(SNA)」",
     footerSrcEn: "src: Cabinet Office, Economic Outlook and Basic Stance for Economic and Fiscal Management / Cabinet Office, System of National Accounts (SNA)",
-    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。細い点線は初回確報、すなわちその年度の実績として最初に公表された値で、実績線との差が公表後の改定で動いた分にあたる。見通しとのズレのうち、どこまでが予測を外した分でどこからが実績が動いた分かは、この2本を見比べて読む。FY1997以前は年版がウェブに無いため、小巻泰之「Real-Time Database」が収録する当時の四半期速報から年度値を算出した(FY1981〜)。",
-    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases). The fine dotted line is the first release — the figure first published as that year's actual — so its distance from the actual line is how much the actual moved after publication. Reading the two together separates the part of the gap that was a forecasting miss from the part that was the actual moving. Editions for FY1997 and earlier are not online, so those years are computed from the quarterly releases of the time as recorded in Yasuyuki Komaki's Real-Time Database (from FY1981).",
+    note: "注: 1993年度以前の見通しはGNP(国民総生産)ベースで、実績のGDPとは概念が異なる(グラフ上は淡い帯でGNPベース期を示す)。実績は最新の改定値で、FY1994以前は2015年基準の参考系列(簡易遡及)、FY1995以降は2020年基準の確報を接いでいる(細い縦線で境目を示す)。当時公表された値とは異なる年度がある。背景の淡い帯は、実績値が基準改定でどれだけ動いたかの幅(基準別系列の最小〜最大)を示す。細い点線は初回確報、すなわちその年度の実績として最初に公表された値で、実績線との差が公表後の改定で動いた分にあたる。見通しとのズレのうち、どこまでが予測を外した分でどこからが実績が動いた分かは、この2本を見比べて読む。FY1997以前は年版がウェブに無いため、小巻泰之「Real-Time Database」が収録する当時の四半期速報から年度値を算出した(FY1981〜)。FY1988以前の初回確報は、当時の主要指標だったGNP(国民総生産)の値で、実績のGDPとは概念が異なる。",
+    noteEn: "Note: forecasts through FY1993 are on a GNP basis, which differs in concept from the GDP actuals (shaded band). The actual line stitches two revised vintages—a 2015-base reference series through FY1994 and the 2020-base final series from FY1995 (the seam is marked by a thin vertical line)—so it differs from the figures published at the time in some years. The faint background ribbon shows how much the actual itself has been revised across statistical base-years (min–max across bases). The fine dotted line is the first release — the figure first published as that year's actual — so its distance from the actual line is how much the actual moved after publication. Reading the two together separates the part of the gap that was a forecasting miss from the part that was the actual moving. Editions for FY1997 and earlier are not online, so those years are computed from the quarterly releases of the time as recorded in Yasuyuki Komaki's Real-Time Database (from FY1981). First releases for FY1988 and earlier are GNP figures — the headline measure at the time — and so differ in concept from the GDP actuals.",
     archiveNote: "FY1997以前の名目GDP見通しも内閣府の見通しアーカイブには存在しない。FY1982〜1987は国会会議録の委員会質疑・政府答弁から、FY1989〜1997は財務省『平成財政史』の記述から、FY1988は同じく財務省『昭和財政史(昭和49〜63年度)』の記述から収集した。",
     archiveNoteEn: "The nominal GDP forecast for FY1997 and earlier is likewise absent from the Cabinet Office's archive. FY1982–1987 was collected from Diet committee questioning and government responses, FY1989–1997 from the Ministry of Finance's Heisei Zaisei-shi (Fiscal History of the Heisei Era), and FY1988 from the same ministry's Showa Zaisei-shi (Fiscal History of the Showa Era, FY1974–1988).",
     csv: "/data/gdp_forecast.csv",
@@ -546,7 +554,7 @@ async function main() {
     frows.forEach((fr) => {
       const v = toNum(fr[metric.firstReleaseCol]);
       if (v === null) return;
-      firstReleaseByYear.set(Number(fr.fiscal_year), { val: v, basis: fr.release_basis || "" });
+      firstReleaseByYear.set(Number(fr.fiscal_year), { val: v, basis: fr.release_basis || "", concept: fr.release_concept || "" });
     });
   }
 
@@ -912,11 +920,12 @@ async function main() {
     const fr = firstReleaseByYear.get(r.year);
     if (fr) {
       const u = metricUnit(metric, lang);
-      links.push(`${T[lang].firstReleasePrefix}${fmtVal(fr.val, u, metric.signed)}`);
+      const gnp = fr.concept === "gnp";
+      links.push(`${T[lang].firstReleasePrefix}${fmtVal(fr.val, u, metric.signed)}${gnp ? T[lang].firstReleaseGnpSuffix : ""}`);
       if (r.actualVal !== null) {
         const drift = r.actualVal - fr.val;
         links.push(
-          `${T[lang].firstReleaseDriftPrefix}${drift > 0 ? "+" : ""}${drift.toFixed(1)}${gapUnitSuffix(metric, lang)}`
+          `${T[lang].firstReleaseDriftPrefix}${drift > 0 ? "+" : ""}${drift.toFixed(1)}${gapUnitSuffix(metric, lang)}${gnp ? T[lang].firstReleaseDriftGnpSuffix : ""}`
         );
       }
     }

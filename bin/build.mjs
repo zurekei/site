@@ -123,7 +123,7 @@ function hreflangTags(pair) {
 }
 
 // style.css / chart.js のキャッシュバスター。ページ側の ?v= と揃える。
-const ASSET_V = "20260929b";
+const ASSET_V = "20261027";
 
 const read = (f) => fs.readFileSync(path.join(SITE_DIR, f), "utf8");
 
@@ -315,7 +315,14 @@ function firstReleaseByYear(metric) {
         `data/gdp_first_release.csv の release_basis "${r.release_basis}" に呼称が無い(chart.js の T.ja/T.en の basisLabels に追加すること)`
       );
     }
-    map.set(Number(r.fiscal_year), { val: v, url: r[urlCol] || "", basis: r.release_basis || "" });
+    // 概念(GNP/GDP)も同じ扱い。表示側は gnp の行にだけ印を付けるので、語彙の
+    // 外れ(`gpn` 等)を通すと印が消えて GDP と同じに見える——静かに嘘になる側。
+    if (!T.ja.forecastBasisLabels[r.release_concept] || !T.en.forecastBasisLabels[r.release_concept]) {
+      throw new Error(
+        `data/gdp_first_release.csv の release_concept "${r.release_concept}" が語彙(${Object.keys(T.ja.forecastBasisLabels).join(" / ")})に無い`
+      );
+    }
+    map.set(Number(r.fiscal_year), { val: v, url: r[urlCol] || "", basis: r.release_basis || "", concept: r.release_concept });
   }
   if (!map.size) throw new Error(`${metric.firstReleaseCsv} から ${metric.firstReleaseCol} を1件も取り出せなかった`);
   return map;
@@ -339,7 +346,7 @@ function buildTable(metric, rows, lang) {
       // 語彙を分けていないのは、ここが空なのは年度の新旧ではなく資料の有無
       // だけによるため。
       const frCell = hasFR
-        ? `        <td class="mono">${escapeHTML(fr ? R.fmtVal(fr.val, R.metricUnit(metric, lang), metric.signed) : "—")}</td>\n`
+        ? `        <td class="mono">${escapeHTML(fr ? R.fmtVal(fr.val, R.metricUnit(metric, lang), metric.signed) + (fr.concept === "gnp" ? T[lang].firstReleaseGnpMark : "") : "—")}</td>\n`
         : "";
       const tr =
         `      <tr>\n` +
@@ -4357,6 +4364,11 @@ const CSV_COLUMNS = {
     // 接尾辞の無い形が「その基準の公表当時の系列」、`-ref` が遡及参考系列、
     // `-final` が最新確報。初回確報は定義上いつも接尾辞なしになる。
     release_basis: "text",
+    // 統制語彙(gnp / gdp)。gdp_forecast.csv の forecast_basis と同じ語彙で、
+    // 呼称も同じ辞書(chart.js の T.forecastBasisLabels)から引く。FY1988以前の
+    // 初回確報は当時の主要指標だったGNPで公表されている(新聞記事の金額で確認)。
+    // 語彙外の値は firstReleaseByYear() がビルドを止める。
+    release_concept: "text",
     first_real_source_url: "text",
     first_nominal_source_url: "text",
     notes: "text",

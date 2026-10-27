@@ -1,1 +1,2 @@
 date,target,before,after,reason,url
+2026-10-27,data/gdp_first_release.csv FY1981〜FY1988 の概念(release_concept),GDPとして扱っていた(notesに「GDPで扱っているが、この年度そのものについてはGDPかGNPかを一次資料で確かめていない」),GNP(release_concept=gnp。成長率の値は変更なし),確報を報じた当時の新聞記事(日本経済新聞・朝日新聞)で、FY1985・FY1987・FY1988の名目GNPの金額が収録系列の年度合算と一致し、FY1989は名目GNPより系列が約3兆円小さいことを確かめた。系列はFY1988までGNP、FY1989(1985年基準への改定回)からGDP。根拠の記事は各行のnotesに記載,

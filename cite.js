@@ -135,8 +135,8 @@ const DATA_FILES = [
   },
   {
     file: "gdp_first_release.csv",
-    ja: "実質GDP・名目GDP成長率の初回確報（その年度の実績として最初に公表された値）",
-    en: "Real/nominal GDP growth as first released (the figure first published for that fiscal year)",
+    ja: "実質GDP・名目GDP成長率の初回確報（その年度の実績として最初に公表された値。FY1988以前はGNP）",
+    en: "Real/nominal GDP growth as first released (the figure first published for that fiscal year; GNP through FY1988)",
     pages: ["gdp-real", "gdp-nominal"],
   },
   {

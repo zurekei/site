@@ -24,7 +24,7 @@
 <link rel="icon" type="image/svg+xml" href="/zurekei_icon.svg">
 <link rel="icon" type="image/png" sizes="512x512" href="/zurekei_icon_512.png">
 <link rel="apple-touch-icon" href="/zurekei_icon_512.png">
-<link rel="stylesheet" href="style.css?v=20260929b">
+<link rel="stylesheet" href="style.css?v=20261027">
 </head>
 <body>
 <div class="page">
@@ -64,7 +64,18 @@
       このサイトは、誤りを見つけたときに黙って直すのではなく、記録を残して訂正します。データの転記ミス・出典の誤り・計算式の誤りなどを、発見次第ここに記載します。
     </p>
 
-    <div id="corrections-list"><!-- BUILD:list --><p class="correction-empty">現時点で訂正の記録はありません。</p><!-- /BUILD:list --></div>
+    <div id="corrections-list"><!-- BUILD:list -->
+    <div class="correction-item">
+      <div class="correction-date mono">2026-10-27</div>
+      <div class="correction-target">data/gdp_first_release.csv FY1981〜FY1988 の概念(release_concept)</div>
+      <div class="correction-diff">
+        <span class="correction-before">GDPとして扱っていた(notesに「GDPで扱っているが、この年度そのものについてはGDPかGNPかを一次資料で確かめていない」)</span>
+        <span class="correction-arrow">→</span>
+        <span class="correction-after">GNP(release_concept=gnp。成長率の値は変更なし)</span>
+      </div>
+      <div class="correction-reason">確報を報じた当時の新聞記事(日本経済新聞・朝日新聞)で、FY1985・FY1987・FY1988の名目GNPの金額が収録系列の年度合算と一致し、FY1989は名目GNPより系列が約3兆円小さいことを確かめた。系列はFY1988までGNP、FY1989(1985年基準への改定回)からGDP。根拠の記事は各行のnotesに記載</div>
+      
+    </div><!-- /BUILD:list --></div>
 
     <section class="about-contact corrections-policy">
       <h2 class="about-contact-title" id="corrections-policy-title">訂正の方針</h2>
@@ -84,7 +95,7 @@
     <a class="footer-about" href="https://onrecord.zurekei.org/" target="_blank" rel="noopener">言質OnRecord</a>
   </footer>
 </div>
-<script src="csv.js?v=20260929b"></script>
-<script src="corrections.js?v=20260929b"></script>
+<script src="csv.js?v=20261027"></script>
+<script src="corrections.js?v=20261027"></script>
 </body>
 </html>
